@@ -72,6 +72,28 @@ class CircuitVerificationTests(unittest.TestCase):
         with self.assertRaisesRegex(VERIFY.VerificationError, "legacy 16/12 width"):
             VERIFY.verify_small_profile_circuit(profile, machine)
 
+    def test_8_8_electrical_matrix_is_complete_and_profile_valid(self) -> None:
+        root = MODULE_PATH.parents[1]
+        logisim = root / "hardware" / "logisim"
+        matrix = json.loads((logisim / "tinycpu-electrical-matrix-8-v1.json").read_text())
+        machine = json.loads((logisim / "tinycpu-machine-8-v1.json").read_text())
+        self.assertEqual(
+            VERIFY.verify_electrical_matrix(
+                matrix, machine, "tinycpu-8-8",
+                logisim / "tinycpu-electrical-matrix-8-v1.json",
+            ),
+            6,
+        )
+
+    def test_8_8_electrical_matrix_rejects_16_bit_operand(self) -> None:
+        root = MODULE_PATH.parents[1]
+        logisim = root / "hardware" / "logisim"
+        matrix = json.loads((logisim / "tinycpu-electrical-matrix-8-v1.json").read_text())
+        machine = json.loads((logisim / "tinycpu-machine-8-v1.json").read_text())
+        matrix["fixtures"][0]["program"] = "LOAD_CONST(32767)\nHALT_ERROR()\n"
+        with self.assertRaisesRegex(VERIFY.VerificationError, "invalid for tinycpu-8-8"):
+            VERIFY.verify_electrical_matrix(matrix, machine, "tinycpu-8-8", Path("matrix.json"))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,6 +1,6 @@
 # Vorschlag: zweites TinyCPU-Hardwareprofil
 
-**Status: in Umsetzung (Schritte 1 bis 3 abgeschlossen).** Dieses Dokument trifft die im Hardware-Arbeitsplan nach
+**Status: in Umsetzung (Schritte 1 bis 3 abgeschlossen, Schritt 4 vorbereitet).** Dieses Dokument trifft die im Hardware-Arbeitsplan nach
 AP 16 geforderte Produktentscheidung. Von den beiden verbliebenen Kandidaten
 wird **Weitere Hardwareprofile** ausgewählt. Das neue Arbeitspaket erhält die
 Nummer **AP 17**. Eine Bus-/Interrupt-Erweiterung bleibt ausdrücklich einem
@@ -114,7 +114,13 @@ ROM entspricht bytegenau den profilbezogenen AP-17-Countdown-Artefakten. Der
 Offline-Prüfer verwirft verbliebene 16/12-/22-Bit-Breiten, abweichende
 ROM-Breiten und ein vom Fixture abweichendes eingebettetes Programm.
 
-AP 17 bleibt offen: Der reale elektrische Kerntrace und die vollständige
-elektrische ISA-/Fehlermatrix (Schritt 4) sind noch nicht vorhanden.
-Entsprechend wird aus der strukturellen Schaltungsprüfung und den Softwaretests
-noch kein elektrischer Nachweis abgeleitet.
+`tinycpu-electrical-matrix-8-v1.json` beschreibt jetzt alle 50 isolierten
+Opcode-Fälle und die sechs Sticky-Fehler-Fixtures profilgerecht. Der
+Offline-Prüfer assembliert jeden Fall ausdrücklich als `tinycpu-8-8`, prüft
+Formatkennung, Rohwortbreite sowie Opcode- und Fehlerabdeckung und verhindert
+damit insbesondere versehentlich übernommene 16-Bit-Grenzwerte.
+
+AP 17 bleibt offen: Der reale elektrische Kerntrace und die Ausführung dieser
+vollständigen Matrix im gepinnten Logisim-Simulator (restlicher Schritt 4) sind
+noch nicht vorhanden. Entsprechend wird aus Matrixvertrag, struktureller
+Schaltungsprüfung und Softwaretests noch kein elektrischer Nachweis abgeleitet.

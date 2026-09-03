@@ -432,9 +432,12 @@ Das portable Countdown-Programm liegt profilspezifisch als
 dem eingecheckten 14-Bit-ROM; `tiny_cpu_verify.py` prüft zusätzlich, dass keine
 16-, 12- oder 22-Bit-Komponentenbreite in die Variante übernommen wurde.
 
-Diese Offline-Prüfung belegt Struktur und Fixture-Konsistenz, aber noch keine
-elektrische Ausführung. Der reale Simulatorvergleich und die vollständige
-8/8-ISA-/Fehlermatrix sind der folgende AP-17-Schritt.
+`tinycpu-electrical-matrix-8-v1.json` friert inzwischen die vollständige
+8/8-ISA-/Fehlermatrix ein. Der Offline-Prüfer assembliert alle 50 Opcode-Fälle
+und sechs Fehler-Fixtures mit dem 8/8-Profil und prüft auch rohe 14-Bit-Wörter.
+Der reale elektrische Kerntrace und die Ausführung der Matrix im gepinnten
+Simulator sind der verbleibende AP-17-Schritt; die Offline-Prüfung ist kein
+elektrischer Nachweis.
 
 The project fixes the initial hardware profile at 16 data bits and 12 address
 bits and splits the design into the same blocks as the hardware contract:

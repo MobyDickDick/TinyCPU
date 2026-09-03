@@ -16,6 +16,9 @@ import xml.etree.ElementTree as ET
 from collections import Counter
 from pathlib import Path
 
+from tiny_cpu_assembler import AssemblyError, assemble, opcode_table
+from tiny_cpu_profiles import load_profile
+
 
 ROOT = Path(__file__).resolve().parents[1]
 LOGISIM = ROOT / "hardware" / "logisim"
@@ -197,6 +200,58 @@ def verify_small_profile_circuit(profile: dict[str, object], machine: dict[str, 
         raise VerificationError(f"{display_path(path)}: embedded ROM differs from AP-17 fixture")
 
 
+def verify_electrical_matrix(
+    matrix: dict[str, object], machine: dict[str, object], profile_name: str, source: Path
+) -> int:
+    """Validate that an electrical matrix is complete and executable for a profile."""
+    profile = load_profile(profile_name)
+    if matrix.get("machine_format") != machine.get("format"):
+        raise VerificationError(f"{display_path(source)}: matrix selects the wrong machine format")
+    if matrix.get("profile") != profile_name:
+        raise VerificationError(f"{display_path(source)}: matrix selects the wrong profile")
+
+    opcode_names = set(opcode_table(profile))
+    cases = matrix.get("opcode_cases")
+    if not isinstance(cases, list) or any(not isinstance(case, dict) for case in cases):
+        raise VerificationError(f"{display_path(source)}: opcode_cases must be an object array")
+    case_opcodes = [case.get("opcode") for case in cases]
+    if set(case_opcodes) != opcode_names:
+        missing = sorted(opcode_names - set(case_opcodes))
+        extra = sorted(set(case_opcodes) - opcode_names)
+        raise VerificationError(
+            f"{display_path(source)}: opcode matrix mismatch; missing={missing}, extra={extra}"
+        )
+    if len(cases) != len({case.get("id") for case in cases}):
+        raise VerificationError(f"{display_path(source)}: duplicate opcode-case id")
+
+    fixtures = matrix.get("fixtures")
+    sticky = matrix.get("sticky_errors")
+    if (not isinstance(fixtures, list) or not isinstance(sticky, list)
+            or any(not isinstance(item, dict) for item in fixtures + sticky)):
+        raise VerificationError(f"{display_path(source)}: invalid sticky-error fixtures")
+    fixture_ids = {fixture.get("id") for fixture in fixtures}
+    sticky_ids = {item.get("fixture") for item in sticky}
+    if sticky_ids != fixture_ids or {item.get("flag") for item in sticky} != {
+            "OVF", "DIV0", "ADDR", "INV", "ILL", "INPUT"}:
+        raise VerificationError(f"{display_path(source)}: sticky-error coverage is incomplete")
+
+    for case in fixtures + cases:
+        try:
+            assemble(str(case.get("program", "")), profile)
+        except AssemblyError as exc:
+            raise VerificationError(
+                f"{display_path(source)}: fixture {case.get('id')!r} is invalid for {profile_name}: {exc}"
+            ) from exc
+        raw_words = case.get("raw_words", [])
+        if (not isinstance(raw_words, list) or any(
+                not isinstance(word, int) or not 0 <= word < (1 << profile.word_bits)
+                for word in raw_words)):
+            raise VerificationError(
+                f"{display_path(source)}: fixture {case.get('id')!r} has an out-of-range raw word"
+            )
+    return len(fixtures)
+
+
 def verify_contracts() -> tuple[int, int]:
     machine_path = LOGISIM / "tinycpu-machine-v1.json"
     matrix_path = LOGISIM / "tinycpu-electrical-matrix-v1.json"
@@ -264,18 +319,19 @@ def verify_contracts() -> tuple[int, int]:
         raise VerificationError(
             f"{profile_path.relative_to(ROOT)}: instruction_signals do not match the machine opcode table"
         )
-    cases = matrix.get("opcode_cases")
-    case_opcodes = [case.get("opcode") for case in cases] if isinstance(cases, list) else []
-    if set(case_opcodes) != set(mnemonics):
-        missing = sorted(set(mnemonics) - set(case_opcodes))
-        extra = sorted(set(case_opcodes) - set(mnemonics))
-        raise VerificationError(
-            f"{matrix_path.relative_to(ROOT)}: opcode matrix mismatch; missing={missing}, extra={extra}"
-        )
-    fixture_ids = {fixture.get("id") for fixture in matrix.get("fixtures", []) if isinstance(fixture, dict)}
-    sticky_ids = {item.get("fixture") for item in matrix.get("sticky_errors", []) if isinstance(item, dict)}
-    if sticky_ids != fixture_ids:
-        raise VerificationError(f"{matrix_path.relative_to(ROOT)}: sticky-error fixtures do not match fixtures")
+    # The legacy matrix predates the explicit profile field. Keep accepting it
+    # as the frozen 1.0 contract while requiring it on every new profile.
+    matrix.setdefault("profile", "tinycpu-16-12")
+    fixture_count = verify_electrical_matrix(matrix, machine, "tinycpu-16-12", matrix_path)
+    small_matrix_path = LOGISIM / "tinycpu-electrical-matrix-8-v1.json"
+    small_matrix = load_json(small_matrix_path)
+    if not isinstance(small_matrix, dict):
+        raise VerificationError(f"{small_matrix_path.relative_to(ROOT)}: matrix root must be an object")
+    small_fixture_count = verify_electrical_matrix(
+        small_matrix, small_machine, "tinycpu-8-8", small_matrix_path
+    )
+    if small_fixture_count != fixture_count:
+        raise VerificationError("electrical matrices have different sticky-error coverage")
     debug_path = LOGISIM / "tinycpu-debug-v1.json"
     debug = load_json(debug_path)
     if not isinstance(debug, dict) or debug.get("schema_version") != 1:
@@ -285,7 +341,7 @@ def verify_contracts() -> tuple[int, int]:
         raise VerificationError(f"{debug_path.relative_to(ROOT)}: incomplete stop reasons")
     if debug.get("breakpoint_timing") != "before_instruction":
         raise VerificationError(f"{debug_path.relative_to(ROOT)}: invalid breakpoint timing")
-    return len(opcodes), len(fixture_ids)
+    return len(opcodes), fixture_count
 
 
 def current_machine_path_name(machine: dict[str, object]) -> str:

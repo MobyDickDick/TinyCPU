@@ -165,10 +165,13 @@ werden dadurch nicht wieder geöffnet.
   kanonische JSON-Ausgabe zeigen den vollständigen Architekturzustand und
   Speicheränderungen. Die Offline-Suite prüft Countdown, Fehlerfälle,
   Zustandsparität und deterministische Ausgabe.
-- [ ] **AP 17: Zweites Hardwareprofil:** Der abgegrenzte Vorschlag legt ein
-  8/8-Zielprofil, eine eigene Maschinenformatkennung, unveränderte
-  16/12-Standardaufrufe und gemeinsame elektrische Abnahmekriterien fest. Die
-  Implementierung beginnt erst auf Grundlage dieses Vertrags.
+- [ ] **AP 17: Zweites Hardwareprofil:** Profil, 14-Bit-Maschinenformat,
+  Softwarewerkzeuge, eigenständige Schaltung, Countdown-Fixture und die
+  vollständige profilbezogene ISA-/Fehlermatrix sind umgesetzt. Der
+  Matrixvertrag wird offline gegen alle 50 Opcodes, sechs Sticky-Fehler und die
+  8-Bit-Operandgrenzen geprüft. Offen bleiben der reale elektrische Kerntrace,
+  die elektrische Matrixausführung und danach die gemeinsame Endabnahme beider
+  Profile.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
