@@ -6,7 +6,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from tiny_cpu_logisim import ROOT, autonomous_project, resolve_jar
+from tiny_cpu_logisim import ROOT, _expected_edges, _matrix_program, autonomous_project, resolve_jar
+from tiny_cpu_profiles import load_profile
 
 
 class LogisimLauncherTests(unittest.TestCase):
@@ -30,6 +31,26 @@ class LogisimLauncherTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             autonomous_project(source, Path(directory) / "copy.circ", "TinyCPUMain")
         self.assertEqual(before, source.read_bytes())
+
+    def test_matrix_rom_is_injected_only_into_temporary_project(self):
+        source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
+        before = source.read_bytes()
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "copy.circ"
+            autonomous_project(source, target, "TinyCPUMain", (0x123, 0x456))
+            root = ET.parse(target).getroot()
+            rom = next(c for owner in root.findall("circuit") for c in owner.findall("comp")
+                       if c.get("name") == "ROM")
+            contents = next(a for a in rom.findall("a") if a.get("name") == "contents")
+            self.assertEqual(contents.text, "addr/data: 8 14\n123 456\n")
+        self.assertEqual(before, source.read_bytes())
+
+    def test_reserved_opcode_fixture_halts_in_reference_model(self):
+        profile = load_profile("tinycpu-8-8")
+        case = {"program": "HALT()\n", "raw_words": [0x3F00, 0x2D00]}
+        program = _matrix_program(case, profile)
+        self.assertEqual(program.instructions[0].mnemonic, "__ILLEGAL__")
+        self.assertEqual(_expected_edges(program), 1)
 
     def test_vendored_jar_is_preferred_without_an_override(self):
         with tempfile.TemporaryDirectory() as directory:

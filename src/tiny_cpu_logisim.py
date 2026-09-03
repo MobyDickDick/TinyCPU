@@ -11,6 +11,7 @@ as an electrical run.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import subprocess
@@ -21,6 +22,8 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from tiny_cpu_profiles import DEFAULT_PROFILE, load_profile
+from tiny_cpu_assembler import Instruction, Program, assemble, encode_program, opcode_table
+from tiny_cpu_vm import TinyCPU
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,7 +44,9 @@ def _attributes(component: ET.Element) -> dict[str, ET.Element]:
     return {item.get("name", ""): item for item in component.findall("a")}
 
 
-def autonomous_project(source: Path, destination: Path, top: str) -> None:
+def autonomous_project(
+    source: Path, destination: Path, top: str, rom_words: tuple[int, ...] | None = None
+) -> None:
     """Replace only the top-level clock/reset pins in a temporary project."""
     tree = ET.parse(source)
     root = tree.getroot()
@@ -76,6 +81,21 @@ def autonomous_project(source: Path, destination: Path, top: str) -> None:
 
     if found != {"CLK", "RESET", "HALTED"}:
         raise LogisimError(f"{source}: cannot create autonomous trace (found {sorted(found)})")
+    if rom_words is not None:
+        rom = next((component for owner in root.findall("circuit")
+                    for component in owner.findall("comp")
+                    if component.get("name") == "ROM"
+                    and _attributes(component).get("label") is not None
+                    and _attributes(component)["label"].get("val") == "INSTRUCTION_ROM"), None)
+        if rom is None:
+            raise LogisimError(f"{source}: INSTRUCTION_ROM is missing")
+        attributes = _attributes(rom)
+        contents = attributes.get("contents")
+        if contents is None:
+            raise LogisimError(f"{source}: INSTRUCTION_ROM has no contents")
+        contents.text = (f"addr/data: {attributes['addrWidth'].get('val')} "
+                         f"{attributes['dataWidth'].get('val')}\n"
+                         + " ".join(f"{word:x}" for word in rom_words) + "\n")
     tree.write(destination, encoding="utf-8", xml_declaration=True)
 
 
@@ -109,7 +129,9 @@ def resolve_jar(explicit: Path | None, *, vendored: Path = VENDORED_JAR) -> Path
     return cached
 
 
-def run_trace(project: Path, jar: Path, java: str, output: Path, timeout: int) -> None:
+def run_trace(
+    project: Path, jar: Path, java: str, output: Path, timeout: int, *, minimum_edges: int = 1
+) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     command = [java, "-jar", str(jar), "-tty", "table,halt", str(project)]
     try:
@@ -127,8 +149,10 @@ def run_trace(project: Path, jar: Path, java: str, output: Path, timeout: int) -
     # halt column was asserted.  Accept Logisim's binary and decimal displays.
     rows = [row for row in result.stdout.decode("utf-8", errors="replace").splitlines()
             if row.strip()]
-    if len(rows) < 18:
-        raise LogisimError(f"electrical table ended before the 17-edge fixture ({len(rows) - 1} rows)")
+    if len(rows) < minimum_edges + 1:
+        raise LogisimError(
+            f"electrical table ended before the {minimum_edges}-edge fixture ({len(rows) - 1} rows)"
+        )
     header = re.split(r"\s+", rows[0].strip())
     try:
         halt_column = header.index("halt")
@@ -139,12 +163,66 @@ def run_trace(project: Path, jar: Path, java: str, output: Path, timeout: int) -
         raise LogisimError("electrical table did not terminate with normal halt asserted")
 
 
+def _matrix_program(case: dict[str, object], profile) -> Program:
+    """Assemble one matrix case, preserving deliberately illegal raw opcodes."""
+    program = assemble(str(case.get("program", "")), profile)
+    raw = case.get("raw_words")
+    if not raw:
+        return program
+    by_code = {int(item["code"]): str(item["mnemonic"])
+               for item in opcode_table(profile).values()}
+    instructions = []
+    for word in raw:
+        code = int(word) >> profile.data_bits
+        operand = int(word) & profile.data_mask
+        instructions.append(Instruction(by_code.get(code, "__ILLEGAL__"), operand))
+    return Program(tuple(instructions), {}, {}, profile)
+
+
+def _expected_edges(program: Program) -> int:
+    cpu = TinyCPU(program)
+    edges = 0
+    limit = max(64, len(program.instructions) * 8)
+    while not cpu.halted and edges <= limit:
+        cpu.step()
+        edges += 1
+    if not cpu.halted:
+        raise LogisimError("matrix fixture does not halt in the reference VM")
+    return edges
+
+
+def run_matrix(
+    source: Path, profile, jar: Path, java: str, output: Path, timeout: int
+) -> int:
+    matrix_path = ROOT / "hardware" / "logisim" / (
+        "tinycpu-electrical-matrix-8-v1.json"
+        if profile.name == "tinycpu-8-8" else "tinycpu-electrical-matrix-v1.json"
+    )
+    matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
+    cases = [*matrix["opcode_cases"], *matrix["fixtures"]]
+    ids = [str(case["id"]) for case in cases]
+    if len(ids) != len(set(ids)):
+        raise LogisimError(f"{matrix_path}: duplicate fixture id")
+    output.mkdir(parents=True, exist_ok=True)
+    for case in cases:
+        program = _matrix_program(case, profile)
+        words = tuple(case.get("raw_words") or encode_program(program))
+        edges = _expected_edges(program)
+        with tempfile.TemporaryDirectory(prefix="tinycpu-matrix-") as directory:
+            project = Path(directory) / source.name
+            autonomous_project(source, project, str(profile["top_circuit"]), words)
+            run_trace(project, jar, java, output / f"{case['id']}.tsv", timeout,
+                      minimum_edges=edges)
+    return len(cases)
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--profile", default=DEFAULT_PROFILE)
     parser.add_argument("--jar", type=Path)
     parser.add_argument("--java", default=os.environ.get("JAVA", "java"))
     parser.add_argument("--trace-output", type=Path, required=True)
+    parser.add_argument("--matrix-output", type=Path)
     parser.add_argument("--timeout", type=int, default=90)
     return parser.parse_args(argv)
 
@@ -160,7 +238,10 @@ def main(argv: list[str] | None = None) -> int:
         with tempfile.TemporaryDirectory(prefix="tinycpu-logisim-") as directory:
             project = Path(directory) / source.name
             autonomous_project(source, project, str(profile["top_circuit"]))
-            run_trace(project, jar, args.java, args.trace_output, args.timeout)
+            run_trace(project, jar, args.java, args.trace_output, args.timeout, minimum_edges=17)
+        if args.matrix_output is not None:
+            count = run_matrix(source, profile, jar, args.java, args.matrix_output, args.timeout)
+            print(f"electrical matrix passed: {profile['name']} ({count} fixtures)")
         print(f"electrical trace passed: {profile['name']} -> {args.trace_output}")
         return 0
     except (LogisimError, KeyError, OSError, ET.ParseError, ValueError) as exc:
