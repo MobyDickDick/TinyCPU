@@ -417,6 +417,25 @@ PYTHONPATH=src python src/tiny_cpu_circuit.py \
 
 ## What is implemented
 
+### AP 17: eigenständige 8/8-Schaltung
+
+`TinyCPU-8-8.circ` ist die fest verdrahtete Variante für das Profil
+`tinycpu-8-8`. Daten- und Adresspfade sind 8 Bit breit, das Instruktions-ROM
+verwendet 8 Adressbits und 14 Datenbits. Die Datei ist bewusst ein eigenes
+Logisim-Projekt und keine zur Laufzeit umgeschaltete Parametrisierung von
+`TinyCPU.circ`; damit bleibt die abgenommene 16/12-Schaltung unverändert.
+
+Das portable Countdown-Programm liegt profilspezifisch als
+`ap17_countdown_8_8.tcpu`, `ap17_countdown_8_8.rom` und
+`ap17_countdown_8_8.lst` vor. `ap17_countdown_8_8_trace.json` hält den
+17-Flanken-Referenzzustand der 8/8-VM fest. Das ROM in der Schaltung entspricht
+dem eingecheckten 14-Bit-ROM; `tiny_cpu_verify.py` prüft zusätzlich, dass keine
+16-, 12- oder 22-Bit-Komponentenbreite in die Variante übernommen wurde.
+
+Diese Offline-Prüfung belegt Struktur und Fixture-Konsistenz, aber noch keine
+elektrische Ausführung. Der reale Simulatorvergleich und die vollständige
+8/8-ISA-/Fehlermatrix sind der folgende AP-17-Schritt.
+
 The project fixes the initial hardware profile at 16 data bits and 12 address
 bits and splits the design into the same blocks as the hardware contract:
 
