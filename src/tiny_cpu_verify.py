@@ -140,6 +140,20 @@ def verify_contracts() -> tuple[int, int]:
     profile = load_json(profile_path)
     if not isinstance(machine, dict) or not isinstance(matrix, dict) or not isinstance(profile, dict):
         raise VerificationError("machine, matrix, and profile roots must be JSON objects")
+    small_machine_path = LOGISIM / "tinycpu-machine-8-v1.json"
+    small_profile_path = LOGISIM / "tinycpu-8-8.json"
+    small_machine, small_profile = load_json(small_machine_path), load_json(small_profile_path)
+    if not isinstance(small_machine, dict) or not isinstance(small_profile, dict):
+        raise VerificationError("8/8 machine and profile roots must be JSON objects")
+    expected_profiles = ((profile, machine, 16, 4096, 22),
+                         (small_profile, small_machine, 8, 256, 14))
+    for current_profile, current_machine, bits, size, word_bits in expected_profiles:
+        if (current_profile.get("data_bits"), current_profile.get("memory_size"),
+                current_profile.get("machine_format_id"), current_machine.get("word_bits")) != (
+                    bits, size, current_machine.get("format"), word_bits):
+            raise VerificationError(f"profile {current_profile.get('name')!r} is inconsistent")
+        if current_profile.get("machine_format") != current_machine_path_name(current_machine):
+            raise VerificationError(f"profile {current_profile.get('name')!r} selects the wrong format file")
 
     opcodes = machine.get("opcodes")
     if not isinstance(opcodes, list) or not opcodes:
@@ -158,6 +172,9 @@ def verify_contracts() -> tuple[int, int]:
         mnemonics.append(mnemonic)
     if len(set(codes)) != len(codes) or len(set(mnemonics)) != len(mnemonics):
         raise VerificationError(f"{machine_path.relative_to(ROOT)}: duplicate opcode code or mnemonic")
+    small_opcodes = small_machine.get("opcodes")
+    if small_opcodes != opcodes:
+        raise VerificationError(f"{small_machine_path.relative_to(ROOT)}: opcode table differs from v1")
 
     isa_controls = profile.get("isa_controls", {})
     signals = isa_controls.get("instruction_signals") if isinstance(isa_controls, dict) else None
@@ -202,6 +219,10 @@ def verify_contracts() -> tuple[int, int]:
     if debug.get("breakpoint_timing") != "before_instruction":
         raise VerificationError(f"{debug_path.relative_to(ROOT)}: invalid breakpoint timing")
     return len(opcodes), len(fixture_ids)
+
+
+def current_machine_path_name(machine: dict[str, object]) -> str:
+    return "tinycpu-machine-8-v1.json" if machine.get("format") == "tinycpu-machine-8-v1" else "tinycpu-machine-v1.json"
 
 
 def verify(root: Path = ROOT) -> list[str]:

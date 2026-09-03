@@ -10,6 +10,7 @@ from pathlib import Path
 
 from tiny_cpu_assembler import AssemblyError, Program, load_program
 from tiny_cpu_vm import FLAGS, TinyCPU
+from tiny_cpu_profiles import load_profile
 
 
 SCHEMA_VERSION = 1
@@ -77,6 +78,8 @@ class Debugger:
         location = self.program.source_map.get(pc)
         result: dict[str, object] = {
             "schema_version": SCHEMA_VERSION,
+            "profile": self.cpu.profile.name,
+            "machine_format": self.cpu.profile.machine_format,
             "stop_reason": reason,
             "steps": self.steps,
             "pc": pc,
@@ -101,8 +104,9 @@ class Debugger:
 
     def read_memory(self, start: int, end: int | None = None) -> list[dict[str, object]]:
         end = start if end is None else end
-        if not 0 <= start <= end < 4096:
-            raise DebuggerError("memory range must be within 0..4095")
+        if not 0 <= start <= end < self.cpu.profile.memory_size:
+            raise DebuggerError(
+                f"memory range must be within 0..{self.cpu.profile.memory_size - 1}")
         return [{"address": address, "value": self.cpu.memory.get(address, (0, False))[0],
                  "valid": self.cpu.memory.get(address, (0, False))[1]}
                 for address in range(start, end + 1)]
@@ -127,9 +131,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--json", action="store_true", help="emit stable machine-readable JSON")
     parser.add_argument("--input", action="append", type=int, default=[])
     parser.add_argument("--step-limit", type=int, default=10000)
+    parser.add_argument("--profile", choices=("tinycpu-16-12", "tinycpu-8-8"),
+                        default="tinycpu-16-12")
     args = parser.parse_args(argv)
     try:
-        debugger = Debugger(load_program(args.program), inputs=args.input, step_limit=args.step_limit)
+        debugger = Debugger(load_program(args.program, load_profile(args.profile)),
+                            inputs=args.input, step_limit=args.step_limit)
         for breakpoint in args.breakpoint: debugger.add_breakpoint(breakpoint)
         state = debugger.step() if args.step else debugger.continue_()
     except (OSError, AssemblyError, DebuggerError) as exc:

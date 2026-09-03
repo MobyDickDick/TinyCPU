@@ -10,9 +10,10 @@ from tiny_cpu_assembler import Instruction, Program
 FLAGS = ("OVF", "DIV0", "ADDR", "INV", "ILL", "INPUT")
 
 
-def signed(value: int) -> int:
-    value &= 0xffff
-    return value - 0x10000 if value & 0x8000 else value
+def signed(value: int, bits: int = 16) -> int:
+    mask = (1 << bits) - 1
+    value &= mask
+    return value - (1 << bits) if value & (1 << (bits - 1)) else value
 
 
 @dataclass
@@ -30,11 +31,15 @@ class TinyCPU:
     halted: bool = False
     halt_error: bool = False
 
+    @property
+    def profile(self):
+        return self.program.profile
+
     def _error(self, name: str) -> None:
         self.errors[name] = True
 
     def _address(self, instruction: Instruction) -> int | None:
-        name, operand = instruction.mnemonic, signed(instruction.operand)
+        name, operand = instruction.mnemonic, signed(instruction.operand, self.profile.data_bits)
         if "ADDRESS_REGISTER" in name and not name.startswith("LOAD_ADDRESS_REGISTER_CONST"):
             if not self.address_register_valid:
                 self._error("INV")
@@ -44,19 +49,19 @@ class TinyCPU:
                 address += operand
         else:
             address = instruction.operand
-        if not 0 <= address < 4096:
+        if not 0 <= address < self.profile.memory_size:
             self._error("ADDR")
             return None
         return address
 
     def _source(self, instruction: Instruction) -> tuple[int, bool]:
         if instruction.mnemonic.endswith("_CONST"):
-            return signed(instruction.operand), True
+            return signed(instruction.operand, self.profile.data_bits), True
         address = self._address(instruction)
         return self.memory.get(address, (0, False)) if address is not None else (0, False)
 
     def _write_accumulator(self, value: int, valid: bool) -> None:
-        self.accumulator = signed(value) if valid else 0
+        self.accumulator = signed(value, self.profile.data_bits) if valid else 0
         self.accumulator_valid = valid
 
     def step(self) -> set[int]:
@@ -75,14 +80,14 @@ class TinyCPU:
             if not valid: self._error("INV")
             self._write_accumulator(value, valid)
         elif name == "LOAD_ADDRESS_REGISTER_CONST":
-            value = signed(instruction.operand)
-            valid = 0 <= value < 4096
+            value = instruction.operand
+            valid = 0 <= value < self.profile.memory_size
             self.address_register, self.address_register_valid = (value if valid else 0), valid
             if not valid: self._error("ADDR")
         elif name == "LOAD_ADDRESS_REGISTER_ADDRESS":
             address = self._address(instruction)
             value, valid = self.memory.get(address, (0, False)) if address is not None else (0, False)
-            valid = valid and 0 <= value < 4096
+            valid = valid and 0 <= value < self.profile.memory_size
             self.address_register, self.address_register_valid = (value if valid else 0), valid
             if not valid: self._error("INV" if address is not None else "ADDR")
         elif name.startswith("STORE_"):
@@ -107,7 +112,7 @@ class TinyCPU:
                           "MUL": lambda: left * right, "DIV": lambda: int(left / right),
                           "AND": lambda: left & right, "OR": lambda: left | right,
                           "XOR": lambda: left ^ right}[operation]()
-                if operation in {"ADD", "SUB", "MUL"} and not -32768 <= result <= 32767:
+                if operation in {"ADD", "SUB", "MUL"} and not self.profile.signed_min <= result <= self.profile.signed_max:
                     self._error("OVF"); self._write_accumulator(0, False)
                 else: self._write_accumulator(result, True)
         elif name.startswith("JUMP_"):
@@ -125,7 +130,7 @@ class TinyCPU:
         elif name == "INPUT":
             if self.inputs:
                 value = self.inputs.pop(0)
-                if -32768 <= value <= 32767: self._write_accumulator(value, True)
+                if self.profile.signed_min <= value <= self.profile.signed_max: self._write_accumulator(value, True)
                 else: self._error("INPUT"); self._write_accumulator(0, False)
             else: self._error("INPUT"); self._write_accumulator(0, False)
         elif name in {"PRINT", "PRINT_ADDRESS"}:

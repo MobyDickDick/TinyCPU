@@ -424,5 +424,7 @@
       "RESET": "input",
       "FETCH_RESET": "output"
     }
-  }
+  },
+  "machine_format_id": "tinycpu-machine-v1",
+  "machine_format": "tinycpu-machine-v1.json"
 }
