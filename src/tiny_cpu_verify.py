@@ -192,6 +192,15 @@ def verify_contracts() -> tuple[int, int]:
     sticky_ids = {item.get("fixture") for item in matrix.get("sticky_errors", []) if isinstance(item, dict)}
     if sticky_ids != fixture_ids:
         raise VerificationError(f"{matrix_path.relative_to(ROOT)}: sticky-error fixtures do not match fixtures")
+    debug_path = LOGISIM / "tinycpu-debug-v1.json"
+    debug = load_json(debug_path)
+    if not isinstance(debug, dict) or debug.get("schema_version") != 1:
+        raise VerificationError(f"{debug_path.relative_to(ROOT)}: unsupported debug schema")
+    expected_reasons = {"breakpoint", "step", "halt", "halt_error", "step_limit"}
+    if set(debug.get("stop_reasons", [])) != expected_reasons:
+        raise VerificationError(f"{debug_path.relative_to(ROOT)}: incomplete stop reasons")
+    if debug.get("breakpoint_timing") != "before_instruction":
+        raise VerificationError(f"{debug_path.relative_to(ROOT)}: invalid breakpoint timing")
     return len(opcodes), len(fixture_ids)
 
 

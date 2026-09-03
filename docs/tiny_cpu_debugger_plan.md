@@ -1,5 +1,10 @@
 # Vorschlag: symbolischer TinyCPU-Debugger
 
+**Status: abgeschlossen (2026-09-03).** Der versionierte Vertrag, die
+Quellzuordnung, das pausierbare Referenzmodell, die Text-/JSON-CLI und die
+automatisierte Abnahme sind implementiert. Bedienung und Ausgabeformat sind in
+[`tiny_cpu_debugger.md`](tiny_cpu_debugger.md) dokumentiert.
+
 Dieses Dokument trifft die im Hardware-Arbeitsplan geforderte Produktentscheidung
 für die Weiterentwicklung nach TinyCPU 1.0. Von den dort genannten Kandidaten
 wird **Entwicklungswerkzeuge** ausgewählt. Das erste neue Arbeitspaket erhält die
@@ -98,7 +103,5 @@ geprüft sind:
 5. Zustandsparität, Breakpoints, Fehlerfälle und deterministische Ausgabe
    automatisiert abnehmen.
 
-Diese Reihenfolge ist die Paketgrenze, nicht der Nachweis einer bereits
-erfolgten Implementierung. Mit diesem Vorschlag sind Richtung,
-Kompatibilitätsfolgen und Abnahmekriterien entschieden; die Implementierung von
-AP 16 ist die nächste ausführbare Aufgabe.
+Diese Reihenfolge bildete die Paketgrenze. Alle fünf Schritte sind umgesetzt;
+ein weiteres Arbeitspaket ist derzeit nicht dokumentiert.
