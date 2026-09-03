@@ -16,3 +16,14 @@ Dieses Verzeichnis enthält ausschließlich Dokumentation zur TinyCPU:
 
 Die Dokumentation der Logisim-Implementierung befindet sich ergänzend unter
 [`hardware/logisim/README.md`](../hardware/logisim/README.md).
+
+## Planungsstand
+
+Die dokumentierten Arbeitspakete AP 1 bis AP 16 sind abgeschlossen. Insbesondere
+ist AP 16 nicht nur ein Vorschlag: Implementierung, Bedienungsanleitung und
+automatisierte Abnahme des symbolischen Debuggers liegen im Repository. Derzeit
+gibt es deshalb **kein weiteres dokumentiertes Arbeitspaket**, das unmittelbar
+abgearbeitet werden könnte. Vor AP 17 ist zuerst eine neue, abgegrenzte
+Produktentscheidung mit Kompatibilitätsfolgen und messbaren Abnahmekriterien zu
+dokumentieren; die noch nicht ausgewählten Kandidaten stehen im
+[`tiny_cpu_roadmap.md`](tiny_cpu_roadmap.md#funktionsstatus-und-weitere-planung).
