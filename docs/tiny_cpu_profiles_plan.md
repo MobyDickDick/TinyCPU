@@ -1,6 +1,6 @@
 # Vorschlag: zweites TinyCPU-Hardwareprofil
 
-**Status: geplant.** Dieses Dokument trifft die im Hardware-Arbeitsplan nach
+**Status: in Umsetzung (Vertrags- und Softwarephase abgeschlossen).** Dieses Dokument trifft die im Hardware-Arbeitsplan nach
 AP 16 geforderte Produktentscheidung. Von den beiden verbliebenen Kandidaten
 wird **Weitere Hardwareprofile** ausgewählt. Das neue Arbeitspaket erhält die
 Nummer **AP 17**. Eine Bus-/Interrupt-Erweiterung bleibt ausdrücklich einem
@@ -97,3 +97,18 @@ geprüft sind:
 Diese Reihenfolge ist die Grenze des geplanten AP 17. Der Vorschlag legt
 bewusst noch keine Implementierungsdetails fest, die erst durch die
 elektrische Schaltung validiert werden können.
+
+## Umsetzungsstand
+
+Die Schritte 1 und 2 sind umgesetzt. `tinycpu-8-8.json` und
+`tinycpu-machine-8-v1.json` frieren Profil und 14-Bit-Format ein. Assembler,
+ROM-Decoder, VM und Debugger verwenden ein gemeinsames explizites Profilobjekt;
+ohne `--profile` bleibt `tinycpu-16-12` der Standard. Operanden werden vor der
+Codierung profilbezogen geprüft statt abgeschnitten. Die Regression deckt alle
+50 Opcodes im 14-Bit-Roundtrip, Daten-/Adressgrenzen, 8-Bit-Überlauf und den
+portablen Countdown in beiden Referenzmodell-Profilen ab.
+
+AP 17 bleibt offen: Die eigenständige 8/8-Logisim-Schaltung sowie deren realer
+Kerntrace und vollständige elektrische ISA-/Fehlermatrix (Schritte 3 und 4)
+sind noch nicht vorhanden. Entsprechend wird aus den Softwaretests kein
+elektrischer Nachweis abgeleitet.

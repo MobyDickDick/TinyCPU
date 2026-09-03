@@ -14,6 +14,7 @@ python3 src/tiny_cpu_debugger.py hardware/logisim/ap5_countdown.tcpu \
   --breakpoint loop
 python3 src/tiny_cpu_debugger.py hardware/logisim/ap5_countdown.tcpu --step
 python3 src/tiny_cpu_debugger.py hardware/logisim/ap5_countdown.tcpu --json
+python3 src/tiny_cpu_debugger.py program.tcpu --profile tinycpu-8-8 --json
 ```
 
 Ein erster Lauf mit dem Breakpoint `loop` liefert beispielsweise:
@@ -44,6 +45,8 @@ Weitere wichtige Optionen:
 - `--step-limit N` begrenzt die insgesamt ausgeführten Instruktionen (Standard:
   `10000`), damit beispielsweise eine Endlosschleife deterministisch endet;
 - `--json` ersetzt die Textausgabe durch das unten beschriebene JSON-Objekt.
+- `--profile tinycpu-16-12|tinycpu-8-8` wählt Daten-/Adressbreite und
+  Maschinenformat; ohne diese Option bleibt `tinycpu-16-12` der Standard.
 
 Ein normaler Halt und ein Breakpoint liefern Exit-Code `0`. `halt_error` und
 `step_limit` liefern Exit-Code `1`; fehlerhafte Argumente, nicht assemblierbare
@@ -79,7 +82,8 @@ print(state["stop_reason"], state["output"])
 `remove_breakpoint` löscht einen Breakpoint wieder. `read_memory(100)` liest
 eine einzelne Zelle; `read_memory(100, 110)` liest den geschlossenen Bereich
 100 bis 110. Beide Formen liefern für jede Zelle `address`, `value` und
-`valid`. Bereichsgrenzen außerhalb von `0..4095` werden abgelehnt.
+`valid`. Bereichsgrenzen außerhalb des gewählten Profils (`0..4095` oder
+`0..255`) werden abgelehnt.
 
 Die Python-Schnittstelle `Debugger` bietet zusätzlich `add_breakpoint`,
 `remove_breakpoint`, `step`, `continue_` und `read_memory(start, end)`. Ein
@@ -98,7 +102,8 @@ Konsumenten müssen unbekannte Felder ignorieren. `stop_reason` ist einer von:
 - `halt` oder `halt_error`: endgültiger Haltzustand;
 - `step_limit`: das feste Ausführungslimit wurde erreicht.
 
-Jeder Stopp enthält PC und optionale Quellzeile, Akkumulator und Adressregister
+Jeder Stopp nennt `profile` und `machine_format` und enthält PC und optionale
+Quellzeile, Akkumulator und Adressregister
 jeweils als Wert/Validitäts-Paar, Zero/Negative, alle sechs Sticky-Fehlerbits,
 Ausgaben sowie seit dem vorherigen Stopp veränderte Speicherzellen. Ungelesene
 oder ungültige Speicherwerte werden niemals als gültige Null dargestellt.

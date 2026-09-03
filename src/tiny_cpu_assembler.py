@@ -11,9 +11,10 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from tiny_cpu_profiles import DEFAULT_PROFILE, Profile
+
 
 ROOT = Path(__file__).resolve().parents[1]
-MACHINE = ROOT / "hardware" / "logisim" / "tinycpu-machine-v1.json"
 CALL = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\s*\((.*?)\)\s*$")
 NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
@@ -40,10 +41,11 @@ class Program:
     instructions: tuple[Instruction, ...]
     source_map: dict[int, SourceLocation]
     labels: dict[str, int]
+    profile: Profile = DEFAULT_PROFILE
 
 
-def opcode_table() -> dict[str, dict[str, object]]:
-    data = json.loads(MACHINE.read_text(encoding="utf-8"))
+def opcode_table(profile: Profile = DEFAULT_PROFILE) -> dict[str, dict[str, object]]:
+    data = json.loads(profile.machine_path.read_text(encoding="utf-8"))
     return {entry["mnemonic"]: entry for entry in data["opcodes"]}
 
 
@@ -56,9 +58,9 @@ def _lines(source: str) -> list[tuple[int, str]]:
     return result
 
 
-def assemble(source: str) -> Program:
+def assemble(source: str, profile: Profile = DEFAULT_PROFILE) -> Program:
     """Assemble source text and retain an address-to-source mapping."""
-    table = opcode_table()
+    table = opcode_table(profile)
     aliases: dict[str, str | int] = {}
     labels: dict[str, int] = {}
     pending: list[str] = []
@@ -109,25 +111,48 @@ def assemble(source: str) -> Program:
                 operand = int(value, 0) if isinstance(value, str) else value
             except (TypeError, ValueError):
                 raise AssemblyError(f"line {line}: unknown operand {token!r}") from None
+            if kind in {"address", "target"} or name == "LOAD_ADDRESS_REGISTER_CONST":
+                minimum, maximum = 0, profile.memory_size - 1
+            else:
+                minimum, maximum = profile.signed_min, profile.signed_max
+            if not minimum <= operand <= maximum:
+                raise AssemblyError(
+                    f"line {line}: {kind} {operand} is outside {minimum}..{maximum} "
+                    f"for profile {profile.name}"
+                )
         instructions.append(Instruction(name, operand))
         source_map[address] = SourceLocation(line, text, label)
-    return Program(tuple(instructions), source_map, labels)
+    return Program(tuple(instructions), source_map, labels, profile)
 
 
-def load_program(path: Path) -> Program:
+def load_program(path: Path, profile: Profile = DEFAULT_PROFILE) -> Program:
     """Load assembly or a Logisim ``v2.0 raw`` ROM image."""
     if path.suffix != ".rom":
-        return assemble(path.read_text(encoding="utf-8"))
+        return assemble(path.read_text(encoding="utf-8"), profile)
     tokens = path.read_text(encoding="utf-8").split()
     if tokens[:2] != ["v2.0", "raw"]:
         raise AssemblyError(f"{path}: expected 'v2.0 raw' ROM header")
-    by_code = {entry["code"]: entry["mnemonic"] for entry in opcode_table().values()}
+    by_code = {entry["code"]: entry for entry in opcode_table(profile).values()}
     instructions = []
     for address, token in enumerate(tokens[2:]):
         try:
             word = int(token, 16)
-            mnemonic = by_code[word >> 16]
+            if word >= 1 << profile.word_bits:
+                raise ValueError
+            entry = by_code[word >> profile.data_bits]
         except (ValueError, KeyError):
             raise AssemblyError(f"{path}: invalid word at address {address}: {token!r}") from None
-        instructions.append(Instruction(mnemonic, word & 0xffff))
-    return Program(tuple(instructions), {}, {})
+        operand = word & profile.data_mask
+        if entry["operand"] in {"value", "offset"} and entry["mnemonic"] != "LOAD_ADDRESS_REGISTER_CONST":
+            sign_bit = 1 << (profile.data_bits - 1)
+            operand = operand - (1 << profile.data_bits) if operand & sign_bit else operand
+        instructions.append(Instruction(entry["mnemonic"], operand))
+    return Program(tuple(instructions), {}, {}, profile)
+
+
+def encode_program(program: Program) -> tuple[int, ...]:
+    """Encode a program using the format selected during assembly."""
+    table = opcode_table(program.profile)
+    return tuple((int(table[item.mnemonic]["code"]) << program.profile.data_bits)
+                 | (item.operand & program.profile.data_mask)
+                 for item in program.instructions)

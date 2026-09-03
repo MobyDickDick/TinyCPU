@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "name": "tinycpu-8-8",
+  "data_bits": 8,
+  "address_bits": 8,
+  "memory_size": 256,
+  "machine_format_id": "tinycpu-machine-8-v1",
+  "machine_format": "tinycpu-machine-8-v1.json",
+  "circuit": "TinyCPU-8-8.circ",
+  "top_circuit": "TinyCPUMain",
+  "public_pins": {
+    "CLK": 1,
+    "RESET": 1,
+    "INPUT_VALUE": 8,
+    "INPUT_VALID": 1,
+    "OUTPUT_VALUE": 8,
+    "OUTPUT_VALID": 1,
+    "HALT_ENABLE": 1,
+    "HALT_ERROR_ENABLE": 1,
+    "PC_OUT": 8,
+    "ACC_OUT": 8,
+    "ACC_VALID_OUT": 1,
+    "ADDRESS_OUT": 8,
+    "ADDRESS_VALID_OUT": 1,
+    "OVF_OUT": 1,
+    "DIV0_OUT": 1,
+    "ADDR_OUT": 1,
+    "INV_OUT": 1,
+    "ILL_OUT": 1,
+    "INPUT_OUT": 1
+  }
+}
