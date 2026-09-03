@@ -20,8 +20,7 @@ not committed to Git.
 Before using Java, run the repository's fast offline gate:
 
 ```bash
-python3 src/tiny_cpu_verify.py
-python3 -m unittest discover -s tests -v
+scripts/test-offline.sh
 ```
 
 It parses every checked-in JSON and Logisim project, rejects malformed circuit
@@ -29,6 +28,28 @@ hierarchies, duplicate pin names, recursive subcircuits, missing subcircuits,
 zero-length wires, and diagonal wires, and cross-checks the opcode/profile and
 electrical-matrix inventories. This is a structural and contract check only;
 it does **not** replace the electrical Logisim run below.
+
+## Automated checks for commits and pull requests
+
+The same offline test suite is used locally and by GitHub, so failures can be
+found before code is pushed:
+
+```bash
+python3 -m pip install pre-commit
+pre-commit install
+```
+
+After this one-time setup, `.pre-commit-config.yaml` runs
+`scripts/test-offline.sh` before every commit. A failing check aborts the
+commit. Run `pre-commit run --all-files` to check the complete working tree at
+any time. The hook can only protect checkouts in which it has been installed;
+the test script may also be run directly without installing `pre-commit`.
+
+GitHub Actions runs the same command for every push, pull request, and merge
+queue entry. To prevent failed pull requests from being merged, configure the
+repository's protected branch or ruleset to require the status check
+**Offline verification and unit tests**. The workflow supplies the check, while
+the branch protection setting in GitHub enforces it.
 
 1. Open a terminal and change to the checkout:
 
