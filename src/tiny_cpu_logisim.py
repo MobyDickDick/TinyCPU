@@ -125,13 +125,14 @@ def resolve_jar(explicit: Path | None, *, vendored: Path = VENDORED_JAR) -> Path
             partial.replace(cached)
         except OSError as exc:
             partial.unlink(missing_ok=True)
-            raise LogisimError(f"cannot download pinned Logisim {LOGISIM_VERSION}: {exc}") from exc
+            raise LogisimError(
+                f"pinned Logisim JAR was not found at {vendored} or {cached}, "
+                f"and version {LOGISIM_VERSION} could not be downloaded: {exc}"
+            ) from exc
     return cached
 
 
-def run_trace(
-    project: Path, jar: Path, java: str, output: Path, timeout: int, *, minimum_edges: int = 1
-) -> None:
+def run_trace(project: Path, jar: Path, java: str, output: Path, timeout: int) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     command = [java, "-jar", str(jar), "-tty", "table,halt", str(project)]
     try:
@@ -145,22 +146,14 @@ def run_trace(
         raise LogisimError(f"Logisim exited with {result.returncode}: {diagnostics}")
     if not result.stdout.strip():
         raise LogisimError("Logisim produced no electrical table")
-    # table,halt returning successfully is only meaningful if the designated
-    # halt column was asserted.  Accept Logisim's binary and decimal displays.
+    # Logisim's table format contains values only; pin labels are not emitted as
+    # a header. With the autonomous clock still running, ``table,halt`` returns
+    # only when the specially named halt output is asserted. A circuit which
+    # never reaches halt is rejected by the timeout above.
     rows = [row for row in result.stdout.decode("utf-8", errors="replace").splitlines()
             if row.strip()]
-    if len(rows) < minimum_edges + 1:
-        raise LogisimError(
-            f"electrical table ended before the {minimum_edges}-edge fixture ({len(rows) - 1} rows)"
-        )
-    header = re.split(r"\s+", rows[0].strip())
-    try:
-        halt_column = header.index("halt")
-    except ValueError as exc:
-        raise LogisimError("electrical table has no halt observation column") from exc
-    values = re.split(r"\s+", rows[-1].strip())
-    if halt_column >= len(values) or values[halt_column] not in {"1", "0x1"}:
-        raise LogisimError("electrical table did not terminate with normal halt asserted")
+    if not rows:
+        raise LogisimError("electrical table has no data rows")
 
 
 def _matrix_program(case: dict[str, object], profile) -> Program:
@@ -207,18 +200,20 @@ def run_matrix(
     for case in cases:
         program = _matrix_program(case, profile)
         words = tuple(case.get("raw_words") or encode_program(program))
-        edges = _expected_edges(program)
+        # Validate the fixture independently in the reference model. Logisim's
+        # table logger is change-driven, so its row count is not an edge count:
+        # consecutive clock edges with identical observed outputs are folded.
+        _expected_edges(program)
         with tempfile.TemporaryDirectory(prefix="tinycpu-matrix-") as directory:
             project = Path(directory) / source.name
-            autonomous_project(source, project, str(profile["top_circuit"]), words)
-            run_trace(project, jar, java, output / f"{case['id']}.tsv", timeout,
-                      minimum_edges=edges)
+            autonomous_project(source, project, profile.top_circuit, words)
+            run_trace(project, jar, java, output / f"{case['id']}.tsv", timeout)
     return len(cases)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--profile", default=DEFAULT_PROFILE)
+    parser.add_argument("--profile", default=DEFAULT_PROFILE.name)
     parser.add_argument("--jar", type=Path)
     parser.add_argument("--java", default=os.environ.get("JAVA", "java"))
     parser.add_argument("--trace-output", type=Path, required=True)
@@ -234,15 +229,15 @@ def main(argv: list[str] | None = None) -> int:
         if java_major(args.java) < 21:
             raise LogisimError("Java 21 or newer is required")
         jar = resolve_jar(args.jar)
-        source = ROOT / "hardware" / "logisim" / str(profile["circuit"])
+        source = ROOT / "hardware" / "logisim" / profile.circuit
         with tempfile.TemporaryDirectory(prefix="tinycpu-logisim-") as directory:
             project = Path(directory) / source.name
-            autonomous_project(source, project, str(profile["top_circuit"]))
-            run_trace(project, jar, args.java, args.trace_output, args.timeout, minimum_edges=17)
+            autonomous_project(source, project, profile.top_circuit)
+            run_trace(project, jar, args.java, args.trace_output, args.timeout)
         if args.matrix_output is not None:
             count = run_matrix(source, profile, jar, args.java, args.matrix_output, args.timeout)
-            print(f"electrical matrix passed: {profile['name']} ({count} fixtures)")
-        print(f"electrical trace passed: {profile['name']} -> {args.trace_output}")
+            print(f"electrical matrix passed: {profile.name} ({count} fixtures)")
+        print(f"electrical trace passed: {profile.name} -> {args.trace_output}")
         return 0
     except (LogisimError, KeyError, OSError, ET.ParseError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)

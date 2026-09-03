@@ -28,3 +28,39 @@ jobs:
 
       - name: Run offline test suite
         run: scripts/test-offline.sh
+
+  electrical-profile-acceptance:
+    name: Electrical acceptance (all profiles)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Cache pinned Logisim runtime
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/tinycpu/logisim-evolution-4.1.0-all.jar
+          key: tinycpu-logisim-evolution-4.1.0
+
+      - name: Run both electrical profile gates
+        run: scripts/test-logisim.sh
+
+      - name: Preserve electrical tables
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tinycpu-profile-acceptance
+          path: artifacts/tinycpu-profile-acceptance
+          if-no-files-found: error

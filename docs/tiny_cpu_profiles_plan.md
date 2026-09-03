@@ -1,6 +1,6 @@
 # Vorschlag: zweites TinyCPU-Hardwareprofil
 
-**Status: in Umsetzung (Schritte 1 bis 3 abgeschlossen, Schritt 4 automatisiert).** Dieses Dokument trifft die im Hardware-Arbeitsplan nach
+**Status: abgeschlossen.** Dieses Dokument trifft die im Hardware-Arbeitsplan nach
 AP 16 geforderte Produktentscheidung. Von den beiden verbliebenen Kandidaten
 wird **Weitere Hardwareprofile** ausgewählt. Das neue Arbeitspaket erhält die
 Nummer **AP 17**. Eine Bus-/Interrupt-Erweiterung bleibt ausdrücklich einem
@@ -120,11 +120,22 @@ Offline-Prüfer assembliert jeden Fall ausdrücklich als `tinycpu-8-8`, prüft
 Formatkennung, Rohwortbreite sowie Opcode- und Fehlerabdeckung und verhindert
 damit insbesondere versehentlich übernommene 16-Bit-Grenzwerte.
 
-Der profilbewusste Launcher führt `TinyCPU-8-8.circ` nun in temporären
-Kopien mit autonomem Takt und Power-on-Reset im gepinnten Logisim-Simulator aus.
-Er bewahrt die rohe Tabelle auf und verlangt mindestens die 17 Zustände des
-Countdown-Fixtures sowie dessen normalen elektrischen Halt. Derselbe Launcher
+Der profilbewusste Launcher führt beide Schaltungen in temporären Kopien mit
+autonomem Takt und Power-on-Reset im gepinnten Logisim-Simulator aus. Er bewahrt
+die rohen, änderungsgetriebenen Tabellen ohne künstliche Kopfzeile auf. Der
+autonome Takt und die erfolgreiche Rückkehr aus Logisims `table,halt`-Modus
+weisen den normalen elektrischen Halt nach; ohne Halt bricht erst das Zeitlimit
+den Lauf ab. Die Tabellenzeilenzahl wird nicht als Taktzahl interpretiert, weil
+Logisim unveränderte beobachtete Zustände nicht erneut ausgibt. Derselbe Launcher
 assembliert außerdem alle Opcode- und Fehler-Fixtures, ersetzt ausschließlich
 das ROM der jeweiligen temporären Kopie und bewahrt jede elektrische Tabelle
-getrennt auf. AP 17 bleibt offen: Die gemeinsame Endabnahme beider Profile aus
-Schritt 5 steht noch aus.
+getrennt auf.
+
+Schritt 5 ist abgeschlossen: `scripts/test-logisim.sh` führt Kerntrace und
+vollständige elektrische ISA-/Fehlermatrix für `tinycpu-16-12` und
+`tinycpu-8-8` gemeinsam aus. Es versucht auch dann beide Profile, wenn eines
+fehlschlägt. Das verpflichtende CI-Gate läuft bei Pushes, Pull Requests und
+Merge-Queues; seine profilgetrennten Nachweisartefakte werden auch bei einem
+Fehlschlag hochgeladen. Die Offline-Prüfung gleicht weiterhin für jedes Profil
+die Opcode-Fälle exakt mit der gemeinsamen Opcode-Tabelle und alle sechs
+Sticky-Fehler-Fixtures ab.

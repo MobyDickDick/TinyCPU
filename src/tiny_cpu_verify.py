@@ -223,6 +223,10 @@ def verify_electrical_matrix(
         )
     if len(cases) != len({case.get("id") for case in cases}):
         raise VerificationError(f"{display_path(source)}: duplicate opcode-case id")
+    # Conditional jumps deliberately have taken and non-taken cases. Every
+    # opcode must nevertheless own at least one independently identified case.
+    if any(not case.get("id") or not case.get("program") for case in cases):
+        raise VerificationError(f"{display_path(source)}: every opcode case needs an id and program")
 
     fixtures = matrix.get("fixtures")
     sticky = matrix.get("sticky_errors")
