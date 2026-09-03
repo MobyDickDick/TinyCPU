@@ -48,6 +48,6 @@ Hardwareprofil und den AP-11/AP-12-Traces.
 
 Die Rechenpfade und das 22-Bit-Maschinenformat sind integriert und elektrisch
 abgenommen. Es gibt aus dieser historischen Skizze **kein offenes
-Folgepaket**. Neue TinyCPU-Arbeit muss zuerst mit eigenem Umfang und
-Abnahmekriterien in `docs/open_tasks.md` festgelegt werden; sie darf nicht aus
-dem früheren ALU-Vorschlag abgeleitet werden.
+Folgepaket**. Neue TinyCPU-Arbeit muss zuerst als eigenes Arbeitspaket mit
+klarem Umfang und Abnahmekriterien festgelegt werden; sie darf nicht aus dem
+früheren ALU-Vorschlag abgeleitet werden.
