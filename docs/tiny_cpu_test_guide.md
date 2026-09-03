@@ -17,6 +17,19 @@ not committed to Git.
 
 ## Complete automated test
 
+Before using Java, run the repository's fast offline gate:
+
+```bash
+python3 src/tiny_cpu_verify.py
+python3 -m unittest discover -s tests -v
+```
+
+It parses every checked-in JSON and Logisim project, rejects malformed circuit
+hierarchies, duplicate pin names, recursive subcircuits, missing subcircuits,
+zero-length wires, and diagonal wires, and cross-checks the opcode/profile and
+electrical-matrix inventories. This is a structural and contract check only;
+it does **not** replace the electrical Logisim run below.
+
 1. Open a terminal and change to the checkout:
 
    ```bash
