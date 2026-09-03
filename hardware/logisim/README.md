@@ -435,9 +435,19 @@ dem eingecheckten 14-Bit-ROM; `tiny_cpu_verify.py` prüft zusätzlich, dass kein
 `tinycpu-electrical-matrix-8-v1.json` friert inzwischen die vollständige
 8/8-ISA-/Fehlermatrix ein. Der Offline-Prüfer assembliert alle 50 Opcode-Fälle
 und sechs Fehler-Fixtures mit dem 8/8-Profil und prüft auch rohe 14-Bit-Wörter.
-Der reale elektrische Kerntrace und die Ausführung der Matrix im gepinnten
-Simulator sind der verbleibende AP-17-Schritt; die Offline-Prüfung ist kein
-elektrischer Nachweis.
+
+Der erste reale Simulatorlauf des vierten AP-17-Schritts ist über
+`scripts/test-logisim.sh` reproduzierbar. Der Launcher wählt die Schaltung über
+den Profilvertrag, erzeugt eine temporäre Kopie mit autonomem Takt und
+Power-on-Reset und bewahrt Logisims unveränderte Tabelle unter
+`artifacts/tinycpu-ap17-8-8/core-trace.tsv` auf. Mindestens 17 Tabellenzustände
+und ein abschließend gesetzter normaler Halt sind Pflicht. Ohne explizite
+Auswahl verwendet der Launcher zuerst
+`vendor/logisim-evolution-4.1.0-all.jar`, danach den Benutzer-Cache und erst
+zuletzt den automatischen Download. Mit
+`LOGISIM_JAR=/pfad/logisim-evolution-4.1.0-all.jar` kann weiterhin eine andere
+lokale Kopie gewählt werden. Die vollständige elektrische Matrixausführung
+bleibt der anschließende Teil von Schritt 4.
 
 The project fixes the initial hardware profile at 16 data bits and 12 address
 bits and splits the design into the same blocks as the hardware contract:

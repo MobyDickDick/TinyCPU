@@ -11,9 +11,10 @@ checkout.
 - an internet connection for the first run **or** the file
   `logisim-evolution-4.1.0-all.jar`
 
-You do not need to install Logisim separately. The test script downloads the
-exact supported Logisim-evolution version, 4.1.0, to the user cache. The JAR is
-not committed to Git.
+You do not need to install Logisim separately. The test script first uses
+`vendor/logisim-evolution-4.1.0-all.jar` when it is included in the checkout,
+then checks the user cache, and only downloads the exact supported version as a
+last resort.
 
 ## Complete automated test
 

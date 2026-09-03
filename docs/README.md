@@ -22,8 +22,9 @@ Die Dokumentation der Logisim-Implementierung befindet sich ergänzend unter
 
 Die Arbeitspakete AP 1 bis AP 16 sind abgeschlossen. AP 17 für ein zusätzliches
 8/8-Hardwareprofil befindet sich in Umsetzung; Profil, Softwarewerkzeuge,
-Schaltung und der profilbezogene elektrische Matrixvertrag sind vorhanden. Die
-reale elektrische 8/8-Abnahme steht noch aus. Umfang, Kompatibilitätsfolgen,
+Schaltung und der profilbezogene elektrische Matrixvertrag sind vorhanden. Der
+profilbezogene Kernlauf ist automatisiert; elektrische Matrix und gemeinsame
+Endabnahme stehen noch aus. Umfang, Kompatibilitätsfolgen,
 Abnahme und Reihenfolge stehen im
 [`tiny_cpu_profiles_plan.md`](tiny_cpu_profiles_plan.md); Peripherie und
 Integration bleiben Kandidaten für einen späteren eigenen Vorschlag.
