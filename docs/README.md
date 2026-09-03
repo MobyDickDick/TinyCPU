@@ -10,6 +10,7 @@ Dieses Verzeichnis enthält ausschließlich Dokumentation zur TinyCPU:
 - [`tiny_cpu_roadmap.md`](tiny_cpu_roadmap.md): Hardware-Arbeitsplan
 - [`tiny_cpu_debugger_plan.md`](tiny_cpu_debugger_plan.md): abgegrenzter Vorschlag für AP 16 (symbolisches Debugging)
 - [`tiny_cpu_debugger.md`](tiny_cpu_debugger.md): Bedienung und JSON-Vertrag des symbolischen Debuggers
+- [`tiny_cpu_profiles_plan.md`](tiny_cpu_profiles_plan.md): abgegrenzter Vorschlag für AP 17 (zweites Hardwareprofil)
 - [`tiny_cpu_compatibility.md`](tiny_cpu_compatibility.md): Kompatibilitätsregeln
 - [`tiny_cpu_1_0_release_plan.md`](tiny_cpu_1_0_release_plan.md): Releaseplan für TinyCPU 1.0
 - [`tiny_cpu_1_0_release_notes.md`](tiny_cpu_1_0_release_notes.md): Release Notes für TinyCPU 1.0
@@ -19,11 +20,9 @@ Die Dokumentation der Logisim-Implementierung befindet sich ergänzend unter
 
 ## Planungsstand
 
-Die dokumentierten Arbeitspakete AP 1 bis AP 16 sind abgeschlossen. Insbesondere
-ist AP 16 nicht nur ein Vorschlag: Implementierung, Bedienungsanleitung und
-automatisierte Abnahme des symbolischen Debuggers liegen im Repository. Derzeit
-gibt es deshalb **kein weiteres dokumentiertes Arbeitspaket**, das unmittelbar
-abgearbeitet werden könnte. Vor AP 17 ist zuerst eine neue, abgegrenzte
-Produktentscheidung mit Kompatibilitätsfolgen und messbaren Abnahmekriterien zu
-dokumentieren; die noch nicht ausgewählten Kandidaten stehen im
-[`tiny_cpu_roadmap.md`](tiny_cpu_roadmap.md#funktionsstatus-und-weitere-planung).
+Die Arbeitspakete AP 1 bis AP 16 sind abgeschlossen. Als nächste
+Produktentscheidung ist AP 17 für ein zusätzliches 8/8-Hardwareprofil
+abgegrenzt, aber noch nicht implementiert. Umfang, Kompatibilitätsfolgen,
+Abnahme und Reihenfolge stehen im
+[`tiny_cpu_profiles_plan.md`](tiny_cpu_profiles_plan.md); Peripherie und
+Integration bleiben Kandidaten für einen späteren eigenen Vorschlag.

@@ -37,6 +37,7 @@ abdeckt und Ausgabe, Haltzustand, Register, Speicher-Validität und Fehlerflags
 | **14. Reproduzierbare Distribution bauen** | Quell- und Simulator-Bundle mit kanonischem Inventar, Digests, Dokumentation und AP-12-Nachweisen erzeugen. | Zwei saubere Builds liefern identische Payloads; das extrahierte Bundle lässt sich offline verifizieren. |
 | **15. TinyCPU 1.0 qualifizieren und veröffentlichen** | Den exakten Release Candidate elektrisch abnehmen, im Clean Room testen und mit Release Notes sowie authentifizierten Prüfsummen veröffentlichen. | Alle Nachweise referenzieren denselben Commit und dieselben Digests; erst danach gilt TinyCPU 1.0 als veröffentlicht. |
 | **16. Symbolischer Debugger** | Quellzuordnung, Breakpoints, Einzelschritte und deterministische Zustandsausgabe auf dem Python-Referenzmodell ergänzen. | Countdown-Breakpoints, Zustandsparität, Fehlerzustände und versioniertes Debug-JSON sind automatisiert geprüft. |
+| **17. Zweites Hardwareprofil** | Ein abgegrenztes 8-Datenbit-/8-Adressbit-Profil in Tooling und Logisim ergänzen, ohne den 16/12-Standard zu verändern. | Beide Profile bestehen profilbezogene Roundtrip-, Debugger-, Kerntrace- und vollständige elektrische ISA-/Fehlerprüfungen. |
 
 ## Abhängigkeiten und Reihenfolge
 
@@ -52,6 +53,9 @@ in einem frischen Checkout verpflichtend laufen.
 AP 13 friert anschließend die Produktgrenze ein, bevor AP 14 daraus
 Distributionsartefakte erzeugt. AP 15 qualifiziert exakt diese Artefakte; es darf
 weder einen anderen Commit noch nachträglich veränderte Bundles veröffentlichen.
+AP 16 ergänzt darauf rein additive Entwicklungswerkzeuge. AP 17 baut auf dem
+Assembler-, VM-, Debugger- und Verifikationsstand auf und muss die bestehende
+16/12-Abnahme unverändert parallel zum neuen 8/8-Profil ausführen.
 
 ## Stand
 
@@ -66,10 +70,12 @@ Erweiterung einer Lehr-CPU. Insbesondere verspricht die Hardware keine anderen
 Busbreiten, keine Drittanbieter-Schaltungsvarianten und keine Stabilität der als
 intern gekennzeichneten Diagnoseartefakte.
 
-Damit gibt es aktuell **kein notwendiges nächstes Arbeitspaket**, um TinyCPU
-betriebsfähig zu machen. Die anschließend ausgewählte Richtung
-**Entwicklungswerkzeuge** wurde als
+Damit gibt es weiterhin **kein notwendiges nächstes Arbeitspaket**, um TinyCPU
+betriebsfähig zu machen. Die Richtung **Entwicklungswerkzeuge** wurde als
 [AP 16: symbolischer TinyCPU-Debugger](tiny_cpu_debugger_plan.md) umgesetzt.
+Für die optionale Weiterentwicklung ist nun **Weitere Hardwareprofile** als
+[AP 17: zweites TinyCPU-Hardwareprofil](tiny_cpu_profiles_plan.md) ausgewählt
+und mit messbaren Abnahmekriterien geplant.
 
 Sinnvolle neue Pakete waren zunächst Produktentscheidungen für
 eine spätere Version und keine Restarbeiten an 1.0. Bevor dafür
@@ -85,9 +91,10 @@ messbare Abnahmekriterien festlegen:
    klar abgegrenzte Geräte ergänzen, ohne die 1.x-Schnittstellen stillschweigend
    zu verändern.
 
-Die Auswahlentscheidung ist mit dem AP-16-Vorschlag getroffen. Die beiden
-anderen Richtungen bleiben Kandidaten und sind keine offenen Checklistenpunkte.
-Die abgeschlossenen AP 1 bis AP 15 werden dadurch nicht wieder geöffnet.
+Die erste Auswahlentscheidung wurde mit AP 16 umgesetzt; die zweite ist mit
+dem AP-17-Vorschlag getroffen. **Peripherie und Integration** bleibt Kandidat
+und ist kein offener Checklistenpunkt. Die abgeschlossenen AP 1 bis AP 16
+werden dadurch nicht wieder geöffnet.
 
 - [x] **AP 1: Hardwarevertrag einfrieren:** Das Profil
   `hardware/logisim/tinycpu-16-12.json` beschreibt den Vertrag;
@@ -158,6 +165,10 @@ Die abgeschlossenen AP 1 bis AP 15 werden dadurch nicht wieder geöffnet.
   kanonische JSON-Ausgabe zeigen den vollständigen Architekturzustand und
   Speicheränderungen. Die Offline-Suite prüft Countdown, Fehlerfälle,
   Zustandsparität und deterministische Ausgabe.
+- [ ] **AP 17: Zweites Hardwareprofil:** Der abgegrenzte Vorschlag legt ein
+  8/8-Zielprofil, eine eigene Maschinenformatkennung, unveränderte
+  16/12-Standardaufrufe und gemeinsame elektrische Abnahmekriterien fest. Die
+  Implementierung beginnt erst auf Grundlage dieses Vertrags.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
