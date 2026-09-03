@@ -143,20 +143,14 @@ def run_trace(project: Path, jar: Path, java: str, output: Path, timeout: int) -
         raise LogisimError(f"Logisim exited with {result.returncode}: {diagnostics}")
     if not result.stdout.strip():
         raise LogisimError("Logisim produced no electrical table")
-    # table,halt returning successfully is only meaningful if the designated
-    # halt column was asserted.  Accept Logisim's binary and decimal displays.
+    # Logisim's table format contains values only; pin labels are not emitted as
+    # a header. With the autonomous clock still running, ``table,halt`` returns
+    # only when the specially named halt output is asserted. A circuit which
+    # never reaches halt is rejected by the timeout above.
     rows = [row for row in result.stdout.decode("utf-8", errors="replace").splitlines()
             if row.strip()]
-    if len(rows) < 2:
+    if not rows:
         raise LogisimError("electrical table has no data rows")
-    header = re.split(r"\s+", rows[0].strip())
-    try:
-        halt_column = header.index("halt")
-    except ValueError as exc:
-        raise LogisimError("electrical table has no halt observation column") from exc
-    values = re.split(r"\s+", rows[-1].strip())
-    if halt_column >= len(values) or values[halt_column] not in {"1", "0x1"}:
-        raise LogisimError("electrical table did not terminate with normal halt asserted")
 
 
 def _matrix_program(case: dict[str, object], profile) -> Program:

@@ -86,8 +86,11 @@ command still exits nonzero.
 Logisim's table logger is change-driven: if two clock edges leave every
 exported signal unchanged, it emits no duplicate row. Consequently, the raw
 table can contain fewer than 17 data rows even though the complete countdown
-ran. Acceptance relies on `table,halt` reaching the asserted normal-halt pin;
-the table row count is deliberately not treated as a clock-edge counter.
+ran. Logisim's raw table contains values but no column-name header. Acceptance
+therefore relies on the autonomous clock together with `table,halt`: successful
+termination means that the specially named normal-halt output was asserted,
+whereas a CPU which never halts reaches the launcher timeout. The table row
+count is deliberately not treated as a clock-edge counter.
 
 This complete command is a required CI test. A missing simulator, an incomplete
 matrix, or any electrical failure causes the run to fail; there is no silent

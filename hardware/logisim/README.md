@@ -20,9 +20,11 @@ exact JDK patch had unnecessarily prevented local reproduction.
 
 Logisim's table output is change-driven rather than one-row-per-edge. The
 17-edge countdown can therefore produce fewer than 17 data rows when an edge
-does not alter any exported signal. The launcher preserves that raw output and
-requires the designated `halt` column to be asserted in the final row instead
-of incorrectly using the number of table rows as an edge counter.
+does not alter any exported signal. The raw format contains values without a
+column-name header. The launcher preserves that output and relies on successful
+termination of `table,halt` with an autonomous clock; a circuit that does not
+assert the specially named halt output continues until the launcher rejects it
+at the timeout. It does not use the number of table rows as an edge counter.
 
 If the automatic download is blocked, select an existing JAR explicitly:
 

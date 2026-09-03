@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from tiny_cpu_logisim import (
     ROOT,
+    LogisimError,
     _expected_edges,
     _matrix_program,
     autonomous_project,
@@ -23,7 +24,9 @@ from tiny_cpu_profiles import load_profile
 
 class LogisimLauncherTests(unittest.TestCase):
     def test_change_driven_table_is_not_mistaken_for_an_edge_count(self):
-        table = b"PC halt\n0 0\n1 0\n2 1\n"
+        # Logisim emits values, not a synthetic column-name header. Successful
+        # completion of table,halt is the halt observation.
+        table = b"0\t0\n1\t0\n2\t1\n"
         completed = subprocess.CompletedProcess([], 0, table, b"")
         with tempfile.TemporaryDirectory() as directory, patch(
             "tiny_cpu_logisim.subprocess.run", return_value=completed
@@ -31,6 +34,17 @@ class LogisimLauncherTests(unittest.TestCase):
             output = Path(directory) / "trace.tsv"
             run_trace(Path("project.circ"), Path("logisim.jar"), "java", output, 90)
             self.assertEqual(output.read_bytes(), table)
+
+    def test_empty_electrical_table_is_rejected(self):
+        completed = subprocess.CompletedProcess([], 0, b"", b"")
+        with tempfile.TemporaryDirectory() as directory, patch(
+            "tiny_cpu_logisim.subprocess.run", return_value=completed
+        ):
+            with self.assertRaisesRegex(LogisimError, "no electrical table"):
+                run_trace(
+                    Path("project.circ"), Path("logisim.jar"), "java",
+                    Path(directory) / "trace.tsv", 90,
+                )
 
     def test_default_cli_profile_is_a_loadable_profile_name(self):
         args = parse_args(["--trace-output", "trace.tsv"])
