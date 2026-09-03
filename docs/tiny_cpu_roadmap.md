@@ -36,6 +36,7 @@ abdeckt und Ausgabe, Haltzustand, Register, Speicher-Validität und Fehlerflags
 | **13. 1.0-Releasevertrag einfrieren** | Öffentliche Hardware-, ISA-, Maschinenformat-, CLI- und Nachweisgrenzen versionieren. | Ein maschinenlesbarer Releasevertrag wird gegen vorhandene Profile, Tool-Versionen und CLI-Oberflächen geprüft. |
 | **14. Reproduzierbare Distribution bauen** | Quell- und Simulator-Bundle mit kanonischem Inventar, Digests, Dokumentation und AP-12-Nachweisen erzeugen. | Zwei saubere Builds liefern identische Payloads; das extrahierte Bundle lässt sich offline verifizieren. |
 | **15. TinyCPU 1.0 qualifizieren und veröffentlichen** | Den exakten Release Candidate elektrisch abnehmen, im Clean Room testen und mit Release Notes sowie authentifizierten Prüfsummen veröffentlichen. | Alle Nachweise referenzieren denselben Commit und dieselben Digests; erst danach gilt TinyCPU 1.0 als veröffentlicht. |
+| **16. Symbolischer Debugger** | Quellzuordnung, Breakpoints, Einzelschritte und deterministische Zustandsausgabe auf dem Python-Referenzmodell ergänzen. | Countdown-Breakpoints, Zustandsparität, Fehlerzustände und versioniertes Debug-JSON sind automatisiert geprüft. |
 
 ## Abhängigkeiten und Reihenfolge
 
@@ -66,11 +67,9 @@ Busbreiten, keine Drittanbieter-Schaltungsvarianten und keine Stabilität der al
 intern gekennzeichneten Diagnoseartefakte.
 
 Damit gibt es aktuell **kein notwendiges nächstes Arbeitspaket**, um TinyCPU
-betriebsfähig zu machen. Für die Weiterentwicklung wurde inzwischen die
-Richtung **Entwicklungswerkzeuge** ausgewählt und als
-[AP 16: symbolischer TinyCPU-Debugger](tiny_cpu_debugger_plan.md) abgegrenzt.
-Die Implementierung ist noch nicht Bestandteil der abgeschlossenen
-1.0-Arbeitspakete.
+betriebsfähig zu machen. Die anschließend ausgewählte Richtung
+**Entwicklungswerkzeuge** wurde als
+[AP 16: symbolischer TinyCPU-Debugger](tiny_cpu_debugger_plan.md) umgesetzt.
 
 Sinnvolle neue Pakete waren zunächst Produktentscheidungen für
 eine spätere Version und keine Restarbeiten an 1.0. Bevor dafür
@@ -153,6 +152,12 @@ Die abgeschlossenen AP 1 bis AP 15 werden dadurch nicht wieder geöffnet.
   Qualifikation prüft exakt diese Archive offline, führt den Countdown im Clean
   Room aus und friert Commit, Digests und unveränderte Veröffentlichungsbytes
   für den Tag `tinycpu-v1.0.0` ein.
+- [x] **AP 16: Symbolischer TinyCPU-Debugger:** Der gemeinsame Assemblerpfad
+  erzeugt eine optionale Adresse-zu-Quelle-Zuordnung; das pausierbare
+  Referenzmodell unterstützt Breakpoints und Einzelschritte. Text- und
+  kanonische JSON-Ausgabe zeigen den vollständigen Architekturzustand und
+  Speicheränderungen. Die Offline-Suite prüft Countdown, Fehlerfälle,
+  Zustandsparität und deterministische Ausgabe.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

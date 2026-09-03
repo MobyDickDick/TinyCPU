@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "format": "tinycpu-debug-v1",
+  "stop_reasons": ["breakpoint", "step", "halt", "halt_error", "step_limit"],
+  "required_state": [
+    "pc", "accumulator", "address_register", "zero", "negative", "errors",
+    "halted", "output", "memory_changes"
+  ],
+  "breakpoint_timing": "before_instruction",
+  "unknown_fields": "ignore"
+}
