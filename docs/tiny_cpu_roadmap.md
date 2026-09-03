@@ -66,7 +66,13 @@ Busbreiten, keine Drittanbieter-Schaltungsvarianten und keine Stabilität der al
 intern gekennzeichneten Diagnoseartefakte.
 
 Damit gibt es aktuell **kein notwendiges nächstes Arbeitspaket**, um TinyCPU
-betriebsfähig zu machen. Sinnvolle neue Pakete wären Produktentscheidungen für
+betriebsfähig zu machen. Für die Weiterentwicklung wurde inzwischen die
+Richtung **Entwicklungswerkzeuge** ausgewählt und als
+[AP 16: symbolischer TinyCPU-Debugger](tiny_cpu_debugger_plan.md) abgegrenzt.
+Die Implementierung ist noch nicht Bestandteil der abgeschlossenen
+1.0-Arbeitspakete.
+
+Sinnvolle neue Pakete waren zunächst Produktentscheidungen für
 eine spätere Version und keine Restarbeiten an 1.0. Bevor dafür
 Implementierungsarbeit beginnt, soll ein eigener Vorschlag genau eine der
 folgenden Entwicklungsrichtungen auswählen, Kompatibilitätsfolgen benennen und
@@ -80,9 +86,9 @@ messbare Abnahmekriterien festlegen:
    klar abgegrenzte Geräte ergänzen, ohne die 1.x-Schnittstellen stillschweigend
    zu verändern.
 
-Diese Richtungen sind bewusst **Kandidaten und keine offenen Checklistenpunkte**.
-Priorität, Versionsziel und Ressourcen sind noch nicht beschlossen; die
-abgeschlossenen AP 1 bis AP 15 werden dadurch nicht wieder geöffnet.
+Die Auswahlentscheidung ist mit dem AP-16-Vorschlag getroffen. Die beiden
+anderen Richtungen bleiben Kandidaten und sind keine offenen Checklistenpunkte.
+Die abgeschlossenen AP 1 bis AP 15 werden dadurch nicht wieder geöffnet.
 
 - [x] **AP 1: Hardwarevertrag einfrieren:** Das Profil
   `hardware/logisim/tinycpu-16-12.json` beschreibt den Vertrag;
