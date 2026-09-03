@@ -48,6 +48,12 @@ jobs:
           distribution: temurin
           java-version: "21"
 
+      - name: Cache pinned Logisim runtime
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/tinycpu/logisim-evolution-4.1.0-all.jar
+          key: tinycpu-logisim-evolution-4.1.0
+
       - name: Run both electrical profile gates
         run: scripts/test-logisim.sh
 

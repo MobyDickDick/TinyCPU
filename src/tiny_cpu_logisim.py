@@ -125,7 +125,10 @@ def resolve_jar(explicit: Path | None, *, vendored: Path = VENDORED_JAR) -> Path
             partial.replace(cached)
         except OSError as exc:
             partial.unlink(missing_ok=True)
-            raise LogisimError(f"cannot download pinned Logisim {LOGISIM_VERSION}: {exc}") from exc
+            raise LogisimError(
+                f"pinned Logisim JAR was not found at {vendored} or {cached}, "
+                f"and version {LOGISIM_VERSION} could not be downloaded: {exc}"
+            ) from exc
     return cached
 
 

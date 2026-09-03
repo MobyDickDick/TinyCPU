@@ -10,7 +10,9 @@ scripts/test-logisim.sh
 ```
 
 The script accepts `JAVA`, `LOGISIM_JAR`, and `LOGISIM_OUTPUT` environment
-overrides. It downloads the pinned JAR when no local JAR is selected and then
+overrides. The JAR itself is not checked in: the launcher first checks
+`vendor/logisim-evolution-4.1.0-all.jar`, then `~/.cache/tinycpu/`, and downloads
+the pinned JAR only when neither exists. CI caches that download. It then
 runs the 17-edge countdown and the complete opcode/error matrix for both
 `tinycpu-16-12` and `tinycpu-8-8` against the real simulator. Each matrix owns
 at least one isolated positive program per opcode and six sticky-error programs; the
