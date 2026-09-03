@@ -10,7 +10,9 @@ scripts/test-logisim.sh
 ```
 
 The script accepts `JAVA`, `LOGISIM_JAR`, and `LOGISIM_OUTPUT` environment
-overrides. The JAR itself is not checked in: the launcher first checks
+overrides. Logisim is an integrated, pinned project dependency; the circuits,
+fixtures, launcher, and CI provisioning are checked in. Only the unchanged
+upstream JAR is not duplicated as a Git blob. The launcher first checks
 `vendor/logisim-evolution-4.1.0-all.jar`, then `~/.cache/tinycpu/`, and downloads
 the pinned JAR only when neither exists. CI caches that download. It then
 runs the 17-edge countdown and the complete opcode/error matrix for both

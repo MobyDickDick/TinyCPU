@@ -1,16 +1,21 @@
-# Logisim runtime
+# Im Projekt enthaltene Logisim-Laufzeitabhängigkeit
 
-The repository does not currently contain the Logisim-evolution binary. The
-launcher nevertheless checks this directory first for the pinned file:
+Logisim-evolution gehört als fest gepinnte und automatisch verwaltete
+Laufzeitabhängigkeit zum TinyCPU-Projekt. Schaltungen, Profile, elektrische
+Fixtures und der Launcher sind eingecheckt. Nur das unveränderte große
+Upstream-JAR wird nicht als Git-Blob dupliziert. Der Launcher prüft zuerst
+diesen vorbereiteten Vendor-Pfad:
 
 ```text
 vendor/logisim-evolution-4.1.0-all.jar
 ```
 
-Place that exact upstream JAR at this path to run the electrical tests without
-network access. If it is absent, `src/tiny_cpu_logisim.py` next checks
-`~/.cache/tinycpu/` and downloads the same pinned release only as a last resort.
-GitHub Actions caches that download between runs.
+Liegt das exakte Upstream-JAR dort, laufen die elektrischen Tests vollständig
+ohne Netzwerkzugriff. Andernfalls prüft `src/tiny_cpu_logisim.py` als Nächstes
+`~/.cache/tinycpu/` und lädt dieselbe festgelegte Version nur als letzte
+Möglichkeit herunter. GitHub Actions cached diese Projektabhängigkeit zwischen
+den Läufen.
 
-The JAR is intentionally not represented by an empty placeholder: its presence
-must always mean that a real Java archive is available to the electrical gate.
+Das JAR wird absichtlich nicht durch einen leeren Platzhalter dargestellt: Ist
+die Datei vorhanden, muss sie immer ein echtes Java-Archiv für die elektrische
+Abnahme sein.

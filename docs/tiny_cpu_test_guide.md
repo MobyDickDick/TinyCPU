@@ -11,8 +11,10 @@ checkout.
 - an internet connection for the first run **or** the file
   `logisim-evolution-4.1.0-all.jar`
 
-You do not need to install Logisim separately. The binary is **not currently
-checked into this repository**; only its conventional location is documented.
+You do not need to install Logisim separately. Logisim support is part of the
+project: circuits, fixtures, launcher, pinned version, and CI provisioning are
+checked in. Only the unchanged upstream binary is **not duplicated as a Git
+blob**; its conventional local location is documented.
 The test script first uses `vendor/logisim-evolution-4.1.0-all.jar` when you
 place it there, then checks `~/.cache/tinycpu/`, and only downloads the exact
 supported version as a last resort. GitHub Actions caches this download between

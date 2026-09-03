@@ -18,6 +18,19 @@ Dieses Verzeichnis enthält ausschließlich Dokumentation zur TinyCPU:
 Die Dokumentation der Logisim-Implementierung befindet sich ergänzend unter
 [`hardware/logisim/README.md`](../hardware/logisim/README.md).
 
+## Enthaltene Logisim-Unterstützung
+
+Logisim-evolution ist als festgelegte Projektabhängigkeit vollständig in den
+TinyCPU-Prüfablauf integriert: Das Repository enthält die beiden ausführbaren
+Schaltungsprojekte, Profile, ROM-Fixtures, elektrischen Testmatrizen, Launcher
+und CI-Konfiguration. Die unterstützte Simulatorversion 4.1.0 ist fest
+vorgegeben und wird vom Launcher automatisch aus `vendor/`, dem lokalen Cache
+oder – als letzte Möglichkeit – von der versionierten Upstream-Adresse
+bezogen. Das große Upstream-JAR selbst wird derzeit nicht als Git-Blob
+dupliziert. „Logisim ist im Projekt enthalten“ bezeichnet daher die
+reproduzierbare Integration und automatische Bereitstellung, nicht eine
+Quellkopie des externen Simulators.
+
 ## Planungsstand
 
 Die Arbeitspakete AP 1 bis AP 17 sind abgeschlossen. AP 17 ergänzt ein
