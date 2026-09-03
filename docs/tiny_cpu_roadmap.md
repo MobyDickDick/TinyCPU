@@ -169,9 +169,9 @@ werden dadurch nicht wieder geöffnet.
   Softwarewerkzeuge, eigenständige Schaltung, Countdown-Fixture und die
   vollständige profilbezogene ISA-/Fehlermatrix sind umgesetzt. Der
   Matrixvertrag wird offline gegen alle 50 Opcodes, sechs Sticky-Fehler und die
-  8-Bit-Operandgrenzen geprüft. Offen bleiben der reale elektrische Kerntrace,
-  die elektrische Matrixausführung und danach die gemeinsame Endabnahme beider
-  Profile.
+  8-Bit-Operandgrenzen geprüft. Kerntrace und Matrixausführung sind im
+  profilbezogenen Simulator-Gate automatisiert. Offen bleibt die gemeinsame
+  Endabnahme beider Profile.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
