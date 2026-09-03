@@ -1,6 +1,6 @@
 # Vorschlag: zweites TinyCPU-Hardwareprofil
 
-**Status: in Umsetzung (Schritte 1 bis 3 abgeschlossen, Schritt 4 vorbereitet).** Dieses Dokument trifft die im Hardware-Arbeitsplan nach
+**Status: in Umsetzung (Schritte 1 bis 3 abgeschlossen, elektrischer Kernlauf aus Schritt 4 automatisiert).** Dieses Dokument trifft die im Hardware-Arbeitsplan nach
 AP 16 geforderte Produktentscheidung. Von den beiden verbliebenen Kandidaten
 wird **Weitere Hardwareprofile** ausgewählt. Das neue Arbeitspaket erhält die
 Nummer **AP 17**. Eine Bus-/Interrupt-Erweiterung bleibt ausdrücklich einem
@@ -120,7 +120,10 @@ Offline-Prüfer assembliert jeden Fall ausdrücklich als `tinycpu-8-8`, prüft
 Formatkennung, Rohwortbreite sowie Opcode- und Fehlerabdeckung und verhindert
 damit insbesondere versehentlich übernommene 16-Bit-Grenzwerte.
 
-AP 17 bleibt offen: Der reale elektrische Kerntrace und die Ausführung dieser
-vollständigen Matrix im gepinnten Logisim-Simulator (restlicher Schritt 4) sind
-noch nicht vorhanden. Entsprechend wird aus Matrixvertrag, struktureller
-Schaltungsprüfung und Softwaretests noch kein elektrischer Nachweis abgeleitet.
+Der profilbewusste Launcher führt `TinyCPU-8-8.circ` nun in einer temporären
+Kopie mit autonomem Takt und Power-on-Reset im gepinnten Logisim-Simulator aus.
+Er bewahrt die rohe Tabelle auf und verlangt mindestens die 17 Zustände des
+Countdown-Fixtures sowie dessen normalen elektrischen Halt. AP 17 bleibt offen:
+Die vollständige Matrix muss als restlicher Schritt 4 noch elektrisch
+ausgeführt werden; anschließend steht die gemeinsame Endabnahme beider Profile
+aus Schritt 5 an.
