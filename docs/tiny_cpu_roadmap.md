@@ -164,7 +164,7 @@ AP 15 deren signierte Clean-Room-Qualifikation und unveränderte Veröffentlichu
 abgeschlossen. Der Umfang und die Abnahmekriterien sind im
 [TinyCPU-1.0-Releaseplan](tiny_cpu_1_0_release_plan.md) festgelegt; ein weiteres
 Release-Arbeitspaket ist derzeit nicht dokumentiert. Die
-abgeschlossenen Pflegeeinträge in `docs/open_tasks.md` öffnen AP 1 bis AP 12
+abgeschlossenen Pflegeeinträge öffnen AP 1 bis AP 12
 nicht erneut.
 
 ## Abgeschlossene Baseline-Pflege

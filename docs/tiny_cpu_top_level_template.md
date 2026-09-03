@@ -151,7 +151,7 @@ Ein künftiges `INCOMPLETE`/`unconnected` ist daher ein Wartungsfehler, während
 ## Änderungsprotokoll für künftige Wartungspakete
 
 Die abgeschlossene Schaltung benötigt keinen weiteren Arbeitsschritt. Nur für
-ein zuvor in `docs/open_tasks.md` abgegrenztes Wartungspaket wird dieser Block
+ein zuvor abgegrenztes TinyCPU-Wartungspaket wird dieser Block
 vor dem Zeichnen ausgefüllt und zusammen mit der Änderung geprüft:
 
 ```text
