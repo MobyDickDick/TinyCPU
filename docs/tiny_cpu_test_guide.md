@@ -46,11 +46,12 @@ commit. Run `pre-commit run --all-files` to check the complete working tree at
 any time. The hook can only protect checkouts in which it has been installed;
 the test script may also be run directly without installing `pre-commit`.
 
-GitHub Actions runs the same command for every push, pull request, and merge
-queue entry. To prevent failed pull requests from being merged, configure the
-repository's protected branch or ruleset to require the status check
-**Offline verification and unit tests**. The workflow supplies the check, while
-the branch protection setting in GitHub enforces it.
+GitHub Actions runs the offline command and the electrical profile acceptance
+for every push, pull request, and merge queue entry. To prevent failed pull
+requests from being merged, configure the repository's protected branch or
+ruleset to require **Offline verification and unit tests** and **Electrical
+acceptance (all profiles)**. The workflow supplies both checks, while the
+branch protection setting in GitHub enforces them.
 
 1. Open a terminal and change to the checkout:
 
@@ -72,45 +73,28 @@ the branch protection setting in GitHub enforces it.
    scripts/test-logisim.sh
    ```
 
-The script loads `hardware/logisim/TinyCPU.circ` in the real simulator and runs
-the stable 17-tick counter test. A successful run exits with status 0. The full
-opcode/error matrix, which currently still fails, is deliberately not part of
-the required test run. It can be run for diagnostic purposes with
-`TINYCPU_FULL_ACCEPTANCE=1 scripts/test-logisim.sh` and must become a mandatory
-CI check again only after a successful repair.
+The script loads `TinyCPU.circ` and `TinyCPU-8-8.circ` in the real simulator.
+For each profile it runs the 17-edge countdown and all isolated programs from
+the corresponding electrical matrix: one positive case for every opcode and
+the six sticky-error fixtures. Conditional jumps additionally have separate
+taken and non-taken programs. The offline gate rejects a matrix that omits an
+opcode or repeats a case ID. Results are kept below
+`artifacts/tinycpu-profile-acceptance/<profile>/`; a failure in one profile
+does not prevent the other profile from being attempted, but the combined
+command still exits nonzero.
 
-The stable AP-5 test is part of the CI test run. A missing simulator or a
-failure in this approved test causes the run to fail; there is no silent
-fallback to a project-loading-only or Python test.
+This complete command is a required CI test. A missing simulator, an incomplete
+matrix, or any electrical failure causes the run to fail; there is no silent
+fallback to a project-loading-only or Python test. The CI artifact preserves
+all tables produced before success or failure.
 
 ### If you already have the Logisim JAR
 
-Place the exactly named file `logisim-evolution-4.1.0-all.jar` anywhere under
-the checkout and run:
+Pass its path explicitly instead of downloading it:
 
 ```bash
-scripts/test-logisim-local.sh
+LOGISIM_JAR=/pfad/zu/logisim-evolution-4.1.0-all.jar scripts/test-logisim.sh
 ```
-
-If it is outside the checkout or there are multiple copies, specify the path
-explicitly:
-
-```bash
-scripts/test-logisim-local.sh /pfad/zu/logisim-evolution-4.1.0-all.jar
-```
-
-## Verifying the result later without the simulator
-
-An existing evidence bundle can be checked for completeness and unchanged
-checksums using Python alone:
-
-```bash
-PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
-  --verify-acceptance artifacts/tinycpu-ap12-acceptance
-```
-
-This check does not simulate the CPU again. It confirms that the bundle
-previously produced by the real simulator is complete and unchanged.
 
 ## Inspecting the circuit as well
 

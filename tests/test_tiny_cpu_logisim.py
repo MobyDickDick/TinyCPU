@@ -1,3 +1,5 @@
+import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -11,6 +13,35 @@ from tiny_cpu_profiles import load_profile
 
 
 class LogisimLauncherTests(unittest.TestCase):
+    def test_combined_gate_attempts_both_profiles_after_a_failure(self):
+        with tempfile.TemporaryDirectory() as directory:
+            temporary = Path(directory)
+            log = temporary / "calls"
+            fake_python = temporary / "python3"
+            fake_python.write_text(
+                "#!/bin/sh\n"
+                f"printf '%s\\n' \"$*\" >> {log}\n"
+                "case \" $* \" in *' --profile tinycpu-16-12 '*) exit 1;; esac\n",
+                encoding="utf-8",
+            )
+            fake_python.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{temporary}:{environment['PATH']}"
+            environment["LOGISIM_OUTPUT"] = str(temporary / "evidence")
+            result = subprocess.run(
+                ["bash", str(ROOT / "scripts/test-logisim.sh")],
+                cwd=ROOT,
+                env=environment,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            calls = log.read_text(encoding="utf-8")
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("--profile tinycpu-16-12", calls)
+            self.assertIn("--profile tinycpu-8-8", calls)
+            self.assertIn("tinycpu-16-12", result.stderr)
+
     def test_autonomous_project_uses_profile_specific_circuit(self):
         source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
         with tempfile.TemporaryDirectory() as directory:

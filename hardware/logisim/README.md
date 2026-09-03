@@ -1,8 +1,8 @@
 # TinyCPU in Logisim-evolution
 
-## Stable simulator gate and AP-12 release acceptance
+## Gemeinsame elektrische Profilabnahme
 
-From a fresh checkout with Java 21 or newer available, run the stable AP-5
+From a fresh checkout with Java 21 or newer available, run the complete
 electrical gate used by CI with one command:
 
 ```bash
@@ -10,104 +10,26 @@ scripts/test-logisim.sh
 ```
 
 The script accepts `JAVA`, `LOGISIM_JAR`, and `LOGISIM_OUTPUT` environment
-overrides. It downloads the pinned JAR when `LOGISIM_JAR` does not exist and
-then runs the load check and 17-edge AP-5 trace against the real simulator.
+overrides. It downloads the pinned JAR when no local JAR is selected and then
+runs the 17-edge countdown and the complete opcode/error matrix for both
+`tinycpu-16-12` and `tinycpu-8-8` against the real simulator. Each matrix owns
+at least one isolated positive program per opcode and six sticky-error programs; the
+offline verifier rejects missing, additional, or duplicate opcode coverage.
 Java security-patch and newer-feature releases are accepted; requiring one
 exact JDK patch had unnecessarily prevented local reproduction.
 
-The full reset/restart and opcode/error matrix currently remains available as
-an explicit diagnostic, but is not a required CI test while the accumulator
-write mismatch exposed by `MUL_ADDRESS_REGISTER` is unresolved:
+If the automatic download is blocked, select an existing JAR explicitly:
 
 ```bash
-TINYCPU_FULL_ACCEPTANCE=1 \
-LOGISIM_OUTPUT=artifacts/tinycpu-ap12-acceptance \
-scripts/test-logisim.sh
+LOGISIM_JAR=path/to/logisim-evolution-4.1.0-all.jar scripts/test-logisim.sh
 ```
 
-Do not promote this command back into CI until it exits successfully against
-the pinned simulator. This keeps the required suite green without representing
-the unfinished electrical matrix as accepted.
-
-If the automatic download is blocked, copy
-`logisim-evolution-4.1.0-all.jar` anywhere into the repository checkout and run:
-
-```bash
-scripts/test-logisim-local.sh
-```
-
-The local launcher searches the checkout for that exact versioned filename and
-passes it to the normal acceptance script. The JAR pattern is ignored by Git,
-so a local simulator binary is not accidentally committed. If several copies
-exist, or the file has a different name, select it explicitly:
-
-```bash
-scripts/test-logisim-local.sh path/to/logisim-evolution-4.1.0-all.jar
-```
-
-The command downloads the version-addressed Logisim-evolution 4.1.0 JAR when
-needed, verifies both pinned versions, and loads the maintained project. It
-then starts `TinyCPUMain` twice with Logisim's `PowerOnReset` component asserting
-the synchronous reset at simulator startup and compares the normalized 17-edge
-AP-5 traces. (A constant inactive reset is not equivalent: it leaves the CPU's
-documented reset boundary untested.) The maintained `FetchDecode` circuit also
-drives the `PC` register enable high and feeds an explicit 16-bit one into its
-next-address adder. Both are required: a low enable or the former zero-valued
-increment makes every edge select ROM address zero and yields the long, almost
-empty tables seen in the earlier evidence.
-The `PC_ADDRESS` splitter also declares its right-facing appearance explicitly;
-its 12-bit output terminal therefore coincides with the checked-in route to the
-ROM address input instead of leaving that route one symbol lane away.
-The ROM's XML location is the upper-left drawing anchor. Its address input is
-at `(510,410)` on the west edge and, with the Logisim-evolution appearance, its
-22-bit data output is at `(750,460)` on the lower-right edge of the expanded
-ROM body. The data net drives both `OPCODE` and the instruction-field splitter;
-the former `(550,410)` route ended on empty drawing space. A taken
-`JUMP_NOT_ZERO` selects
-the instruction's low 16-bit operand as the next PC value; otherwise the next-PC
-multiplexer retains the sequential `PC + 1` result.
-The jump selection condition is now defined at the integration boundary as
-`NOT Datapath.ZERO`. The named `INVERT_ZERO_FOR_JNZ` gate feeds
-`FetchDecode.NOT_ZERO`, so the AP-5 countdown takes its first two loop jumps and
-falls through when the accumulator reaches zero. This status route uses the
-single documented top-level tunnel exception, `NOT_ZERO_STATUS`: its source and
-consumer are separated by enclosed clock, reset, address, and data wiring
-regions, where a direct line would electrically cross unrelated nets.
-In particular, the visually open `y=100` corridor is electrically occupied;
-routing the status through it joins existing top-level signals and produces
-Logisim error values. The topology regression therefore rejects that former
-three-segment route as well as any additional top-level tunnel.
-In full-acceptance mode, these independent runs are the reset/restart and
-multi-cycle reproducibility check. That opt-in invocation then runs every
-isolated opcode proof and sticky-error fixture; the stable default invocation
-stops after the passing AP-5 comparison.
-
-The output directory contains `reset-start.tsv` and `restart.tsv` as untouched
-Logisim tables, normalized TSV counterparts, all raw `isa-matrix/*.tsv` tables,
-and `acceptance.json`. A passed schema-version-2 report inventories every other
-evidence file by relative POSIX path, byte size, and SHA-256 digest. This makes
-the uploaded bundle self-checking without including the report in its own
-manifest. The JSON report is written as schema version 1 with status `started`
-before simulation and replaced by the passed report only after every comparison
-succeeds, so an interrupted run cannot be mistaken for accepted hardware. CI
-uploads the entire directory even on failure.
-
-A retained or downloaded bundle can be checked independently of Java and
-Logisim. The verifier rejects missing, additional, reordered, resized, or
-digest-mismatched evidence files. It also rejects symbolic links and other
-non-regular inventory entries instead of following them outside the retained
-bundle. The report and every inventory entry are schema-checked first, so
-malformed paths, byte sizes, and SHA-256 values produce a controlled
-verification failure rather than being interpreted as evidence metadata. The
-verifier also requires the pinned runtime versions, both linked reset/restart
-traces with identical digests and edge counts, and a matrix fixture count that
-matches the inventoried tables; an arbitrary inventory alone is not an AP-12
-acceptance report:
-
-```bash
-PYTHONPATH=src python src/tiny_cpu_logisim.py \
-  --verify-acceptance artifacts/tinycpu-ap12-acceptance
-```
+Raw evidence is stored independently below
+`artifacts/tinycpu-profile-acceptance/tinycpu-16-12/` and
+`artifacts/tinycpu-profile-acceptance/tinycpu-8-8/`. The wrapper attempts both
+profiles even when the first fails, reports every failed profile, and returns a
+failure if either gate fails. CI runs this command for pushes, pull requests,
+and merge queues and uploads the result tree even on failure.
 
 Am Ausgang des `Operations`-Blatts wählen zwei ausdrücklich benannte
 Multiplexer zwischen dem unmittelbaren Befehlsoperanden und dem zusammengeführten

@@ -165,13 +165,14 @@ werden dadurch nicht wieder geöffnet.
   kanonische JSON-Ausgabe zeigen den vollständigen Architekturzustand und
   Speicheränderungen. Die Offline-Suite prüft Countdown, Fehlerfälle,
   Zustandsparität und deterministische Ausgabe.
-- [ ] **AP 17: Zweites Hardwareprofil:** Profil, 14-Bit-Maschinenformat,
+- [x] **AP 17: Zweites Hardwareprofil:** Profil, 14-Bit-Maschinenformat,
   Softwarewerkzeuge, eigenständige Schaltung, Countdown-Fixture und die
   vollständige profilbezogene ISA-/Fehlermatrix sind umgesetzt. Der
   Matrixvertrag wird offline gegen alle 50 Opcodes, sechs Sticky-Fehler und die
   8-Bit-Operandgrenzen geprüft. Kerntrace und Matrixausführung sind im
-  profilbezogenen Simulator-Gate automatisiert. Offen bleibt die gemeinsame
-  Endabnahme beider Profile.
+  profilbezogenen Simulator-Gate automatisiert. Die gemeinsame Endabnahme
+  führt beide Profile bei jedem Push, Pull Request und Merge-Queue-Lauf aus
+  und bewahrt ihre Tabellen getrennt auf.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
