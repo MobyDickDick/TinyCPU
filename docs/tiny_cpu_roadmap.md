@@ -38,6 +38,7 @@ abdeckt und Ausgabe, Haltzustand, Register, Speicher-Validität und Fehlerflags
 | **15. TinyCPU 1.0 qualifizieren und veröffentlichen** | Den exakten Release Candidate elektrisch abnehmen, im Clean Room testen und mit Release Notes sowie authentifizierten Prüfsummen veröffentlichen. | Alle Nachweise referenzieren denselben Commit und dieselben Digests; erst danach gilt TinyCPU 1.0 als veröffentlicht. |
 | **16. Symbolischer Debugger** | Quellzuordnung, Breakpoints, Einzelschritte und deterministische Zustandsausgabe auf dem Python-Referenzmodell ergänzen. | Countdown-Breakpoints, Zustandsparität, Fehlerzustände und versioniertes Debug-JSON sind automatisiert geprüft. |
 | **17. Zweites Hardwareprofil** | Ein abgegrenztes 8-Datenbit-/8-Adressbit-Profil in Tooling und Logisim ergänzen, ohne den 16/12-Standard zu verändern. | Beide Profile bestehen profilbezogene Roundtrip-, Debugger-, Kerntrace- und vollständige elektrische ISA-/Fehlerprüfungen. |
+| **18. Peripherie und Integration** | Eine optionale 16/12-Systemvariante mit speicherabgebildetem Ausgabeport und einer maskierbaren Interruptquelle ergänzen. | Versionierte System-, Maschinenformat- und Trace-Verträge bestehen taktgenaue VM-/Logisim-Abnahmen, ohne die bisherigen Profile oder Gates zu verändern. |
 
 ## Abhängigkeiten und Reihenfolge
 
@@ -56,6 +57,9 @@ weder einen anderen Commit noch nachträglich veränderte Bundles veröffentlich
 AP 16 ergänzt darauf rein additive Entwicklungswerkzeuge. AP 17 baut auf dem
 Assembler-, VM-, Debugger- und Verifikationsstand auf und muss die bestehende
 16/12-Abnahme unverändert parallel zum neuen 8/8-Profil ausführen.
+AP 18 setzt beide abgeschlossenen Profilabnahmen voraus und ergänzt eine
+eigenständige 16/12-Systemvariante; bestehende Profile bleiben dabei frei von
+Peripherie- und Interruptsemantik.
 
 ## Stand
 
@@ -75,7 +79,10 @@ betriebsfähig zu machen. Die Richtung **Entwicklungswerkzeuge** wurde als
 [AP 16: symbolischer TinyCPU-Debugger](tiny_cpu_debugger_plan.md) umgesetzt.
 Für die optionale Weiterentwicklung ist nun **Weitere Hardwareprofile** als
 [AP 17: zweites TinyCPU-Hardwareprofil](tiny_cpu_profiles_plan.md) ausgewählt
-und mit messbaren Abnahmekriterien geplant.
+und abgeschlossen. Die verbleibende Richtung **Peripherie und Integration**
+ist als [AP 18](tiny_cpu_peripherals_plan.md) mit einer einzelnen
+Interruptquelle und einem Ausgabeport ausgewählt und messbar abgegrenzt; ihre
+Implementierung ist noch offen.
 
 Sinnvolle neue Pakete waren zunächst Produktentscheidungen für
 eine spätere Version und keine Restarbeiten an 1.0. Bevor dafür
@@ -91,10 +98,10 @@ messbare Abnahmekriterien festlegen:
    klar abgegrenzte Geräte ergänzen, ohne die 1.x-Schnittstellen stillschweigend
    zu verändern.
 
-Die erste Auswahlentscheidung wurde mit AP 16 umgesetzt; die zweite ist mit
-dem AP-17-Vorschlag getroffen. **Peripherie und Integration** bleibt Kandidat
-und ist kein offener Checklistenpunkt. Die abgeschlossenen AP 1 bis AP 16
-werden dadurch nicht wieder geöffnet.
+Die erste Auswahlentscheidung wurde mit AP 16 umgesetzt, die zweite mit AP 17.
+Der eigene AP-18-Vorschlag trifft nun auch die dritte Auswahlentscheidung, ohne
+bereits Bus- oder Peripherieimplementierung vorwegzunehmen. Die abgeschlossenen
+AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
 
 - [x] **AP 1: Hardwarevertrag einfrieren:** Das Profil
   `hardware/logisim/tinycpu-16-12.json` beschreibt den Vertrag;
@@ -173,6 +180,10 @@ werden dadurch nicht wieder geöffnet.
   profilbezogenen Simulator-Gate automatisiert. Die gemeinsame Endabnahme
   führt beide Profile bei jedem Push, Pull Request und Merge-Queue-Lauf aus
   und bewahrt ihre Tabellen getrennt auf.
+- [ ] **AP 18: Peripherie und Integration:** Der abgegrenzte Vorschlag legt
+  Ausgabeport, Interruptmodell, Kompatibilitätsfolgen, Vertragsartefakte und
+  elektrische Abnahmekriterien fest. Systemprofil, Softwaremodell, Schaltung
+  und Matrix sind noch umzusetzen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
