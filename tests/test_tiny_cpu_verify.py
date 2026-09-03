@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import importlib.util
+import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -45,6 +47,30 @@ class CircuitVerificationTests(unittest.TestCase):
         path = self.write_project(pins)
         with self.assertRaisesRegex(VERIFY.VerificationError, "duplicate Pin labels"):
             VERIFY.verify_circuit(path)
+
+    def test_8_8_circuit_matches_profile_and_embedded_fixture(self) -> None:
+        root = MODULE_PATH.parents[1]
+        logisim = root / "hardware" / "logisim"
+        profile = json.loads((logisim / "tinycpu-8-8.json").read_text())
+        machine = json.loads((logisim / "tinycpu-machine-8-v1.json").read_text())
+        VERIFY.verify_small_profile_circuit(profile, machine)
+
+    def test_8_8_circuit_rejects_a_legacy_width(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copy(source / "TinyCPU-8-8.circ", temporary)
+        shutil.copy(source / "ap17_countdown_8_8.rom", temporary)
+        circuit = temporary / "TinyCPU-8-8.circ"
+        circuit.write_text(circuit.read_text().replace('name="width" val="8"',
+                                                        'name="width" val="16"', 1))
+        profile = json.loads((source / "tinycpu-8-8.json").read_text())
+        machine = json.loads((source / "tinycpu-machine-8-v1.json").read_text())
+        original = VERIFY.LOGISIM
+        VERIFY.LOGISIM = temporary
+        self.addCleanup(setattr, VERIFY, "LOGISIM", original)
+        with self.assertRaisesRegex(VERIFY.VerificationError, "legacy 16/12 width"):
+            VERIFY.verify_small_profile_circuit(profile, machine)
 
 
 if __name__ == "__main__":

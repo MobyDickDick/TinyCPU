@@ -131,6 +131,72 @@ def verify_circuit(path: Path) -> tuple[int, int]:
     return len(circuits), wires
 
 
+def _rom_words(text: str, *, source: Path, address_bits: int, word_bits: int) -> list[int]:
+    """Parse the uncompressed Logisim raw format used by the AP-17 fixture."""
+    tokens = text.split()
+    expected_header = ["addr/data:", str(address_bits), str(word_bits)]
+    if tokens[:3] != expected_header:
+        raise VerificationError(
+            f"{display_path(source)}: expected ROM header {' '.join(expected_header)!r}"
+        )
+    try:
+        words = [int(token, 16) for token in tokens[3:]]
+    except ValueError as exc:
+        raise VerificationError(f"{display_path(source)}: invalid ROM word") from exc
+    if not words or any(word >= 1 << word_bits for word in words):
+        raise VerificationError(f"{display_path(source)}: empty or out-of-range ROM payload")
+    return words
+
+
+def verify_small_profile_circuit(profile: dict[str, object], machine: dict[str, object]) -> None:
+    """Check that the checked-in 8/8 circuit really is width-specialized.
+
+    This remains a structural gate, not a substitute for the electrical AP-17
+    trace.  It nevertheless prevents the new profile from silently pointing at
+    a renamed 16/12 circuit or embedding a ROM for the wrong machine format.
+    """
+    path = LOGISIM / str(profile.get("circuit", ""))
+    if not path.is_file():
+        raise VerificationError(f"{display_path(path)}: profile circuit is missing")
+    project = ET.parse(path).getroot()
+    if project.find("main") is None or project.find("main").get("name") != profile.get("top_circuit"):
+        raise VerificationError(f"{display_path(path)}: top circuit differs from profile")
+
+    width_attributes = {"width", "incoming", "dataWidth", "addrWidth"}
+    forbidden = {"16", "12", "22"}
+    for attribute in project.findall(".//a"):
+        if attribute.get("name") in width_attributes and attribute.get("val") in forbidden:
+            raise VerificationError(
+                f"{display_path(path)}: legacy 16/12 width remains in {attribute.get('name')}"
+            )
+
+    rom = next((component for component in project.findall(".//comp")
+                if component.get("name") == "ROM" and any(
+                    item.get("name") == "label" and item.get("val") == "INSTRUCTION_ROM"
+                    for item in component.findall("a"))), None)
+    if rom is None:
+        raise VerificationError(f"{display_path(path)}: INSTRUCTION_ROM is missing")
+    attributes = {item.get("name"): item for item in rom.findall("a")}
+    address_bits = int(profile["address_bits"])
+    word_bits = int(machine["word_bits"])
+    if (attributes.get("addrWidth") is None or attributes["addrWidth"].get("val") != str(address_bits)
+            or attributes.get("dataWidth") is None or attributes["dataWidth"].get("val") != str(word_bits)
+            or attributes.get("contents") is None):
+        raise VerificationError(f"{display_path(path)}: ROM widths differ from profile")
+    embedded = _rom_words(attributes["contents"].text or "", source=path,
+                          address_bits=address_bits, word_bits=word_bits)
+    fixture_path = LOGISIM / "ap17_countdown_8_8.rom"
+    fixture_tokens = fixture_path.read_text(encoding="utf-8").split()
+    if fixture_tokens[:2] != ["v2.0", "raw"]:
+        raise VerificationError(f"{display_path(fixture_path)}: invalid raw ROM header")
+    try:
+        fixture = [int(token, 16) for token in fixture_tokens[2:]]
+    except ValueError as exc:
+        raise VerificationError(f"{display_path(fixture_path)}: invalid ROM word") from exc
+    if embedded != fixture:
+        raise VerificationError(f"{display_path(path)}: embedded ROM differs from AP-17 fixture")
+
+
 def verify_contracts() -> tuple[int, int]:
     machine_path = LOGISIM / "tinycpu-machine-v1.json"
     matrix_path = LOGISIM / "tinycpu-electrical-matrix-v1.json"
@@ -154,6 +220,7 @@ def verify_contracts() -> tuple[int, int]:
             raise VerificationError(f"profile {current_profile.get('name')!r} is inconsistent")
         if current_profile.get("machine_format") != current_machine_path_name(current_machine):
             raise VerificationError(f"profile {current_profile.get('name')!r} selects the wrong format file")
+    verify_small_profile_circuit(small_profile, small_machine)
 
     opcodes = machine.get("opcodes")
     if not isinstance(opcodes, list) or not opcodes:
