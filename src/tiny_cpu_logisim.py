@@ -129,9 +129,7 @@ def resolve_jar(explicit: Path | None, *, vendored: Path = VENDORED_JAR) -> Path
     return cached
 
 
-def run_trace(
-    project: Path, jar: Path, java: str, output: Path, timeout: int, *, minimum_edges: int = 1
-) -> None:
+def run_trace(project: Path, jar: Path, java: str, output: Path, timeout: int) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     command = [java, "-jar", str(jar), "-tty", "table,halt", str(project)]
     try:
@@ -149,10 +147,8 @@ def run_trace(
     # halt column was asserted.  Accept Logisim's binary and decimal displays.
     rows = [row for row in result.stdout.decode("utf-8", errors="replace").splitlines()
             if row.strip()]
-    if len(rows) < minimum_edges + 1:
-        raise LogisimError(
-            f"electrical table ended before the {minimum_edges}-edge fixture ({len(rows) - 1} rows)"
-        )
+    if len(rows) < 2:
+        raise LogisimError("electrical table has no data rows")
     header = re.split(r"\s+", rows[0].strip())
     try:
         halt_column = header.index("halt")
@@ -207,12 +203,14 @@ def run_matrix(
     for case in cases:
         program = _matrix_program(case, profile)
         words = tuple(case.get("raw_words") or encode_program(program))
-        edges = _expected_edges(program)
+        # Validate the fixture independently in the reference model. Logisim's
+        # table logger is change-driven, so its row count is not an edge count:
+        # consecutive clock edges with identical observed outputs are folded.
+        _expected_edges(program)
         with tempfile.TemporaryDirectory(prefix="tinycpu-matrix-") as directory:
             project = Path(directory) / source.name
             autonomous_project(source, project, profile.top_circuit, words)
-            run_trace(project, jar, java, output / f"{case['id']}.tsv", timeout,
-                      minimum_edges=edges)
+            run_trace(project, jar, java, output / f"{case['id']}.tsv", timeout)
     return len(cases)
 
 
@@ -238,7 +236,7 @@ def main(argv: list[str] | None = None) -> int:
         with tempfile.TemporaryDirectory(prefix="tinycpu-logisim-") as directory:
             project = Path(directory) / source.name
             autonomous_project(source, project, profile.top_circuit)
-            run_trace(project, jar, args.java, args.trace_output, args.timeout, minimum_edges=17)
+            run_trace(project, jar, args.java, args.trace_output, args.timeout)
         if args.matrix_output is not None:
             count = run_matrix(source, profile, jar, args.java, args.matrix_output, args.timeout)
             print(f"electrical matrix passed: {profile.name} ({count} fixtures)")

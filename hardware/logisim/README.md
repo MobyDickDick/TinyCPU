@@ -18,6 +18,12 @@ offline verifier rejects missing, additional, or duplicate opcode coverage.
 Java security-patch and newer-feature releases are accepted; requiring one
 exact JDK patch had unnecessarily prevented local reproduction.
 
+Logisim's table output is change-driven rather than one-row-per-edge. The
+17-edge countdown can therefore produce fewer than 17 data rows when an edge
+does not alter any exported signal. The launcher preserves that raw output and
+requires the designated `halt` column to be asserted in the final row instead
+of incorrectly using the number of table rows as an edge counter.
+
 If the automatic download is blocked, select an existing JAR explicitly:
 
 ```bash

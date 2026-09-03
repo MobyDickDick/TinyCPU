@@ -5,6 +5,7 @@ import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -15,11 +16,22 @@ from tiny_cpu_logisim import (
     autonomous_project,
     parse_args,
     resolve_jar,
+    run_trace,
 )
 from tiny_cpu_profiles import load_profile
 
 
 class LogisimLauncherTests(unittest.TestCase):
+    def test_change_driven_table_is_not_mistaken_for_an_edge_count(self):
+        table = b"PC halt\n0 0\n1 0\n2 1\n"
+        completed = subprocess.CompletedProcess([], 0, table, b"")
+        with tempfile.TemporaryDirectory() as directory, patch(
+            "tiny_cpu_logisim.subprocess.run", return_value=completed
+        ):
+            output = Path(directory) / "trace.tsv"
+            run_trace(Path("project.circ"), Path("logisim.jar"), "java", output, 90)
+            self.assertEqual(output.read_bytes(), table)
+
     def test_default_cli_profile_is_a_loadable_profile_name(self):
         args = parse_args(["--trace-output", "trace.tsv"])
         profile = load_profile(args.profile)

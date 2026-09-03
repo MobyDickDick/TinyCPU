@@ -74,7 +74,7 @@ branch protection setting in GitHub enforces them.
    ```
 
 The script loads `TinyCPU.circ` and `TinyCPU-8-8.circ` in the real simulator.
-For each profile it runs the 17-edge countdown and all isolated programs from
+For each profile it runs the complete 17-edge countdown and all isolated programs from
 the corresponding electrical matrix: one positive case for every opcode and
 the six sticky-error fixtures. Conditional jumps additionally have separate
 taken and non-taken programs. The offline gate rejects a matrix that omits an
@@ -82,6 +82,12 @@ opcode or repeats a case ID. Results are kept below
 `artifacts/tinycpu-profile-acceptance/<profile>/`; a failure in one profile
 does not prevent the other profile from being attempted, but the combined
 command still exits nonzero.
+
+Logisim's table logger is change-driven: if two clock edges leave every
+exported signal unchanged, it emits no duplicate row. Consequently, the raw
+table can contain fewer than 17 data rows even though the complete countdown
+ran. Acceptance relies on `table,halt` reaching the asserted normal-halt pin;
+the table row count is deliberately not treated as a clock-edge counter.
 
 This complete command is a required CI test. A missing simulator, an incomplete
 matrix, or any electrical failure causes the run to fail; there is no silent

@@ -122,8 +122,10 @@ damit insbesondere versehentlich übernommene 16-Bit-Grenzwerte.
 
 Der profilbewusste Launcher führt beide Schaltungen in temporären Kopien mit
 autonomem Takt und Power-on-Reset im gepinnten Logisim-Simulator aus. Er bewahrt
-die rohen Tabellen auf und verlangt mindestens die 17 Zustände des jeweiligen
-Countdown-Fixtures sowie dessen normalen elektrischen Halt. Derselbe Launcher
+die rohen, änderungsgetriebenen Tabellen auf und verlangt den normalen
+elektrischen Halt des jeweiligen Countdown-Fixtures. Die Tabellenzeilenzahl
+wird nicht als Taktzahl interpretiert, weil Logisim unveränderte beobachtete
+Zustände nicht erneut ausgibt. Derselbe Launcher
 assembliert außerdem alle Opcode- und Fehler-Fixtures, ersetzt ausschließlich
 das ROM der jeweiligen temporären Kopie und bewahrt jede elektrische Tabelle
 getrennt auf.
