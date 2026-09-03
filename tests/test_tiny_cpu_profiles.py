@@ -26,6 +26,8 @@ class ProfileTests(unittest.TestCase):
         program = assemble("LOAD_CONST(32767)\nHALT()")
         self.assertEqual(program.profile, DEFAULT_PROFILE)
         self.assertEqual(program.profile.name, "tinycpu-16-12")
+        self.assertEqual(program.profile.circuit, "TinyCPU.circ")
+        self.assertEqual(program.profile.top_circuit, "TinyCPUMain")
         self.assertEqual(encode_program(program)[0], 0x7fff)
 
     def test_all_opcodes_roundtrip_in_8_8_format(self) -> None:

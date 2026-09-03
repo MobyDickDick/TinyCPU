@@ -18,6 +18,8 @@ class Profile:
     memory_size: int
     machine_format: str
     machine_path: Path
+    circuit: str
+    top_circuit: str
 
     @property
     def word_bits(self) -> int:
@@ -53,8 +55,18 @@ def load_profile(name: str = "tinycpu-16-12") -> Profile:
     machine = json.loads(machine_path.read_text(encoding="utf-8"))
     if machine["format"] != data["machine_format_id"]:
         raise ValueError(f"profile {name!r} has an inconsistent machine format")
+    # The frozen 16/12 v1 contract predates the explicit ``circuit`` field;
+    # retain its established project name while exposing one typed interface
+    # to all profile-aware tools.
+    circuit = data.get("circuit", "TinyCPU.circ" if name == "tinycpu-16-12" else None)
+    if not isinstance(circuit, str) or not circuit:
+        raise ValueError(f"profile {name!r} has no circuit")
+    top_circuit = data.get("top_circuit")
+    if not isinstance(top_circuit, str) or not top_circuit:
+        raise ValueError(f"profile {name!r} has no top circuit")
     return Profile(name, data["data_bits"], data["address_bits"],
-                   data["memory_size"], data["machine_format_id"], machine_path)
+                   data["memory_size"], data["machine_format_id"], machine_path,
+                   circuit, top_circuit)
 
 
 DEFAULT_PROFILE = load_profile()

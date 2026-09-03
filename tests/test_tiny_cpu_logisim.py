@@ -8,11 +8,24 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from tiny_cpu_logisim import ROOT, _expected_edges, _matrix_program, autonomous_project, resolve_jar
+from tiny_cpu_logisim import (
+    ROOT,
+    _expected_edges,
+    _matrix_program,
+    autonomous_project,
+    parse_args,
+    resolve_jar,
+)
 from tiny_cpu_profiles import load_profile
 
 
 class LogisimLauncherTests(unittest.TestCase):
+    def test_default_cli_profile_is_a_loadable_profile_name(self):
+        args = parse_args(["--trace-output", "trace.tsv"])
+        profile = load_profile(args.profile)
+        self.assertEqual(profile.name, "tinycpu-16-12")
+        self.assertEqual(profile.circuit, "TinyCPU.circ")
+
     def test_combined_gate_attempts_both_profiles_after_a_failure(self):
         with tempfile.TemporaryDirectory() as directory:
             temporary = Path(directory)

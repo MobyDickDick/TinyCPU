@@ -210,7 +210,7 @@ def run_matrix(
         edges = _expected_edges(program)
         with tempfile.TemporaryDirectory(prefix="tinycpu-matrix-") as directory:
             project = Path(directory) / source.name
-            autonomous_project(source, project, str(profile["top_circuit"]), words)
+            autonomous_project(source, project, profile.top_circuit, words)
             run_trace(project, jar, java, output / f"{case['id']}.tsv", timeout,
                       minimum_edges=edges)
     return len(cases)
@@ -218,7 +218,7 @@ def run_matrix(
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--profile", default=DEFAULT_PROFILE)
+    parser.add_argument("--profile", default=DEFAULT_PROFILE.name)
     parser.add_argument("--jar", type=Path)
     parser.add_argument("--java", default=os.environ.get("JAVA", "java"))
     parser.add_argument("--trace-output", type=Path, required=True)
@@ -234,15 +234,15 @@ def main(argv: list[str] | None = None) -> int:
         if java_major(args.java) < 21:
             raise LogisimError("Java 21 or newer is required")
         jar = resolve_jar(args.jar)
-        source = ROOT / "hardware" / "logisim" / str(profile["circuit"])
+        source = ROOT / "hardware" / "logisim" / profile.circuit
         with tempfile.TemporaryDirectory(prefix="tinycpu-logisim-") as directory:
             project = Path(directory) / source.name
-            autonomous_project(source, project, str(profile["top_circuit"]))
+            autonomous_project(source, project, profile.top_circuit)
             run_trace(project, jar, args.java, args.trace_output, args.timeout, minimum_edges=17)
         if args.matrix_output is not None:
             count = run_matrix(source, profile, jar, args.java, args.matrix_output, args.timeout)
-            print(f"electrical matrix passed: {profile['name']} ({count} fixtures)")
-        print(f"electrical trace passed: {profile['name']} -> {args.trace_output}")
+            print(f"electrical matrix passed: {profile.name} ({count} fixtures)")
+        print(f"electrical trace passed: {profile.name} -> {args.trace_output}")
         return 0
     except (LogisimError, KeyError, OSError, ET.ParseError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
