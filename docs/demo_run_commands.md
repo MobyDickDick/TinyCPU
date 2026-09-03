@@ -1,0 +1,94 @@
+# Command list for demos and quick checks
+
+This list collects common CLI invocations to validate the most important examples and backends in a single pass. Run the commands from the repository root; set `PYTHONPATH=src` for the Python helper scripts.
+
+## Interpreter-Demos
+
+```bash
+python src/tiny_language.py src_tiny/hello_world.tiny
+python src/tiny_language.py src_tiny/demo.tiny
+python src/tiny_language.py src_tiny/all_features.tiny
+python src/tiny_language.py src_tiny/class_demo.tiny
+python src/tiny_language.py src_tiny/namespace_demo.tiny
+python src/tiny_language.py src_tiny/match_demo.tiny
+python src/tiny_language.py src_tiny/operator_overloading_demo.tiny
+python src/tiny_language.py src_tiny/number_class.tiny
+python src/tiny_language.py src_tiny/number_intervall.tiny
+python src/tiny_language.py src_tiny/heap_pointer_demo.tiny
+python src/tiny_language.py src_tiny/try_catch_demo.tiny
+python src/tiny_language.py src_tiny/rosetta_fibonacci.tiny
+python src/tiny_language.py src_tiny/copy_rosetta_samples.tiny
+python src/tiny_language.py src_tiny/transpile_rosetta.tiny
+python src/tiny_language.py src_tiny/stdlib_io_random_demo.tiny
+python src/tiny_language.py src_tiny/stdlib_collections_demo.tiny
+python src/tiny_language.py src_tiny/stdlib_argparse_demo.tiny
+```
+
+## Concurrency and pipeline examples
+
+```bash
+python src/tiny_language.py src_tiny/concurrency_demo.tiny
+python src/tiny_language.py src_tiny/concurrency_pipeline.tiny
+python src/tiny_language.py src_tiny/parallel_map.tiny
+python src/tiny_language.py src_tiny/structured_concurrency_demo.tiny
+```
+
+## Python-Interop
+
+```bash
+python src/tiny_language.py src_tiny/python_math_demo.tiny
+python src/tiny_language.py src_tiny/python_json_demo.tiny
+python src/tiny_language.py src_tiny/python_namespace_typed_demo.tiny
+python src/tiny_language.py src_tiny/python_proxy_pipeline_demo.tiny
+```
+
+## Native backend for comparison
+
+```bash
+python src/tiny_language.py --native-backend src_tiny/all_features.tiny
+python src/tiny_language.py --native-backend src_tiny/match_demo.tiny
+python -m pytest tests/test_native_codegen.py -q
+```
+
+## Language-server helpers
+
+```bash
+PYTHONPATH=src python src/language_server_cli.py --file src_tiny/class_demo.tiny hover --symbol Greeter
+PYTHONPATH=src python src/language_server_cli.py --file src_tiny/namespace_demo.tiny completions --prefix To
+PYTHONPATH=src python src/language_server_cli.py --file src_tiny/stdlib_io_random_demo.tiny diagnostics
+PYTHONPATH=src python src/language_server_cli.py --file src_tiny/class_demo.tiny workspace-symbols --query Gre
+```
+
+## Regression fixtures from src/run_all.py
+
+```bash
+python src/tiny_language.py tests/logic_example.tiny
+python src/tiny_language.py .vscode/all_features.tiny
+python src/tiny_language.py .vscode/rosetta_fibonacci.tiny
+```
+
+## Module workflows
+
+```bash
+# Check a local module tree with a relative import
+python src/tiny_language_cli.py --file my_pkg/main.tiny --backend interpreter
+
+# Cross-check with an optional search path and the native backend
+TINYPATH=../deps python src/tiny_language_cli.py --file my_pkg/main.tiny --native-backend
+```
+
+## Project scaffolding
+
+```bash
+PYTHONPATH=src python -m tiny_project_cli init my_app --vscode
+```
+
+## Everything at once
+
+The script `src/run_all.py` runs a representative selection of the demos above plus the pytest suite:
+
+```bash
+python src/run_all.py
+```
+
+Failures return a non-zero exit code, so the script works as a quick regression test in CI or editor launchers.

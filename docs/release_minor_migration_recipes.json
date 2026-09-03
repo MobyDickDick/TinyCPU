@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "releases": {
+    "1.0.0->1.1.0": {
+      "summary": "Prepare for the first minor release upgrade by documenting validation steps and placeholders for migration work.",
+      "steps": [],
+      "manual_steps": [
+        "Review release notes for any API or CLI changes introduced in 1.1.0.",
+        "Run the full test suite after upgrading to confirm behavior matches 1.0.0 expectations.",
+        "Update any automation or documentation references if the release introduced renamed commands."
+      ]
+    }
+  }
+}
