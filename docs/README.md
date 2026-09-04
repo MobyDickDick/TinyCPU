@@ -11,6 +11,7 @@ Dieses Verzeichnis enthält ausschließlich Dokumentation zur TinyCPU:
 - [`tiny_cpu_debugger_plan.md`](tiny_cpu_debugger_plan.md): abgegrenzter Vorschlag für AP 16 (symbolisches Debugging)
 - [`tiny_cpu_debugger.md`](tiny_cpu_debugger.md): Bedienung und JSON-Vertrag des symbolischen Debuggers
 - [`tiny_cpu_profiles_plan.md`](tiny_cpu_profiles_plan.md): abgegrenzter Vorschlag für AP 17 (zweites Hardwareprofil)
+- [`tiny_cpu_peripherals_plan.md`](tiny_cpu_peripherals_plan.md): abgegrenzter Vorschlag für AP 18 (Peripherie und Integration)
 - [`tiny_cpu_compatibility.md`](tiny_cpu_compatibility.md): Kompatibilitätsregeln
 - [`tiny_cpu_1_0_release_plan.md`](tiny_cpu_1_0_release_plan.md): Releaseplan für TinyCPU 1.0
 - [`tiny_cpu_1_0_release_notes.md`](tiny_cpu_1_0_release_notes.md): Release Notes für TinyCPU 1.0
@@ -36,7 +37,8 @@ Quellkopie des externen Simulators.
 Die Arbeitspakete AP 1 bis AP 17 sind abgeschlossen. AP 17 ergänzt ein
 8/8-Hardwareprofil samt Profilvertrag, Softwarewerkzeugen, eigener Schaltung,
 Kernlauf und vollständiger elektrischer ISA-/Fehlermatrix. Die gemeinsame
-Endabnahme beider Profile läuft verpflichtend bei jeder CI-Prüfung. Umfang, Kompatibilitätsfolgen,
-Abnahme und Reihenfolge stehen im
-[`tiny_cpu_profiles_plan.md`](tiny_cpu_profiles_plan.md); Peripherie und
-Integration bleiben Kandidaten für einen späteren eigenen Vorschlag.
+Endabnahme beider Profile läuft verpflichtend bei jeder CI-Prüfung. Umfang,
+Kompatibilitätsfolgen, Abnahme und Reihenfolge stehen im
+[`tiny_cpu_profiles_plan.md`](tiny_cpu_profiles_plan.md). Als nächster
+optionaler Entwicklungsschritt ist AP 18 für einen Ausgabeport und eine
+maskierbare Interruptquelle abgegrenzt; die Implementierung ist noch offen.
