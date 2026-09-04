@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1] / "src"))
-from tiny_cpu_assembler import AssemblyError, assemble
+from tiny_cpu_assembler import AssemblyError, Instruction, assemble
 from tiny_cpu_debugger import Debugger
 
 
@@ -76,6 +76,43 @@ class DebuggerTests(unittest.TestCase):
             assemble("value := 1\nvalue:\nHALT()")
         with self.assertRaisesRegex(AssemblyError, "duplicate alias"):
             assemble("value:\nvalue := 1\nHALT()")
+
+    def test_documented_builtin_instruction_aliases_are_assembled(self) -> None:
+        source = """LDC(1)
+LDA(2)
+STA(3)
+ADC(4)
+ADA(5)
+JMP(target)
+JZ(target)
+JNZ(target)
+JNEG(target)
+JER(target)
+CER()
+target:
+HLT()
+"""
+        self.assertEqual(
+            assemble(source).instructions,
+            (
+                Instruction("LOAD_CONST", 1),
+                Instruction("LOAD_ADDRESS", 2),
+                Instruction("STORE_ADDRESS", 3),
+                Instruction("ADD_CONST", 4),
+                Instruction("ADD_ADDRESS", 5),
+                Instruction("JUMP_ADDRESS", 11),
+                Instruction("JUMP_ZERO", 11),
+                Instruction("JUMP_NOT_ZERO", 11),
+                Instruction("JUMP_NEGATIVE", 11),
+                Instruction("JUMP_ERROR", 11),
+                Instruction("CLEAR_ERROR"),
+                Instruction("HALT"),
+            ),
+        )
+
+    def test_source_alias_can_override_builtin_alias(self) -> None:
+        program = assemble("ADC := SUB_CONST\nADC(2)\nHALT()")
+        self.assertEqual(program.instructions[0], Instruction("SUB_CONST", 2))
 
 
 if __name__ == "__main__": unittest.main()

@@ -17,6 +17,20 @@ from tiny_cpu_profiles import DEFAULT_PROFILE, Profile
 ROOT = Path(__file__).resolve().parents[1]
 CALL = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\s*\((.*?)\)\s*$")
 NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+BUILTIN_ALIASES = {
+    "LDC": "LOAD_CONST",
+    "LDA": "LOAD_ADDRESS",
+    "STA": "STORE_ADDRESS",
+    "ADC": "ADD_CONST",
+    "ADA": "ADD_ADDRESS",
+    "JMP": "JUMP_ADDRESS",
+    "JZ": "JUMP_ZERO",
+    "JNZ": "JUMP_NOT_ZERO",
+    "JNEG": "JUMP_NEGATIVE",
+    "JER": "JUMP_ERROR",
+    "CER": "CLEAR_ERROR",
+    "HLT": "HALT",
+}
 
 
 class AssemblyError(ValueError):
@@ -93,7 +107,10 @@ def assemble(source: str, profile: Profile = DEFAULT_PROFILE) -> Program:
         if not match:
             raise AssemblyError(f"line {line}: expected INSTRUCTION(operand)")
         name, operand_text = match.groups()
-        name = str(aliases.get(name, name))
+        # Source-defined aliases deliberately take precedence so existing
+        # programs can redefine a shorthand without shadowing a canonical
+        # instruction name.
+        name = str(aliases.get(name, BUILTIN_ALIASES.get(name, name)))
         entry = table.get(name)
         if entry is None:
             raise AssemblyError(f"line {line}: unknown instruction {name!r}")
