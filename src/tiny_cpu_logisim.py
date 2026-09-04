@@ -19,6 +19,7 @@ import sys
 import tempfile
 import urllib.request
 import xml.etree.ElementTree as ET
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from tiny_cpu_profiles import DEFAULT_PROFILE, load_profile
@@ -202,7 +203,8 @@ def _expected_halt_output(program: Program) -> str:
 
 
 def run_matrix(
-    source: Path, profile, jar: Path, java: str, output: Path, timeout: int
+    source: Path, profile, jar: Path, java: str, output: Path, timeout: int,
+    jobs: int = 1,
 ) -> int:
     matrix_path = ROOT / "hardware" / "logisim" / (
         "tinycpu-electrical-matrix-8-v1.json"
@@ -215,26 +217,39 @@ def run_matrix(
         raise LogisimError(f"{matrix_path}: duplicate fixture id")
     output.mkdir(parents=True, exist_ok=True)
     total = len(cases)
+    runs: list[tuple[int, dict[str, object], tuple[int, ...], str]] = []
     for index, case in enumerate(cases, start=1):
-        # A fresh JVM is required for every injected ROM. Without an eagerly
-        # flushed status line, CI can remain quiet long enough to look stuck.
-        print(
-            f"electrical matrix: {profile.name} [{index}/{total}] {case['id']}",
-            flush=True,
-        )
         program = _matrix_program(case, profile)
         words = tuple(case.get("raw_words") or encode_program(program))
         # Validate the fixture independently in the reference model. Logisim's
         # table logger is change-driven, so its row count is not an edge count:
         # consecutive clock edges with identical observed outputs are folded.
         _expected_edges(program)
+        runs.append((index, case, words, _expected_halt_output(program)))
+
+    def run_case(run: tuple[int, dict[str, object], tuple[int, ...], str]) -> None:
+        index, case, words, halt_output = run
+        # Report when a worker actually starts the JVM, not when work is merely
+        # queued, so the heartbeat continues throughout a parallel matrix run.
+        print(
+            f"electrical matrix: {profile.name} [{index}/{total}] {case['id']}",
+            flush=True,
+        )
         with tempfile.TemporaryDirectory(prefix="tinycpu-matrix-") as directory:
             project = Path(directory) / source.name
             autonomous_project(
                 source, project, profile.top_circuit, words,
-                halt_output=_expected_halt_output(program),
+                halt_output=halt_output,
             )
             run_trace(project, jar, java, output / f"{case['id']}.tsv", timeout)
+
+    # Each fixture owns its project and evidence file. Independent Logisim JVMs
+    # can therefore share the runner's cores instead of paying every startup
+    # cost serially. Executor shutdown still waits for all diagnostic output.
+    with ThreadPoolExecutor(max_workers=jobs) as executor:
+        futures = [executor.submit(run_case, run) for run in runs]
+        for future in futures:
+            future.result()
     return len(cases)
 
 
@@ -246,7 +261,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--trace-output", type=Path, required=True)
     parser.add_argument("--matrix-output", type=Path)
     parser.add_argument("--timeout", type=int, default=90)
-    return parser.parse_args(argv)
+    parser.add_argument("--jobs", type=int, default=1)
+    args = parser.parse_args(argv)
+    if args.jobs < 1:
+        parser.error("--jobs must be at least 1")
+    return args
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -263,7 +282,9 @@ def main(argv: list[str] | None = None) -> int:
             print(f"electrical trace: {profile.name} core", flush=True)
             run_trace(project, jar, args.java, args.trace_output, args.timeout)
         if args.matrix_output is not None:
-            count = run_matrix(source, profile, jar, args.java, args.matrix_output, args.timeout)
+            count = run_matrix(
+                source, profile, jar, args.java, args.matrix_output, args.timeout, args.jobs
+            )
             print(f"electrical matrix passed: {profile.name} ({count} fixtures)")
         print(f"electrical trace passed: {profile.name} -> {args.trace_output}")
         return 0

@@ -110,6 +110,10 @@ This heartbeat is intentional: every fixture needs a fresh JVM for its injected
 ROM, so a complete two-profile run can otherwise look stalled in a buffered CI
 log even though electrical simulation is still advancing. The last printed ID
 also identifies the fixture to inspect if its per-process timeout is reached.
+The acceptance script runs two isolated fixture JVMs concurrently by default to
+avoid paying all 61 startup costs serially. Set `LOGISIM_JOBS=1` when diagnosing
+a simulator or host that cannot safely run concurrent JVMs; larger runners may
+increase the value explicitly.
 
 ### If you already have the Logisim JAR
 
