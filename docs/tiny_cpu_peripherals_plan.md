@@ -1,6 +1,6 @@
 # Vorschlag: Peripherie und Integration
 
-**Status: geplant.** Dieses Dokument trifft die nach AP 17 noch offene
+**Status: in Umsetzung (Vertragsphase abgeschlossen).** Dieses Dokument trifft die nach AP 17 noch offene
 Produktentscheidung. Die Richtung **Peripherie und Integration** wird als
 **AP 18** ausgewählt. Das Paket ergänzt genau einen speicherabgebildeten
 Ausgabeport und eine externe, maskierbare Interruptquelle. Weitere Geräte und
@@ -40,6 +40,12 @@ Vor der Schaltungsänderung werden drei maschinenlesbare Grenzen eingefroren:
    nicht umnummeriert.
 3. Ein Trace-Schema ergänzt den Architekturzustand um Ausgaberegister,
    Interruptmaske, Pending-Bit und Rückkehradresse samt Validität.
+
+Diese erste Umsetzungsstufe liegt nun als
+`tinycpu-peripherals-16-12-v1.json`, `tinycpu-system-machine-v1.json` und
+`tinycpu-system-trace-v1.json` vor. `tiny_cpu_systems.py` lädt die Verträge
+nur nach expliziter Systemauswahl und prüft ihre Querverweise und Adressgrenzen.
+Das eingefrorene Standardprofil und seine 50 Opcodes bleiben dabei unverändert.
 
 Die Priorität an einer Taktflanke ist festgelegt: Reset vor angenommener
 Interruptanforderung, angenommener Interrupt vor normalem Fetch. Gleichzeitig

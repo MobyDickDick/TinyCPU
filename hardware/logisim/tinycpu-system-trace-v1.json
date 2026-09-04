@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "schema": "tinycpu-system-trace-v1",
+  "base_profile": "tinycpu-16-12",
+  "system": "tinycpu-peripherals-16-12-v1",
+  "base_schema": "tinycpu-trace-v1",
+  "additional_state": {
+    "output_port": {
+      "value_bits": 16,
+      "fields": [
+        "value",
+        "valid"
+      ]
+    },
+    "interrupt": {
+      "fields": [
+        "enabled",
+        "pending",
+        "in_handler"
+      ]
+    },
+    "return_address": {
+      "value_bits": 12,
+      "fields": [
+        "value",
+        "valid"
+      ]
+    }
+  },
+  "required_edge_fields": [
+    "output_port",
+    "interrupt",
+    "return_address"
+  ]
+}

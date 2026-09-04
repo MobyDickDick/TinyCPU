@@ -182,8 +182,9 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   und bewahrt ihre Tabellen getrennt auf.
 - [ ] **AP 18: Peripherie und Integration:** Der abgegrenzte Vorschlag legt
   Ausgabeport, Interruptmodell, Kompatibilitätsfolgen, Vertragsartefakte und
-  elektrische Abnahmekriterien fest. Systemprofil, Softwaremodell, Schaltung
-  und Matrix sind noch umzusetzen.
+  elektrische Abnahmekriterien fest. Systemprofil, erweitertes Maschinenformat
+  und Trace-Schema sind versioniert und werden gemeinsam validiert;
+  Softwaremodell, Schaltung und Matrix sind noch umzusetzen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

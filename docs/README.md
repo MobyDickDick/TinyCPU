@@ -41,4 +41,6 @@ Endabnahme beider Profile läuft verpflichtend bei jeder CI-Prüfung. Umfang,
 Kompatibilitätsfolgen, Abnahme und Reihenfolge stehen im
 [`tiny_cpu_profiles_plan.md`](tiny_cpu_profiles_plan.md). Als nächster
 optionaler Entwicklungsschritt ist AP 18 für einen Ausgabeport und eine
-maskierbare Interruptquelle abgegrenzt; die Implementierung ist noch offen.
+maskierbare Interruptquelle abgegrenzt. Dessen versionierte System-,
+Maschinenformat- und Trace-Verträge sind abgeschlossen; Softwaremodell und
+elektrische Implementierung sind noch offen.
