@@ -75,7 +75,10 @@ class TinyCPU:
         self.pc += 1
         name = instruction.mnemonic
         changed: set[int] = set()
-        if name.startswith("LOAD_") and not name.startswith("LOAD_ADDRESS_REGISTER_"):
+        if name.startswith("LOAD_") and name not in {
+            "LOAD_ADDRESS_REGISTER_CONST",
+            "LOAD_ADDRESS_REGISTER_ADDRESS",
+        }:
             value, valid = self._source(instruction)
             if not valid: self._error("INV")
             self._write_accumulator(value, valid)

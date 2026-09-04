@@ -67,6 +67,25 @@ class ProfileTests(unittest.TestCase):
             states.append((state["stop_reason"], state["output"], state["pc"]))
         self.assertEqual(states[0], states[1])
 
+    def test_register_address_loads_execute_in_both_profiles(self) -> None:
+        source = """LOAD_CONST(7)
+STORE_ADDRESS(21)
+STORE_ADDRESS(20)
+LOAD_ADDRESS_REGISTER_CONST(20)
+LOAD_ADDRESS_REGISTER_PLUS_OFFSET(1)
+PRINT()
+LOAD_ADDRESS_REGISTER()
+PRINT()
+HALT()
+"""
+        for name in ("tinycpu-16-12", "tinycpu-8-8"):
+            with self.subTest(profile=name):
+                debugger = Debugger(assemble(source, load_profile(name)))
+                state = debugger.continue_()
+                self.assertEqual(state["stop_reason"], "halt")
+                self.assertEqual(state["output"], [7, 7])
+                self.assertFalse(any(state["errors"].values()))
+
     def test_8_bit_overflow_uses_profile_boundary(self) -> None:
         debugger = Debugger(assemble("LOAD_CONST(127)\nADD_CONST(1)\nHALT()",
                                      load_profile("tinycpu-8-8")))
