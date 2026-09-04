@@ -92,7 +92,9 @@ exported signal unchanged, it emits no duplicate row. Consequently, the raw
 table can contain fewer than 17 data rows even though the complete countdown
 ran. Logisim's raw table contains values but no column-name header. Acceptance
 therefore relies on the autonomous clock together with `table,halt`: successful
-termination means that the specially named normal-halt output was asserted,
+termination means that the temporary runner's specially named halt output was
+asserted. That output ORs the maintained, separate `HALTED` and
+`HALTED_WITH_ERROR` event nets, so both terminal instructions stop the runner,
 whereas a CPU which never halts reaches the launcher timeout. The table row
 count is deliberately not treated as a clock-edge counter.
 

@@ -47,7 +47,7 @@ def _attributes(component: ET.Element) -> dict[str, ET.Element]:
 def autonomous_project(
     source: Path, destination: Path, top: str, rom_words: tuple[int, ...] | None = None
 ) -> None:
-    """Replace only the top-level clock/reset pins in a temporary project."""
+    """Add autonomous clock, reset, and combined halt to a temporary project."""
     tree = ET.parse(source)
     root = tree.getroot()
     circuit = next((item for item in root.findall("circuit") if item.get("name") == top), None)
@@ -60,7 +60,9 @@ def autonomous_project(
             continue
         attributes = _attributes(component)
         label = attributes.get("label")
-        if label is None or label.get("val") not in {"CLK", "RESET", "HALTED"}:
+        if label is None or label.get("val") not in {
+            "CLK", "RESET", "HALTED", "HALTED_WITH_ERROR"
+        }:
             continue
         name = label.get("val", "")
         found.add(name)
@@ -75,11 +77,28 @@ def autonomous_project(
             component.set("name", "PowerOnReset")
             for item in list(component):
                 component.remove(item)
-        else:
-            # Logisim's `table,halt` mode stops on an asserted output named halt.
-            label.set("val", "halt")
+    if {"HALTED", "HALTED_WITH_ERROR"} <= found:
+        # The maintained outputs deliberately keep normal and error halts
+        # separate. The temporary runner needs to stop for either event, so add
+        # an out-of-band OR and the specially named table,halt output.
+        halt_or = ET.SubElement(circuit, "comp", {
+            "lib": "1", "loc": "(3450,1820)", "name": "OR Gate"
+        })
+        ET.SubElement(halt_or, "a", {"name": "label", "val": "TRACE_HALT_OR"})
+        halt_pin = ET.SubElement(circuit, "comp", {
+            "lib": "0", "loc": "(3500,1820)", "name": "Pin"
+        })
+        for name, value in (
+            ("appearance", "classic"), ("facing", "west"),
+            ("label", "halt"), ("type", "output"),
+        ):
+            ET.SubElement(halt_pin, "a", {"name": name, "val": value})
+        ET.SubElement(circuit, "wire", {"from": "(3340,1810)", "to": "(3400,1810)"})
+        ET.SubElement(circuit, "wire", {"from": "(3340,1830)", "to": "(3400,1830)"})
+        ET.SubElement(circuit, "wire", {"from": "(3450,1820)", "to": "(3500,1820)"})
 
-    if found != {"CLK", "RESET", "HALTED"}:
+    required = {"CLK", "RESET", "HALTED", "HALTED_WITH_ERROR"}
+    if found != required:
         raise LogisimError(f"{source}: cannot create autonomous trace (found {sorted(found)})")
     if rom_words is not None:
         rom = next((component for owner in root.findall("circuit")

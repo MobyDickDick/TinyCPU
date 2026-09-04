@@ -96,7 +96,17 @@ class LogisimLauncherTests(unittest.TestCase):
             self.assertIn(("PowerOnReset", "(200,370)"), parts)
             labels = [a.get("val") for a in main.findall("comp/a") if a.get("name") == "label"]
             self.assertIn("halt", labels)
-            self.assertNotIn("HALTED", labels)
+            self.assertIn("HALTED", labels)
+            self.assertIn("HALTED_WITH_ERROR", labels)
+            halt_or = next(
+                c for c in main.findall("comp")
+                if c.get("name") == "OR Gate"
+                and any(a.get("val") == "TRACE_HALT_OR" for a in c.findall("a"))
+            )
+            self.assertEqual(halt_or.get("loc"), "(3450,1820)")
+            wires = {(w.get("from"), w.get("to")) for w in main.findall("wire")}
+            self.assertIn(("(3340,1810)", "(3400,1810)"), wires)
+            self.assertIn(("(3340,1830)", "(3400,1830)"), wires)
 
     def test_source_project_is_not_modified(self):
         source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
