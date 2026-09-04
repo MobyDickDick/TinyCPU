@@ -248,10 +248,18 @@ def run_matrix(
                     f"{profile.name} fixture {case['id']}: {exc}"
                 ) from exc
 
-    # Keep the acceptance script serial by default: separate Logisim JVMs still
-    # share simulator state below the project directory on hosted runners.
+    # Do not queue the whole matrix behind a single worker: ThreadPoolExecutor
+    # continues with later queued calls after an early failure. That made a
+    # failure in fixture 4 appear only after heartbeats 5 through 61. The normal
+    # serial gate must instead fail immediately at the responsible fixture.
+    if jobs == 1:
+        for run in runs:
+            run_case(run)
+        return len(cases)
+
     # Explicit parallel runs remain available for environments known to isolate
-    # that state. Executor shutdown waits for all available diagnostic output.
+    # Logisim's shared state. Executor shutdown waits for diagnostic output from
+    # work which was already started.
     with ThreadPoolExecutor(max_workers=jobs) as executor:
         futures = [executor.submit(run_case, run) for run in runs]
         for future in futures:

@@ -115,6 +115,8 @@ simulator state outside their isolated project directories on hosted runners.
 Environments known to isolate that state may opt into concurrency with, for
 example, `LOGISIM_JOBS=2`; CI deliberately prioritizes reproducibility. A
 fixture failure includes its profile and ID in the final error message.
+In the default serial mode the launcher stops immediately at that fixture; it
+does not print or execute the remaining matrix entries after a failure.
 
 ### If you already have the Logisim JAR
 

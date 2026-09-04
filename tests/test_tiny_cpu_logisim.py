@@ -207,8 +207,14 @@ class LogisimLauncherTests(unittest.TestCase):
             if output.stem == "load-const":
                 raise LogisimError("trace timed out")
 
+        attempted = []
+
+        def record_and_fail(*args):
+            attempted.append(args[3].stem)
+            fail_first(*args)
+
         with tempfile.TemporaryDirectory() as directory, patch(
-            "tiny_cpu_logisim.run_trace", side_effect=fail_first
+            "tiny_cpu_logisim.run_trace", side_effect=record_and_fail
         ), redirect_stdout(StringIO()):
             with self.assertRaisesRegex(
                 LogisimError, "tinycpu-8-8 fixture load-const: trace timed out"
@@ -221,6 +227,7 @@ class LogisimLauncherTests(unittest.TestCase):
                     Path(directory) / "evidence",
                     90,
                 )
+        self.assertEqual(attempted, ["load-const"])
 
     def test_vendored_jar_is_preferred_without_an_override(self):
         with tempfile.TemporaryDirectory() as directory:
