@@ -92,7 +92,10 @@ exported signal unchanged, it emits no duplicate row. Consequently, the raw
 table can contain fewer than 17 data rows even though the complete countdown
 ran. Logisim's raw table contains values but no column-name header. Acceptance
 therefore relies on the autonomous clock together with `table,halt`: successful
-termination means that the specially named normal-halt output was asserted,
+termination means that the temporary runner's specially named halt output was
+asserted. Before each run, the reference VM determines whether the fixture ends
+through `HALTED` or `HALTED_WITH_ERROR`; the launcher renames that expected
+event in the temporary copy. Both terminal instructions therefore stop the runner,
 whereas a CPU which never halts reaches the launcher timeout. The table row
 count is deliberately not treated as a clock-edge counter.
 
@@ -100,6 +103,29 @@ This complete command is a required CI test. A missing simulator, an incomplete
 matrix, or any electrical failure causes the run to fail; there is no silent
 fallback to a project-loading-only or Python test. The CI artifact preserves
 all tables produced before success or failure.
+
+The matrix launcher prints and immediately flushes the profile, fixture number,
+fixture count, and fixture ID before starting each isolated Logisim process.
+This heartbeat is intentional: every fixture needs a fresh JVM for its injected
+ROM, so a complete two-profile run can otherwise look stalled in a buffered CI
+log even though electrical simulation is still advancing. The last printed ID
+also identifies the fixture to inspect if its per-process timeout is reached.
+The acceptance script runs fixtures serially because Logisim JVMs can share
+simulator state outside their isolated project directories on hosted runners.
+Environments known to isolate that state may opt into concurrency with, for
+example, `LOGISIM_JOBS=2`; CI deliberately prioritizes reproducibility. A
+fixture failure includes its profile and ID in the final error message.
+In the default serial mode the launcher stops immediately at that fixture; it
+does not print or execute the remaining matrix entries after a failure.
+
+The `LOAD_ADDRESS_REGISTER_PLUS_OFFSET` acceptance case also guards a physical
+top-level junction: the address path's register-plus-offset sum must branch to
+the effective-address selector. A visually routed but electrically floating
+selector input prevents Logisim from settling and appears as a launcher
+timeout rather than as an ordinary value mismatch.
+Its decode signal must also occupy the third `ACC_MEMORY_SELECT` input. The
+immediate `LOAD_CONST` control must not drive that selector: register-offset
+loads consume memory data, while constants retain the operand path.
 
 ### If you already have the Logisim JAR
 

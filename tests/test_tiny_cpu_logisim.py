@@ -2,8 +2,11 @@ import os
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
 import xml.etree.ElementTree as ET
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
@@ -13,10 +16,12 @@ from tiny_cpu_logisim import (
     ROOT,
     LogisimError,
     _expected_edges,
+    _expected_halt_output,
     _matrix_program,
     autonomous_project,
     parse_args,
     resolve_jar,
+    run_matrix,
     run_trace,
 )
 from tiny_cpu_profiles import load_profile
@@ -51,6 +56,11 @@ class LogisimLauncherTests(unittest.TestCase):
         profile = load_profile(args.profile)
         self.assertEqual(profile.name, "tinycpu-16-12")
         self.assertEqual(profile.circuit, "TinyCPU.circ")
+        self.assertEqual(args.jobs, 1)
+
+    def test_cli_rejects_nonpositive_job_count(self):
+        with self.assertRaises(SystemExit):
+            parse_args(["--trace-output", "trace.tsv", "--jobs", "0"])
 
     def test_combined_gate_attempts_both_profiles_after_a_failure(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -79,6 +89,7 @@ class LogisimLauncherTests(unittest.TestCase):
             self.assertEqual(result.returncode, 1)
             self.assertIn("--profile tinycpu-16-12", calls)
             self.assertIn("--profile tinycpu-8-8", calls)
+            self.assertIn("--jobs 1", calls)
             self.assertIn("tinycpu-16-12", result.stderr)
 
     def test_autonomous_project_uses_profile_specific_circuit(self):
@@ -93,7 +104,22 @@ class LogisimLauncherTests(unittest.TestCase):
             self.assertIn(("PowerOnReset", "(200,370)"), parts)
             labels = [a.get("val") for a in main.findall("comp/a") if a.get("name") == "label"]
             self.assertIn("halt", labels)
+            self.assertIn("HALTED_WITH_ERROR", labels)
             self.assertNotIn("HALTED", labels)
+
+    def test_autonomous_project_can_stop_on_error_halt(self):
+        source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / source.name
+            autonomous_project(
+                source, target, "TinyCPUMain", halt_output="HALTED_WITH_ERROR"
+            )
+            root = ET.parse(target).getroot()
+            main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+            labels = [a.get("val") for a in main.findall("comp/a") if a.get("name") == "label"]
+            self.assertIn("halt", labels)
+            self.assertIn("HALTED", labels)
+            self.assertNotIn("HALTED_WITH_ERROR", labels)
 
     def test_source_project_is_not_modified(self):
         source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
@@ -101,6 +127,26 @@ class LogisimLauncherTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             autonomous_project(source, Path(directory) / "copy.circ", "TinyCPUMain")
         self.assertEqual(before, source.read_bytes())
+
+    def test_register_offset_sum_reaches_effective_address_selector(self):
+        for name in ("TinyCPU.circ", "TinyCPU-8-8.circ"):
+            root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
+            main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+            wires = {(w.get("from"), w.get("to")) for w in main.findall("wire")}
+            self.assertIn(
+                ("(2280,2130)", "(2470,2130)"), wires,
+                f"{name} leaves the register-plus-offset selector floating",
+            )
+
+    def test_register_offset_load_selects_memory_data(self):
+        for name in ("TinyCPU.circ", "TinyCPU-8-8.circ"):
+            root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
+            decode = next(c for c in root.findall("circuit") if c.get("name") == "DecodeSignals")
+            wires = {(w.get("from"), w.get("to")) for w in decode.findall("wire")}
+            self.assertNotIn(("(600,100)", "(710,100)"), wires)
+            self.assertIn(("(570,160)", "(680,160)"), wires)
+            self.assertIn(("(680,100)", "(680,160)"), wires)
+            self.assertIn(("(680,100)", "(710,100)"), wires)
 
     def test_matrix_rom_is_injected_only_into_temporary_project(self):
         source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
@@ -121,6 +167,87 @@ class LogisimLauncherTests(unittest.TestCase):
         program = _matrix_program(case, profile)
         self.assertEqual(program.instructions[0].mnemonic, "__ILLEGAL__")
         self.assertEqual(_expected_edges(program), 1)
+        self.assertEqual(_expected_halt_output(program), "HALTED_WITH_ERROR")
+
+    def test_matrix_reports_progress_before_each_electrical_run(self):
+        profile = load_profile("tinycpu-8-8")
+        output = StringIO()
+        with tempfile.TemporaryDirectory() as directory, patch(
+            "tiny_cpu_logisim.run_trace"
+        ) as trace, redirect_stdout(output):
+            count = run_matrix(
+                ROOT / "hardware/logisim/TinyCPU-8-8.circ",
+                profile,
+                Path("logisim.jar"),
+                "java",
+                Path(directory) / "evidence",
+                90,
+            )
+
+        lines = output.getvalue().splitlines()
+        self.assertEqual(len(lines), count)
+        self.assertEqual(trace.call_count, count)
+        self.assertIn(f"[1/{count}]", lines[0])
+        self.assertIn(f"[{count}/{count}]", lines[-1])
+        self.assertIn("tinycpu-8-8", lines[0])
+
+    def test_matrix_can_run_two_electrical_fixtures_concurrently(self):
+        profile = load_profile("tinycpu-8-8")
+        barrier = threading.Barrier(2)
+        lock = threading.Lock()
+        started = 0
+
+        def synchronized_trace(*_args):
+            nonlocal started
+            with lock:
+                started += 1
+                should_wait = started <= 2
+            if should_wait:
+                barrier.wait(timeout=5)
+
+        with tempfile.TemporaryDirectory() as directory, patch(
+            "tiny_cpu_logisim.run_trace", side_effect=synchronized_trace
+        ) as trace, redirect_stdout(StringIO()):
+            count = run_matrix(
+                ROOT / "hardware/logisim/TinyCPU-8-8.circ",
+                profile,
+                Path("logisim.jar"),
+                "java",
+                Path(directory) / "evidence",
+                90,
+                jobs=2,
+            )
+
+        self.assertEqual(trace.call_count, count)
+
+    def test_matrix_error_identifies_the_failing_fixture(self):
+        profile = load_profile("tinycpu-8-8")
+
+        def fail_first(_project, _jar, _java, output, _timeout):
+            if output.stem == "load-const":
+                raise LogisimError("trace timed out")
+
+        attempted = []
+
+        def record_and_fail(*args):
+            attempted.append(args[3].stem)
+            fail_first(*args)
+
+        with tempfile.TemporaryDirectory() as directory, patch(
+            "tiny_cpu_logisim.run_trace", side_effect=record_and_fail
+        ), redirect_stdout(StringIO()):
+            with self.assertRaisesRegex(
+                LogisimError, "tinycpu-8-8 fixture load-const: trace timed out"
+            ):
+                run_matrix(
+                    ROOT / "hardware/logisim/TinyCPU-8-8.circ",
+                    profile,
+                    Path("logisim.jar"),
+                    "java",
+                    Path(directory) / "evidence",
+                    90,
+                )
+        self.assertEqual(attempted, ["load-const"])
 
     def test_vendored_jar_is_preferred_without_an_override(self):
         with tempfile.TemporaryDirectory() as directory:

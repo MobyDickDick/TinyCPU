@@ -19,6 +19,7 @@ import sys
 import tempfile
 import urllib.request
 import xml.etree.ElementTree as ET
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from tiny_cpu_profiles import DEFAULT_PROFILE, load_profile
@@ -45,9 +46,12 @@ def _attributes(component: ET.Element) -> dict[str, ET.Element]:
 
 
 def autonomous_project(
-    source: Path, destination: Path, top: str, rom_words: tuple[int, ...] | None = None
+    source: Path, destination: Path, top: str, rom_words: tuple[int, ...] | None = None,
+    halt_output: str = "HALTED",
 ) -> None:
-    """Replace only the top-level clock/reset pins in a temporary project."""
+    """Add autonomous inputs and select the expected halt in a temporary project."""
+    if halt_output not in {"HALTED", "HALTED_WITH_ERROR"}:
+        raise LogisimError(f"unsupported halt output: {halt_output!r}")
     tree = ET.parse(source)
     root = tree.getroot()
     circuit = next((item for item in root.findall("circuit") if item.get("name") == top), None)
@@ -60,7 +64,9 @@ def autonomous_project(
             continue
         attributes = _attributes(component)
         label = attributes.get("label")
-        if label is None or label.get("val") not in {"CLK", "RESET", "HALTED"}:
+        if label is None or label.get("val") not in {
+            "CLK", "RESET", "HALTED", "HALTED_WITH_ERROR"
+        }:
             continue
         name = label.get("val", "")
         found.add(name)
@@ -75,11 +81,12 @@ def autonomous_project(
             component.set("name", "PowerOnReset")
             for item in list(component):
                 component.remove(item)
-        else:
-            # Logisim's `table,halt` mode stops on an asserted output named halt.
+        elif name == halt_output:
+            # Logisim's table,halt mode stops on an asserted output named halt.
             label.set("val", "halt")
 
-    if found != {"CLK", "RESET", "HALTED"}:
+    required = {"CLK", "RESET", "HALTED", "HALTED_WITH_ERROR"}
+    if found != required:
         raise LogisimError(f"{source}: cannot create autonomous trace (found {sorted(found)})")
     if rom_words is not None:
         rom = next((component for owner in root.findall("circuit")
@@ -184,8 +191,20 @@ def _expected_edges(program: Program) -> int:
     return edges
 
 
+def _expected_halt_output(program: Program) -> str:
+    """Return the terminal event output selected by the reference execution."""
+    cpu = TinyCPU(program)
+    limit = max(64, len(program.instructions) * 8)
+    for _ in range(limit + 1):
+        if cpu.halted:
+            return "HALTED_WITH_ERROR" if cpu.halt_error else "HALTED"
+        cpu.step()
+    raise LogisimError("matrix fixture does not halt in the reference VM")
+
+
 def run_matrix(
-    source: Path, profile, jar: Path, java: str, output: Path, timeout: int
+    source: Path, profile, jar: Path, java: str, output: Path, timeout: int,
+    jobs: int = 1,
 ) -> int:
     matrix_path = ROOT / "hardware" / "logisim" / (
         "tinycpu-electrical-matrix-8-v1.json"
@@ -197,17 +216,54 @@ def run_matrix(
     if len(ids) != len(set(ids)):
         raise LogisimError(f"{matrix_path}: duplicate fixture id")
     output.mkdir(parents=True, exist_ok=True)
-    for case in cases:
+    total = len(cases)
+    runs: list[tuple[int, dict[str, object], tuple[int, ...], str]] = []
+    for index, case in enumerate(cases, start=1):
         program = _matrix_program(case, profile)
         words = tuple(case.get("raw_words") or encode_program(program))
         # Validate the fixture independently in the reference model. Logisim's
         # table logger is change-driven, so its row count is not an edge count:
         # consecutive clock edges with identical observed outputs are folded.
         _expected_edges(program)
+        runs.append((index, case, words, _expected_halt_output(program)))
+
+    def run_case(run: tuple[int, dict[str, object], tuple[int, ...], str]) -> None:
+        index, case, words, halt_output = run
+        # Report when a worker actually starts the JVM, not when work is merely
+        # queued, so the heartbeat continues throughout a parallel matrix run.
+        print(
+            f"electrical matrix: {profile.name} [{index}/{total}] {case['id']}",
+            flush=True,
+        )
         with tempfile.TemporaryDirectory(prefix="tinycpu-matrix-") as directory:
             project = Path(directory) / source.name
-            autonomous_project(source, project, profile.top_circuit, words)
-            run_trace(project, jar, java, output / f"{case['id']}.tsv", timeout)
+            autonomous_project(
+                source, project, profile.top_circuit, words,
+                halt_output=halt_output,
+            )
+            try:
+                run_trace(project, jar, java, output / f"{case['id']}.tsv", timeout)
+            except LogisimError as exc:
+                raise LogisimError(
+                    f"{profile.name} fixture {case['id']}: {exc}"
+                ) from exc
+
+    # Do not queue the whole matrix behind a single worker: ThreadPoolExecutor
+    # continues with later queued calls after an early failure. That made a
+    # failure in fixture 4 appear only after heartbeats 5 through 61. The normal
+    # serial gate must instead fail immediately at the responsible fixture.
+    if jobs == 1:
+        for run in runs:
+            run_case(run)
+        return len(cases)
+
+    # Explicit parallel runs remain available for environments known to isolate
+    # Logisim's shared state. Executor shutdown waits for diagnostic output from
+    # work which was already started.
+    with ThreadPoolExecutor(max_workers=jobs) as executor:
+        futures = [executor.submit(run_case, run) for run in runs]
+        for future in futures:
+            future.result()
     return len(cases)
 
 
@@ -219,7 +275,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--trace-output", type=Path, required=True)
     parser.add_argument("--matrix-output", type=Path)
     parser.add_argument("--timeout", type=int, default=90)
-    return parser.parse_args(argv)
+    parser.add_argument("--jobs", type=int, default=1)
+    args = parser.parse_args(argv)
+    if args.jobs < 1:
+        parser.error("--jobs must be at least 1")
+    return args
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -233,9 +293,12 @@ def main(argv: list[str] | None = None) -> int:
         with tempfile.TemporaryDirectory(prefix="tinycpu-logisim-") as directory:
             project = Path(directory) / source.name
             autonomous_project(source, project, profile.top_circuit)
+            print(f"electrical trace: {profile.name} core", flush=True)
             run_trace(project, jar, args.java, args.trace_output, args.timeout)
         if args.matrix_output is not None:
-            count = run_matrix(source, profile, jar, args.java, args.matrix_output, args.timeout)
+            count = run_matrix(
+                source, profile, jar, args.java, args.matrix_output, args.timeout, args.jobs
+            )
             print(f"electrical matrix passed: {profile.name} ({count} fixtures)")
         print(f"electrical trace passed: {profile.name} -> {args.trace_output}")
         return 0
