@@ -89,7 +89,7 @@ class LogisimLauncherTests(unittest.TestCase):
             self.assertEqual(result.returncode, 1)
             self.assertIn("--profile tinycpu-16-12", calls)
             self.assertIn("--profile tinycpu-8-8", calls)
-            self.assertIn("--jobs 2", calls)
+            self.assertIn("--jobs 1", calls)
             self.assertIn("tinycpu-16-12", result.stderr)
 
     def test_autonomous_project_uses_profile_specific_circuit(self):
@@ -199,6 +199,28 @@ class LogisimLauncherTests(unittest.TestCase):
             )
 
         self.assertEqual(trace.call_count, count)
+
+    def test_matrix_error_identifies_the_failing_fixture(self):
+        profile = load_profile("tinycpu-8-8")
+
+        def fail_first(_project, _jar, _java, output, _timeout):
+            if output.stem == "load-const":
+                raise LogisimError("trace timed out")
+
+        with tempfile.TemporaryDirectory() as directory, patch(
+            "tiny_cpu_logisim.run_trace", side_effect=fail_first
+        ), redirect_stdout(StringIO()):
+            with self.assertRaisesRegex(
+                LogisimError, "tinycpu-8-8 fixture load-const: trace timed out"
+            ):
+                run_matrix(
+                    ROOT / "hardware/logisim/TinyCPU-8-8.circ",
+                    profile,
+                    Path("logisim.jar"),
+                    "java",
+                    Path(directory) / "evidence",
+                    90,
+                )
 
     def test_vendored_jar_is_preferred_without_an_override(self):
         with tempfile.TemporaryDirectory() as directory:

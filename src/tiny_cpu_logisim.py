@@ -241,11 +241,17 @@ def run_matrix(
                 source, project, profile.top_circuit, words,
                 halt_output=halt_output,
             )
-            run_trace(project, jar, java, output / f"{case['id']}.tsv", timeout)
+            try:
+                run_trace(project, jar, java, output / f"{case['id']}.tsv", timeout)
+            except LogisimError as exc:
+                raise LogisimError(
+                    f"{profile.name} fixture {case['id']}: {exc}"
+                ) from exc
 
-    # Each fixture owns its project and evidence file. Independent Logisim JVMs
-    # can therefore share the runner's cores instead of paying every startup
-    # cost serially. Executor shutdown still waits for all diagnostic output.
+    # Keep the acceptance script serial by default: separate Logisim JVMs still
+    # share simulator state below the project directory on hosted runners.
+    # Explicit parallel runs remain available for environments known to isolate
+    # that state. Executor shutdown waits for all available diagnostic output.
     with ThreadPoolExecutor(max_workers=jobs) as executor:
         futures = [executor.submit(run_case, run) for run in runs]
         for future in futures:

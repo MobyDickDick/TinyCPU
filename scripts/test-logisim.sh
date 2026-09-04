@@ -14,7 +14,7 @@ mkdir -p "$OUTPUT"
 for profile in "${profiles[@]}"; do
   args=(--profile "$profile" --trace-output "$OUTPUT/$profile/core-trace.tsv"
         --matrix-output "$OUTPUT/$profile/isa-matrix"
-        --jobs "${LOGISIM_JOBS:-2}")
+        --jobs "${LOGISIM_JOBS:-1}")
   if [[ -n "${LOGISIM_JAR:-}" ]]; then
     args+=(--jar "$LOGISIM_JAR")
   fi
