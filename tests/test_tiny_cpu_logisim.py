@@ -138,6 +138,16 @@ class LogisimLauncherTests(unittest.TestCase):
                 f"{name} leaves the register-plus-offset selector floating",
             )
 
+    def test_register_offset_load_selects_memory_data(self):
+        for name in ("TinyCPU.circ", "TinyCPU-8-8.circ"):
+            root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
+            decode = next(c for c in root.findall("circuit") if c.get("name") == "DecodeSignals")
+            wires = {(w.get("from"), w.get("to")) for w in decode.findall("wire")}
+            self.assertNotIn(("(600,100)", "(710,100)"), wires)
+            self.assertIn(("(570,160)", "(680,160)"), wires)
+            self.assertIn(("(680,100)", "(680,160)"), wires)
+            self.assertIn(("(680,100)", "(710,100)"), wires)
+
     def test_matrix_rom_is_injected_only_into_temporary_project(self):
         source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
         before = source.read_bytes()

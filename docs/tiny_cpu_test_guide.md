@@ -123,6 +123,9 @@ top-level junction: the address path's register-plus-offset sum must branch to
 the effective-address selector. A visually routed but electrically floating
 selector input prevents Logisim from settling and appears as a launcher
 timeout rather than as an ordinary value mismatch.
+Its decode signal must also occupy the third `ACC_MEMORY_SELECT` input. The
+immediate `LOAD_CONST` control must not drive that selector: register-offset
+loads consume memory data, while constants retain the operand path.
 
 ### If you already have the Logisim JAR
 
