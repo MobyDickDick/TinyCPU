@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "system": "tinycpu-peripherals-16-12-v1",
+  "base_profile": "tinycpu-16-12",
+  "machine_format": "tinycpu-system-machine-v1.json",
+  "machine_format_id": "tinycpu-system-machine-v1",
+  "trace_schema": "tinycpu-system-trace-v1.json",
+  "io": {
+    "output_address": 4095,
+    "data_bits": 16,
+    "reset_value": 0,
+    "reset_valid": false,
+    "ram_write_through": false
+  },
+  "interrupt": {
+    "request": "rising_edge",
+    "vector": 4080,
+    "accepted_at": "instruction_boundary",
+    "enabled_after_reset": false,
+    "pending_after_reset": false,
+    "disable_on_accept": true,
+    "restore_mask_on_return": true,
+    "nested": false
+  },
+  "return_address": {
+    "bits": 12,
+    "reset_value": 0,
+    "reset_valid": false
+  },
+  "priority": [
+    "reset",
+    "interrupt_accept",
+    "instruction"
+  ]
+}
