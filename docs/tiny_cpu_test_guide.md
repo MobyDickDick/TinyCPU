@@ -93,8 +93,9 @@ table can contain fewer than 17 data rows even though the complete countdown
 ran. Logisim's raw table contains values but no column-name header. Acceptance
 therefore relies on the autonomous clock together with `table,halt`: successful
 termination means that the temporary runner's specially named halt output was
-asserted. That output ORs the maintained, separate `HALTED` and
-`HALTED_WITH_ERROR` event nets, so both terminal instructions stop the runner,
+asserted. Before each run, the reference VM determines whether the fixture ends
+through `HALTED` or `HALTED_WITH_ERROR`; the launcher renames that expected
+event in the temporary copy. Both terminal instructions therefore stop the runner,
 whereas a CPU which never halts reaches the launcher timeout. The table row
 count is deliberately not treated as a clock-edge counter.
 

@@ -15,6 +15,7 @@ from tiny_cpu_logisim import (
     ROOT,
     LogisimError,
     _expected_edges,
+    _expected_halt_output,
     _matrix_program,
     autonomous_project,
     parse_args,
@@ -96,17 +97,22 @@ class LogisimLauncherTests(unittest.TestCase):
             self.assertIn(("PowerOnReset", "(200,370)"), parts)
             labels = [a.get("val") for a in main.findall("comp/a") if a.get("name") == "label"]
             self.assertIn("halt", labels)
-            self.assertIn("HALTED", labels)
             self.assertIn("HALTED_WITH_ERROR", labels)
-            halt_or = next(
-                c for c in main.findall("comp")
-                if c.get("name") == "OR Gate"
-                and any(a.get("val") == "TRACE_HALT_OR" for a in c.findall("a"))
+            self.assertNotIn("HALTED", labels)
+
+    def test_autonomous_project_can_stop_on_error_halt(self):
+        source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / source.name
+            autonomous_project(
+                source, target, "TinyCPUMain", halt_output="HALTED_WITH_ERROR"
             )
-            self.assertEqual(halt_or.get("loc"), "(3450,1820)")
-            wires = {(w.get("from"), w.get("to")) for w in main.findall("wire")}
-            self.assertIn(("(3340,1810)", "(3400,1810)"), wires)
-            self.assertIn(("(3340,1830)", "(3400,1830)"), wires)
+            root = ET.parse(target).getroot()
+            main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+            labels = [a.get("val") for a in main.findall("comp/a") if a.get("name") == "label"]
+            self.assertIn("halt", labels)
+            self.assertIn("HALTED", labels)
+            self.assertNotIn("HALTED_WITH_ERROR", labels)
 
     def test_source_project_is_not_modified(self):
         source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
@@ -134,6 +140,7 @@ class LogisimLauncherTests(unittest.TestCase):
         program = _matrix_program(case, profile)
         self.assertEqual(program.instructions[0].mnemonic, "__ILLEGAL__")
         self.assertEqual(_expected_edges(program), 1)
+        self.assertEqual(_expected_halt_output(program), "HALTED_WITH_ERROR")
 
     def test_matrix_reports_progress_before_each_electrical_run(self):
         profile = load_profile("tinycpu-8-8")

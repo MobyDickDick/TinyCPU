@@ -45,9 +45,12 @@ def _attributes(component: ET.Element) -> dict[str, ET.Element]:
 
 
 def autonomous_project(
-    source: Path, destination: Path, top: str, rom_words: tuple[int, ...] | None = None
+    source: Path, destination: Path, top: str, rom_words: tuple[int, ...] | None = None,
+    halt_output: str = "HALTED",
 ) -> None:
-    """Add autonomous clock, reset, and combined halt to a temporary project."""
+    """Add autonomous inputs and select the expected halt in a temporary project."""
+    if halt_output not in {"HALTED", "HALTED_WITH_ERROR"}:
+        raise LogisimError(f"unsupported halt output: {halt_output!r}")
     tree = ET.parse(source)
     root = tree.getroot()
     circuit = next((item for item in root.findall("circuit") if item.get("name") == top), None)
@@ -77,25 +80,9 @@ def autonomous_project(
             component.set("name", "PowerOnReset")
             for item in list(component):
                 component.remove(item)
-    if {"HALTED", "HALTED_WITH_ERROR"} <= found:
-        # The maintained outputs deliberately keep normal and error halts
-        # separate. The temporary runner needs to stop for either event, so add
-        # an out-of-band OR and the specially named table,halt output.
-        halt_or = ET.SubElement(circuit, "comp", {
-            "lib": "1", "loc": "(3450,1820)", "name": "OR Gate"
-        })
-        ET.SubElement(halt_or, "a", {"name": "label", "val": "TRACE_HALT_OR"})
-        halt_pin = ET.SubElement(circuit, "comp", {
-            "lib": "0", "loc": "(3500,1820)", "name": "Pin"
-        })
-        for name, value in (
-            ("appearance", "classic"), ("facing", "west"),
-            ("label", "halt"), ("type", "output"),
-        ):
-            ET.SubElement(halt_pin, "a", {"name": name, "val": value})
-        ET.SubElement(circuit, "wire", {"from": "(3340,1810)", "to": "(3400,1810)"})
-        ET.SubElement(circuit, "wire", {"from": "(3340,1830)", "to": "(3400,1830)"})
-        ET.SubElement(circuit, "wire", {"from": "(3450,1820)", "to": "(3500,1820)"})
+        elif name == halt_output:
+            # Logisim's table,halt mode stops on an asserted output named halt.
+            label.set("val", "halt")
 
     required = {"CLK", "RESET", "HALTED", "HALTED_WITH_ERROR"}
     if found != required:
@@ -203,6 +190,17 @@ def _expected_edges(program: Program) -> int:
     return edges
 
 
+def _expected_halt_output(program: Program) -> str:
+    """Return the terminal event output selected by the reference execution."""
+    cpu = TinyCPU(program)
+    limit = max(64, len(program.instructions) * 8)
+    for _ in range(limit + 1):
+        if cpu.halted:
+            return "HALTED_WITH_ERROR" if cpu.halt_error else "HALTED"
+        cpu.step()
+    raise LogisimError("matrix fixture does not halt in the reference VM")
+
+
 def run_matrix(
     source: Path, profile, jar: Path, java: str, output: Path, timeout: int
 ) -> int:
@@ -232,7 +230,10 @@ def run_matrix(
         _expected_edges(program)
         with tempfile.TemporaryDirectory(prefix="tinycpu-matrix-") as directory:
             project = Path(directory) / source.name
-            autonomous_project(source, project, profile.top_circuit, words)
+            autonomous_project(
+                source, project, profile.top_circuit, words,
+                halt_output=_expected_halt_output(program),
+            )
             run_trace(project, jar, java, output / f"{case['id']}.tsv", timeout)
     return len(cases)
 
@@ -259,6 +260,7 @@ def main(argv: list[str] | None = None) -> int:
         with tempfile.TemporaryDirectory(prefix="tinycpu-logisim-") as directory:
             project = Path(directory) / source.name
             autonomous_project(source, project, profile.top_circuit)
+            print(f"electrical trace: {profile.name} core", flush=True)
             run_trace(project, jar, args.java, args.trace_output, args.timeout)
         if args.matrix_output is not None:
             count = run_matrix(source, profile, jar, args.java, args.matrix_output, args.timeout)
