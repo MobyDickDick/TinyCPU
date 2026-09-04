@@ -128,6 +128,16 @@ class LogisimLauncherTests(unittest.TestCase):
             autonomous_project(source, Path(directory) / "copy.circ", "TinyCPUMain")
         self.assertEqual(before, source.read_bytes())
 
+    def test_register_offset_sum_reaches_effective_address_selector(self):
+        for name in ("TinyCPU.circ", "TinyCPU-8-8.circ"):
+            root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
+            main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+            wires = {(w.get("from"), w.get("to")) for w in main.findall("wire")}
+            self.assertIn(
+                ("(2280,2130)", "(2470,2130)"), wires,
+                f"{name} leaves the register-plus-offset selector floating",
+            )
+
     def test_matrix_rom_is_injected_only_into_temporary_project(self):
         source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
         before = source.read_bytes()

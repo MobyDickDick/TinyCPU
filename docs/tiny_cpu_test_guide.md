@@ -118,6 +118,12 @@ fixture failure includes its profile and ID in the final error message.
 In the default serial mode the launcher stops immediately at that fixture; it
 does not print or execute the remaining matrix entries after a failure.
 
+The `LOAD_ADDRESS_REGISTER_PLUS_OFFSET` acceptance case also guards a physical
+top-level junction: the address path's register-plus-offset sum must branch to
+the effective-address selector. A visually routed but electrically floating
+selector input prevents Logisim from settling and appears as a launcher
+timeout rather than as an ordinary value mismatch.
+
 ### If you already have the Logisim JAR
 
 Pass its path explicitly instead of downloading it:
