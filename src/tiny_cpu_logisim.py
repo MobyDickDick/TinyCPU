@@ -197,7 +197,14 @@ def run_matrix(
     if len(ids) != len(set(ids)):
         raise LogisimError(f"{matrix_path}: duplicate fixture id")
     output.mkdir(parents=True, exist_ok=True)
-    for case in cases:
+    total = len(cases)
+    for index, case in enumerate(cases, start=1):
+        # A fresh JVM is required for every injected ROM. Without an eagerly
+        # flushed status line, CI can remain quiet long enough to look stuck.
+        print(
+            f"electrical matrix: {profile.name} [{index}/{total}] {case['id']}",
+            flush=True,
+        )
         program = _matrix_program(case, profile)
         words = tuple(case.get("raw_words") or encode_program(program))
         # Validate the fixture independently in the reference model. Logisim's

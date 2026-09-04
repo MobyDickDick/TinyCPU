@@ -4,6 +4,8 @@ import sys
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
@@ -17,6 +19,7 @@ from tiny_cpu_logisim import (
     autonomous_project,
     parse_args,
     resolve_jar,
+    run_matrix,
     run_trace,
 )
 from tiny_cpu_profiles import load_profile
@@ -121,6 +124,28 @@ class LogisimLauncherTests(unittest.TestCase):
         program = _matrix_program(case, profile)
         self.assertEqual(program.instructions[0].mnemonic, "__ILLEGAL__")
         self.assertEqual(_expected_edges(program), 1)
+
+    def test_matrix_reports_progress_before_each_electrical_run(self):
+        profile = load_profile("tinycpu-8-8")
+        output = StringIO()
+        with tempfile.TemporaryDirectory() as directory, patch(
+            "tiny_cpu_logisim.run_trace"
+        ) as trace, redirect_stdout(output):
+            count = run_matrix(
+                ROOT / "hardware/logisim/TinyCPU-8-8.circ",
+                profile,
+                Path("logisim.jar"),
+                "java",
+                Path(directory) / "evidence",
+                90,
+            )
+
+        lines = output.getvalue().splitlines()
+        self.assertEqual(len(lines), count)
+        self.assertEqual(trace.call_count, count)
+        self.assertIn(f"[1/{count}]", lines[0])
+        self.assertIn(f"[{count}/{count}]", lines[-1])
+        self.assertIn("tinycpu-8-8", lines[0])
 
     def test_vendored_jar_is_preferred_without_an_override(self):
         with tempfile.TemporaryDirectory() as directory:

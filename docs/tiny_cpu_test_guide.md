@@ -101,6 +101,13 @@ matrix, or any electrical failure causes the run to fail; there is no silent
 fallback to a project-loading-only or Python test. The CI artifact preserves
 all tables produced before success or failure.
 
+The matrix launcher prints and immediately flushes the profile, fixture number,
+fixture count, and fixture ID before starting each isolated Logisim process.
+This heartbeat is intentional: every fixture needs a fresh JVM for its injected
+ROM, so a complete two-profile run can otherwise look stalled in a buffered CI
+log even though electrical simulation is still advancing. The last printed ID
+also identifies the fixture to inspect if its per-process timeout is reached.
+
 ### If you already have the Logisim JAR
 
 Pass its path explicitly instead of downloading it:
