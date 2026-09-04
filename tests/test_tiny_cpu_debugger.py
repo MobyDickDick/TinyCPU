@@ -71,5 +71,11 @@ class DebuggerTests(unittest.TestCase):
         with self.assertRaisesRegex(AssemblyError, "requires an operand"):
             assemble("ADD_ADDRESS()")
 
+    def test_labels_and_aliases_cannot_redefine_each_other(self) -> None:
+        with self.assertRaisesRegex(AssemblyError, "duplicate label"):
+            assemble("value := 1\nvalue:\nHALT()")
+        with self.assertRaisesRegex(AssemblyError, "duplicate alias"):
+            assemble("value:\nvalue := 1\nHALT()")
+
 
 if __name__ == "__main__": unittest.main()

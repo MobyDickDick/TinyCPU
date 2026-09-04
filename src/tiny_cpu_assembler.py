@@ -69,13 +69,13 @@ def assemble(source: str, profile: Profile = DEFAULT_PROFILE) -> Program:
     for line, text in _lines(source):
         if text.endswith(":"):
             label = text[:-1].strip()
-            if not NAME.fullmatch(label) or label in labels:
+            if not NAME.fullmatch(label) or label in labels or label in aliases:
                 raise AssemblyError(f"line {line}: invalid or duplicate label {label!r}")
             labels[label] = pc
             pending.append(label)
         elif ":=" in text:
             name, value = (part.strip() for part in text.split(":=", 1))
-            if not NAME.fullmatch(name) or name in aliases:
+            if not NAME.fullmatch(name) or name in aliases or name in labels:
                 raise AssemblyError(f"line {line}: invalid or duplicate alias {name!r}")
             try:
                 aliases[name] = int(value, 0)
