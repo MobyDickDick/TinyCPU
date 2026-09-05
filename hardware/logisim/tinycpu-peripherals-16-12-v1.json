@@ -30,6 +30,28 @@
         "output_port": "address_match",
         "ram": "address_mismatch"
       }
+    },
+    "interrupt_controller": {
+      "circuit": "InterruptController",
+      "address_bits": 12,
+      "vector": 4080,
+      "request_edge": "rising_edge",
+      "acceptance": "instruction_boundary",
+      "registers": {
+        "request_level": 1,
+        "enabled": 1,
+        "pending": 1,
+        "in_handler": 1,
+        "return_address": 12,
+        "return_address_valid": 1
+      },
+      "priority": [
+        "reset",
+        "interrupt_accept",
+        "instruction"
+      ],
+      "disable_on_accept": true,
+      "restore_mask_on_return": true
     }
   },
   "public_pins": {

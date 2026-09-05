@@ -97,6 +97,26 @@ class CircuitVerificationTests(unittest.TestCase):
                                         "OutputMemoryPath routing"):
                 VERIFY.verify_system_circuit()
 
+    def test_ap18_interrupt_controller_owns_interrupt_state(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
+        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
+            'label" val="REQUEST_LEVEL"', 'label" val="BROKEN_REQUEST_LEVEL"', 1),
+            encoding="utf-8",
+        )
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        original = VERIFY.LOGISIM
+        VERIFY.LOGISIM = temporary / "logisim"
+        self.addCleanup(setattr, VERIFY, "LOGISIM", original)
+        with mock.patch.object(VERIFY, "load_system_profile",
+                               return_value=replace(system, circuit_path=circuit)):
+            with self.assertRaisesRegex(VERIFY.VerificationError,
+                                        "InterruptController registers"):
+                VERIFY.verify_system_circuit()
+
     def test_8_8_circuit_rejects_a_legacy_width(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"

@@ -1,6 +1,6 @@
 # Vorschlag: Peripherie und Integration
 
-**Status: in Umsetzung (Speicherpfadgrenze für den Ausgabeport eingecheckt).** Dieses Dokument trifft die nach AP 17 noch offene
+**Status: in Umsetzung (Interruptsteuerungsgrenze eingecheckt).** Dieses Dokument trifft die nach AP 17 noch offene
 Produktentscheidung. Die Richtung **Peripherie und Integration** wird als
 **AP 18** ausgewählt. Das Paket ergänzt genau einen speicherabgebildeten
 Ausgabeport und eine externe, maskierbare Interruptquelle. Weitere Geräte und
@@ -96,8 +96,15 @@ die beiden getrennten Zustandsregister ab. Der neue Baustein
 ausschließlich Adresse `0xfff`, trennt Port- und RAM-Schreibfreigabe und beschreibt die Auswahl von Wert und Validität beim Lesen.
 Der Komponentenvertrag und der Offline-Prüfer sichern dabei Adress- und
 Datenbreiten, die reservierte Adresse sowie die getrennten Lese- und
-Schreibpfade ab. Die Einfügung dieser Grenze in die vollständige CPU und die
-Interruptsteuerung folgen weiterhin innerhalb von Schritt 3.
+Schreibpfade ab. Der Baustein `InterruptController` friert zusätzlich die
+elektrische Interruptsteuerungsgrenze ein: Seine Pins führen Flankenanforderung,
+Instruktionsgrenze, Maskenbefehle, Rückkehrbefehl und nächsten PC sowie Annahme,
+Sprungziel, sämtliche Interruptzustände und den Fehler einer illegalen
+Rückkehr. Sechs getrennte Register besitzen Request-Pegel, Maske, Pending-Bit,
+Handlerzustand und Rückkehradresse samt Validität; Vektor, Breiten und die
+benannten Flanken-, Annahme- und Rückkehrpfade werden offline gegen den
+Systemvertrag geprüft. Die funktionale Verdrahtung dieser Grenzen in die
+vollständige CPU folgt weiterhin innerhalb von Schritt 3.
 
 ## Kompatibilitätsfolgen
 

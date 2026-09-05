@@ -144,4 +144,38 @@
     <comp loc="(650,360)" name="OutputPort"><a name="label" val="OUTPUT_PORT"/></comp>
     <comp lib="9" loc="(170,60)" name="Text"><a name="text" val="AP-18 address 0xfff bypasses RAM writes and selects the clocked output port for reads"/></comp>
   </circuit>
+  <circuit name="InterruptController">
+    <a name="appearance" val="logisim_evolution"/>
+    <a name="circuit" val="InterruptController"/>
+    <a name="circuitnamedboxfixedsize" val="true"/>
+    <a name="simulationFrequency" val="1.0"/>
+    <comp lib="0" loc="(160,120)" name="Pin"><a name="appearance" val="classic"/><a name="label" val="INTERRUPT_REQUEST"/></comp>
+    <comp lib="0" loc="(160,160)" name="Pin"><a name="appearance" val="classic"/><a name="label" val="INSTRUCTION_BOUNDARY"/></comp>
+    <comp lib="0" loc="(160,200)" name="Pin"><a name="appearance" val="classic"/><a name="label" val="ENABLE_REQUEST"/></comp>
+    <comp lib="0" loc="(160,240)" name="Pin"><a name="appearance" val="classic"/><a name="label" val="DISABLE_REQUEST"/></comp>
+    <comp lib="0" loc="(160,280)" name="Pin"><a name="appearance" val="classic"/><a name="label" val="RETURN_REQUEST"/></comp>
+    <comp lib="0" loc="(160,320)" name="Pin"><a name="appearance" val="classic"/><a name="label" val="NEXT_PC"/><a name="width" val="12"/></comp>
+    <comp lib="0" loc="(160,360)" name="Pin"><a name="appearance" val="classic"/><a name="label" val="CLK"/></comp>
+    <comp lib="0" loc="(160,400)" name="Pin"><a name="appearance" val="classic"/><a name="label" val="RESET"/></comp>
+    <comp lib="0" loc="(820,100)" name="Pin"><a name="appearance" val="classic"/><a name="facing" val="west"/><a name="label" val="INTERRUPT_ACCEPT"/><a name="type" val="output"/></comp>
+    <comp lib="0" loc="(820,140)" name="Pin"><a name="appearance" val="classic"/><a name="facing" val="west"/><a name="label" val="TARGET_PC"/><a name="type" val="output"/><a name="width" val="12"/></comp>
+    <comp lib="0" loc="(820,180)" name="Pin"><a name="appearance" val="classic"/><a name="facing" val="west"/><a name="label" val="INTERRUPT_ENABLED"/><a name="type" val="output"/></comp>
+    <comp lib="0" loc="(820,220)" name="Pin"><a name="appearance" val="classic"/><a name="facing" val="west"/><a name="label" val="INTERRUPT_PENDING"/><a name="type" val="output"/></comp>
+    <comp lib="0" loc="(820,260)" name="Pin"><a name="appearance" val="classic"/><a name="facing" val="west"/><a name="label" val="IN_INTERRUPT_HANDLER"/><a name="type" val="output"/></comp>
+    <comp lib="0" loc="(820,300)" name="Pin"><a name="appearance" val="classic"/><a name="facing" val="west"/><a name="label" val="RETURN_ADDRESS"/><a name="type" val="output"/><a name="width" val="12"/></comp>
+    <comp lib="0" loc="(820,340)" name="Pin"><a name="appearance" val="classic"/><a name="facing" val="west"/><a name="label" val="RETURN_ADDRESS_VALID"/><a name="type" val="output"/></comp>
+    <comp lib="0" loc="(820,380)" name="Pin"><a name="appearance" val="classic"/><a name="facing" val="west"/><a name="label" val="ILLEGAL_RETURN"/><a name="type" val="output"/></comp>
+    <comp lib="0" loc="(300,80)" name="Constant"><a name="label" val="INTERRUPT_VECTOR"/><a name="value" val="0xff0"/><a name="width" val="12"/></comp>
+    <comp lib="5" loc="(430,110)" name="Register"><a name="label" val="REQUEST_LEVEL"/><a name="width" val="1"/></comp>
+    <comp lib="5" loc="(430,170)" name="Register"><a name="label" val="INTERRUPT_ENABLED"/><a name="width" val="1"/></comp>
+    <comp lib="5" loc="(430,230)" name="Register"><a name="label" val="INTERRUPT_PENDING"/><a name="width" val="1"/></comp>
+    <comp lib="5" loc="(430,290)" name="Register"><a name="label" val="IN_INTERRUPT_HANDLER"/><a name="width" val="1"/></comp>
+    <comp lib="5" loc="(430,350)" name="Register"><a name="label" val="RETURN_ADDRESS"/><a name="width" val="12"/></comp>
+    <comp lib="5" loc="(430,410)" name="Register"><a name="label" val="RETURN_ADDRESS_VALID"/><a name="width" val="1"/></comp>
+    <comp lib="1" loc="(610,120)" name="AND Gate"><a name="label" val="RISING_EDGE_DETECT"/></comp>
+    <comp lib="1" loc="(610,180)" name="AND Gate"><a name="label" val="INTERRUPT_ACCEPT_GATE"/><a name="inputs" val="4"/></comp>
+    <comp lib="1" loc="(610,240)" name="AND Gate"><a name="label" val="ILLEGAL_RETURN_GATE"/></comp>
+    <comp lib="2" loc="(700,300)" name="Multiplexer"><a name="label" val="INTERRUPT_TARGET_SELECT"/><a name="width" val="12"/></comp>
+    <comp lib="9" loc="(170,50)" name="Text"><a name="text" val="AP-18 interrupt state: reset &gt; accept at instruction boundary &gt; instruction; rising edges remain pending while masked"/></comp>
+  </circuit>
 </project>

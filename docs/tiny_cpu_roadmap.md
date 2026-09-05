@@ -188,8 +188,10 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   expliziten Auswahl um. Die eigenständige Schaltung besitzt inzwischen ihre
   öffentliche Systemgrenze und einen vertraglich geprüften, taktsynchronen
   Ausgabeport-Baustein sowie eine vertraglich geprüfte Speicherpfadgrenze für
-  Adressdekodierung, RAM-Schreibsperre und Leseauswahl. Die Einfügung in die
-  vollständige CPU, die Interruptsteuerung und die elektrische Matrix sind noch
+  Adressdekodierung, RAM-Schreibsperre und Leseauswahl. Eine eigenständige
+  Interruptsteuerungsgrenze friert zudem Pins, Zustandsregister, Vektor und die
+  benannten Flanken-, Annahme- und Rückkehrpfade ein. Die funktionale Einfügung
+  dieser Grenzen in die vollständige CPU und die elektrische Matrix sind noch
   umzusetzen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
