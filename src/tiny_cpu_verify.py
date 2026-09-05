@@ -458,7 +458,8 @@ def verify_system_circuit() -> None:
     }
     required_interrupt_labels = {
         "INTERRUPT_VECTOR", "RISING_EDGE_DETECT", "INTERRUPT_ACCEPT_GATE",
-        "ILLEGAL_RETURN_GATE", "INTERRUPT_TARGET_SELECT",
+        "ILLEGAL_RETURN_GATE", "INTERRUPT_TARGET_SELECT", "PREVIOUS_REQUEST_NOT",
+        "REQUEST_LEVEL_WRITE_ENABLE",
     }
     if not required_interrupt_labels <= interrupt_labels:
         raise VerificationError(
@@ -479,6 +480,30 @@ def verify_system_circuit() -> None:
             or interrupt_contract.get("request_edge") != contract["interrupt"]["request"]):
         raise VerificationError(
             f"{display_path(system.circuit_path)}: InterruptController contract differs from system profile"
+        )
+    interrupt_wires = {
+        (wire.get("from"), wire.get("to")) for wire in interrupt.findall("wire")
+    }
+    required_interrupt_wires = {
+        ("(160,120)", "(360,120)"),
+        ("(360,140)", "(430,140)"),
+        ("(550,115)", "(580,115)"),
+        ("(390,160)", "(430,160)"),
+        ("(380,180)", "(430,180)"),
+        ("(460,200)", "(460,210)"),
+        ("(490,140)", "(510,140)"),
+        ("(540,140)", "(560,140)"),
+        ("(560,125)", "(580,125)"),
+    }
+    expected_interrupt_paths = {
+        "request_to_level_register", "request_level_clock_and_reset",
+        "previous_level_inversion", "rising_edge_detection",
+    }
+    if (not required_interrupt_wires <= interrupt_wires
+            or set(interrupt_contract.get("verified_paths", []))
+            != expected_interrupt_paths):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: InterruptController wiring differs from contract"
         )
 
 

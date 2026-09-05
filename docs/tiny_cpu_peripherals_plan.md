@@ -1,6 +1,6 @@
 # Vorschlag: Peripherie und Integration
 
-**Status: in Umsetzung (Interruptsteuerungsgrenze eingecheckt).** Dieses Dokument trifft die nach AP 17 noch offene
+**Status: in Umsetzung (Interrupt-Flankenerkennung verdrahtet).** Dieses Dokument trifft die nach AP 17 noch offene
 Produktentscheidung. Die Richtung **Peripherie und Integration** wird als
 **AP 18** ausgewählt. Das Paket ergänzt genau einen speicherabgebildeten
 Ausgabeport und eine externe, maskierbare Interruptquelle. Weitere Geräte und
@@ -112,7 +112,12 @@ Sprungziel, sämtliche Interruptzustände und den Fehler einer illegalen
 Rückkehr. Sechs getrennte Register besitzen Request-Pegel, Maske, Pending-Bit,
 Handlerzustand und Rückkehradresse samt Validität; Vektor, Breiten und die
 benannten Flanken-, Annahme- und Rückkehrpfade werden offline gegen den
-Systemvertrag geprüft. Die funktionale Verdrahtung dieser Grenzen in die
+Systemvertrag geprüft. Der erste funktionale Pfad tastet den externen
+Anforderungspegel an jeder Taktflanke ab, setzt ihn bei Reset zurück und bildet
+aus aktuellem sowie invertiertem vorherigem Pegel ausschließlich einen
+Anstiegsimpuls. Komponentenvertrag und Leitungs-Mutationstest sichern diesen
+Pfad direkt an den Bauteilanschlüssen. Die verbleibende Pending-, Annahme-,
+Masken- und Rückkehrlogik sowie die funktionale Verdrahtung dieser Grenzen in die
 vollständige CPU folgt weiterhin innerhalb von Schritt 3.
 
 ## Kompatibilitätsfolgen

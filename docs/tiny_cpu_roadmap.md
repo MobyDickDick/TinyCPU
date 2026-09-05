@@ -194,7 +194,10 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   dieser Speicherpfadgrenze sind inzwischen direkt verdrahtet und werden durch
   einen gezielten Leitungs-Mutationstest geschützt. Eine eigenständige
   Interruptsteuerungsgrenze friert zudem Pins, Zustandsregister, Vektor und die
-  benannten Flanken-, Annahme- und Rückkehrpfade ein. Die funktionale Einfügung
+  benannten Flanken-, Annahme- und Rückkehrpfade ein. Die externe Anforderung
+  wird inzwischen taktsynchron gespeichert und mit dem invertierten vorherigen
+  Pegel zu einem vertraglich sowie per Mutationstest geprüften Anstiegsimpuls
+  verknüpft. Die weitere funktionale Einfügung
   dieser Grenzen in die vollständige CPU und die elektrische Matrix sind noch
   umzusetzen.
 

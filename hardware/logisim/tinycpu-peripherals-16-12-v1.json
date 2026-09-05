@@ -72,7 +72,13 @@
         "instruction"
       ],
       "disable_on_accept": true,
-      "restore_mask_on_return": true
+      "restore_mask_on_return": true,
+      "verified_paths": [
+        "request_to_level_register",
+        "request_level_clock_and_reset",
+        "previous_level_inversion",
+        "rising_edge_detection"
+      ]
     }
   },
   "public_pins": {
