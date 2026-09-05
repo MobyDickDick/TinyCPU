@@ -7,6 +7,13 @@
   "trace_schema": "tinycpu-system-trace-v1.json",
   "circuit": "TinyCPU-Peripherals.circ",
   "top_circuit": "TinyCPUSystemMain",
+  "components": {
+    "output_port": {
+      "circuit": "OutputPort",
+      "registers": {"value": 16, "valid": 1},
+      "write_priority": ["reset", "write", "hold"]
+    }
+  },
   "public_pins": {
     "CLK": {"direction": "input", "bits": 1},
     "RESET": {"direction": "input", "bits": 1},

@@ -223,6 +223,47 @@ def verify_system_circuit() -> None:
     if system.circuit_path.name == system.base_profile.circuit:
         raise VerificationError("AP-18 must use an independent circuit")
 
+    contract = load_json(LOGISIM / "tinycpu-peripherals-16-12-v1.json")
+    component_contract = contract.get("components", {}).get("output_port", {})
+    output_name = component_contract.get("circuit")
+    output = project.find(f"circuit[@name='{output_name}']")
+    if output is None:
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: OutputPort circuit is missing"
+        )
+    pins = {}
+    for component in output.findall("comp[@name='Pin']"):
+        attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
+        pins[attributes.get("label", "")] = {
+            "direction": attributes.get("type", "input"),
+            "bits": int(attributes.get("width", "1")),
+        }
+    expected_pins = {
+        "WRITE_VALUE": {"direction": "input", "bits": 16},
+        "WRITE_VALID": {"direction": "input", "bits": 1},
+        "WRITE_ENABLE": {"direction": "input", "bits": 1},
+        "CLK": {"direction": "input", "bits": 1},
+        "RESET": {"direction": "input", "bits": 1},
+        "VALUE": {"direction": "output", "bits": 16},
+        "VALID": {"direction": "output", "bits": 1},
+    }
+    if pins != expected_pins:
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: OutputPort pins differ from contract"
+        )
+    registers = {}
+    for component in output.findall("comp[@name='Register']"):
+        attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
+        registers[attributes.get("label", "")] = int(attributes.get("width", "1"))
+    expected_registers = {
+        "OUTPUT_VALUE": component_contract.get("registers", {}).get("value"),
+        "OUTPUT_VALID": component_contract.get("registers", {}).get("valid"),
+    }
+    if registers != expected_registers:
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: OutputPort registers differ from contract"
+        )
+
 
 def verify_electrical_matrix(
     matrix: dict[str, object], machine: dict[str, object], profile_name: str, source: Path

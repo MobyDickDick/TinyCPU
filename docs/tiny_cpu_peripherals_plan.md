@@ -1,6 +1,6 @@
 # Vorschlag: Peripherie und Integration
 
-**Status: in Umsetzung (elektrische Systemgrenze eingecheckt).** Dieses Dokument trifft die nach AP 17 noch offene
+**Status: in Umsetzung (Ausgabeport-Baustein eingecheckt).** Dieses Dokument trifft die nach AP 17 noch offene
 Produktentscheidung. Die Richtung **Peripherie und Integration** wird als
 **AP 18** ausgewählt. Das Paket ergänzt genau einen speicherabgebildeten
 Ausgabeport und eine externe, maskierbare Interruptquelle. Weitere Geräte und
@@ -86,6 +86,13 @@ Systemprofil ab. Die interne Verdrahtung des Ausgabeports und der
 Interruptsteuerung sowie deren elektrische Abnahme bleiben die nächsten
 Teilschritte von AP 18; die neue Datei wird daher noch nicht vom elektrischen
 Release-Gate als fertige System-CPU behandelt.
+
+Der erste interne Baustein `OutputPort` ist jetzt ebenfalls Bestandteil der
+Schaltung. Zwei taktsynchrone Register übernehmen Wert und Validität gemeinsam
+bei `WRITE_ENABLE`; `RESET` löscht beide Zustände. Sein maschinenlesbarer
+Komponentenvertrag und der Offline-Prüfer sichern Pinrichtungen, Breiten und
+die beiden getrennten Zustandsregister ab. Die Anbindung an den Speicherpfad
+und die Interruptsteuerung folgen weiterhin innerhalb von Schritt 3.
 
 ## Kompatibilitätsfolgen
 
