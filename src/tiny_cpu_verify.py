@@ -460,7 +460,8 @@ def verify_system_circuit() -> None:
         "INTERRUPT_VECTOR", "RISING_EDGE_DETECT", "INTERRUPT_ACCEPT_GATE",
         "ILLEGAL_RETURN_GATE", "INTERRUPT_TARGET_SELECT", "PREVIOUS_REQUEST_NOT",
         "REQUEST_LEVEL_WRITE_ENABLE", "PENDING_SET_OR_HOLD",
-        "PENDING_WRITE_ENABLE",
+        "PENDING_WRITE_ENABLE", "NOT_IN_HANDLER", "INTERRUPT_ACCEPT_NOT",
+        "PENDING_HOLD_UNTIL_ACCEPT",
     }
     if not required_interrupt_labels <= interrupt_labels:
         raise VerificationError(
@@ -502,11 +503,21 @@ def verify_system_circuit() -> None:
         ("(380,300)", "(430,300)"),
         ("(490,260)", "(700,260)"),
         ("(700,220)", "(820,220)"),
+        ("(550,185)", "(580,185)"),
+        ("(540,165)", "(580,165)"),
+        ("(530,175)", "(580,175)"),
+        ("(560,195)", "(580,195)"),
+        ("(650,100)", "(820,100)"),
+        ("(650,180)", "(650,200)"),
+        ("(580,305)", "(700,305)"),
+        ("(610,300)", "(620,300)"),
     }
     expected_interrupt_paths = {
         "request_to_level_register", "request_level_clock_and_reset",
         "previous_level_inversion", "rising_edge_detection",
         "pending_set_or_hold", "pending_clock_and_reset", "pending_state_output",
+        "accept_requires_pending_enabled_boundary_and_idle", "accept_state_output",
+        "pending_cleared_on_accept",
     }
     if (not required_interrupt_wires <= interrupt_wires
             or set(interrupt_contract.get("verified_paths", []))

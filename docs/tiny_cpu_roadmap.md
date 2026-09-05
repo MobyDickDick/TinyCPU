@@ -198,8 +198,10 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   wird inzwischen taktsynchron gespeichert und mit dem invertierten vorherigen
   Pegel zu einem vertraglich sowie per Mutationstest geprüften Anstiegsimpuls
   verknüpft. Dieser Impuls setzt nun ein taktsynchrones Pending-Register, dessen
-  Rückkopplung maskierte Anforderungen bis zur noch zu verdrahtenden Annahme
-  hält; Reset sowie der direkte Zustandsausgang sind vertraglich geprüft. Die
+  Rückkopplung maskierte Anforderungen bis zur Annahme hält; Reset sowie der
+  direkte Zustandsausgang sind vertraglich geprüft. Pending-Zustand, Maske,
+  Instruktionsgrenze und invertierter Handlerzustand bilden inzwischen den
+  Annahmeimpuls, der zugleich das Pending-Bit gezielt löscht. Die
   weitere funktionale Einfügung dieser Grenzen in die vollständige CPU und die
   elektrische Matrix sind noch umzusetzen.
 

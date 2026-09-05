@@ -80,7 +80,10 @@
         "rising_edge_detection",
         "pending_set_or_hold",
         "pending_clock_and_reset",
-        "pending_state_output"
+        "pending_state_output",
+        "accept_requires_pending_enabled_boundary_and_idle",
+        "accept_state_output",
+        "pending_cleared_on_accept"
       ]
     }
   },
