@@ -231,6 +231,8 @@
     <comp lib="1" loc="(610,120)" name="AND Gate"><a name="label" val="RISING_EDGE_DETECT"/></comp>
     <comp lib="1" loc="(540,140)" name="NOT Gate"><a name="label" val="PREVIOUS_REQUEST_NOT"/></comp>
     <comp lib="0" loc="(390,160)" name="Constant"><a name="label" val="REQUEST_LEVEL_WRITE_ENABLE"/><a name="value" val="0x1"/></comp>
+    <comp lib="1" loc="(350,260)" name="OR Gate"><a name="label" val="PENDING_SET_OR_HOLD"/></comp>
+    <comp lib="0" loc="(390,280)" name="Constant"><a name="label" val="PENDING_WRITE_ENABLE"/><a name="value" val="0x1"/></comp>
     <comp lib="1" loc="(610,180)" name="AND Gate"><a name="label" val="INTERRUPT_ACCEPT_GATE"/><a name="inputs" val="4"/></comp>
     <comp lib="1" loc="(610,240)" name="AND Gate"><a name="label" val="ILLEGAL_RETURN_GATE"/></comp>
     <comp lib="2" loc="(700,300)" name="Multiplexer"><a name="label" val="INTERRUPT_TARGET_SELECT"/><a name="width" val="12"/></comp>
@@ -252,5 +254,21 @@
     <wire from="(540,140)" to="(560,140)"/>
     <wire from="(560,125)" to="(560,140)"/>
     <wire from="(560,125)" to="(580,125)"/>
+    <wire from="(610,120)" to="(640,120)"/>
+    <wire from="(640,120)" to="(640,450)"/>
+    <wire from="(300,450)" to="(640,450)"/>
+    <wire from="(300,255)" to="(300,450)"/>
+    <wire from="(300,255)" to="(320,255)"/>
+    <wire from="(490,260)" to="(510,260)"/>
+    <wire from="(510,260)" to="(510,470)"/>
+    <wire from="(310,470)" to="(510,470)"/>
+    <wire from="(310,265)" to="(310,470)"/>
+    <wire from="(310,265)" to="(320,265)"/>
+    <wire from="(350,260)" to="(430,260)"/>
+    <wire from="(390,280)" to="(430,280)"/>
+    <wire from="(380,300)" to="(430,300)"/>
+    <wire from="(490,260)" to="(700,260)"/>
+    <wire from="(700,220)" to="(700,260)"/>
+    <wire from="(700,220)" to="(820,220)"/>
   </circuit>
 </project>

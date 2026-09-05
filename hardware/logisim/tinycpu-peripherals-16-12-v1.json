@@ -77,7 +77,10 @@
         "request_to_level_register",
         "request_level_clock_and_reset",
         "previous_level_inversion",
-        "rising_edge_detection"
+        "rising_edge_detection",
+        "pending_set_or_hold",
+        "pending_clock_and_reset",
+        "pending_state_output"
       ]
     }
   },

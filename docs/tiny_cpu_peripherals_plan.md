@@ -1,6 +1,6 @@
 # Vorschlag: Peripherie und Integration
 
-**Status: in Umsetzung (Interrupt-Flankenerkennung verdrahtet).** Dieses Dokument trifft die nach AP 17 noch offene
+**Status: in Umsetzung (Interrupt-Pending-Pfad verdrahtet).** Dieses Dokument trifft die nach AP 17 noch offene
 Produktentscheidung. Die Richtung **Peripherie und Integration** wird als
 **AP 18** ausgewählt. Das Paket ergänzt genau einen speicherabgebildeten
 Ausgabeport und eine externe, maskierbare Interruptquelle. Weitere Geräte und
@@ -116,9 +116,14 @@ Systemvertrag geprüft. Der erste funktionale Pfad tastet den externen
 Anforderungspegel an jeder Taktflanke ab, setzt ihn bei Reset zurück und bildet
 aus aktuellem sowie invertiertem vorherigem Pegel ausschließlich einen
 Anstiegsimpuls. Komponentenvertrag und Leitungs-Mutationstest sichern diesen
-Pfad direkt an den Bauteilanschlüssen. Die verbleibende Pending-, Annahme-,
-Masken- und Rückkehrlogik sowie die funktionale Verdrahtung dieser Grenzen in die
-vollständige CPU folgt weiterhin innerhalb von Schritt 3.
+Pfad direkt an den Bauteilanschlüssen. Der Anstiegsimpuls setzt nun das
+taktsynchrone Pending-Register; dessen Rückkopplung hält eine während der
+Maskierung eingetroffene Anforderung, und Reset löscht den Zustand. Der
+Komponentenvertrag prüft Setz-, Halte-, Takt-, Reset- und Ausgangspfad direkt.
+Die Annahmelogik wird den Pending-Zustand im nächsten Teilschritt gezielt
+löschen. Die verbleibende Annahme-, Masken- und Rückkehrlogik sowie die
+funktionale Verdrahtung dieser Grenzen in die vollständige CPU folgt weiterhin
+innerhalb von Schritt 3.
 
 ## Kompatibilitätsfolgen
 

@@ -459,7 +459,8 @@ def verify_system_circuit() -> None:
     required_interrupt_labels = {
         "INTERRUPT_VECTOR", "RISING_EDGE_DETECT", "INTERRUPT_ACCEPT_GATE",
         "ILLEGAL_RETURN_GATE", "INTERRUPT_TARGET_SELECT", "PREVIOUS_REQUEST_NOT",
-        "REQUEST_LEVEL_WRITE_ENABLE",
+        "REQUEST_LEVEL_WRITE_ENABLE", "PENDING_SET_OR_HOLD",
+        "PENDING_WRITE_ENABLE",
     }
     if not required_interrupt_labels <= interrupt_labels:
         raise VerificationError(
@@ -494,10 +495,18 @@ def verify_system_circuit() -> None:
         ("(490,140)", "(510,140)"),
         ("(540,140)", "(560,140)"),
         ("(560,125)", "(580,125)"),
+        ("(300,255)", "(320,255)"),
+        ("(310,265)", "(320,265)"),
+        ("(350,260)", "(430,260)"),
+        ("(390,280)", "(430,280)"),
+        ("(380,300)", "(430,300)"),
+        ("(490,260)", "(700,260)"),
+        ("(700,220)", "(820,220)"),
     }
     expected_interrupt_paths = {
         "request_to_level_register", "request_level_clock_and_reset",
         "previous_level_inversion", "rising_edge_detection",
+        "pending_set_or_hold", "pending_clock_and_reset", "pending_state_output",
     }
     if (not required_interrupt_wires <= interrupt_wires
             or set(interrupt_contract.get("verified_paths", []))

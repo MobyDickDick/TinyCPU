@@ -197,9 +197,11 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   benannten Flanken-, Annahme- und Rückkehrpfade ein. Die externe Anforderung
   wird inzwischen taktsynchron gespeichert und mit dem invertierten vorherigen
   Pegel zu einem vertraglich sowie per Mutationstest geprüften Anstiegsimpuls
-  verknüpft. Die weitere funktionale Einfügung
-  dieser Grenzen in die vollständige CPU und die elektrische Matrix sind noch
-  umzusetzen.
+  verknüpft. Dieser Impuls setzt nun ein taktsynchrones Pending-Register, dessen
+  Rückkopplung maskierte Anforderungen bis zur noch zu verdrahtenden Annahme
+  hält; Reset sowie der direkte Zustandsausgang sind vertraglich geprüft. Die
+  weitere funktionale Einfügung dieser Grenzen in die vollständige CPU und die
+  elektrische Matrix sind noch umzusetzen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
