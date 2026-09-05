@@ -98,8 +98,14 @@ gelangen. Der neue Baustein
 `OutputMemoryPath` friert jetzt auch die Speicherpfadgrenze ein: Er dekodiert
 ausschließlich Adresse `0xfff`, trennt Port- und RAM-Schreibfreigabe und beschreibt die Auswahl von Wert und Validität beim Lesen.
 Der Komponentenvertrag und der Offline-Prüfer sichern dabei Adress- und
-Datenbreiten, die reservierte Adresse sowie die getrennten Lese- und
-Schreibpfade ab. Der Baustein `InterruptController` friert zusätzlich die
+Datenbreiten, die reservierte Adresse sowie nun auch die tatsächlich
+verdrahteten, getrennten Lese- und Schreibpfade ab. Der Adressvergleich sperrt
+RAM-Schreibzugriffe auf `0xfff`, gibt dort ausschließlich den atomaren
+Port-Schreibpfad frei und schaltet Wert und Validität gemeinsam auf den
+Portzustand um; Takt und Reset erreichen den gekapselten `OutputPort` direkt.
+Ein Mutationstest entfernt gezielt eine dieser Leitungen und stellt sicher,
+dass der Offline-Prüfer die Verdrahtungslücke erkennt. Der Baustein
+`InterruptController` friert zusätzlich die
 elektrische Interruptsteuerungsgrenze ein: Seine Pins führen Flankenanforderung,
 Instruktionsgrenze, Maskenbefehle, Rückkehrbefehl und nächsten PC sowie Annahme,
 Sprungziel, sämtliche Interruptzustände und den Fehler einer illegalen

@@ -38,7 +38,19 @@
       "write_routing": {
         "output_port": "address_match",
         "ram": "address_mismatch"
-      }
+      },
+      "verified_paths": [
+        "reserved_address_decode",
+        "ram_write_on_address_mismatch",
+        "output_write_on_address_match",
+        "ram_value_read_default",
+        "ram_valid_read_default",
+        "output_value_read_on_address_match",
+        "output_valid_read_on_address_match",
+        "output_port_write_value_and_valid",
+        "output_port_clock_and_reset",
+        "read_and_state_outputs"
+      ]
     },
     "interrupt_controller": {
       "circuit": "InterruptController",
