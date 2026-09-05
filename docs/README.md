@@ -44,5 +44,6 @@ optionaler Entwicklungsschritt ist AP 18 für einen Ausgabeport und eine
 maskierbare Interruptquelle abgegrenzt. Dessen versionierte System-,
 Maschinenformat- und Trace-Verträge sowie das Softwaremodell sind
 abgeschlossen. Die elektrische Implementierung ist mit einem vertraglich
-geprüften Ausgabeport-Baustein begonnen; Speicherpfadanbindung,
-Interruptsteuerung und elektrische Systemabnahme sind noch offen.
+geprüften Ausgabeport-Baustein und dessen vertraglicher Speicherpfadgrenze
+begonnen; die Einfügung in die vollständige CPU, Interruptsteuerung und
+elektrische Systemabnahme sind noch offen.

@@ -77,6 +77,26 @@ class CircuitVerificationTests(unittest.TestCase):
             with self.assertRaisesRegex(VERIFY.VerificationError, "OutputPort registers"):
                 VERIFY.verify_system_circuit()
 
+    def test_ap18_output_memory_path_enforces_reserved_address(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
+        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
+            'label" val="RAM_WRITE_GATE"', 'label" val="BROKEN_RAM_WRITE_GATE"', 1),
+            encoding="utf-8",
+        )
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        original = VERIFY.LOGISIM
+        VERIFY.LOGISIM = temporary / "logisim"
+        self.addCleanup(setattr, VERIFY, "LOGISIM", original)
+        with mock.patch.object(VERIFY, "load_system_profile",
+                               return_value=replace(system, circuit_path=circuit)):
+            with self.assertRaisesRegex(VERIFY.VerificationError,
+                                        "OutputMemoryPath routing"):
+                VERIFY.verify_system_circuit()
+
     def test_8_8_circuit_rejects_a_legacy_width(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"

@@ -10,21 +10,69 @@
   "components": {
     "output_port": {
       "circuit": "OutputPort",
-      "registers": {"value": 16, "valid": 1},
-      "write_priority": ["reset", "write", "hold"]
+      "registers": {
+        "value": 16,
+        "valid": 1
+      },
+      "write_priority": [
+        "reset",
+        "write",
+        "hold"
+      ]
+    },
+    "output_memory_path": {
+      "circuit": "OutputMemoryPath",
+      "address_bits": 12,
+      "data_bits": 16,
+      "output_address": 4095,
+      "read_select": "output_address",
+      "write_routing": {
+        "output_port": "address_match",
+        "ram": "address_mismatch"
+      }
     }
   },
   "public_pins": {
-    "CLK": {"direction": "input", "bits": 1},
-    "RESET": {"direction": "input", "bits": 1},
-    "INTERRUPT_REQUEST": {"direction": "input", "bits": 1},
-    "OUTPUT_PORT_VALUE": {"direction": "output", "bits": 16},
-    "OUTPUT_PORT_VALID": {"direction": "output", "bits": 1},
-    "INTERRUPT_ENABLED": {"direction": "output", "bits": 1},
-    "INTERRUPT_PENDING": {"direction": "output", "bits": 1},
-    "IN_INTERRUPT_HANDLER": {"direction": "output", "bits": 1},
-    "RETURN_ADDRESS": {"direction": "output", "bits": 12},
-    "RETURN_ADDRESS_VALID": {"direction": "output", "bits": 1}
+    "CLK": {
+      "direction": "input",
+      "bits": 1
+    },
+    "RESET": {
+      "direction": "input",
+      "bits": 1
+    },
+    "INTERRUPT_REQUEST": {
+      "direction": "input",
+      "bits": 1
+    },
+    "OUTPUT_PORT_VALUE": {
+      "direction": "output",
+      "bits": 16
+    },
+    "OUTPUT_PORT_VALID": {
+      "direction": "output",
+      "bits": 1
+    },
+    "INTERRUPT_ENABLED": {
+      "direction": "output",
+      "bits": 1
+    },
+    "INTERRUPT_PENDING": {
+      "direction": "output",
+      "bits": 1
+    },
+    "IN_INTERRUPT_HANDLER": {
+      "direction": "output",
+      "bits": 1
+    },
+    "RETURN_ADDRESS": {
+      "direction": "output",
+      "bits": 12
+    },
+    "RETURN_ADDRESS_VALID": {
+      "direction": "output",
+      "bits": 1
+    }
   },
   "io": {
     "output_address": 4095,
