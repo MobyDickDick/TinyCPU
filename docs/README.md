@@ -42,5 +42,7 @@ Kompatibilitätsfolgen, Abnahme und Reihenfolge stehen im
 [`tiny_cpu_profiles_plan.md`](tiny_cpu_profiles_plan.md). Als nächster
 optionaler Entwicklungsschritt ist AP 18 für einen Ausgabeport und eine
 maskierbare Interruptquelle abgegrenzt. Dessen versionierte System-,
-Maschinenformat- und Trace-Verträge sind abgeschlossen; Softwaremodell und
-elektrische Implementierung sind noch offen.
+Maschinenformat- und Trace-Verträge sowie das Softwaremodell sind
+abgeschlossen. Die elektrische Implementierung ist mit einem vertraglich
+geprüften Ausgabeport-Baustein begonnen; Speicherpfadanbindung,
+Interruptsteuerung und elektrische Systemabnahme sind noch offen.

@@ -185,8 +185,10 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   elektrische Abnahmekriterien fest. Systemprofil, erweitertes Maschinenformat
   und Trace-Schema sind versioniert und werden gemeinsam validiert. Assembler,
   VM und Debugger setzen den optionalen Systemvertrag inzwischen hinter einer
-  expliziten Auswahl um; die eigenständige Schaltung und ihre elektrische
-  Matrix sind noch umzusetzen.
+  expliziten Auswahl um. Die eigenständige Schaltung besitzt inzwischen ihre
+  öffentliche Systemgrenze und einen vertraglich geprüften, taktsynchronen
+  Ausgabeport-Baustein. Dessen Speicherpfadanbindung, die Interruptsteuerung
+  und die elektrische Matrix sind noch umzusetzen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
