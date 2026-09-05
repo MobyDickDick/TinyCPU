@@ -10,6 +10,7 @@ from pathlib import Path
 from tiny_cpu_assembler import AssemblyError, Program, load_program
 from tiny_cpu_vm import FLAGS, TinyCPU
 from tiny_cpu_profiles import load_profile
+from tiny_cpu_systems import load_system_profile
 
 
 SCHEMA_VERSION = 1
@@ -76,9 +77,10 @@ class Debugger:
         pc = self.cpu.pc
         location = self.program.source_map.get(pc)
         result: dict[str, object] = {
-            "schema_version": SCHEMA_VERSION,
+            "schema_version": 2 if self.cpu.system is not None else SCHEMA_VERSION,
             "profile": self.cpu.profile.name,
-            "machine_format": self.cpu.profile.machine_format,
+            "machine_format": (self.cpu.system.machine_format if self.cpu.system is not None
+                               else self.cpu.profile.machine_format),
             "stop_reason": reason,
             "steps": self.steps,
             "pc": pc,
@@ -98,6 +100,15 @@ class Debugger:
                 for address in sorted(self._changes)
             ],
         }
+        if self.cpu.system is not None:
+            result["system"] = self.cpu.system.name
+            result["output_port"] = {"value": self.cpu.output_port,
+                                     "valid": self.cpu.output_port_valid}
+            result["interrupt"] = {"enabled": self.cpu.interrupts_enabled,
+                                   "pending": self.cpu.interrupt_pending,
+                                   "in_handler": self.cpu.in_interrupt_handler}
+            result["return_address"] = {"value": self.cpu.return_address,
+                                        "valid": self.cpu.return_address_valid}
         self._changes.clear()
         return result
 
@@ -132,13 +143,17 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--step-limit", type=int, default=10000)
     parser.add_argument("--profile", choices=("tinycpu-16-12", "tinycpu-8-8"),
                         default="tinycpu-16-12")
+    parser.add_argument("--system", choices=("tinycpu-peripherals-16-12-v1",),
+                        help="select an optional peripheral/interrupt system")
     args = parser.parse_args(argv)
     try:
-        debugger = Debugger(load_program(args.program, load_profile(args.profile)),
+        profile = load_profile(args.profile)
+        system = load_system_profile(args.system) if args.system else None
+        debugger = Debugger(load_program(args.program, profile, system),
                             inputs=args.input, step_limit=args.step_limit)
         for breakpoint in args.breakpoint: debugger.add_breakpoint(breakpoint)
         state = debugger.step() if args.step else debugger.continue_()
-    except (OSError, AssemblyError, DebuggerError) as exc:
+    except (OSError, ValueError) as exc:
         parser.error(str(exc))
     print(json.dumps(state, sort_keys=True, separators=(",", ":")) if args.json else format_text(state))
     return 1 if state["stop_reason"] in {"halt_error", "step_limit"} else 0

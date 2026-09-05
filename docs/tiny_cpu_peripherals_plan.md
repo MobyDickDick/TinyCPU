@@ -1,6 +1,6 @@
 # Vorschlag: Peripherie und Integration
 
-**Status: in Umsetzung (Vertragsphase abgeschlossen).** Dieses Dokument trifft die nach AP 17 noch offene
+**Status: in Umsetzung (Software-Referenzphase abgeschlossen).** Dieses Dokument trifft die nach AP 17 noch offene
 Produktentscheidung. Die Richtung **Peripherie und Integration** wird als
 **AP 18** ausgewählt. Das Paket ergänzt genau einen speicherabgebildeten
 Ausgabeport und eine externe, maskierbare Interruptquelle. Weitere Geräte und
@@ -52,6 +52,14 @@ Interruptanforderung, angenommener Interrupt vor normalem Fetch. Gleichzeitig
 eintreffende Anforderungen werden in einem Pending-Bit zusammengefasst. Ein
 Interrupt wird nur zwischen zwei Instruktionen angenommen; es gibt keine
 teilweise ausgeführte Instruktion.
+
+Assembler, ROM-Decoder und Encoder verwenden das erweiterte Maschinenformat
+nur bei expliziter Systemauswahl. Das Python-Referenzmodell bildet inzwischen
+Ausgabeport, Flankenerkennung, Pending-Zustand, Maskierung, Annahme an der
+Instruktionsgrenze und Interrupt-Rückkehr ab. Der Debugger gibt diese Zustände
+unter der neuen Schemaversion aus; Aufrufe ohne Systemauswahl behalten ihr
+bisheriges Format und Verhalten. Referenztests decken außerdem den
+Vektorfehler, eine illegale Rückkehr und Reset der neuen Zustände ab.
 
 ## Technische Grenze
 
@@ -115,8 +123,8 @@ geprüft sind:
 ## Umsetzungsreihenfolge
 
 1. Systemprofil, Maschinenformat und erweitertes Trace-Schema festlegen.
-2. Assembler, VM und Debugger hinter einer expliziten Systemprofilauswahl
-   erweitern und Referenztests für sämtliche Prioritätsfälle ergänzen.
+2. ~~Assembler, VM und Debugger hinter einer expliziten Systemprofilauswahl
+   erweitern und Referenztests für sämtliche Prioritätsfälle ergänzen.~~
 3. Die eigenständige Logisim-Schaltung mit Ausgabeport und
    Interruptsteuerung erstellen.
 4. End-to-End-Fixtures und die vollständige elektrische Peripheriematrix gegen

@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from tiny_cpu_profiles import DEFAULT_PROFILE, Profile
+from tiny_cpu_systems import SystemProfile
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -56,10 +57,17 @@ class Program:
     source_map: dict[int, SourceLocation]
     labels: dict[str, int]
     profile: Profile = DEFAULT_PROFILE
+    system: SystemProfile | None = None
 
 
-def opcode_table(profile: Profile = DEFAULT_PROFILE) -> dict[str, dict[str, object]]:
-    data = json.loads(profile.machine_path.read_text(encoding="utf-8"))
+def opcode_table(profile: Profile = DEFAULT_PROFILE,
+                 system: SystemProfile | None = None) -> dict[str, dict[str, object]]:
+    if system is not None and system.base_profile.name != profile.name:
+        raise ValueError(
+            f"system {system.name!r} requires profile {system.base_profile.name!r}"
+        )
+    path = system.machine_path if system is not None else profile.machine_path
+    data = json.loads(path.read_text(encoding="utf-8"))
     return {entry["mnemonic"]: entry for entry in data["opcodes"]}
 
 
@@ -72,9 +80,10 @@ def _lines(source: str) -> list[tuple[int, str]]:
     return result
 
 
-def assemble(source: str, profile: Profile = DEFAULT_PROFILE) -> Program:
+def assemble(source: str, profile: Profile = DEFAULT_PROFILE,
+             system: SystemProfile | None = None) -> Program:
     """Assemble source text and retain an address-to-source mapping."""
-    table = opcode_table(profile)
+    table = opcode_table(profile, system)
     aliases: dict[str, str | int] = {}
     labels: dict[str, int] = {}
     pending: list[str] = []
@@ -139,17 +148,18 @@ def assemble(source: str, profile: Profile = DEFAULT_PROFILE) -> Program:
                 )
         instructions.append(Instruction(name, operand))
         source_map[address] = SourceLocation(line, text, label)
-    return Program(tuple(instructions), source_map, labels, profile)
+    return Program(tuple(instructions), source_map, labels, profile, system)
 
 
-def load_program(path: Path, profile: Profile = DEFAULT_PROFILE) -> Program:
+def load_program(path: Path, profile: Profile = DEFAULT_PROFILE,
+                 system: SystemProfile | None = None) -> Program:
     """Load assembly or a Logisim ``v2.0 raw`` ROM image."""
     if path.suffix != ".rom":
-        return assemble(path.read_text(encoding="utf-8"), profile)
+        return assemble(path.read_text(encoding="utf-8"), profile, system)
     tokens = path.read_text(encoding="utf-8").split()
     if tokens[:2] != ["v2.0", "raw"]:
         raise AssemblyError(f"{path}: expected 'v2.0 raw' ROM header")
-    by_code = {entry["code"]: entry for entry in opcode_table(profile).values()}
+    by_code = {entry["code"]: entry for entry in opcode_table(profile, system).values()}
     instructions = []
     for address, token in enumerate(tokens[2:]):
         try:
@@ -164,12 +174,12 @@ def load_program(path: Path, profile: Profile = DEFAULT_PROFILE) -> Program:
             sign_bit = 1 << (profile.data_bits - 1)
             operand = operand - (1 << profile.data_bits) if operand & sign_bit else operand
         instructions.append(Instruction(entry["mnemonic"], operand))
-    return Program(tuple(instructions), {}, {}, profile)
+    return Program(tuple(instructions), {}, {}, profile, system)
 
 
 def encode_program(program: Program) -> tuple[int, ...]:
     """Encode a program using the format selected during assembly."""
-    table = opcode_table(program.profile)
+    table = opcode_table(program.profile, program.system)
     return tuple((int(table[item.mnemonic]["code"]) << program.profile.data_bits)
                  | (item.operand & program.profile.data_mask)
                  for item in program.instructions)

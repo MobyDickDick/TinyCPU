@@ -30,10 +30,36 @@ class TinyCPU:
     output: list[int] = field(default_factory=list)
     halted: bool = False
     halt_error: bool = False
+    output_port: int = 0
+    output_port_valid: bool = False
+    interrupts_enabled: bool = False
+    interrupt_pending: bool = False
+    in_interrupt_handler: bool = False
+    return_address: int = 0
+    return_address_valid: bool = False
+    _interrupt_level: bool = False
 
     @property
     def profile(self):
         return self.program.profile
+
+    @property
+    def system(self):
+        return self.program.system
+
+    def reset(self) -> None:
+        """Reset architectural state, including the optional AP-18 system."""
+        self.pc = self.accumulator = self.address_register = 0
+        self.accumulator_valid = self.address_register_valid = False
+        self.errors = {name: False for name in FLAGS}
+        self.halted = self.halt_error = False
+        self.output_port = 0
+        self.output_port_valid = False
+        self.interrupts_enabled = self.interrupt_pending = False
+        self.in_interrupt_handler = False
+        self.return_address = 0
+        self.return_address_valid = False
+        self._interrupt_level = False
 
     def _error(self, name: str) -> None:
         self.errors[name] = True
@@ -58,14 +84,38 @@ class TinyCPU:
         if instruction.mnemonic.endswith("_CONST"):
             return signed(instruction.operand, self.profile.data_bits), True
         address = self._address(instruction)
+        return self._read(address)
+
+    def _read(self, address: int | None) -> tuple[int, bool]:
+        if self.system is not None and address == self.system.output_address:
+            return self.output_port, self.output_port_valid
         return self.memory.get(address, (0, False)) if address is not None else (0, False)
 
     def _write_accumulator(self, value: int, valid: bool) -> None:
         self.accumulator = signed(value, self.profile.data_bits) if valid else 0
         self.accumulator_valid = valid
 
-    def step(self) -> set[int]:
+    def step(self, *, interrupt_request: bool = False, reset: bool = False) -> set[int]:
         """Execute exactly one instruction and return changed memory addresses."""
+        if reset:
+            self.reset()
+            return set()
+        if self.system is None and interrupt_request:
+            raise ValueError("interrupt requests require an explicit system profile")
+        if interrupt_request and not self._interrupt_level:
+            self.interrupt_pending = True
+        self._interrupt_level = interrupt_request
+        if (self.system is not None and self.interrupt_pending
+                and self.interrupts_enabled and not self.in_interrupt_handler):
+            self.return_address = self.pc
+            self.return_address_valid = True
+            self.in_interrupt_handler = True
+            self.interrupt_pending = False
+            self.interrupts_enabled = False
+            self.pc = self.system.interrupt_vector
+            if not 0 <= self.pc < len(self.program.instructions):
+                self._error("ADDR"); self.halted = self.halt_error = True
+            return set()
         if self.halted:
             return set()
         if not 0 <= self.pc < len(self.program.instructions):
@@ -89,15 +139,20 @@ class TinyCPU:
             if not valid: self._error("ADDR")
         elif name == "LOAD_ADDRESS_REGISTER_ADDRESS":
             address = self._address(instruction)
-            value, valid = self.memory.get(address, (0, False)) if address is not None else (0, False)
+            value, valid = self._read(address)
             valid = valid and 0 <= value < self.profile.memory_size
             self.address_register, self.address_register_valid = (value if valid else 0), valid
             if not valid: self._error("INV" if address is not None else "ADDR")
         elif name.startswith("STORE_"):
             address = self._address(instruction)
             if address is not None:
-                self.memory[address] = (self.accumulator if self.accumulator_valid else 0, self.accumulator_valid)
-                changed.add(address)
+                if self.system is not None and address == self.system.output_address:
+                    self.output_port = self.accumulator if self.accumulator_valid else 0
+                    self.output_port_valid = self.accumulator_valid
+                else:
+                    self.memory[address] = (self.accumulator if self.accumulator_valid else 0,
+                                            self.accumulator_valid)
+                    changed.add(address)
                 if not self.accumulator_valid: self._error("INV")
         elif name == "NOT":
             if self.accumulator_valid: self._write_accumulator(~self.accumulator, True)
@@ -138,10 +193,21 @@ class TinyCPU:
             else: self._error("INPUT"); self._write_accumulator(0, False)
         elif name in {"PRINT", "PRINT_ADDRESS"}:
             value, valid = ((self.accumulator, self.accumulator_valid) if name == "PRINT"
-                            else self.memory.get(self._address(instruction), (0, False)))
+                            else self._read(self._address(instruction)))
             if valid: self.output.append(value)
             else: self._error("INV")
         elif name == "HALT": self.halted = True
         elif name == "HALT_ERROR": self.halted = self.halt_error = True
+        elif name == "ENABLE_INTERRUPTS": self.interrupts_enabled = True
+        elif name == "DISABLE_INTERRUPTS": self.interrupts_enabled = False
+        elif name == "RETURN_FROM_INTERRUPT":
+            if not self.in_interrupt_handler or not self.return_address_valid:
+                self._error("ILL"); self.halted = self.halt_error = True
+            else:
+                self.pc = self.return_address
+                self.return_address = 0
+                self.return_address_valid = False
+                self.in_interrupt_handler = False
+                self.interrupts_enabled = True
         else: self._error("ILL"); self.halted = self.halt_error = True
         return changed
