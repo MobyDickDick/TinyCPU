@@ -229,9 +229,28 @@
     <comp lib="5" loc="(430,350)" name="Register"><a name="label" val="RETURN_ADDRESS"/><a name="width" val="12"/></comp>
     <comp lib="5" loc="(430,410)" name="Register"><a name="label" val="RETURN_ADDRESS_VALID"/><a name="width" val="1"/></comp>
     <comp lib="1" loc="(610,120)" name="AND Gate"><a name="label" val="RISING_EDGE_DETECT"/></comp>
+    <comp lib="1" loc="(540,140)" name="NOT Gate"><a name="label" val="PREVIOUS_REQUEST_NOT"/></comp>
+    <comp lib="0" loc="(390,160)" name="Constant"><a name="label" val="REQUEST_LEVEL_WRITE_ENABLE"/><a name="value" val="0x1"/></comp>
     <comp lib="1" loc="(610,180)" name="AND Gate"><a name="label" val="INTERRUPT_ACCEPT_GATE"/><a name="inputs" val="4"/></comp>
     <comp lib="1" loc="(610,240)" name="AND Gate"><a name="label" val="ILLEGAL_RETURN_GATE"/></comp>
     <comp lib="2" loc="(700,300)" name="Multiplexer"><a name="label" val="INTERRUPT_TARGET_SELECT"/><a name="width" val="12"/></comp>
     <comp lib="9" loc="(170,50)" name="Text"><a name="text" val="AP-18 interrupt state: reset &gt; accept at instruction boundary &gt; instruction; rising edges remain pending while masked"/></comp>
+    <wire from="(160,120)" to="(360,120)"/>
+    <wire from="(360,120)" to="(360,140)"/>
+    <wire from="(360,140)" to="(430,140)"/>
+    <wire from="(360,120)" to="(550,120)"/>
+    <wire from="(550,115)" to="(550,120)"/>
+    <wire from="(550,115)" to="(580,115)"/>
+    <wire from="(390,160)" to="(430,160)"/>
+    <wire from="(160,360)" to="(380,360)"/>
+    <wire from="(380,180)" to="(380,360)"/>
+    <wire from="(380,180)" to="(430,180)"/>
+    <wire from="(160,400)" to="(460,400)"/>
+    <wire from="(460,200)" to="(460,400)"/>
+    <wire from="(460,200)" to="(460,210)"/>
+    <wire from="(490,140)" to="(510,140)"/>
+    <wire from="(540,140)" to="(560,140)"/>
+    <wire from="(560,125)" to="(560,140)"/>
+    <wire from="(560,125)" to="(580,125)"/>
   </circuit>
 </project>
