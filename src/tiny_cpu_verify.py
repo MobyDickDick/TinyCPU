@@ -18,6 +18,7 @@ from pathlib import Path
 
 from tiny_cpu_assembler import AssemblyError, assemble, opcode_table
 from tiny_cpu_profiles import load_profile
+from tiny_cpu_systems import load_system_profile
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -200,6 +201,29 @@ def verify_small_profile_circuit(profile: dict[str, object], machine: dict[str, 
         raise VerificationError(f"{display_path(path)}: embedded ROM differs from AP-17 fixture")
 
 
+def verify_system_circuit() -> None:
+    """Match the AP-18 system's public electrical boundary to its contract."""
+    system = load_system_profile("tinycpu-peripherals-16-12-v1")
+    project = ET.parse(system.circuit_path).getroot()
+    main = project.find("main")
+    if main is None or main.get("name") != system.top_circuit:
+        raise VerificationError(f"{display_path(system.circuit_path)}: top circuit differs from system profile")
+    circuit = project.find(f"circuit[@name='{system.top_circuit}']")
+    if circuit is None:
+        raise VerificationError(f"{display_path(system.circuit_path)}: system top circuit is missing")
+    actual: dict[str, dict[str, object]] = {}
+    for component in circuit.findall("comp[@name='Pin']"):
+        attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
+        actual[attributes.get("label", "")] = {
+            "direction": attributes.get("type", "input"),
+            "bits": int(attributes.get("width", "1")),
+        }
+    if actual != system.public_pins:
+        raise VerificationError(f"{display_path(system.circuit_path)}: public pins differ from system profile")
+    if system.circuit_path.name == system.base_profile.circuit:
+        raise VerificationError("AP-18 must use an independent circuit")
+
+
 def verify_electrical_matrix(
     matrix: dict[str, object], machine: dict[str, object], profile_name: str, source: Path
 ) -> int:
@@ -280,6 +304,7 @@ def verify_contracts() -> tuple[int, int]:
         if current_profile.get("machine_format") != current_machine_path_name(current_machine):
             raise VerificationError(f"profile {current_profile.get('name')!r} selects the wrong format file")
     verify_small_profile_circuit(small_profile, small_machine)
+    verify_system_circuit()
 
     opcodes = machine.get("opcodes")
     if not isinstance(opcodes, list) or not opcodes:

@@ -21,6 +21,9 @@ class SystemProfile:
     machine_path: Path
     trace_schema: str
     trace_path: Path
+    circuit_path: Path
+    top_circuit: str
+    public_pins: dict[str, dict[str, object]]
 
 
 _FILES = {"tinycpu-peripherals-16-12-v1": "tinycpu-peripherals-16-12-v1.json"}
@@ -50,5 +53,12 @@ def load_system_profile(name: str) -> SystemProfile:
         raise ValueError(f"system profile {name!r} contains an out-of-range address")
     if output_address == vector:
         raise ValueError(f"system profile {name!r} aliases its output port and interrupt vector")
+    circuit_path = path.with_name(data["circuit"])
+    if not circuit_path.is_file():
+        raise ValueError(f"system profile {name!r} refers to a missing circuit")
+    public_pins = data.get("public_pins")
+    if not isinstance(public_pins, dict) or not public_pins:
+        raise ValueError(f"system profile {name!r} has no public pin contract")
     return SystemProfile(name, base, output_address, vector, machine["format"],
-                         machine_path, trace["schema"], trace_path)
+                         machine_path, trace["schema"], trace_path, circuit_path,
+                         data["top_circuit"], public_pins)
