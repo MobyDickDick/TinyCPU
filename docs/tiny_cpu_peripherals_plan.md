@@ -1,6 +1,6 @@
 # Vorschlag: Peripherie und Integration
 
-**Status: in Umsetzung (Interrupt-Pending-Pfad verdrahtet).** Dieses Dokument trifft die nach AP 17 noch offene
+**Status: in Umsetzung (Interrupt-Annahmepfad verdrahtet).** Dieses Dokument trifft die nach AP 17 noch offene
 Produktentscheidung. Die Richtung **Peripherie und Integration** wird als
 **AP 18** ausgewählt. Das Paket ergänzt genau einen speicherabgebildeten
 Ausgabeport und eine externe, maskierbare Interruptquelle. Weitere Geräte und
@@ -120,8 +120,13 @@ Pfad direkt an den Bauteilanschlüssen. Der Anstiegsimpuls setzt nun das
 taktsynchrone Pending-Register; dessen Rückkopplung hält eine während der
 Maskierung eingetroffene Anforderung, und Reset löscht den Zustand. Der
 Komponentenvertrag prüft Setz-, Halte-, Takt-, Reset- und Ausgangspfad direkt.
-Die Annahmelogik wird den Pending-Zustand im nächsten Teilschritt gezielt
-löschen. Die verbleibende Annahme-, Masken- und Rückkehrlogik sowie die
+Die Annahmelogik verknüpft Pending-Zustand, aktivierte Maske,
+Instruktionsgrenze und den invertierten Handlerzustand. Ihr Annahmeimpuls wird
+direkt ausgegeben und löscht über einen eigenen Rückkopplungspfad das
+Pending-Bit, sofern nicht gleichzeitig eine neue Anforderungsflanke eintrifft.
+Der Komponentenvertrag und ein Leitungs-Mutationstest schützen sowohl die vier
+Annahmebedingungen als auch Ausgabe und Löschpfad. Die verbleibende Masken- und
+Rückkehrlogik sowie die
 funktionale Verdrahtung dieser Grenzen in die vollständige CPU folgt weiterhin
 innerhalb von Schritt 3.
 

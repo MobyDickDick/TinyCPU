@@ -234,6 +234,9 @@
     <comp lib="1" loc="(350,260)" name="OR Gate"><a name="label" val="PENDING_SET_OR_HOLD"/></comp>
     <comp lib="0" loc="(390,280)" name="Constant"><a name="label" val="PENDING_WRITE_ENABLE"/><a name="value" val="0x1"/></comp>
     <comp lib="1" loc="(610,180)" name="AND Gate"><a name="label" val="INTERRUPT_ACCEPT_GATE"/><a name="inputs" val="4"/></comp>
+    <comp lib="1" loc="(540,320)" name="NOT Gate"><a name="label" val="NOT_IN_HANDLER"/></comp>
+    <comp lib="1" loc="(680,200)" name="NOT Gate"><a name="label" val="INTERRUPT_ACCEPT_NOT"/></comp>
+    <comp lib="1" loc="(610,300)" name="AND Gate"><a name="label" val="PENDING_HOLD_UNTIL_ACCEPT"/></comp>
     <comp lib="1" loc="(610,240)" name="AND Gate"><a name="label" val="ILLEGAL_RETURN_GATE"/></comp>
     <comp lib="2" loc="(700,300)" name="Multiplexer"><a name="label" val="INTERRUPT_TARGET_SELECT"/><a name="width" val="12"/></comp>
     <comp lib="9" loc="(170,50)" name="Text"><a name="text" val="AP-18 interrupt state: reset &gt; accept at instruction boundary &gt; instruction; rising edges remain pending while masked"/></comp>
@@ -259,10 +262,30 @@
     <wire from="(300,450)" to="(640,450)"/>
     <wire from="(300,255)" to="(300,450)"/>
     <wire from="(300,255)" to="(320,255)"/>
-    <wire from="(490,260)" to="(510,260)"/>
-    <wire from="(510,260)" to="(510,470)"/>
-    <wire from="(310,470)" to="(510,470)"/>
-    <wire from="(310,265)" to="(310,470)"/>
+    <wire from="(490,260)" to="(550,260)"/>
+    <wire from="(550,185)" to="(550,295)"/>
+    <wire from="(550,185)" to="(580,185)"/>
+    <wire from="(550,295)" to="(580,295)"/>
+    <wire from="(490,200)" to="(540,200)"/>
+    <wire from="(540,165)" to="(540,200)"/>
+    <wire from="(540,165)" to="(580,165)"/>
+    <wire from="(160,160)" to="(530,160)"/>
+    <wire from="(530,160)" to="(530,175)"/>
+    <wire from="(530,175)" to="(580,175)"/>
+    <wire from="(490,320)" to="(510,320)"/>
+    <wire from="(540,320)" to="(560,320)"/>
+    <wire from="(560,195)" to="(560,320)"/>
+    <wire from="(560,195)" to="(580,195)"/>
+    <wire from="(610,180)" to="(650,180)"/>
+    <wire from="(650,100)" to="(650,200)"/>
+    <wire from="(650,100)" to="(820,100)"/>
+    <wire from="(650,180)" to="(650,200)"/>
+    <wire from="(680,200)" to="(700,200)"/>
+    <wire from="(700,200)" to="(700,305)"/>
+    <wire from="(580,305)" to="(700,305)"/>
+    <wire from="(610,300)" to="(620,300)"/>
+    <wire from="(310,300)" to="(620,300)"/>
+    <wire from="(310,265)" to="(310,300)"/>
     <wire from="(310,265)" to="(320,265)"/>
     <wire from="(350,260)" to="(430,260)"/>
     <wire from="(390,280)" to="(430,280)"/>

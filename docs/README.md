@@ -51,7 +51,9 @@ Interruptanforderung besitzt nun einen direkt verdrahteten, taktsynchron
 zurücksetzbaren Pegelspeicher und eine geprüfte Erkennung ausschließlich
 ansteigender Flanken. Der Impuls setzt ein taktsynchrones Pending-Register;
 dessen Rückkopplung hält maskierte Anforderungen, während Reset den Zustand
-löscht. Die funktionale Einfügung
+löscht. Pending-Zustand, Interruptmaske, Instruktionsgrenze und invertierter
+Handlerzustand sind nun zum Annahmeimpuls verknüpft; derselbe Impuls löscht das
+Pending-Bit gezielt. Die funktionale Einfügung
 dieser Grenzen in die vollständige CPU und die elektrische Systemabnahme sind
 noch offen. Die Speicherpfadgrenze des Ausgabeports ist inzwischen vollständig
 verdrahtet und wird offline einschließlich ihrer getrennten RAM-/Port-Freigaben
