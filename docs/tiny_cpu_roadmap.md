@@ -186,8 +186,9 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   und Trace-Schema sind versioniert und werden gemeinsam validiert. Assembler,
   VM und Debugger setzen den optionalen Systemvertrag inzwischen hinter einer
   expliziten Auswahl um. Die eigenständige Schaltung besitzt inzwischen ihre
-  öffentliche Systemgrenze und einen vertraglich geprüften, taktsynchronen
-  Ausgabeport-Baustein sowie eine vertraglich geprüfte Speicherpfadgrenze für
+  öffentliche Systemgrenze und einen vertraglich bis auf jeden Daten-, Takt-,
+  Reset- und Freigabepfad geprüften, taktsynchronen Ausgabeport-Baustein sowie
+  eine vertraglich geprüfte Speicherpfadgrenze für
   Adressdekodierung, RAM-Schreibsperre und Leseauswahl. Eine eigenständige
   Interruptsteuerungsgrenze friert zudem Pins, Zustandsregister, Vektor und die
   benannten Flanken-, Annahme- und Rückkehrpfade ein. Die funktionale Einfügung
