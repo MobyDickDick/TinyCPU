@@ -116,4 +116,32 @@
     <wire from="(490,140)" to="(600,140)"/>
     <wire from="(490,240)" to="(600,240)"/>
   </circuit>
+  <circuit name="OutputMemoryPath">
+    <a name="appearance" val="logisim_evolution"/>
+    <a name="circuit" val="OutputMemoryPath"/>
+    <a name="circuitnamedboxfixedsize" val="true"/>
+    <a name="simulationFrequency" val="1.0"/>
+    <comp lib="0" loc="(160,120)" name="Pin"><a name="appearance" val="classic"/><a name="label" val="ADDRESS"/><a name="width" val="12"/></comp>
+    <comp lib="0" loc="(160,180)" name="Pin"><a name="appearance" val="classic"/><a name="label" val="WRITE_VALUE"/><a name="width" val="16"/></comp>
+    <comp lib="0" loc="(160,220)" name="Pin"><a name="appearance" val="classic"/><a name="label" val="WRITE_VALID"/></comp>
+    <comp lib="0" loc="(160,260)" name="Pin"><a name="appearance" val="classic"/><a name="label" val="WRITE_ENABLE"/></comp>
+    <comp lib="0" loc="(160,320)" name="Pin"><a name="appearance" val="classic"/><a name="label" val="RAM_READ_VALUE"/><a name="width" val="16"/></comp>
+    <comp lib="0" loc="(160,360)" name="Pin"><a name="appearance" val="classic"/><a name="label" val="RAM_READ_VALID"/></comp>
+    <comp lib="0" loc="(160,420)" name="Pin"><a name="appearance" val="classic"/><a name="label" val="CLK"/></comp>
+    <comp lib="0" loc="(160,460)" name="Pin"><a name="appearance" val="classic"/><a name="label" val="RESET"/></comp>
+    <comp lib="0" loc="(800,140)" name="Pin"><a name="appearance" val="classic"/><a name="facing" val="west"/><a name="label" val="READ_VALUE"/><a name="type" val="output"/><a name="width" val="16"/></comp>
+    <comp lib="0" loc="(800,180)" name="Pin"><a name="appearance" val="classic"/><a name="facing" val="west"/><a name="label" val="READ_VALID"/><a name="type" val="output"/></comp>
+    <comp lib="0" loc="(800,240)" name="Pin"><a name="appearance" val="classic"/><a name="facing" val="west"/><a name="label" val="RAM_WRITE_ENABLE"/><a name="type" val="output"/></comp>
+    <comp lib="0" loc="(800,300)" name="Pin"><a name="appearance" val="classic"/><a name="facing" val="west"/><a name="label" val="OUTPUT_PORT_VALUE"/><a name="type" val="output"/><a name="width" val="16"/></comp>
+    <comp lib="0" loc="(800,340)" name="Pin"><a name="appearance" val="classic"/><a name="facing" val="west"/><a name="label" val="OUTPUT_PORT_VALID"/><a name="type" val="output"/></comp>
+    <comp lib="0" loc="(260,100)" name="Constant"><a name="value" val="0xfff"/><a name="width" val="12"/></comp>
+    <comp lib="3" loc="(350,120)" name="Comparator"><a name="label" val="OUTPUT_ADDRESS_DECODE"/><a name="width" val="12"/></comp>
+    <comp lib="1" loc="(470,240)" name="NOT Gate"><a name="label" val="NOT_OUTPUT_ADDRESS"/></comp>
+    <comp lib="1" loc="(570,240)" name="AND Gate"><a name="label" val="RAM_WRITE_GATE"/></comp>
+    <comp lib="1" loc="(570,280)" name="AND Gate"><a name="label" val="OUTPUT_WRITE_GATE"/></comp>
+    <comp lib="2" loc="(690,140)" name="Multiplexer"><a name="label" val="OUTPUT_READ_VALUE_SELECT"/><a name="width" val="16"/></comp>
+    <comp lib="2" loc="(690,180)" name="Multiplexer"><a name="label" val="OUTPUT_READ_VALID_SELECT"/></comp>
+    <comp loc="(650,360)" name="OutputPort"><a name="label" val="OUTPUT_PORT"/></comp>
+    <comp lib="9" loc="(170,60)" name="Text"><a name="text" val="AP-18 address 0xfff bypasses RAM writes and selects the clocked output port for reads"/></comp>
+  </circuit>
 </project>

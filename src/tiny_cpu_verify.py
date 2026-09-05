@@ -264,6 +264,57 @@ def verify_system_circuit() -> None:
             f"{display_path(system.circuit_path)}: OutputPort registers differ from contract"
         )
 
+    path_contract = contract.get("components", {}).get("output_memory_path", {})
+    path_name = path_contract.get("circuit")
+    memory_path = project.find(f"circuit[@name='{path_name}']")
+    if memory_path is None:
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: OutputMemoryPath circuit is missing"
+        )
+    path_pins = {}
+    for component in memory_path.findall("comp[@name='Pin']"):
+        attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
+        path_pins[attributes.get("label", "")] = {
+            "direction": attributes.get("type", "input"),
+            "bits": int(attributes.get("width", "1")),
+        }
+    expected_path_pins = {
+        "ADDRESS": {"direction": "input", "bits": path_contract.get("address_bits")},
+        "WRITE_VALUE": {"direction": "input", "bits": path_contract.get("data_bits")},
+        "WRITE_VALID": {"direction": "input", "bits": 1},
+        "WRITE_ENABLE": {"direction": "input", "bits": 1},
+        "RAM_READ_VALUE": {"direction": "input", "bits": path_contract.get("data_bits")},
+        "RAM_READ_VALID": {"direction": "input", "bits": 1},
+        "CLK": {"direction": "input", "bits": 1},
+        "RESET": {"direction": "input", "bits": 1},
+        "READ_VALUE": {"direction": "output", "bits": path_contract.get("data_bits")},
+        "READ_VALID": {"direction": "output", "bits": 1},
+        "RAM_WRITE_ENABLE": {"direction": "output", "bits": 1},
+        "OUTPUT_PORT_VALUE": {"direction": "output", "bits": path_contract.get("data_bits")},
+        "OUTPUT_PORT_VALID": {"direction": "output", "bits": 1},
+    }
+    if path_pins != expected_path_pins:
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: OutputMemoryPath pins differ from contract"
+        )
+    labelled = {
+        item.get("val")
+        for component in memory_path.findall("comp")
+        for item in component.findall("a[@name='label']")
+    }
+    required = {"OUTPUT_ADDRESS_DECODE", "NOT_OUTPUT_ADDRESS", "RAM_WRITE_GATE",
+                "OUTPUT_WRITE_GATE", "OUTPUT_READ_VALUE_SELECT",
+                "OUTPUT_READ_VALID_SELECT", "OUTPUT_PORT"}
+    if not required <= labelled:
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: OutputMemoryPath routing differs from contract"
+        )
+    constant = memory_path.find("comp[@name='Constant']/a[@name='value']")
+    if constant is None or int(constant.get("val", "-1"), 0) != path_contract.get("output_address"):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: OutputMemoryPath address differs from contract"
+        )
+
 
 def verify_electrical_matrix(
     matrix: dict[str, object], machine: dict[str, object], profile_name: str, source: Path

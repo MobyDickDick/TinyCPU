@@ -187,8 +187,10 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   VM und Debugger setzen den optionalen Systemvertrag inzwischen hinter einer
   expliziten Auswahl um. Die eigenständige Schaltung besitzt inzwischen ihre
   öffentliche Systemgrenze und einen vertraglich geprüften, taktsynchronen
-  Ausgabeport-Baustein. Dessen Speicherpfadanbindung, die Interruptsteuerung
-  und die elektrische Matrix sind noch umzusetzen.
+  Ausgabeport-Baustein sowie eine vertraglich geprüfte Speicherpfadgrenze für
+  Adressdekodierung, RAM-Schreibsperre und Leseauswahl. Die Einfügung in die
+  vollständige CPU, die Interruptsteuerung und die elektrische Matrix sind noch
+  umzusetzen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

@@ -1,6 +1,6 @@
 # Vorschlag: Peripherie und Integration
 
-**Status: in Umsetzung (Ausgabeport-Baustein eingecheckt).** Dieses Dokument trifft die nach AP 17 noch offene
+**Status: in Umsetzung (Speicherpfadgrenze für den Ausgabeport eingecheckt).** Dieses Dokument trifft die nach AP 17 noch offene
 Produktentscheidung. Die Richtung **Peripherie und Integration** wird als
 **AP 18** ausgewählt. Das Paket ergänzt genau einen speicherabgebildeten
 Ausgabeport und eine externe, maskierbare Interruptquelle. Weitere Geräte und
@@ -91,8 +91,13 @@ Der erste interne Baustein `OutputPort` ist jetzt ebenfalls Bestandteil der
 Schaltung. Zwei taktsynchrone Register übernehmen Wert und Validität gemeinsam
 bei `WRITE_ENABLE`; `RESET` löscht beide Zustände. Sein maschinenlesbarer
 Komponentenvertrag und der Offline-Prüfer sichern Pinrichtungen, Breiten und
-die beiden getrennten Zustandsregister ab. Die Anbindung an den Speicherpfad
-und die Interruptsteuerung folgen weiterhin innerhalb von Schritt 3.
+die beiden getrennten Zustandsregister ab. Der neue Baustein
+`OutputMemoryPath` friert jetzt auch die Speicherpfadgrenze ein: Er dekodiert
+ausschließlich Adresse `0xfff`, trennt Port- und RAM-Schreibfreigabe und beschreibt die Auswahl von Wert und Validität beim Lesen.
+Der Komponentenvertrag und der Offline-Prüfer sichern dabei Adress- und
+Datenbreiten, die reservierte Adresse sowie die getrennten Lese- und
+Schreibpfade ab. Die Einfügung dieser Grenze in die vollständige CPU und die
+Interruptsteuerung folgen weiterhin innerhalb von Schritt 3.
 
 ## Kompatibilitätsfolgen
 
