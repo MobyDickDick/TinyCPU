@@ -49,4 +49,6 @@ Steuerverdrahtung vollständig offline geprüft wird. Speicherpfad- und
 Interruptsteuerungsgrenze sind ebenfalls vertraglich festgelegt; die
 funktionale Einfügung
 dieser Grenzen in die vollständige CPU und die elektrische Systemabnahme sind
-noch offen.
+noch offen. Die Speicherpfadgrenze des Ausgabeports ist inzwischen vollständig
+verdrahtet und wird offline einschließlich ihrer getrennten RAM-/Port-Freigaben
+und gemeinsamen Wert-/Validitätsauswahl geprüft.

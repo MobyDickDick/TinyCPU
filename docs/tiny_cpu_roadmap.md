@@ -189,7 +189,10 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   öffentliche Systemgrenze und einen vertraglich bis auf jeden Daten-, Takt-,
   Reset- und Freigabepfad geprüften, taktsynchronen Ausgabeport-Baustein sowie
   eine vertraglich geprüfte Speicherpfadgrenze für
-  Adressdekodierung, RAM-Schreibsperre und Leseauswahl. Eine eigenständige
+  Adressdekodierung, RAM-Schreibsperre und Leseauswahl. Sämtliche Daten-,
+  Validitäts-, Auswahl-, Schreibfreigabe-, Takt-, Reset- und Ausgangswege
+  dieser Speicherpfadgrenze sind inzwischen direkt verdrahtet und werden durch
+  einen gezielten Leitungs-Mutationstest geschützt. Eine eigenständige
   Interruptsteuerungsgrenze friert zudem Pins, Zustandsregister, Vektor und die
   benannten Flanken-, Annahme- und Rückkehrpfade ein. Die funktionale Einfügung
   dieser Grenzen in die vollständige CPU und die elektrische Matrix sind noch

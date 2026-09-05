@@ -114,6 +114,24 @@ class CircuitVerificationTests(unittest.TestCase):
                                         "OutputMemoryPath routing"):
                 VERIFY.verify_system_circuit()
 
+    def test_ap18_output_memory_path_requires_functional_wiring(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
+        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
+            '<wire from="(410,280)" to="(540,280)"/>', "", 1), encoding="utf-8")
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        original = VERIFY.LOGISIM
+        VERIFY.LOGISIM = temporary / "logisim"
+        self.addCleanup(setattr, VERIFY, "LOGISIM", original)
+        with mock.patch.object(VERIFY, "load_system_profile",
+                               return_value=replace(system, circuit_path=circuit)):
+            with self.assertRaisesRegex(VERIFY.VerificationError,
+                                        "OutputMemoryPath wiring"):
+                VERIFY.verify_system_circuit()
+
     def test_ap18_interrupt_controller_owns_interrupt_state(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"

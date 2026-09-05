@@ -352,6 +352,49 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             f"{display_path(system.circuit_path)}: OutputMemoryPath address differs from contract"
         )
+    memory_wires = {
+        (wire.get("from"), wire.get("to")) for wire in memory_path.findall("wire")
+    }
+    # These segments anchor every functional route at a real component port.
+    # The intervening orthogonal segments remain free to be redrawn, but no
+    # declared path may be replaced with labels alone.
+    required_memory_wires = {
+        ("(300,130)", "(310,130)"),  # address -> comparator
+        ("(290,100)", "(310,100)"),  # reserved constant -> comparator
+        ("(410,240)", "(440,240)"),  # match -> inverter
+        ("(520,235)", "(540,235)"),  # mismatch -> RAM write gate
+        ("(500,245)", "(540,245)"),  # write enable -> RAM write gate
+        ("(410,280)", "(540,280)"),  # match -> output write gate
+        ("(500,275)", "(540,275)"),  # write enable -> output write gate
+        ("(620,130)", "(660,130)"),  # RAM value -> value mux
+        ("(600,170)", "(660,170)"),  # RAM validity -> validity mux
+        ("(640,150)", "(660,150)"),  # output value -> value mux
+        ("(630,190)", "(660,190)"),  # output validity -> validity mux
+        ("(610,170)", "(670,170)"),  # match -> value selector
+        ("(610,210)", "(670,210)"),  # match -> validity selector
+        ("(560,330)", "(650,330)"),  # write value -> output port
+        ("(550,340)", "(650,340)"),  # write validity -> output port
+        ("(590,350)", "(650,350)"),  # gated write -> output port
+        ("(530,360)", "(650,360)"),  # clock -> output port
+        ("(540,370)", "(650,370)"),  # reset -> output port
+        ("(690,140)", "(800,140)"),  # selected value -> read output
+        ("(690,180)", "(800,180)"),  # selected validity -> read output
+        ("(570,240)", "(800,240)"),  # gated RAM write output
+        ("(760,300)", "(800,300)"),  # output value state
+        ("(780,340)", "(800,340)"),  # output validity state
+    }
+    expected_memory_paths = {
+        "reserved_address_decode", "ram_write_on_address_mismatch",
+        "output_write_on_address_match", "ram_value_read_default",
+        "ram_valid_read_default", "output_value_read_on_address_match",
+        "output_valid_read_on_address_match", "output_port_write_value_and_valid",
+        "output_port_clock_and_reset", "read_and_state_outputs",
+    }
+    if (not required_memory_wires <= memory_wires
+            or set(path_contract.get("verified_paths", [])) != expected_memory_paths):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: OutputMemoryPath wiring differs from contract"
+        )
 
     interrupt_contract = contract.get("components", {}).get("interrupt_controller", {})
     interrupt_name = interrupt_contract.get("circuit")

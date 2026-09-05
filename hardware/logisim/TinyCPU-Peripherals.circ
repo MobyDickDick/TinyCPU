@@ -143,6 +143,62 @@
     <comp lib="2" loc="(690,180)" name="Multiplexer"><a name="label" val="OUTPUT_READ_VALID_SELECT"/></comp>
     <comp loc="(650,360)" name="OutputPort"><a name="label" val="OUTPUT_PORT"/></comp>
     <comp lib="9" loc="(170,60)" name="Text"><a name="text" val="AP-18 address 0xfff bypasses RAM writes and selects the clocked output port for reads"/></comp>
+    <wire from="(160,120)" to="(300,120)"/>
+    <wire from="(300,120)" to="(300,130)"/>
+    <wire from="(300,130)" to="(310,130)"/>
+    <wire from="(290,100)" to="(310,100)"/>
+    <wire from="(310,100)" to="(310,110)"/>
+    <wire from="(390,120)" to="(410,120)"/>
+    <wire from="(410,120)" to="(410,280)"/>
+    <wire from="(410,240)" to="(440,240)"/>
+    <wire from="(410,280)" to="(540,280)"/>
+    <wire from="(470,240)" to="(520,240)"/>
+    <wire from="(520,235)" to="(520,240)"/>
+    <wire from="(520,235)" to="(540,235)"/>
+    <wire from="(160,260)" to="(500,260)"/>
+    <wire from="(500,245)" to="(500,275)"/>
+    <wire from="(500,245)" to="(540,245)"/>
+    <wire from="(500,275)" to="(540,275)"/>
+    <wire from="(160,320)" to="(620,320)"/>
+    <wire from="(620,130)" to="(620,320)"/>
+    <wire from="(620,130)" to="(660,130)"/>
+    <wire from="(160,360)" to="(600,360)"/>
+    <wire from="(600,170)" to="(600,360)"/>
+    <wire from="(600,170)" to="(660,170)"/>
+    <wire from="(650,340)" to="(640,340)"/>
+    <wire from="(640,150)" to="(640,340)"/>
+    <wire from="(640,150)" to="(660,150)"/>
+    <wire from="(650,350)" to="(630,350)"/>
+    <wire from="(630,190)" to="(630,350)"/>
+    <wire from="(630,190)" to="(660,190)"/>
+    <wire from="(410,120)" to="(610,120)"/>
+    <wire from="(610,120)" to="(610,210)"/>
+    <wire from="(610,170)" to="(670,170)"/>
+    <wire from="(610,210)" to="(670,210)"/>
+    <wire from="(690,140)" to="(800,140)"/>
+    <wire from="(690,180)" to="(800,180)"/>
+    <wire from="(570,240)" to="(800,240)"/>
+    <wire from="(160,180)" to="(560,180)"/>
+    <wire from="(560,180)" to="(560,330)"/>
+    <wire from="(560,330)" to="(650,330)"/>
+    <wire from="(160,220)" to="(550,220)"/>
+    <wire from="(550,220)" to="(550,340)"/>
+    <wire from="(550,340)" to="(650,340)"/>
+    <wire from="(570,280)" to="(590,280)"/>
+    <wire from="(590,280)" to="(590,350)"/>
+    <wire from="(590,350)" to="(650,350)"/>
+    <wire from="(160,420)" to="(530,420)"/>
+    <wire from="(530,360)" to="(530,420)"/>
+    <wire from="(530,360)" to="(650,360)"/>
+    <wire from="(160,460)" to="(540,460)"/>
+    <wire from="(540,370)" to="(540,460)"/>
+    <wire from="(540,370)" to="(650,370)"/>
+    <wire from="(650,340)" to="(760,340)"/>
+    <wire from="(760,300)" to="(760,340)"/>
+    <wire from="(760,300)" to="(800,300)"/>
+    <wire from="(650,350)" to="(780,350)"/>
+    <wire from="(780,340)" to="(780,350)"/>
+    <wire from="(780,340)" to="(800,340)"/>
   </circuit>
   <circuit name="InterruptController">
     <a name="appearance" val="logisim_evolution"/>
