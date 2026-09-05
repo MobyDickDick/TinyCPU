@@ -90,8 +90,11 @@ Release-Gate als fertige System-CPU behandelt.
 Der erste interne Baustein `OutputPort` ist jetzt ebenfalls Bestandteil der
 Schaltung. Zwei taktsynchrone Register übernehmen Wert und Validität gemeinsam
 bei `WRITE_ENABLE`; `RESET` löscht beide Zustände. Sein maschinenlesbarer
-Komponentenvertrag und der Offline-Prüfer sichern Pinrichtungen, Breiten und
-die beiden getrennten Zustandsregister ab. Der neue Baustein
+Komponentenvertrag und der Offline-Prüfer sichern Pinrichtungen, Breiten, die
+beiden getrennten Zustandsregister und nun auch jeden Daten-, Freigabe-, Takt-,
+Reset- und Ausgangspfad ab. Damit kann weder eine nur einseitige Freigabe noch
+ein vom Wert entkoppeltes Valid-Bit unbemerkt in die elektrische Abnahme
+gelangen. Der neue Baustein
 `OutputMemoryPath` friert jetzt auch die Speicherpfadgrenze ein: Er dekodiert
 ausschließlich Adresse `0xfff`, trennt Port- und RAM-Schreibfreigabe und beschreibt die Auswahl von Wert und Validität beim Lesen.
 Der Komponentenvertrag und der Offline-Prüfer sichern dabei Adress- und

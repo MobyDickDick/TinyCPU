@@ -18,6 +18,15 @@
         "reset",
         "write",
         "hold"
+      ],
+      "verified_paths": [
+        "write_value_to_value_register",
+        "write_valid_to_valid_register",
+        "shared_write_enable",
+        "shared_clock",
+        "shared_reset",
+        "value_register_to_output",
+        "valid_register_to_output"
       ]
     },
     "output_memory_path": {

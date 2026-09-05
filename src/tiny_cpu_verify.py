@@ -263,6 +263,44 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             f"{display_path(system.circuit_path)}: OutputPort registers differ from contract"
         )
+    output_wires = {
+        (wire.get("from"), wire.get("to")) for wire in output.findall("wire")
+    }
+    # Check the actual Logisim register ports, not merely the presence of
+    # suitably named components. Removing either half of a shared control net
+    # must fail offline before an electrical run is attempted.
+    expected_output_wires = {
+        ("(180,140)", "(430,140)"),
+        ("(180,200)", "(300,200)"),
+        ("(300,200)", "(300,240)"),
+        ("(300,240)", "(430,240)"),
+        ("(180,260)", "(330,260)"),
+        ("(330,160)", "(330,260)"),
+        ("(330,160)", "(430,160)"),
+        ("(330,260)", "(430,260)"),
+        ("(180,320)", "(350,320)"),
+        ("(350,180)", "(350,320)"),
+        ("(350,180)", "(430,180)"),
+        ("(350,280)", "(350,320)"),
+        ("(350,280)", "(430,280)"),
+        ("(180,380)", "(460,380)"),
+        ("(460,200)", "(460,380)"),
+        ("(460,200)", "(460,210)"),
+        ("(460,300)", "(460,380)"),
+        ("(460,300)", "(460,310)"),
+        ("(490,140)", "(600,140)"),
+        ("(490,240)", "(600,240)"),
+    }
+    expected_paths = {
+        "write_value_to_value_register", "write_valid_to_valid_register",
+        "shared_write_enable", "shared_clock", "shared_reset",
+        "value_register_to_output", "valid_register_to_output",
+    }
+    if (output_wires != expected_output_wires
+            or set(component_contract.get("verified_paths", [])) != expected_paths):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: OutputPort wiring differs from contract"
+        )
 
     path_contract = contract.get("components", {}).get("output_memory_path", {})
     path_name = path_contract.get("circuit")
