@@ -315,6 +315,91 @@ def verify_system_circuit() -> None:
             f"{display_path(system.circuit_path)}: OutputMemoryPath address differs from contract"
         )
 
+    interrupt_contract = contract.get("components", {}).get("interrupt_controller", {})
+    interrupt_name = interrupt_contract.get("circuit")
+    interrupt = project.find(f"circuit[@name='{interrupt_name}']")
+    if interrupt is None:
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: InterruptController circuit is missing"
+        )
+    interrupt_pins = {}
+    for component in interrupt.findall("comp[@name='Pin']"):
+        attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
+        interrupt_pins[attributes.get("label", "")] = {
+            "direction": attributes.get("type", "input"),
+            "bits": int(attributes.get("width", "1")),
+        }
+    address_bits = interrupt_contract.get("address_bits")
+    expected_interrupt_pins = {
+        "INTERRUPT_REQUEST": {"direction": "input", "bits": 1},
+        "INSTRUCTION_BOUNDARY": {"direction": "input", "bits": 1},
+        "ENABLE_REQUEST": {"direction": "input", "bits": 1},
+        "DISABLE_REQUEST": {"direction": "input", "bits": 1},
+        "RETURN_REQUEST": {"direction": "input", "bits": 1},
+        "NEXT_PC": {"direction": "input", "bits": address_bits},
+        "CLK": {"direction": "input", "bits": 1},
+        "RESET": {"direction": "input", "bits": 1},
+        "INTERRUPT_ACCEPT": {"direction": "output", "bits": 1},
+        "TARGET_PC": {"direction": "output", "bits": address_bits},
+        "INTERRUPT_ENABLED": {"direction": "output", "bits": 1},
+        "INTERRUPT_PENDING": {"direction": "output", "bits": 1},
+        "IN_INTERRUPT_HANDLER": {"direction": "output", "bits": 1},
+        "RETURN_ADDRESS": {"direction": "output", "bits": address_bits},
+        "RETURN_ADDRESS_VALID": {"direction": "output", "bits": 1},
+        "ILLEGAL_RETURN": {"direction": "output", "bits": 1},
+    }
+    if interrupt_pins != expected_interrupt_pins:
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: InterruptController pins differ from contract"
+        )
+    register_labels = {
+        "REQUEST_LEVEL": "request_level",
+        "INTERRUPT_ENABLED": "enabled",
+        "INTERRUPT_PENDING": "pending",
+        "IN_INTERRUPT_HANDLER": "in_handler",
+        "RETURN_ADDRESS": "return_address",
+        "RETURN_ADDRESS_VALID": "return_address_valid",
+    }
+    interrupt_registers = {}
+    for component in interrupt.findall("comp[@name='Register']"):
+        attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
+        label = attributes.get("label", "")
+        if label in register_labels:
+            interrupt_registers[register_labels[label]] = int(attributes.get("width", "1"))
+    if interrupt_registers != interrupt_contract.get("registers"):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: InterruptController registers differ from contract"
+        )
+    interrupt_labels = {
+        item.get("val")
+        for component in interrupt.findall("comp")
+        for item in component.findall("a[@name='label']")
+    }
+    required_interrupt_labels = {
+        "INTERRUPT_VECTOR", "RISING_EDGE_DETECT", "INTERRUPT_ACCEPT_GATE",
+        "ILLEGAL_RETURN_GATE", "INTERRUPT_TARGET_SELECT",
+    }
+    if not required_interrupt_labels <= interrupt_labels:
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: InterruptController routing differs from contract"
+        )
+    vector = None
+    for constant_component in interrupt.findall("comp[@name='Constant']"):
+        label = constant_component.find("a[@name='label']")
+        if label is not None and label.get("val") == "INTERRUPT_VECTOR":
+            vector = constant_component.find("a[@name='value']")
+            break
+    if vector is None or int(vector.get("val", "-1"), 0) != interrupt_contract.get("vector"):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: InterruptController vector differs from contract"
+        )
+    if (interrupt_contract.get("vector") != system.interrupt_vector
+            or interrupt_contract.get("priority") != contract.get("priority")
+            or interrupt_contract.get("request_edge") != contract["interrupt"]["request"]):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: InterruptController contract differs from system profile"
+        )
+
 
 def verify_electrical_matrix(
     matrix: dict[str, object], machine: dict[str, object], profile_name: str, source: Path
