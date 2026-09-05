@@ -5,6 +5,20 @@
   "machine_format": "tinycpu-system-machine-v1.json",
   "machine_format_id": "tinycpu-system-machine-v1",
   "trace_schema": "tinycpu-system-trace-v1.json",
+  "circuit": "TinyCPU-Peripherals.circ",
+  "top_circuit": "TinyCPUSystemMain",
+  "public_pins": {
+    "CLK": {"direction": "input", "bits": 1},
+    "RESET": {"direction": "input", "bits": 1},
+    "INTERRUPT_REQUEST": {"direction": "input", "bits": 1},
+    "OUTPUT_PORT_VALUE": {"direction": "output", "bits": 16},
+    "OUTPUT_PORT_VALID": {"direction": "output", "bits": 1},
+    "INTERRUPT_ENABLED": {"direction": "output", "bits": 1},
+    "INTERRUPT_PENDING": {"direction": "output", "bits": 1},
+    "IN_INTERRUPT_HANDLER": {"direction": "output", "bits": 1},
+    "RETURN_ADDRESS": {"direction": "output", "bits": 12},
+    "RETURN_ADDRESS_VALID": {"direction": "output", "bits": 1}
+  },
   "io": {
     "output_address": 4095,
     "data_bits": 16,

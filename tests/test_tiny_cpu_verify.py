@@ -55,6 +55,9 @@ class CircuitVerificationTests(unittest.TestCase):
         machine = json.loads((logisim / "tinycpu-machine-8-v1.json").read_text())
         VERIFY.verify_small_profile_circuit(profile, machine)
 
+    def test_ap18_circuit_matches_public_pin_contract(self) -> None:
+        VERIFY.verify_system_circuit()
+
     def test_8_8_circuit_rejects_a_legacy_width(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"

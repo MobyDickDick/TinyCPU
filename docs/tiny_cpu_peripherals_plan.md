@@ -1,6 +1,6 @@
 # Vorschlag: Peripherie und Integration
 
-**Status: in Umsetzung (Software-Referenzphase abgeschlossen).** Dieses Dokument trifft die nach AP 17 noch offene
+**Status: in Umsetzung (elektrische Systemgrenze eingecheckt).** Dieses Dokument trifft die nach AP 17 noch offene
 Produktentscheidung. Die Richtung **Peripherie und Integration** wird als
 **AP 18** ausgewählt. Das Paket ergänzt genau einen speicherabgebildeten
 Ausgabeport und eine externe, maskierbare Interruptquelle. Weitere Geräte und
@@ -77,6 +77,15 @@ Handlers illegal und setzt das bestehende Sticky-Flag `ILL` mit Fehlerhalt.
 Nicht Bestandteil sind DMA, verschachtelte oder priorisierte Interrupts,
 mehrere Interruptquellen, Timer, serielle Protokolle, Eingabegeräte,
 Bus-Arbitration, Wait States und eine Änderung des 8/8-Profils.
+
+Die eigenständige Datei `TinyCPU-Peripherals.circ` friert nun außerdem die
+elektrische Systemgrenze ein. Ihr Top-Level `TinyCPUSystemMain` exportiert die
+Interruptanforderung und sämtliche zusätzlichen Trace-Zustände als direkte
+Pins. Der Offline-Prüfer gleicht Richtung und Breite jedes Pins mit dem
+Systemprofil ab. Die interne Verdrahtung des Ausgabeports und der
+Interruptsteuerung sowie deren elektrische Abnahme bleiben die nächsten
+Teilschritte von AP 18; die neue Datei wird daher noch nicht vom elektrischen
+Release-Gate als fertige System-CPU behandelt.
 
 ## Kompatibilitätsfolgen
 
