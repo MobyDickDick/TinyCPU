@@ -60,24 +60,29 @@ Die bei dieser Reparatur sichtbar gewordene Adress-/Halt-Abweichung wurde in
 den folgenden Integrationspaketen behoben und ist durch die AP-12-Abnahme
 abgedeckt.
 
-`FetchDecodeControls` führt die binären Rechenoperationen und die vier
-Argumentarten bewusst als zwei unabhängige Gruppen heraus. Beispielsweise
-bedeutet `ADD_OPERAND` nur „ADD ist aktiv“, während `CONST_ARGUMENT`,
-`ADDR_ARGUMENT`, `ADDR_REG_ARGUMENT` oder `ADDR_REG_OFFS_ARGUMENT` die
-Argumentquelle festlegen. Das Hauptblatt soll daher nicht wieder je eine
-Leitung für jede Kombination wie `ADD_CONST` oder `ADD_ADR_REG` erhalten.
-Stattdessen werden Operation und Argumentart erst am Verbraucher kombiniert.
-Sprung-, Lade-, Speicher-, Fehler- und E/A-Steuerungen bleiben eigenständige
-Direktausgänge. Der Hardwarevertrag bildet diese drei disjunkten Gruppen als
-`operation_outputs`, `argument_outputs` und `direct_outputs` ab; der
-Netlist-Inspektor verlangt, dass jeder Ausgang genau einer Gruppe angehört.
-
-`JUMP_NOT_ZERO` ist weiterhin **kein** reservierter Opcode und bleibt als
-eigener Direktausgang von `JUMP_NEGATIVE` getrennt. Der physische Pin darf an
-einem freien Symbolplatz liegen: Logisim ordnet die Ports automatisch nach den
-Pin-Koordinaten, während der Hardwarevertrag die Schnittstelle absichtlich
-über Namen statt über die Zeichenposition beschreibt. Ein Verschieben darf
-deshalb keine bereits verdrahteten Fehler-, Ein-/Ausgabe- oder Haltanschlüsse am
+Die Ausgänge von `FetchDecodeControls` folgen für jede Steuerung exakt der
+nummerierten Opcode-Spur des Maschinenformats. Die im Schaltbild offene
+Decoderleitung zwischen `JUMP_ZERO` und `JUMP_NEGATIVE` ist Spur 36
+(`JUMP_NOT_ZERO`). Sie ist **nicht** ein reservierter Opcode: Dem Block fehlt
+hier ein gleichnamiger Ausgangspin, sodass auch `FetchDecode.DEC_JUMP_NOT_ZERO`
+keinen Treiber erhält. Die bedingte Auswertung gehört zwar in den separaten
+`FetchDecode`-Block, dieser benötigt dafür aber weiterhin das Decodesignal; die
+offene Leitung ist daher eine Verdrahtungslücke und nicht beabsichtigt.
+Insbesondere darf das reparierte, separat verknüpfte `JUMP_NOT_ZERO`-Signal
+keine gemeinsame Decoder-Spur mit `JUMP_NEGATIVE` belegen:
+die folgenden Steuerungen bleiben bis `HALT` (Opcode 44) und `HALT_ERROR`
+(Opcode 45) um eine Position versetzt. Dadurch meldet das AP-5-Programm an
+seiner Halt-Instruktion den normalen Ausgang statt des Fehlerhalts. Die damals
+noch zu kurze Schleifenausführung wurde anschließend über den elektrischen
+JNZ-Statuspfad behoben und ist kein offener Integrationspunkt mehr.
+Der Netlist-Inspektor prüft dabei nicht nur vorhandene Pins gegen ihre Spur,
+sondern meldet auch jeden fehlenden Ausgang der versionierten Opcode-Tabelle.
+Damit kann eine Decoderleitung nicht erneut dadurch aus der Abnahme fallen,
+dass ihr Pin vollständig aus dem Schaltbild entfernt wird.
+Der physische Pin steht absichtlich im letzten freien Symbolplatz: Logisim
+ordnet die Ports automatisch nach den Pin-Koordinaten. Ein Einschieben zwischen
+`JUMP_ZERO` und `JUMP_NEGATIVE` würde deshalb alle bereits verdrahteten
+`JUMP_NEGATIVE`-, Fehler-, Ein-/Ausgabe-, Halt- und XOR-Anschlüsse am
 Top-Level-Symbol um einen Rasterpunkt verschieben. Die Opcode-Zuordnung entsteht
 stattdessen durch die separate Leitung von Decoder-Spur 36; die Pinposition ist
 keine Opcode-Nummerierung.
