@@ -148,6 +148,55 @@ class LogisimLauncherTests(unittest.TestCase):
             self.assertIn(("(680,100)", "(680,160)"), wires)
             self.assertIn(("(680,100)", "(710,100)"), wires)
 
+    def test_fetch_decode_controls_diagnostic_uses_grouped_operand_outputs(self):
+        project = ROOT / "hardware/logisim/diagnostics/TinyCPU-FetchDecodeControls.circ"
+        root = ET.parse(project).getroot()
+        controls = next(
+            circuit
+            for circuit in root.findall("circuit")
+            if circuit.get("name") == "FetchDecodeControls"
+        )
+        labels = {
+            attribute.get("val")
+            for component in controls.findall("comp")
+            for attribute in component.findall("a")
+            if attribute.get("name") == "label"
+        }
+        self.assertTrue(
+            {
+                "ADD_OPERAND",
+                "SUB_OPERAND",
+                "MUL_OPERAND",
+                "DIV_OPERAND",
+                "AND_OPERAND",
+                "OR_OPERAND",
+                "XOR_OPERAND",
+                "CONST_ARGUMENT",
+                "ADDR_ARGUMENT",
+                "ADDR_REG_ARGUMENT",
+                "ADDR_REG_OFFS_ARGUMENT",
+                "INVALID_OPERAND",
+            }.issubset(labels)
+        )
+        self.assertTrue(
+            {
+                "ADD_OPERAND_SELECT",
+                "SUB_OPERAND_SELECT",
+                "MUL_OPERAND_SELECT",
+                "DIV_OPERAND_SELECT",
+                "AND_OPERAND_SELECT",
+                "OR_OPERAND_SELECT",
+                "XOR_OPERAND_SELECT",
+                "CONST_ARGUMENT_SELECT",
+                "ADDR_ARGUMENT_SELECT",
+                "ADDR_REG_ARGUMENT_SELECT",
+                "ADDR_REG_OFFS_ARGUMENT_SELECT",
+                "INVALID_OPERAND_SELECT",
+            }.issubset(labels)
+        )
+        self.assertNotIn("ADD_CONST", labels)
+        self.assertNotIn("XOR_REG_OFF", labels)
+
     def test_matrix_rom_is_injected_only_into_temporary_project(self):
         source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
         before = source.read_bytes()
