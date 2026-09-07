@@ -152,6 +152,61 @@ def _rom_words(text: str, *, source: Path, address_bits: int, word_bits: int) ->
     return words
 
 
+def verify_decode_pin_contract(
+    profile: dict[str, object], project: ET.Element, source: Path
+) -> None:
+    """Require the complete external decode interface to match its profile."""
+    datapaths = profile.get("datapaths")
+    directions = profile.get("pin_directions")
+    if not isinstance(datapaths, dict) or not isinstance(directions, dict):
+        raise VerificationError(f"{display_path(source)}: profile pin contract is missing")
+
+    circuit_name = "FetchDecodeControls"
+    contract = datapaths.get(circuit_name)
+    expected_directions = directions.get(circuit_name)
+    if not isinstance(contract, dict) or not isinstance(contract.get("pins"), dict):
+        raise VerificationError(f"{display_path(source)}: decode pin contract is missing")
+    groups = contract.get("control_groups")
+    required_groups = {"operation_outputs", "argument_outputs", "direct_outputs"}
+    if not isinstance(groups, dict) or set(groups) != required_groups:
+        raise VerificationError(f"{display_path(source)}: decode control groups are incomplete")
+    grouped_outputs: list[str] = []
+    for group_name in required_groups:
+        group = groups[group_name]
+        if not isinstance(group, list) or any(not isinstance(pin, str) for pin in group):
+            raise VerificationError(
+                f"{display_path(source)}: decode control group {group_name!r} is invalid"
+            )
+        grouped_outputs.extend(group)
+    expected_outputs = set(contract["pins"]) - {"OPCODE"}
+    if len(grouped_outputs) != len(set(grouped_outputs)) or set(grouped_outputs) != expected_outputs:
+        raise VerificationError(
+            f"{display_path(source)}: decode outputs must occur in exactly one control group"
+        )
+    circuit = next(
+        (item for item in project.findall("circuit") if item.get("name") == circuit_name), None
+    )
+    if circuit is None:
+        raise VerificationError(f"{display_path(source)}: contracted decode circuit is missing")
+    actual: dict[str, int] = {}
+    actual_directions: dict[str, str] = {}
+    for component in circuit.findall("comp"):
+        if component.get("name") != "Pin":
+            continue
+        attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
+        label = attributes.get("label", "")
+        actual[label] = int(attributes.get("width", "1"))
+        actual_directions[label] = attributes.get("type", "input")
+    if actual != contract["pins"]:
+        raise VerificationError(
+            f"{display_path(source)}:{circuit_name}: pins differ from profile contract"
+        )
+    if actual_directions != expected_directions:
+        raise VerificationError(
+            f"{display_path(source)}:{circuit_name}: pin directions differ from profile contract"
+        )
+
+
 def verify_small_profile_circuit(profile: dict[str, object], machine: dict[str, object]) -> None:
     """Check that the checked-in 8/8 circuit really is width-specialized.
 
@@ -606,6 +661,8 @@ def verify_contracts() -> tuple[int, int]:
             raise VerificationError(f"profile {current_profile.get('name')!r} is inconsistent")
         if current_profile.get("machine_format") != current_machine_path_name(current_machine):
             raise VerificationError(f"profile {current_profile.get('name')!r} selects the wrong format file")
+    main_circuit_path = LOGISIM / str(profile.get("circuit", "TinyCPU.circ"))
+    verify_decode_pin_contract(profile, ET.parse(main_circuit_path).getroot(), main_circuit_path)
     verify_small_profile_circuit(small_profile, small_machine)
     verify_system_circuit()
 

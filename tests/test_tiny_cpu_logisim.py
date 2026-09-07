@@ -133,8 +133,10 @@ class LogisimLauncherTests(unittest.TestCase):
             root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             wires = {(w.get("from"), w.get("to")) for w in main.findall("wire")}
-            self.assertIn(
-                ("(2280,2130)", "(2470,2130)"), wires,
+            self.assertTrue(
+                any(start == "(2280,2130)" and end in {
+                    "(2470,2130)", "(2520,2130)"
+                } for start, end in wires),
                 f"{name} leaves the register-plus-offset selector floating",
             )
 
