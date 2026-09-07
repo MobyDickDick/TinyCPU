@@ -166,6 +166,23 @@ def verify_decode_pin_contract(
     expected_directions = directions.get(circuit_name)
     if not isinstance(contract, dict) or not isinstance(contract.get("pins"), dict):
         raise VerificationError(f"{display_path(source)}: decode pin contract is missing")
+    groups = contract.get("control_groups")
+    required_groups = {"operation_outputs", "argument_outputs", "direct_outputs"}
+    if not isinstance(groups, dict) or set(groups) != required_groups:
+        raise VerificationError(f"{display_path(source)}: decode control groups are incomplete")
+    grouped_outputs: list[str] = []
+    for group_name in required_groups:
+        group = groups[group_name]
+        if not isinstance(group, list) or any(not isinstance(pin, str) for pin in group):
+            raise VerificationError(
+                f"{display_path(source)}: decode control group {group_name!r} is invalid"
+            )
+        grouped_outputs.extend(group)
+    expected_outputs = set(contract["pins"]) - {"OPCODE"}
+    if len(grouped_outputs) != len(set(grouped_outputs)) or set(grouped_outputs) != expected_outputs:
+        raise VerificationError(
+            f"{display_path(source)}: decode outputs must occur in exactly one control group"
+        )
     circuit = next(
         (item for item in project.findall("circuit") if item.get("name") == circuit_name), None
     )
