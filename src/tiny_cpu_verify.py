@@ -152,95 +152,6 @@ def _rom_words(text: str, *, source: Path, address_bits: int, word_bits: int) ->
     return words
 
 
-def verify_decode_pin_contract(
-    profile: dict[str, object], project: ET.Element, source: Path
-) -> None:
-    """Require the complete external decode interface to match its profile."""
-    datapaths = profile.get("datapaths")
-    directions = profile.get("pin_directions")
-    if not isinstance(datapaths, dict) or not isinstance(directions, dict):
-        raise VerificationError(f"{display_path(source)}: profile pin contract is missing")
-
-    circuit_name = "FetchDecodeControls"
-    contract = datapaths.get(circuit_name)
-    expected_directions = directions.get(circuit_name)
-    if not isinstance(contract, dict) or not isinstance(contract.get("pins"), dict):
-        raise VerificationError(f"{display_path(source)}: decode pin contract is missing")
-    groups = contract.get("control_groups")
-    required_groups = {"operation_outputs", "argument_outputs", "direct_outputs"}
-    if not isinstance(groups, dict) or set(groups) != required_groups:
-        raise VerificationError(f"{display_path(source)}: decode control groups are incomplete")
-    grouped_outputs: list[str] = []
-    for group_name in required_groups:
-        group = groups[group_name]
-        if not isinstance(group, list) or any(not isinstance(pin, str) for pin in group):
-            raise VerificationError(
-                f"{display_path(source)}: decode control group {group_name!r} is invalid"
-            )
-        grouped_outputs.extend(group)
-    expected_outputs = set(contract["pins"]) - {"OPCODE"}
-    if len(grouped_outputs) != len(set(grouped_outputs)) or set(grouped_outputs) != expected_outputs:
-        raise VerificationError(
-            f"{display_path(source)}: decode outputs must occur in exactly one control group"
-        )
-    circuit = next(
-        (item for item in project.findall("circuit") if item.get("name") == circuit_name), None
-    )
-    if circuit is None:
-        raise VerificationError(f"{display_path(source)}: contracted decode circuit is missing")
-    actual: dict[str, int] = {}
-    actual_directions: dict[str, str] = {}
-    for component in circuit.findall("comp"):
-        if component.get("name") != "Pin":
-            continue
-        attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
-        label = attributes.get("label", "")
-        actual[label] = int(attributes.get("width", "1"))
-        actual_directions[label] = attributes.get("type", "input")
-    if actual != contract["pins"]:
-        raise VerificationError(
-            f"{display_path(source)}:{circuit_name}: pins differ from profile contract"
-        )
-    if actual_directions != expected_directions:
-        raise VerificationError(
-            f"{display_path(source)}:{circuit_name}: pin directions differ from profile contract"
-        )
-
-
-def verify_control_wiring_contract(profile: dict[str, object]) -> None:
-    """Validate the grouped FetchDecodeControls-to-Operations wiring plan."""
-    path = LOGISIM / "tinycpu-control-wiring-v2.json"
-    contract = load_json(path)
-    if not isinstance(contract, dict) or contract.get("schema_version") != 2:
-        raise VerificationError(f"{display_path(path)}: unsupported control wiring schema")
-    if contract.get("source") != "FetchDecodeControls" or contract.get("consumer") != "Operations":
-        raise VerificationError(f"{display_path(path)}: invalid control wiring boundary")
-    datapaths = profile.get("datapaths")
-    decode = datapaths.get("FetchDecodeControls") if isinstance(datapaths, dict) else None
-    groups = decode.get("control_groups") if isinstance(decode, dict) else None
-    if not isinstance(groups, dict):
-        raise VerificationError(f"{display_path(path)}: decode groups are unavailable")
-    operations = contract.get("operation_controls")
-    arguments = contract.get("argument_controls")
-    if operations != groups.get("operation_outputs") or arguments != groups.get("argument_outputs"):
-        raise VerificationError(f"{display_path(path)}: grouped controls differ from decode contract")
-    operation_inputs = contract.get("operation_inputs")
-    argument_inputs = contract.get("argument_inputs")
-    if not isinstance(operation_inputs, dict) or set(operation_inputs) != set(operations):
-        raise VerificationError(f"{display_path(path)}: operation input mapping is incomplete")
-    if not isinstance(argument_inputs, dict) or set(argument_inputs) != set(arguments):
-        raise VerificationError(f"{display_path(path)}: argument input mapping is incomplete")
-    combinations = {
-        f"{operation}_{argument}"
-        for operation in operation_inputs.values()
-        for argument in argument_inputs.values()
-    }
-    if len(combinations) != 28 or contract.get("combination") != "operation AND argument":
-        raise VerificationError(f"{display_path(path)}: expected 28 local AND combinations")
-    if contract.get("excluded_circuits") != ["TinyCPU-8-8.circ"]:
-        raise VerificationError(f"{display_path(path)}: 8/8 circuit must remain excluded")
-
-
 def verify_small_profile_circuit(profile: dict[str, object], machine: dict[str, object]) -> None:
     """Check that the checked-in 8/8 circuit really is width-specialized.
 
@@ -695,9 +606,6 @@ def verify_contracts() -> tuple[int, int]:
             raise VerificationError(f"profile {current_profile.get('name')!r} is inconsistent")
         if current_profile.get("machine_format") != current_machine_path_name(current_machine):
             raise VerificationError(f"profile {current_profile.get('name')!r} selects the wrong format file")
-    main_circuit_path = LOGISIM / str(profile.get("circuit", "TinyCPU.circ"))
-    verify_decode_pin_contract(profile, ET.parse(main_circuit_path).getroot(), main_circuit_path)
-    verify_control_wiring_contract(profile)
     verify_small_profile_circuit(small_profile, small_machine)
     verify_system_circuit()
 

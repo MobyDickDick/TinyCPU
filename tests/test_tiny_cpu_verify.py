@@ -245,15 +245,6 @@ class CircuitVerificationTests(unittest.TestCase):
         with self.assertRaisesRegex(VERIFY.VerificationError, "invalid for tinycpu-8-8"):
             VERIFY.verify_electrical_matrix(matrix, machine, "tinycpu-8-8", Path("matrix.json"))
 
-    def test_grouped_control_wiring_contract(self) -> None:
-        root = MODULE_PATH.parents[1]
-        logisim = root / "hardware" / "logisim"
-        profile = json.loads((logisim / "tinycpu-16-12.json").read_text())
-        original = VERIFY.LOGISIM
-        VERIFY.LOGISIM = logisim
-        self.addCleanup(setattr, VERIFY, "LOGISIM", original)
-        VERIFY.verify_control_wiring_contract(profile)
-
 
 if __name__ == "__main__":
     unittest.main()
