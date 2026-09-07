@@ -149,16 +149,22 @@ class LogisimLauncherTests(unittest.TestCase):
             self.assertIn(("(680,100)", "(710,100)"), wires)
 
     def test_fetch_decode_controls_diagnostic_uses_grouped_operand_outputs(self):
-        project = ROOT / "hardware/logisim/diagnostics/TinyCPU-FetchDecodeControls.circ"
-        root = ET.parse(project).getroot()
-        controls = next(
-            circuit
-            for circuit in root.findall("circuit")
-            if circuit.get("name") == "FetchDecodeControls"
-        )
+        projects = [
+            ROOT / "hardware/logisim/diagnostics/TinyCPU-FetchDecodeControls.circ",
+            ROOT / "hardware/logisim/TinyCPU.circ",
+            ROOT / "hardware/logisim/TinyCPU-8-8.circ",
+        ]
+        controls = []
+        for project in projects:
+            root = ET.parse(project).getroot()
+            controls.append(next(
+                circuit
+                for circuit in root.findall("circuit")
+                if circuit.get("name") == "FetchDecodeControls"
+            ))
         labels = {
             attribute.get("val")
-            for component in controls.findall("comp")
+            for component in controls[0].findall("comp")
             for attribute in component.findall("a")
             if attribute.get("name") == "label"
         }
@@ -196,6 +202,15 @@ class LogisimLauncherTests(unittest.TestCase):
         )
         self.assertNotIn("ADD_CONST", labels)
         self.assertNotIn("XOR_REG_OFF", labels)
+        for circuit in controls:
+            circuit.tail = None
+        diagnostic_netlist = ET.tostring(controls[0], encoding="unicode")
+        for project, integrated in zip(projects[1:], controls[1:]):
+            self.assertEqual(
+                ET.tostring(integrated, encoding="unicode"),
+                diagnostic_netlist,
+                f"{project.name} does not embed the maintained grouped decoder",
+            )
 
     def test_matrix_rom_is_injected_only_into_temporary_project(self):
         source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
