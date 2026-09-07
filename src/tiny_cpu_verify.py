@@ -207,6 +207,40 @@ def verify_decode_pin_contract(
         )
 
 
+def verify_control_wiring_contract(profile: dict[str, object]) -> None:
+    """Validate the grouped FetchDecodeControls-to-Operations wiring plan."""
+    path = LOGISIM / "tinycpu-control-wiring-v2.json"
+    contract = load_json(path)
+    if not isinstance(contract, dict) or contract.get("schema_version") != 2:
+        raise VerificationError(f"{display_path(path)}: unsupported control wiring schema")
+    if contract.get("source") != "FetchDecodeControls" or contract.get("consumer") != "Operations":
+        raise VerificationError(f"{display_path(path)}: invalid control wiring boundary")
+    datapaths = profile.get("datapaths")
+    decode = datapaths.get("FetchDecodeControls") if isinstance(datapaths, dict) else None
+    groups = decode.get("control_groups") if isinstance(decode, dict) else None
+    if not isinstance(groups, dict):
+        raise VerificationError(f"{display_path(path)}: decode groups are unavailable")
+    operations = contract.get("operation_controls")
+    arguments = contract.get("argument_controls")
+    if operations != groups.get("operation_outputs") or arguments != groups.get("argument_outputs"):
+        raise VerificationError(f"{display_path(path)}: grouped controls differ from decode contract")
+    operation_inputs = contract.get("operation_inputs")
+    argument_inputs = contract.get("argument_inputs")
+    if not isinstance(operation_inputs, dict) or set(operation_inputs) != set(operations):
+        raise VerificationError(f"{display_path(path)}: operation input mapping is incomplete")
+    if not isinstance(argument_inputs, dict) or set(argument_inputs) != set(arguments):
+        raise VerificationError(f"{display_path(path)}: argument input mapping is incomplete")
+    combinations = {
+        f"{operation}_{argument}"
+        for operation in operation_inputs.values()
+        for argument in argument_inputs.values()
+    }
+    if len(combinations) != 28 or contract.get("combination") != "operation AND argument":
+        raise VerificationError(f"{display_path(path)}: expected 28 local AND combinations")
+    if contract.get("excluded_circuits") != ["TinyCPU-8-8.circ"]:
+        raise VerificationError(f"{display_path(path)}: 8/8 circuit must remain excluded")
+
+
 def verify_small_profile_circuit(profile: dict[str, object], machine: dict[str, object]) -> None:
     """Check that the checked-in 8/8 circuit really is width-specialized.
 
@@ -663,6 +697,7 @@ def verify_contracts() -> tuple[int, int]:
             raise VerificationError(f"profile {current_profile.get('name')!r} selects the wrong format file")
     main_circuit_path = LOGISIM / str(profile.get("circuit", "TinyCPU.circ"))
     verify_decode_pin_contract(profile, ET.parse(main_circuit_path).getroot(), main_circuit_path)
+    verify_control_wiring_contract(profile)
     verify_small_profile_circuit(small_profile, small_machine)
     verify_system_circuit()
 

@@ -1,0 +1,53 @@
+{
+  "schema_version": 2,
+  "source": "FetchDecodeControls",
+  "consumer": "Operations",
+  "operation_controls": [
+    "ADD_OPERAND",
+    "SUB_OPERAND",
+    "MUL_OPERAND",
+    "DIV_OPERAND",
+    "AND_OPERAND",
+    "OR_OPERAND",
+    "XOR_OPERAND"
+  ],
+  "argument_controls": [
+    "CONST_ARGUMENT",
+    "ADDR_ARGUMENT",
+    "ADDR_REG_ARGUMENT",
+    "ADDR_REG_OFFS_ARGUMENT"
+  ],
+  "operation_inputs": {
+    "ADD_OPERAND": "ADD",
+    "SUB_OPERAND": "SUB",
+    "MUL_OPERAND": "MUL",
+    "DIV_OPERAND": "DIV",
+    "AND_OPERAND": "AND",
+    "OR_OPERAND": "OR",
+    "XOR_OPERAND": "XOR"
+  },
+  "argument_inputs": {
+    "CONST_ARGUMENT": "CONST",
+    "ADDR_ARGUMENT": "ADDRESS",
+    "ADDR_REG_ARGUMENT": "ADDRESS_REGISTER",
+    "ADDR_REG_OFFS_ARGUMENT": "ADDRESS_REGISTER_PLUS_OFFSET"
+  },
+  "shared_data_inputs": {
+    "IMMEDIATE_VALUE": "FetchDecode.OPERAND",
+    "MEMORY_VALUE": "Memory.MEMORY_DATA",
+    "ACC_VALUE": "Datapath.ACC_OUT",
+    "MEMORY_VALID": "Memory.MEMORY_VALID",
+    "ACC_VALID": "Datapath.ACC_VALID_OUT"
+  },
+  "combination": "operation AND argument",
+  "priority": [
+    "operation result",
+    "LOAD_CONST",
+    "memory-backed LOAD",
+    "NOT",
+    "INPUT"
+  ],
+  "excluded_circuits": [
+    "TinyCPU-8-8.circ"
+  ]
+}
