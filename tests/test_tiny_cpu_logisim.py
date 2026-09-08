@@ -169,6 +169,27 @@ class LogisimLauncherTests(unittest.TestCase):
                 for circuit in root.findall("circuit")
             ))
 
+    def test_add_operand_reaches_operations_input(self):
+        expected = {
+            ("(1270,930)", "(2170,930)"),
+            ("(2170,830)", "(2170,930)"),
+            ("(2170,830)", "(2510,830)"),
+        }
+        stale_load_const_route = {
+            ("(1270,930)", "(1640,930)"),
+            ("(1640,770)", "(1640,930)"),
+            ("(1640,770)", "(3350,770)"),
+        }
+        for name in ("TinyCPU.circ", "TinyCPU-8-8.circ"):
+            root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
+            main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+            wires = {(wire.get("from"), wire.get("to")) for wire in main.findall("wire")}
+            self.assertTrue(expected.issubset(wires), f"{name} leaves ADD_OPERAND disconnected")
+            self.assertTrue(
+                stale_load_const_route.isdisjoint(wires),
+                f"{name} still routes ADD_OPERAND to the LOAD_CONST monitor",
+            )
+
     def test_public_decoder_separates_operations_from_argument_kinds(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         controls = next(
