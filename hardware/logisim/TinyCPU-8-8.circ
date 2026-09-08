@@ -1957,11 +1957,11 @@ ff 1c65 3 1c64 2a00 4ff 1c64 2404
     </comp>
     <comp lib="1" loc="(1460,460)" name="OR Gate">
       <a name="inputs" val="7"/>
-      <a name="label" val="CONST_ARGUMENT_SELECT"/>
+      <a name="label" val="CONST_ARUGMENT_SELECT"/>
     </comp>
     <comp lib="1" loc="(1460,540)" name="OR Gate">
       <a name="inputs" val="7"/>
-      <a name="label" val="ADDR_ARGUMENT_SELECT"/>
+      <a name="label" val="ADDR_ARGUM_SELECT"/>
     </comp>
     <comp lib="1" loc="(1460,620)" name="OR Gate">
       <a name="inputs" val="7"/>
@@ -1969,7 +1969,7 @@ ff 1c65 3 1c64 2a00 4ff 1c64 2404
     </comp>
     <comp lib="1" loc="(1460,710)" name="OR Gate">
       <a name="inputs" val="7"/>
-      <a name="label" val="ADDR_REG_OFFS_ARGUMENT_SELECT"/>
+      <a name="label" val="ADDR_REG_OFFS_ARGUMENT_SELECGT"/>
     </comp>
     <comp lib="1" loc="(1460,90)" name="OR Gate">
       <a name="inputs" val="4"/>
