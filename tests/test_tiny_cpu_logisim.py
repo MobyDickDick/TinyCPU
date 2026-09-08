@@ -148,49 +148,24 @@ class LogisimLauncherTests(unittest.TestCase):
             self.assertIn(("(680,100)", "(680,160)"), wires)
             self.assertIn(("(680,100)", "(710,100)"), wires)
 
-    def test_legacy_adapter_is_isolated_from_grouped_public_decoder(self):
-        adapters = []
+    def test_grouped_public_decoder_replaces_legacy_adapter(self):
         for name in ("TinyCPU.circ", "TinyCPU-8-8.circ"):
             root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
-            instances = [
-                component
-                for component in main.findall("comp")
-                if component.get("name") == "ControlAdapterBlock"
-            ]
-            self.assertEqual(len(instances), 1)
-            self.assertFalse(any(
-                component.get("name") == "FetchDecodeControls"
-                for component in main.findall("comp")
-            ))
-
-            adapter = next(
-                circuit
-                for circuit in root.findall("circuit")
-                if circuit.get("name") == "ControlAdapterBlock"
-            )
-            adapters.append(adapter)
             decoders = [
                 component
-                for component in adapter.findall("comp")
-                if component.get("name") == "Decoder"
+                for component in main.findall("comp")
+                if component.get("name") == "FetchDecodeControls"
             ]
             self.assertEqual(len(decoders), 1)
-            labels = {
-                attribute.get("val")
-                for component in adapter.findall("comp")
-                for attribute in component.findall("a")
-                if attribute.get("name") == "label"
-            }
-            self.assertIn("ADD_CONST", labels)
-            self.assertNotIn("ADD_OPERAND", labels)
-
-        for adapter in adapters:
-            adapter.tail = None
-        self.assertEqual(
-            ET.tostring(adapters[0], encoding="unicode"),
-            ET.tostring(adapters[1], encoding="unicode"),
-        )
+            self.assertFalse(any(
+                component.get("name") == "ControlAdapterBlock"
+                for component in main.findall("comp")
+            ))
+            self.assertFalse(any(
+                circuit.get("name") == "ControlAdapterBlock"
+                for circuit in root.findall("circuit")
+            ))
 
     def test_public_grouped_decoder_still_matches_diagnostic(self):
         projects = [
