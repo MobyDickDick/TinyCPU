@@ -116,10 +116,11 @@ def assemble(source: str, profile: Profile = DEFAULT_PROFILE,
         if not match:
             raise AssemblyError(f"line {line}: expected INSTRUCTION(operand)")
         name, operand_text = match.groups()
-        # Source-defined aliases deliberately take precedence so existing
-        # programs can redefine a shorthand without shadowing a canonical
-        # instruction name.
-        name = str(aliases.get(name, BUILTIN_ALIASES.get(name, name)))
+        # Canonical instruction names are the stable public interface.  Only
+        # resolve an alias when the spelling is not already canonical; source
+        # aliases still take precedence over built-in shorthand such as ADC.
+        if name not in table:
+            name = str(aliases.get(name, BUILTIN_ALIASES.get(name, name)))
         entry = table.get(name)
         if entry is None:
             raise AssemblyError(f"line {line}: unknown instruction {name!r}")
