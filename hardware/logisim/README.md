@@ -60,13 +60,19 @@ Die bei dieser Reparatur sichtbar gewordene Adress-/Halt-Abweichung wurde in
 den folgenden Integrationspaketen behoben und ist durch die AP-12-Abnahme
 abgedeckt.
 
-`FetchDecodeControls` führt die binären Rechenoperationen und die vier
-Argumentarten als zwei unabhängige Gruppen heraus. Beispielsweise bedeutet
-`ADD_OPERAND` nur „ADD ist aktiv“, während `CONST_ARGUMENT`, `ADDR_ARGUMENT`,
+`FetchDecodeControls` führt die Operation und die Art des zweiten Operanden als
+zwei unabhängige Signalgruppen heraus. `ADD_OPERAND` bedeutet beispielsweise nur
+„ADD ist aktiv“, während `CONST_ARGUMENT`, `ADDR_ARGUMENT`,
 `ADDR_REG_ARGUMENT` oder `ADDR_REG_OFFS_ARGUMENT` die Argumentquelle festlegen.
-Sprung-, Lade-, Speicher-, Fehler- und E/A-Steuerungen bleiben eigenständige
-Direktausgänge. `JUMP_NOT_ZERO` bleibt dabei ein eigener Direktausgang und ist
-kein reservierter Opcode.
+Dasselbe gilt jetzt auch für Laden und Speichern: `LOAD_OPERAND` beziehungsweise
+`STORE_OPERAND` werden nicht mehr als adressierungsabhängige Einzelsignale
+exportiert. Die Argumentsignale laufen getrennt bis `EffectiveAddress`; dort
+ersetzen `ADDR_REG_ARGUMENT` und `ADDR_REG_OFFS_ARGUMENT` den früheren Fan-in aus
+Lade-, Speicher- und Rechensignalen. Sprung-, Fehler- und E/A-Steuerungen bleiben
+eigenständige Direktausgänge. `JUMP_NOT_ZERO` bleibt dabei ein eigener
+Direktausgang und ist kein reservierter Opcode. Der Pinvertrag in
+`tinycpu-16-12.json` bildet diese Grenze ausdrücklich als `operation_outputs`,
+`argument_outputs` und `direct_outputs` ab.
 
 Auf `TinyCPUMain` ist die frühere Übergangsschicht `ControlAdapterBlock`
 vollständig durch `FetchDecodeControls` ersetzt. Damit verwendet auch die
