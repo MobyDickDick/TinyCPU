@@ -114,5 +114,9 @@ HLT()
         program = assemble("ADC := SUB_CONST\nADC(2)\nHALT()")
         self.assertEqual(program.instructions[0], Instruction("SUB_CONST", 2))
 
+    def test_source_alias_cannot_shadow_canonical_instruction(self) -> None:
+        program = assemble("HALT := LOAD_CONST\nHALT()")
+        self.assertEqual(program.instructions, (Instruction("HALT"),))
+
 
 if __name__ == "__main__": unittest.main()
