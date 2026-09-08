@@ -68,14 +68,11 @@ Sprung-, Lade-, Speicher-, Fehler- und E/A-Steuerungen bleiben eigenständige
 Direktausgänge. `JUMP_NOT_ZERO` bleibt dabei ein eigener Direktausgang und ist
 kein reservierter Opcode.
 
-Die bestehenden, bereits einzeln abgenommenen Verbraucheranschlüsse auf
-`TinyCPUMain` bleiben während der schrittweisen Umstellung hinter dem
-`ControlAdapterBlock` erhalten. Diese ausdrücklich als Übergangsschicht
-benannte Kopie des bisherigen Kombinationsdecoders bewahrt die sichtbare
-Pinfolge und damit die abgenommenen Top-Level-Routen. Sie ist nicht Teil der
-neuen öffentlichen `FetchDecodeControls`-Schnittstelle. Der nächste Umbau kann
-so Verbraucher für Verbraucher erfolgen, während die neue öffentliche
-Decodergrenze unverändert und unabhängig abgenommen bleibt.
+Auf `TinyCPUMain` ist die frühere Übergangsschicht `ControlAdapterBlock`
+vollständig durch `FetchDecodeControls` ersetzt. Damit verwendet auch die
+hierarchische Integrationsseite unmittelbar die öffentliche, gruppierte
+Decodergrenze; eine zweite Kopie des alten Kombinationsdecoders ist weder
+instanziiert noch als Schemablatt im Projekt verblieben.
 
 This directory contains the TinyCPU hardware baseline with a dedicated arithmetic sheet.
 Open `TinyCPU.circ` with Logisim-evolution 4.1.x. Das Blatt **`TinyCPUMain` ist
