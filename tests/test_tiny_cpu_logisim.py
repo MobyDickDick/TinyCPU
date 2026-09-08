@@ -148,7 +148,51 @@ class LogisimLauncherTests(unittest.TestCase):
             self.assertIn(("(680,100)", "(680,160)"), wires)
             self.assertIn(("(680,100)", "(710,100)"), wires)
 
-    def test_fetch_decode_controls_diagnostic_uses_grouped_operand_outputs(self):
+    def test_legacy_adapter_is_isolated_from_grouped_public_decoder(self):
+        adapters = []
+        for name in ("TinyCPU.circ", "TinyCPU-8-8.circ"):
+            root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
+            main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+            instances = [
+                component
+                for component in main.findall("comp")
+                if component.get("name") == "ControlAdapterBlock"
+            ]
+            self.assertEqual(len(instances), 1)
+            self.assertFalse(any(
+                component.get("name") == "FetchDecodeControls"
+                for component in main.findall("comp")
+            ))
+
+            adapter = next(
+                circuit
+                for circuit in root.findall("circuit")
+                if circuit.get("name") == "ControlAdapterBlock"
+            )
+            adapters.append(adapter)
+            decoders = [
+                component
+                for component in adapter.findall("comp")
+                if component.get("name") == "Decoder"
+            ]
+            self.assertEqual(len(decoders), 1)
+            labels = {
+                attribute.get("val")
+                for component in adapter.findall("comp")
+                for attribute in component.findall("a")
+                if attribute.get("name") == "label"
+            }
+            self.assertIn("ADD_CONST", labels)
+            self.assertNotIn("ADD_OPERAND", labels)
+
+        for adapter in adapters:
+            adapter.tail = None
+        self.assertEqual(
+            ET.tostring(adapters[0], encoding="unicode"),
+            ET.tostring(adapters[1], encoding="unicode"),
+        )
+
+    def test_public_grouped_decoder_still_matches_diagnostic(self):
         projects = [
             ROOT / "hardware/logisim/diagnostics/TinyCPU-FetchDecodeControls.circ",
             ROOT / "hardware/logisim/TinyCPU.circ",
@@ -168,47 +212,21 @@ class LogisimLauncherTests(unittest.TestCase):
             for attribute in component.findall("a")
             if attribute.get("name") == "label"
         }
-        self.assertTrue(
-            {
-                "ADD_OPERAND",
-                "SUB_OPERAND",
-                "MUL_OPERAND",
-                "DIV_OPERAND",
-                "AND_OPERAND",
-                "OR_OPERAND",
-                "XOR_OPERAND",
-                "CONST_ARGUMENT",
-                "ADDR_ARGUMENT",
-                "ADDR_REG_ARGUMENT",
-                "ADDR_REG_OFFS_ARGUMENT",
-                "INVALID_OPERAND",
-            }.issubset(labels)
-        )
-        self.assertTrue(
-            {
-                "ADD_OPERAND_SELECT",
-                "SUB_OPERAND_SELECT",
-                "MUL_OPERAND_SELECT",
-                "DIV_OPERAND_SELECT",
-                "AND_OPERAND_SELECT",
-                "OR_OPERAND_SELECT",
-                "XOR_OPERAND_SELECT",
-                "CONST_ARGUMENT_SELECT",
-                "ADDR_ARGUMENT_SELECT",
-                "ADDR_REG_ARGUMENT_SELECT",
-                "ADDR_REG_OFFS_ARGUMENT_SELECT",
-                "INVALID_OPERAND_SELECT",
-            }.issubset(labels)
-        )
+        self.assertTrue({
+            "ADD_OPERAND", "SUB_OPERAND", "MUL_OPERAND", "DIV_OPERAND",
+            "AND_OPERAND", "OR_OPERAND", "XOR_OPERAND", "CONST_ARGUMENT",
+            "ADDR_ARGUMENT", "ADDR_REG_ARGUMENT", "ADDR_REG_OFFS_ARGUMENT",
+            "INVALID_OPERAND",
+        }.issubset(labels))
         self.assertNotIn("ADD_CONST", labels)
         self.assertNotIn("XOR_REG_OFF", labels)
         for circuit in controls:
             circuit.tail = None
-        diagnostic_netlist = ET.tostring(controls[0], encoding="unicode")
+        expected = ET.tostring(controls[0], encoding="unicode")
         for project, integrated in zip(projects[1:], controls[1:]):
             self.assertEqual(
                 ET.tostring(integrated, encoding="unicode"),
-                diagnostic_netlist,
+                expected,
                 f"{project.name} does not embed the maintained grouped decoder",
             )
 
