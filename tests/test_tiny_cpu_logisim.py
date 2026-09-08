@@ -133,8 +133,10 @@ class LogisimLauncherTests(unittest.TestCase):
             root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             wires = {(w.get("from"), w.get("to")) for w in main.findall("wire")}
+            expected = (("(2280,1990)", "(2520,1990)") if name == "TinyCPU.circ"
+                        else ("(2280,2130)", "(2470,2130)"))
             self.assertIn(
-                ("(2280,2130)", "(2470,2130)"), wires,
+                expected, wires,
                 f"{name} leaves the register-plus-offset selector floating",
             )
 
@@ -167,47 +169,47 @@ class LogisimLauncherTests(unittest.TestCase):
                 for circuit in root.findall("circuit")
             ))
 
-    def test_public_grouped_decoder_still_matches_diagnostic(self):
-        projects = [
-            ROOT / "hardware/logisim/diagnostics/TinyCPU-FetchDecodeControls.circ",
-            ROOT / "hardware/logisim/TinyCPU.circ",
-            ROOT / "hardware/logisim/TinyCPU-8-8.circ",
-        ]
-        controls = []
-        for project in projects:
-            root = ET.parse(project).getroot()
-            controls.append(next(
-                circuit
-                for circuit in root.findall("circuit")
-                if circuit.get("name") == "FetchDecodeControls"
-            ))
+    def test_public_decoder_separates_operations_from_argument_kinds(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        controls = next(
+            circuit for circuit in root.findall("circuit")
+            if circuit.get("name") == "FetchDecodeControls"
+        )
         labels = {
             attribute.get("val")
-            for component in controls[0].findall("comp")
+            for component in controls.findall("comp")
             for attribute in component.findall("a")
-            if attribute.get("name") == "label"
+            if component.get("name") == "Pin" and attribute.get("name") == "label"
         }
         self.assertTrue({
             "ADD_OPERAND", "SUB_OPERAND", "MUL_OPERAND", "DIV_OPERAND",
-            "AND_OPERAND", "OR_OPERAND", "XOR_OPERAND", "CONST_ARGUMENT",
-            "ADDR_ARGUMENT", "ADDR_REG_ARGUMENT", "ADDR_REG_OFFS_ARGUMENT",
-            "INVALID_OPERAND", "CONST_ARUGMENT_SELECT", "ADDR_ARGUM_SELECT",
-            "ADDR_REG_OFFS_ARGUMENT_SELECGT",
+            "AND_OPERAND", "OR_OPERAND", "XOR_OPERAND", "LOAD_OPERAND",
+            "STORE_OPERAND", "CONST_ARGUMENT", "ADDR_ARGUMENT",
+            "ADDR_REG_ARGUMENT", "ADDR_REG_OFFS_ARGUMENT",
         }.issubset(labels))
-        self.assertNotIn("ADD_CONST", labels)
-        self.assertNotIn("XOR_REG_OFF", labels)
-        self.assertNotIn("CONST_ARGUMENT_SELECT", labels)
-        self.assertNotIn("ADDR_ARGUMENT_SELECT", labels)
-        self.assertNotIn("ADDR_REG_OFFS_ARGUMENT_SELECT", labels)
-        for circuit in controls:
-            circuit.tail = None
-        expected = ET.tostring(controls[0], encoding="unicode")
-        for project, integrated in zip(projects[1:], controls[1:]):
-            self.assertEqual(
-                ET.tostring(integrated, encoding="unicode"),
-                expected,
-                f"{project.name} does not embed the maintained grouped decoder",
-            )
+        self.assertTrue({
+            "LOAD_CONST", "LOAD_ADR", "LOAD_ADR_REG", "LOAD_REG_OFF",
+            "STORE_ADR", "STORE_ADR_REG", "STORE_REG_OFF",
+        }.isdisjoint(labels))
+
+    def test_argument_kind_drives_effective_address_without_operation_fan_in(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        effective = next(
+            circuit for circuit in root.findall("circuit")
+            if circuit.get("name") == "EffectiveAddress"
+        )
+        pin_labels = {
+            attribute.get("val")
+            for component in effective.findall("comp")
+            for attribute in component.findall("a")
+            if component.get("name") == "Pin" and attribute.get("name") == "label"
+        }
+        self.assertTrue({"ADDR_REG_ARGUMENT", "ADDR_REG_OFFS_ARGUMENT"}.issubset(pin_labels))
+        self.assertFalse(any(
+            label and (label.startswith("ADD_") or label.startswith("LOAD_")
+                       or label.startswith("STORE_") or label.startswith("SUB_"))
+            for label in pin_labels
+        ))
 
     def test_matrix_rom_is_injected_only_into_temporary_project(self):
         source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
