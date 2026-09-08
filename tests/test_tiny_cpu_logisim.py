@@ -216,10 +216,14 @@ class LogisimLauncherTests(unittest.TestCase):
             "ADD_OPERAND", "SUB_OPERAND", "MUL_OPERAND", "DIV_OPERAND",
             "AND_OPERAND", "OR_OPERAND", "XOR_OPERAND", "CONST_ARGUMENT",
             "ADDR_ARGUMENT", "ADDR_REG_ARGUMENT", "ADDR_REG_OFFS_ARGUMENT",
-            "INVALID_OPERAND",
+            "INVALID_OPERAND", "CONST_ARUGMENT_SELECT", "ADDR_ARGUM_SELECT",
+            "ADDR_REG_OFFS_ARGUMENT_SELECGT",
         }.issubset(labels))
         self.assertNotIn("ADD_CONST", labels)
         self.assertNotIn("XOR_REG_OFF", labels)
+        self.assertNotIn("CONST_ARGUMENT_SELECT", labels)
+        self.assertNotIn("ADDR_ARGUMENT_SELECT", labels)
+        self.assertNotIn("ADDR_REG_OFFS_ARGUMENT_SELECT", labels)
         for circuit in controls:
             circuit.tail = None
         expected = ET.tostring(controls[0], encoding="unicode")
