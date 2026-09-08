@@ -190,6 +190,34 @@ class LogisimLauncherTests(unittest.TestCase):
                 f"{name} still routes ADD_OPERAND to the LOAD_CONST monitor",
             )
 
+    def test_sub_operand_reaches_operations_input(self):
+        expected = {
+            ("(1270,950)", "(2190,950)"),
+            ("(2190,850)", "(2190,950)"),
+            ("(2190,850)", "(2490,850)"),
+        }
+        stale_sub_monitor_route = {
+            ("(1270,950)", "(1740,950)"),
+            ("(1740,950)", "(1740,2500)"),
+        }
+        stale_sub_input_route = {
+            ("(1720,850)", "(1720,1030)"),
+            ("(1720,850)", "(2490,850)"),
+        }
+        for name in ("TinyCPU.circ", "TinyCPU-8-8.circ"):
+            root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
+            main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+            wires = {(wire.get("from"), wire.get("to")) for wire in main.findall("wire")}
+            self.assertTrue(expected.issubset(wires), f"{name} leaves SUB_OPERAND disconnected")
+            self.assertTrue(
+                stale_sub_monitor_route.isdisjoint(wires),
+                f"{name} still routes SUB_OPERAND to the stale monitor net",
+            )
+            self.assertTrue(
+                stale_sub_input_route.isdisjoint(wires),
+                f"{name} still routes the stale decoder output to SUB_CONST",
+            )
+
     def test_public_decoder_separates_operations_from_argument_kinds(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         controls = next(
