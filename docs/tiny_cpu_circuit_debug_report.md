@@ -13,8 +13,9 @@ Canvas-Koordinaten verändert.
 | 19.1 Fehlerbild und Baseline einfrieren | abgeschlossen | Baseline und Umgebung sind festgehalten; die Offline-Suite reproduziert zwei Fehler, der elektrische Lauf ist mangels Simulator-JAR noch offen. |
 | 19.2 Projektladung und Hierarchie isolieren | abgeschlossen | Alle drei Smoke-Projekte, 24 Diagnoseblätter und `TinyCPU.circ` laden mit Logisim-evolution 4.1.0 fehlerfrei; die Strukturprüfung findet weder Hierarchie- noch Leitungsfehler. |
 | 19.3 Takt, Reset, PC und Fetch prüfen | abgeschlossen mit Abweichung | Das Minimalprogramm erreicht elektrisch keinen Halt. Der erste bereits vor Takt 0 abweichende benannte Fetch-Eingang ist `PROGRAM_LIMIT`: `TinyCPUMain` treibt ihn konstant mit 0 statt mit der Profilgrenze `0xfff`. Zwei Reset-Läufe sind fachlich identisch. |
-| 19.4 Decoder-Steuerfläche vollständig abgleichen | als Nächstes | Die Steuerleitungen aller 50 Opcodes und die Negativfälle müssen gegen die Opcode-Tabelle geprüft werden. |
-| 19.5–19.10 | offen | Noch nicht begonnen. |
+| 19.4 Decoder-Steuerfläche vollständig abgleichen | abgeschlossen mit Abweichung | Die elektrische 64-Zeilen-Tabelle stimmt nur für die reservierten Codes 54–63: `FetchDecodeControls` dekodiert eine veraltete, gegenüber dem Maschinenformat verschobene Belegung. |
+| 19.5 Akkumulator und Rechenpfad debuggen | als Nächstes | Operandenauswahl, Operationspfad, Ergebnis/Validität und Write-Enable müssen elektrisch gegen kleine ROMs geprüft werden. |
+| 19.6–19.10 | offen | Noch nicht begonnen. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
 
@@ -294,3 +295,109 @@ Paketreihenfolge Aufgabe 19.8 vorbehalten.
 - Aufgabe 19.4 prüft nun die Decoder-Steuerfläche. Der Befund zu
   `PROGRAM_LIMIT` bleibt für 19.8 als erster nachgewiesener Übergang
   `Konstante → FetchDecode.PROGRAM_LIMIT` vorgemerkt.
+
+## 19.4 Decoder-Steuerfläche vollständig abgleichen
+
+### Ausgangslage
+
+Untersucht wurde weiterhin unverändert `FetchDecodeControls` aus der in 19.1
+festgehaltenen Schaltungsquelle. Fachliches Orakel war die 6-Bit-Belegung aus
+`tinycpu-machine-v1.json`: Sie definiert 50 Opcodes mit den Codes 0 bis 49;
+die Codes 50 bis 63 sind reservierte Negativfälle. Die erwartete
+Steuerfläche wurde aus Mnemonik und Adressierungsart abgeleitet:
+
+- genau ein zur Instruktionsfamilie passendes Operationssignal und bei
+  Operandenbefehlen genau eine passende Argumentquelle;
+- bei `NOT`, Sprüngen, E/A, `CLEAR_ERROR` und den beiden Haltarten genau der
+  jeweilige Direktausgang;
+- `INVALID_OPERAND` und kein anderer Ausgang bei jedem reservierten Code;
+- kein direktes `SET_*`-Signal allein durch einen gültigen Opcode. Diese
+  Leitungen melden Laufzeitfehler und sind keine zusätzlichen Maschinenbefehle.
+
+### Kommando oder Bedienfolge
+
+Eine temporäre XML-Kopie setzte lediglich das Projekt-Startblatt auf das
+vorhandene Unterblatt `FetchDecodeControls`; die eingecheckte Schaltung blieb
+unverändert. Logisims Tabellenmodus enumerierte daraufhin automatisch alle
+64 Kombinationen des sechsbittigen Eingabepins und exportierte alle 33
+Steuerausgänge:
+
+```bash
+python3 - <<'PY'
+import xml.etree.ElementTree as ET
+
+tree = ET.parse("hardware/logisim/TinyCPU.circ")
+tree.getroot().find("main").set("name", "FetchDecodeControls")
+tree.write("/tmp/ap19.4-decode.circ", encoding="utf-8", xml_declaration=True)
+PY
+
+timeout 30s /root/.local/share/mise/installs/java/21.0.2/bin/java \
+  -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table /tmp/ap19.4-decode.circ \
+  > artifacts/ap19.4-decode/fetch-decode-controls.tsv
+```
+
+Ein Python-Vergleich lud anschließend die Opcode-Tabelle über
+`opcode_table(load_profile("tinycpu-16-12"))`, erzeugte für jeden Code die
+erwartete Ein-Hot-Steuerzeile und verglich jede Zelle der elektrischen Tabelle.
+Die lokale Zusammenfassung und der vollständige zellenweise Unterschied liegen
+unter `artifacts/ap19.4-decode/`. Wie die vorherigen Rohdaten bleibt dieses
+Verzeichnis außerhalb von Git. Die Nachweise besitzen folgende Digests:
+
+```text
+ff80c5cc0460b29572ec117c3286daa7777f1df2867484b2a0267be928134666  fetch-decode-controls.tsv
+4b6447124baf6c83fe71698ab71db576a00ba7fccff36194585ca248bc30e146  comparison.json
+62d411c8211d7d60da4c51e4a7c79639f911b6b4b89e773789ce73c84d2ba7b8  summary.txt
+```
+
+### Beobachteter Nachweis
+
+Der Simulator lieferte 64 vollständig definierte Zeilen ohne schwebende oder
+fehlerhafte Ausgangswerte. Innerhalb seiner tatsächlichen Belegung hält der
+Decoder den gegenseitigen Ausschluss ein: Höchstens ein Operationssignal,
+höchstens eine Argumentquelle und höchstens ein Direktsignal sind aktiv. Diese
+elektrische Belegung ist jedoch nicht die versionierte Maschinenbelegung.
+
+Nur **10 von 64 Zeilen** stimmen vollständig; dies sind die reservierten Codes
+54 bis 63. Die Codes 0 bis 53 weichen in insgesamt **120 Ausgangszellen** ab.
+Der erste Unterschied liegt bereits bei Code 0: `LOAD_CONST` müsste
+`LOAD_OPERAND + CONST_ARGUMENT` liefern, elektrisch erscheinen aber
+`ADD_OPERAND + CONST_ARGUMENT`. Danach zeigt sich eine durchgängige alte
+Gruppierung:
+
+| Codes | Versioniertes Maschinenformat | Elektrischer Decoder |
+|---:|---|---|
+| 0–3 | `LOAD_*` | `ADD_OPERAND` |
+| 4–27 | `ADD_*` bis `OR_*` | `SUB_OPERAND` bis `XOR_OPERAND` |
+| 28–34 | `STORE_*`, Adressregister-Laden, `NOT`, `JUMP_ADDRESS` | `LOAD_OPERAND`, `STORE_OPERAND` |
+| 35–41 | Sprünge, `CLEAR_ERROR`, `INPUT` | `NOT`, Sprünge bis `JUMP_NOT_ERROR` |
+| 42–47 | `PRINT`, `PRINT_ADDRESS`, Haltarten, `XOR_CONST`, `XOR_ADDRESS` | `SET_OVF` bis `SET_INPUT` |
+| 48–49 | `XOR_ADDRESS_REGISTER*` | `CLEAR_ERROR`, `INPUT` |
+| 50–53 | reserviert | `PRINT`, `PRINT_ADR`, `HALT`, `HALT_ERROR` |
+| 54–63 | reserviert | `INVALID_OPERAND` |
+
+Damit sind weder vertauschte Top-Level-Pins noch ein einzelnes
+zusammengeführtes Steuernetz die Hauptabweichung. `FetchDecodeControls` setzt
+seinen 6-zu-64-Decoder konsistent auf eine ältere 54-Code-Steuerreihenfolge um,
+während ROM, Assembler und VM die eingefrorene 50-Code-Tabelle verwenden. Der
+Befund erklärt, warum das Minimalprogramm aus 19.3 mit Maschinenopcode 0 nicht
+als `LOAD_CONST` gesteuert wird. Er liegt ebenfalls bereits vor der ersten
+Taktflanke, wird aber wegen der Paket-Stop-Regel noch nicht repariert.
+
+### Offene Risiken und Übergabe an 19.5
+
+- Die Tabelle isoliert bewusst nur `FetchDecodeControls`. Ob zusätzliche Fehler
+  zwischen dessen Ausgängen und Datenpfad, Speicher oder Endpunkten liegen,
+  bleibt offen.
+- Der Lauf nutzte erneut Java 21.0.2 statt Temurin 21.0.8. Er verwendete aber
+  die gepinnte Logisim-evolution-Version 4.1.0 und erzeugte ausschließlich
+  binäre, reproduzierbare Kombinationswerte; die Abschlussabnahme in 19.9 muss
+  dennoch die vollständig gepinnte Umgebung wiederholen.
+- Die Korrektur muss in 19.8 die Decoder-Ausgänge auf die aktuelle
+  Maschinenbelegung abbilden und zugleich die reservierten Codes 50 bis 63 auf
+  `INVALID_OPERAND` legen. Eine großflächige Neuverdrahtung vor Abschluss der
+  Diagnoseaufgaben bleibt ausgeschlossen.
+- Aufgabe 19.5 verfolgt als Nächstes kleine Lade-, `NOT`-, Arithmetik- und
+  Logikprogramme von der gewählten Argumentquelle bis zum Akkumulator. Wegen
+  der nachgewiesenen Decoder-Verschiebung muss sie den erwarteten und den
+  tatsächlich aktivierten Steuerzweig getrennt protokollieren.
