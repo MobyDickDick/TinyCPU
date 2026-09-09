@@ -1651,11 +1651,11 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     </comp>
     <comp lib="1" loc="(1460,590)" name="OR Gate">
       <a name="inputs" val="8"/>
-      <a name="label" val="CONST_ARUGMENT_SELECT"/>
+      <a name="label" val="CONST_ARGUMENT_SELECT"/>
     </comp>
     <comp lib="1" loc="(1460,690)" name="OR Gate">
       <a name="inputs" val="9"/>
-      <a name="label" val="ADDR_ARGUM_SELECT"/>
+      <a name="label" val="ADDR_ARGUMENT_SELECT"/>
     </comp>
     <comp lib="1" loc="(1460,790)" name="OR Gate">
       <a name="inputs" val="9"/>
@@ -1663,7 +1663,7 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     </comp>
     <comp lib="1" loc="(1460,890)" name="OR Gate">
       <a name="inputs" val="9"/>
-      <a name="label" val="ADDR_REG_OFFS_ARGUMENT_SELECGT"/>
+      <a name="label" val="ADDR_REG_OFFS_ARGUMENT_SELECT"/>
     </comp>
     <comp lib="1" loc="(1460,90)" name="OR Gate">
       <a name="inputs" val="4"/>
