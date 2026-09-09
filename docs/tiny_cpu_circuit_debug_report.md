@@ -16,7 +16,7 @@ Canvas-Koordinaten verändert.
 | 19.4 Decoder-Steuerfläche vollständig abgleichen | abgeschlossen mit Abweichung | Die elektrische 64-Zeilen-Tabelle stimmt nur für die reservierten Codes 54–63: `FetchDecodeControls` dekodiert eine veraltete, gegenüber dem Maschinenformat verschobene Belegung. |
 | 19.5 Akkumulator und Rechenpfad debuggen | abgeschlossen mit Abweichung | Der isolierte Akkumulator schreibt Wert und Validität gemeinsam; 12 von 20 Operationsfällen stimmen. Speicherwahl, Invalidität, Multiplikationsüberlauf und Division weichen bereits im kombinatorischen Blatt ab. |
 | 19.6 Adresspfad und Speicher debuggen | abgeschlossen mit Abweichung | Adressregister und beide RAMs arbeiten gekoppelt; `EffectiveAddress` wählt Direkt-/Registeradresse und Offset jedoch mit vertauschter zweiter Multiplexerpolarität, wodurch auch die Bereichsprüfung die falsche Adresse bewertet. |
-| 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen | als Nächstes | Kontrollfluss, Ausgaben, beide Haltarten und die sechs Sticky-Flags müssen elektrisch eingegrenzt werden. |
+| 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen | abgeschlossen mit Abweichung | Fünf Sprungsteuersignale enden nur an Monitoren; die vier Enable-/Halteausgänge sind vollständig unverdrahtet. Die sechs Sticky-Flags sind dagegen set-dominant und gemeinsam löschbar aufgebaut. |
 | 19.8–19.10 | offen | Noch nicht begonnen. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
@@ -598,3 +598,134 @@ nicht als defekter Vergleicher belegt; nachgewiesen ist der erste lokale
   Logisim-Version war 4.1.0; die vollständig gepinnte Abnahme bleibt 19.9.
 - Aufgabe 19.7 untersucht nun Sprünge, beide Ausgabekanäle, Normal- und
   Fehlerhalt sowie alle Sticky-Flags weiterhin ohne vorgezogene Reparatur.
+
+## 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen
+
+### Ausgangslage
+
+Die integrierten Maschinenwort-Fixtures können wegen der in 19.3 bis 19.6
+bereits nachgewiesenen vorgelagerten Fehler noch nicht als isoliertes Urteil
+über Kontrollfluss und Endpunkte dienen. Deshalb wurde zuerst die Topologie
+zwischen den **benannten** Decoder-, Fetch- und Top-Level-Ports verfolgt und
+anschließend `ErrorFlags` direkt elektrisch angeregt. Als Soll dienten die
+bereits versionierten Fälle der elektrischen Matrix: alle sechs Sprünge,
+genommen und nicht genommen, `PRINT`, `PRINT_ADDRESS`, beide Haltarten,
+`CLEAR_ERROR` und je ein Fixture für jedes der sechs Fehlerbits. Die
+eingecheckte Schaltung blieb unverändert.
+
+### Kommando oder Bedienfolge
+
+Ein XML-Topologielauf bildete aus allen `wire`-Endpunkten von `TinyCPUMain`
+zusammenhängende Netze und ordnete die benannten Pins und Monitor-Probes zu.
+Insbesondere wurden die sechs Sprungausgänge von `FetchDecodeControls`, die
+vier beobachtbaren Steuerendpunkte sowie Wert- und Validitätsausgänge der
+beiden Druckpfade geprüft:
+
+```bash
+python3 - <<'PY'
+import collections
+import xml.etree.ElementTree as ET
+
+root = ET.parse("hardware/logisim/TinyCPU.circ").getroot()
+top = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+graph = collections.defaultdict(set)
+for wire in top.findall("wire"):
+    a, b = wire.get("from"), wire.get("to")
+    graph[a].add(b)
+    graph[b].add(a)
+for start in ("(3350,1070)", "(3350,1090)", "(3350,1110)", "(3350,1130)",
+              "(1270,1210)", "(1270,1230)", "(1270,1270)",
+              "(1270,1290)", "(1270,1310)"):
+    seen, pending = {start}, [start]
+    while pending:
+        point = pending.pop()
+        for neighbor in graph[point] - seen:
+            seen.add(neighbor)
+            pending.append(neighbor)
+    print(start, sorted(seen))
+PY
+```
+
+Für den sequentiellen Fehlerflag-Test wurde nur eine temporäre Kopie des
+vorhandenen Diagnoseblatts erzeugt. `CLK` wurde durch den Simulator-Takt und
+der Startreset durch `PowerOnReset` ersetzt. Alle sechs `SET_*`-Eingänge und
+`CLEAR_ERROR` lagen gleichzeitig auf 1; damit prüft die erste aktive Flanke
+unmittelbar die geforderte Set-vor-Clear-Priorität:
+
+```bash
+python3 /tmp/ap197_flags.py
+timeout 20s /root/.local/share/mise/installs/java/21.0.2/bin/java \
+  -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table,halt /tmp/ap19.7-error-flags.circ \
+  > artifacts/ap19.7-control-endpoints/error-flags-set-before-clear.tsv
+```
+
+Die lokale Rohdatei bleibt wie die bisherigen Simulatorartefakte außerhalb
+von Git. Ihr SHA-256-Digest ist:
+
+```text
+bb152dd6b1dab51cc5e2c4401dadc87adb31a4e425db393e5c7a11068c1b15ff  error-flags-set-before-clear.tsv
+```
+
+### Beobachteter Nachweis
+
+Die Sprungsteuerung ist nicht vollständig bis zum PC geführt. Nur
+`JUMP_NOT_ZERO` besitzt in `FetchDecode` mit `JNZ_TAKEN` einen bedingten
+PC-Auswahlpfad. `JUMP_ADR`, `JUMP_ZERO`, `JUMP_NEGATIVE`, `JUMP_ERROR` und
+`JUMP_NOT_ERROR` verlassen `FetchDecodeControls` auf `TinyCPUMain` jeweils nur
+über eine kurze Leitung zu ihrem gleichnamigen `MONITOR_*`-Probe. Diese fünf
+Netze besitzen keinen weiteren Verbraucher und erreichen insbesondere weder
+PC-Register noch PC-Multiplexer. Damit können die vorhandenen Taken-Fixtures
+dieser fünf Sprünge elektrisch nicht zum Sprungziel gelangen; ihre
+Not-taken-Varianten unterscheiden sich am PC mangels angeschlossenem
+Bedingungspfad nicht von ihnen. Beim allein angeschlossenen `JUMP_NOT_ZERO`
+bilden `DEC_JUMP_NOT_ZERO`, `NOT_ZERO` und das UND-Gatter die Bedingung zwar
+korrekt, der integrierte Maschinenwortlauf bleibt aber durch Decoder- und
+Fetch-Abweichungen aus 19.3/19.4 blockiert.
+
+Noch früher und unabhängig vom Decoder ist die Abweichung an den Endpunkten:
+`PRINT_ENABLE`, `PRINT_ADDRESS_ENABLE`, `HALTED` und `HALTED_WITH_ERROR` sind
+vier isolierte Top-Level-Pins. An keinem ihrer Anschlusskoordinaten beginnt
+oder endet eine Leitung. Deshalb können weder die zwei Druck-Enable-Signale
+noch Normal- oder Fehlerhalt beobachtbar werden. Dies erklärt auch, warum der
+Minimalversuch aus 19.3 trotz temporärer ROM-Belegung den Tabellenmodus nicht
+per Halt beenden konnte. Die Datenendpunkte sind davon getrennt: `PRINT_VALUE`
+ist mit dem Akkumulatorwert verbunden, und `PRINT_ADDRESS_VALUE` sowie
+`PRINT_ADDRESS_VALID` sind mit dem Speicherpfad verbunden. `PRINT_VALID`
+erreicht ebenfalls ein Datapath-Netz. Damit liegt kein Kurzschluss zwischen
+Steuer- und Datennetzen vor, sondern es fehlen die vier Steuerverbindungen.
+
+Das isolierte `ErrorFlags`-Blatt startete mit sechs Nullen. An der ersten
+aktiven Flanke wurden bei gleichzeitigem `SET_*=1` und `CLEAR_ERROR=1` alle
+sechs Ausgänge 1; der als Haltepin verwendete `OVF_OUT` und die fünf
+Tabellenspalten belegen gemeinsam alle Flags. Die Schaltung realisiert für
+jedes Bit dieselbe Gleichung `SET_* OR (alter_Wert AND NOT CLEAR_ERROR)`.
+Dadurch ist das Setzen dominant, ein gesetztes Bit bleibt ohne Clear erhalten,
+und `CLEAR_ERROR` löscht bei inaktivem Set alle sechs Register gemeinsam.
+Zwischen den sechs Ausgängen besteht kein fremdes Fehlernetz. Die isolierte
+Flagbank erfüllt somit den Sticky-Vertrag; ihre Ende-zu-Ende-Anregung durch
+Maschinenprogramme bleibt bis zu den vorgelagerten Reparaturen offen.
+
+Das vollständige Abnahmekriterium von 19.7 besteht wegen der unverdrahteten
+Sprünge und Endpunkte nicht. Die Aufgabe ist als Diagnose mit Abweichung
+abgeschlossen; entsprechend der Stop-Regel wurde noch keine Leitung ergänzt.
+
+### Offene Risiken und Übergabe an 19.8
+
+- Die fünf fehlenden Sprungpfade benötigen neben den Decoderleitungen auch die
+  jeweils fachlich richtige Bedingung und eine gemeinsame PC-Zielauswahl. Sie
+  dürfen nicht nur an den bestehenden `JUMP_NOT_ZERO`-Pfad kurzgeschlossen
+  werden.
+- Die vier isolierten Top-Level-Steuerpins müssen in 19.8 zu den jeweils
+  benannten Decoder-/Fetch-Signalen geführt werden. Wert- und Validitätsnetze
+  der Druckpfade dürfen dabei nicht umverdrahtet werden.
+- Der elektrische Prioritätslauf belegt alle sechs Flags gemeinsam und die
+  Blattgleichungen belegen ihr Halten und Löschen. Separate Ende-zu-Ende-ROMs
+  für jedes Fehlerbit folgen nach der Reparatur der vorgelagerten Pfade.
+- Der Lauf nutzte Java 21.0.2 statt Temurin 21.0.8; die gepinnte
+  Logisim-evolution-Version war 4.1.0. Die finale Umgebung bleibt Aufgabe
+  19.9.
+- Aufgabe 19.8 beginnt gemäß Stop-Regel nicht mit diesen späteren Befunden,
+  sondern mit dem ersten bereits in 19.3 belegten Unterschied
+  `Konstante → FetchDecode.PROGRAM_LIMIT`. Erst nach dessen fokussierter
+  Regression wird der nächste erste Unterschied repariert.
