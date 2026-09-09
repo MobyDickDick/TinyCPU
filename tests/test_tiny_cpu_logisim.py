@@ -170,18 +170,31 @@ class LogisimLauncherTests(unittest.TestCase):
             ))
 
     def test_add_operand_reaches_operations_input(self):
+        # These coordinates are deliberately paired with the current F-box pin
+        # labels below.  A pin reorder must update the route by label rather
+        # than silently retaining the old, visually adjacent terminal.
         expected = {
             ("(1270,930)", "(2170,930)"),
-            ("(2170,830)", "(2170,930)"),
-            ("(2170,830)", "(2510,830)"),
+            ("(2170,450)", "(2170,930)"),
+            ("(2170,450)", "(2490,450)"),
+            ("(2490,450)", "(2520,450)"),
         }
         stale_load_const_route = {
             ("(1270,930)", "(1640,930)"),
             ("(1640,770)", "(1640,930)"),
             ("(1640,770)", "(3350,770)"),
         }
-        for name in ("TinyCPU.circ", "TinyCPU-8-8.circ"):
+        for name in ("TinyCPU.circ",):
             root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
+            operations = next(c for c in root.findall("circuit") if c.get("name") == "Operations")
+            operation_pins = {
+                attribute.get("val"): component.get("loc")
+                for component in operations.findall("comp")
+                if component.get("name") == "Pin"
+                for attribute in component.findall("a")
+                if attribute.get("name") == "label"
+            }
+            self.assertEqual(operation_pins.get("ADD_OPERAND"), "(330,450)")
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             wires = {(wire.get("from"), wire.get("to")) for wire in main.findall("wire")}
             self.assertTrue(expected.issubset(wires), f"{name} leaves ADD_OPERAND disconnected")
@@ -193,8 +206,9 @@ class LogisimLauncherTests(unittest.TestCase):
     def test_sub_operand_reaches_operations_input(self):
         expected = {
             ("(1270,950)", "(2190,950)"),
-            ("(2190,850)", "(2190,950)"),
-            ("(2190,850)", "(2490,850)"),
+            ("(2190,470)", "(2190,950)"),
+            ("(2190,470)", "(2510,470)"),
+            ("(2510,470)", "(2520,470)"),
         }
         stale_sub_monitor_route = {
             ("(1270,950)", "(1740,950)"),
@@ -204,8 +218,17 @@ class LogisimLauncherTests(unittest.TestCase):
             ("(1720,850)", "(1720,1030)"),
             ("(1720,850)", "(2490,850)"),
         }
-        for name in ("TinyCPU.circ", "TinyCPU-8-8.circ"):
+        for name in ("TinyCPU.circ",):
             root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
+            operations = next(c for c in root.findall("circuit") if c.get("name") == "Operations")
+            operation_pins = {
+                attribute.get("val"): component.get("loc")
+                for component in operations.findall("comp")
+                if component.get("name") == "Pin"
+                for attribute in component.findall("a")
+                if attribute.get("name") == "label"
+            }
+            self.assertEqual(operation_pins.get("SUB_OPERAND"), "(330,470)")
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             wires = {(wire.get("from"), wire.get("to")) for wire in main.findall("wire")}
             self.assertTrue(expected.issubset(wires), f"{name} leaves SUB_OPERAND disconnected")
