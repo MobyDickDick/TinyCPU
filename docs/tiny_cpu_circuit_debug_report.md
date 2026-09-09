@@ -17,7 +17,7 @@ Canvas-Koordinaten verändert.
 | 19.5 Akkumulator und Rechenpfad debuggen | abgeschlossen mit Abweichung | Der isolierte Akkumulator schreibt Wert und Validität gemeinsam; 12 von 20 Operationsfällen stimmen. Speicherwahl, Invalidität, Multiplikationsüberlauf und Division weichen bereits im kombinatorischen Blatt ab. |
 | 19.6 Adresspfad und Speicher debuggen | abgeschlossen mit Abweichung | Adressregister und beide RAMs arbeiten gekoppelt; `EffectiveAddress` wählt Direkt-/Registeradresse und Offset jedoch mit vertauschter zweiter Multiplexerpolarität, wodurch auch die Bereichsprüfung die falsche Adresse bewertet. |
 | 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen | abgeschlossen mit Abweichung | Fünf Sprungsteuersignale enden nur an Monitoren; die vier Enable-/Halteausgänge sind vollständig unverdrahtet. Die sechs Sticky-Flags sind dagegen set-dominant und gemeinsam löschbar aufgebaut. |
-| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Der erste belegte Übergang ist repariert: Die benannte `PROGRAM_LIMIT_MAX`-Quelle treibt nun explizit `0xfff`. Der fokussierte Regressionstest und die Projektladung bestehen; der weiterhin abweichende Decoder ist der nächste Übergang. |
+| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Die ersten beiden belegten Übergänge sind repariert: `PROGRAM_LIMIT_MAX` treibt `0xfff`, und `FetchDecodeControls` bildet alle 50 Opcodes sowie 14 reservierte Codes elektrisch vertragsgemäß ab. Der Rechenpfad ist der nächste Übergang. |
 | 19.9–19.10 | offen | Noch nicht begonnen. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
@@ -776,15 +776,50 @@ bereits in 19.1 dokumentierten, koordinatengebundenen Altprüfungen für
 Regression dieser Änderung noch ein Abnahmenachweis für den benannten
 Programmgrenzpfad.
 
+### Zweite Reparatur: Decoder-Steuerfläche
+
+Vor der zweiten Schaltungsänderung wurde `scripts/test-logisim-decode.py` als
+fokussierte elektrische Regression ergänzt. Das Skript wählt in einer
+temporären Projektkopie `FetchDecodeControls` als Startblatt, lässt
+Logisim-evolution alle 64 Eingabekombinationen tabellieren und leitet die
+Sollzeile unmittelbar aus `tinycpu-machine-v1.json` ab. Der Ausgangsstand
+scheiterte bereits bei Opcode 0, weil er `ADD_OPERAND` statt `LOAD_OPERAND`
+setzte.
+
+Die Decoder-Ausgänge wurden anschließend ausschließlich innerhalb von
+`FetchDecodeControls` neu zugeordnet. Benannte Tunnel `DECODE_00` bis
+`DECODE_63` verbinden jeden Ausgang des 6-zu-64-Decoders mit den fachlich
+passenden Operations-, Argument- und Direktsignalen. Selektoren mit mehr als
+acht Quellen sind in zwei begrenzte OR-Bänke und einen definiert geerdeten
+Kombinierer geteilt. Dadurch bleiben alle Eingänge definiert; insbesondere
+führen die Codes 50 bis 63 gemeinsam auf `INVALID_OPERAND`, während die sechs
+laufzeitabhängigen `SET_*`-Ausgänge beim reinen Opcode-Decode null bleiben.
+
+Die fokussierte Abnahme lautet:
+
+```bash
+LOGISIM_JAR=.venv/Include/logisim-evolution-4.1.0-all.jar \
+  scripts/test-logisim-decode.py
+python3 src/tiny_cpu_verify.py
+timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty stats hardware/logisim/TinyCPU.circ
+scripts/test-offline.sh
+```
+
+Der elektrische Test besteht mit **50 gültigen Opcodes und 14 reservierten
+Codes**. Alle 64 Zeilen und alle 33 benannten Ausgänge stimmen mit dem
+Maschinenvertrag überein; es treten keine `E`- oder schwebenden Werte auf. Die
+Strukturprüfung und die Projektladung bestehen ebenfalls. Die Offline-Suite
+endet weiterhin ausschließlich mit den zwei seit 19.1 bekannten,
+koordinatengebundenen Altprüfungen für `ADD_OPERAND` und `SUB_OPERAND`.
+
 ### Offene Risiken und nächster Übergang
 
-- Die temporäre Kontrolle in 19.3 hatte bereits gezeigt, dass allein `0xfff`
-  das Minimalprogramm noch nicht bis zum Halt bringt. Die Reparatur ist daher
-  absichtlich nur der erste Schritt von 19.8 und schließt die Aufgabe noch
-  nicht ab.
-- Gemäß Stop-Regel ist nun die in 19.4 nachgewiesene veraltete Zuordnung in
-  `FetchDecodeControls` der nächste erste Unterschied. Vor deren Korrektur ist
-  die elektrische 64-Zeilen-Tabelle als eincheckbarer Regressionstest zu
-  formulieren.
+- Die Decoderreparatur beseitigt die zweite belegte Abweichung, schließt 19.8
+  aber noch nicht ab; die in 19.5 nachgewiesenen Rechenpfadfehler folgen nun
+  gemäß Stop-Regel als nächster erster Unterschied.
+- Der integrierte Minimal- und Matrixlauf bleibt zusätzlich durch die später
+  diagnostizierten Adress-, Sprung- und Haltepfade blockiert. Diese werden
+  nicht in dieselbe Änderung vorgezogen.
 - Die vollständige elektrische Matrix und die gepinnte Java-Umgebung bleiben
   weiterhin der Abnahme in 19.9 vorbehalten.

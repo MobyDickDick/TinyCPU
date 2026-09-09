@@ -60,6 +60,8 @@ Die bei dieser Reparatur sichtbar gewordene Adress-/Halt-Abweichung wurde in
 den folgenden Integrationspaketen behoben und ist durch die AP-12-Abnahme
 abgedeckt.
 
+`FetchDecodeControls` bildet die eingefrorenen Maschinenopcodes 0 bis 49 nun elektrisch direkt auf die benannten Steuerausgänge ab; die reservierten Codes 50 bis 63 setzen ausschließlich `INVALID_OPERAND`. Die benannten `DECODE_00` bis `DECODE_63`-Tunnel halten diese Zuordnung unabhängig von Canvas-Koordinaten prüfbar. Mehr als acht Quellen werden über zwei begrenzte OR-Bänke zusammengeführt, sodass kein vom Simulator begrenzter Gate-Fan-in einen Opcode stillschweigend verliert.
+
 `FetchDecodeControls` führt die Operation und die Art des zweiten Operanden als
 zwei unabhängige Signalgruppen heraus. `ADD_OPERAND` bedeutet beispielsweise nur
 „ADD ist aktiv“, während `CONST_ARGUMENT`, `ADDR_ARGUMENT`,
