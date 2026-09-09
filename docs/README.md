@@ -12,6 +12,7 @@ Dieses Verzeichnis enthält ausschließlich Dokumentation zur TinyCPU:
 - [`tiny_cpu_debugger.md`](tiny_cpu_debugger.md): Bedienung und JSON-Vertrag des symbolischen Debuggers
 - [`tiny_cpu_profiles_plan.md`](tiny_cpu_profiles_plan.md): abgegrenzter Vorschlag für AP 17 (zweites Hardwareprofil)
 - [`tiny_cpu_peripherals_plan.md`](tiny_cpu_peripherals_plan.md): abgegrenzter Vorschlag für AP 18 (Peripherie und Integration)
+- [`tiny_cpu_circuit_debug_plan.md`](tiny_cpu_circuit_debug_plan.md): zehnstufiger Arbeitsplan für die reproduzierbare Fehlersuche in `TinyCPU.circ`
 - [`tiny_cpu_compatibility.md`](tiny_cpu_compatibility.md): Kompatibilitätsregeln
 - [`tiny_cpu_1_0_release_plan.md`](tiny_cpu_1_0_release_plan.md): Releaseplan für TinyCPU 1.0
 - [`tiny_cpu_1_0_release_notes.md`](tiny_cpu_1_0_release_notes.md): Release Notes für TinyCPU 1.0
@@ -58,3 +59,10 @@ dieser Grenzen in die vollständige CPU und die elektrische Systemabnahme sind
 noch offen. Die Speicherpfadgrenze des Ausgabeports ist inzwischen vollständig
 verdrahtet und wird offline einschließlich ihrer getrennten RAM-/Port-Freigaben
 und gemeinsamen Wert-/Validitätsauswahl geprüft.
+
+Unabhängig von dieser Funktionserweiterung grenzt
+[`tiny_cpu_circuit_debug_plan.md`](tiny_cpu_circuit_debug_plan.md) AP 19 als
+zehn einzeln abnehmbare Aufgaben ab. Das Paket dient der reproduzierbaren
+Fehlersuche an der aktuellen `TinyCPU.circ`, ohne einen manuellen Redraw durch
+eine historische Zeichnung zu ersetzen oder die abgeschlossenen ISA-Verträge
+neu zu öffnen.

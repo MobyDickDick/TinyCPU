@@ -39,6 +39,7 @@ abdeckt und Ausgabe, Haltzustand, Register, Speicher-Validität und Fehlerflags
 | **16. Symbolischer Debugger** | Quellzuordnung, Breakpoints, Einzelschritte und deterministische Zustandsausgabe auf dem Python-Referenzmodell ergänzen. | Countdown-Breakpoints, Zustandsparität, Fehlerzustände und versioniertes Debug-JSON sind automatisiert geprüft. |
 | **17. Zweites Hardwareprofil** | Ein abgegrenztes 8-Datenbit-/8-Adressbit-Profil in Tooling und Logisim ergänzen, ohne den 16/12-Standard zu verändern. | Beide Profile bestehen profilbezogene Roundtrip-, Debugger-, Kerntrace- und vollständige elektrische ISA-/Fehlerprüfungen. |
 | **18. Peripherie und Integration** | Eine optionale 16/12-Systemvariante mit speicherabgebildetem Ausgabeport und einer maskierbaren Interruptquelle ergänzen. | Versionierte System-, Maschinenformat- und Trace-Verträge bestehen taktgenaue VM-/Logisim-Abnahmen, ohne die bisherigen Profile oder Gates zu verändern. |
+| **19. Systematische Schaltungsdiagnose** | Die aktuelle `TinyCPU.circ` in zehn reproduzierbaren Aufgaben von Umgebung und Fetch bis zur vollständigen elektrischen Regression untersuchen und nur belegte Netzfehler minimal reparieren. | Ein frischer Checkout besteht Offline-, 16/12-Matrix- und GUI-Kurzabnahme; jeder behobene Fehler ist auf die erste abweichende Flanke und benannte Ports zurückgeführt. |
 
 ## Abhängigkeiten und Reihenfolge
 
@@ -60,6 +61,10 @@ Assembler-, VM-, Debugger- und Verifikationsstand auf und muss die bestehende
 AP 18 setzt beide abgeschlossenen Profilabnahmen voraus und ergänzt eine
 eigenständige 16/12-Systemvariante; bestehende Profile bleiben dabei frei von
 Peripherie- und Interruptsemantik.
+AP 19 ist davon unabhängig: Es ändert keine Produktsemantik, sondern legt für
+konkret beobachtete Fehler der bestehenden 16/12-Schaltung eine reproduzierbare
+Diagnose- und Reparaturfolge fest. Die zehn Aufgaben und ihre Stop-Regeln sind
+im [Schaltungs-Debugplan](tiny_cpu_circuit_debug_plan.md) beschrieben.
 
 ## Stand
 
