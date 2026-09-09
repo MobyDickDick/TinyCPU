@@ -17,7 +17,8 @@ Canvas-Koordinaten verändert.
 | 19.5 Akkumulator und Rechenpfad debuggen | abgeschlossen mit Abweichung | Der isolierte Akkumulator schreibt Wert und Validität gemeinsam; 12 von 20 Operationsfällen stimmen. Speicherwahl, Invalidität, Multiplikationsüberlauf und Division weichen bereits im kombinatorischen Blatt ab. |
 | 19.6 Adresspfad und Speicher debuggen | abgeschlossen mit Abweichung | Adressregister und beide RAMs arbeiten gekoppelt; `EffectiveAddress` wählt Direkt-/Registeradresse und Offset jedoch mit vertauschter zweiter Multiplexerpolarität, wodurch auch die Bereichsprüfung die falsche Adresse bewertet. |
 | 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen | abgeschlossen mit Abweichung | Fünf Sprungsteuersignale enden nur an Monitoren; die vier Enable-/Halteausgänge sind vollständig unverdrahtet. Die sechs Sticky-Flags sind dagegen set-dominant und gemeinsam löschbar aufgebaut. |
-| 19.8–19.10 | offen | Noch nicht begonnen. |
+| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Der erste belegte Übergang ist repariert: Die benannte `PROGRAM_LIMIT_MAX`-Quelle treibt nun explizit `0xfff`. Der fokussierte Regressionstest und die Projektladung bestehen; der weiterhin abweichende Decoder ist der nächste Übergang. |
+| 19.9–19.10 | offen | Noch nicht begonnen. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
 
@@ -729,3 +730,61 @@ abgeschlossen; entsprechend der Stop-Regel wurde noch keine Leitung ergänzt.
   sondern mit dem ersten bereits in 19.3 belegten Unterschied
   `Konstante → FetchDecode.PROGRAM_LIMIT`. Erst nach dessen fokussierter
   Regression wird der nächste erste Unterschied repariert.
+
+## 19.8 Ersten abweichenden Netzübergang minimal reparieren
+
+### Ausgangslage
+
+Der früheste belegte Unterschied aus 19.3 lag vor Takt 0: Eine 16-Bit-Konstante
+ohne expliziten Wert trieb `FetchDecode.PROGRAM_LIMIT` mit 0, während das
+unveränderte 16/12-Profil als höchste Programmadresse `0x0fff` festlegt. Die
+weiteren Befunde aus 19.4 bis 19.7 wurden für diese erste Korrektur bewusst
+nicht mitbearbeitet.
+
+### Kommando oder Bedienfolge
+
+Vor der Schaltungsänderung wurde ein topologischer Regressionstest ergänzt.
+Er sucht die Quelle über ihren fachlichen Namen statt über eine historische
+Canvas-Koordinate, prüft Breite und Wert und stellt sicher, dass sie
+ausschließlich das bereits vorhandene Fetch-Netz treibt. Auf dem
+Ausgangsstand scheiterte diese Prüfung, weil keine benannte Quelle mit dem
+Profilmaximum existierte. Anschließend wurden an der vorhandenen Konstante nur
+der Name `PROGRAM_LIMIT_MAX` und der Wert `0xfff` ergänzt. Die fokussierte
+Abnahme lautete:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_program_limit_source_uses_profile_maximum
+timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty stats hardware/logisim/TinyCPU.circ
+scripts/test-offline.sh
+```
+
+### Beobachteter Nachweis
+
+Der neue Regressionstest besteht und findet genau eine 16 Bit breite,
+`PROGRAM_LIMIT_MAX` benannte Quelle mit dem Wert `0xfff` sowie genau eine
+angeschlossene Leitung. Logisim-evolution 4.1.0 lädt das geänderte Gesamtprojekt
+weiterhin mit Exitcode 0. Damit ist der Übergang
+`Konstante → FetchDecode.PROGRAM_LIMIT` minimal korrigiert, ohne einen
+zusätzlichen Treiber, eine neue Leitung oder eine Änderung am Fetch-Unterblatt
+einzuführen.
+
+Die Offline-Suite prüft die geänderte Datei strukturell erfolgreich. Ihre zwei
+bereits in 19.1 dokumentierten, koordinatengebundenen Altprüfungen für
+`ADD_OPERAND` und `SUB_OPERAND` schlagen unverändert fehl. Sie sind weder eine
+Regression dieser Änderung noch ein Abnahmenachweis für den benannten
+Programmgrenzpfad.
+
+### Offene Risiken und nächster Übergang
+
+- Die temporäre Kontrolle in 19.3 hatte bereits gezeigt, dass allein `0xfff`
+  das Minimalprogramm noch nicht bis zum Halt bringt. Die Reparatur ist daher
+  absichtlich nur der erste Schritt von 19.8 und schließt die Aufgabe noch
+  nicht ab.
+- Gemäß Stop-Regel ist nun die in 19.4 nachgewiesene veraltete Zuordnung in
+  `FetchDecodeControls` der nächste erste Unterschied. Vor deren Korrektur ist
+  die elektrische 64-Zeilen-Tabelle als eincheckbarer Regressionstest zu
+  formulieren.
+- Die vollständige elektrische Matrix und die gepinnte Java-Umgebung bleiben
+  weiterhin der Abnahme in 19.9 vorbehalten.
