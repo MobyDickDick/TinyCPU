@@ -2783,7 +2783,10 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <a name="circuit" val="Operations"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
     <a name="simulationFrequency" val="1.0"/>
-    <comp lib="0" loc="(1870,940)" name="Constant"/>
+    <comp lib="0" loc="(1870,940)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="SELECTED_OPERAND_VALID"/>
+    </comp>
     <comp lib="0" loc="(2090,1040)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
@@ -2815,10 +2818,12 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
       <a name="label" val="RESULT_IS_VALID"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(260,260)" name="Constant"/>
-    <comp lib="0" loc="(260,280)" name="Pin">
+    <comp lib="0" loc="(260,260)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="MEMORY_VALID"/>
+    </comp>
+    <comp lib="0" loc="(260,280)" name="Constant">
+      <a name="value" val="0x1"/>
     </comp>
     <comp lib="0" loc="(330,360)" name="Pin">
       <a name="appearance" val="classic"/>
@@ -2905,6 +2910,18 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <comp lib="2" loc="(1920,950)" name="Multiplexer"/>
     <comp lib="2" loc="(370,270)" name="Multiplexer"/>
     <comp lib="2" loc="(570,160)" name="Multiplexer">
+      <a name="width" val="16"/>
+    </comp>
+    <comp lib="0" loc="(410,270)" name="Tunnel">
+      <a name="label" val="SELECTED_OPERAND_VALID"/>
+    </comp>
+    <comp lib="0" loc="(570,160)" name="Tunnel">
+      <a name="label" val="SELECTED_OPERAND_VALUE"/>
+      <a name="width" val="16"/>
+    </comp>
+    <comp lib="0" loc="(1660,210)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="SELECTED_OPERAND_VALUE"/>
       <a name="width" val="16"/>
     </comp>
     <comp loc="(940,1010)" name="DivArithmeticCircuit">
@@ -3015,6 +3032,8 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(350,1140)" to="(720,1140)"/>
     <wire from="(350,1290)" to="(720,1290)"/>
     <wire from="(350,290)" to="(350,390)"/>
+    <wire from="(350,180)" to="(350,290)"/>
+    <wire from="(350,180)" to="(550,180)"/>
     <wire from="(360,1460)" to="(720,1460)"/>
     <wire from="(360,1620)" to="(710,1620)"/>
     <wire from="(370,270)" to="(410,270)"/>
@@ -3022,16 +3041,12 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(400,310)" to="(410,310)"/>
     <wire from="(460,140)" to="(490,140)"/>
     <wire from="(460,190)" to="(490,190)"/>
-    <wire from="(460,290)" to="(550,290)"/>
     <wire from="(460,90)" to="(680,90)"/>
     <wire from="(490,140)" to="(490,150)"/>
     <wire from="(490,150)" to="(540,150)"/>
     <wire from="(490,170)" to="(490,190)"/>
     <wire from="(490,170)" to="(510,170)"/>
-    <wire from="(510,170)" to="(510,210)"/>
     <wire from="(510,170)" to="(540,170)"/>
-    <wire from="(510,210)" to="(1660,210)"/>
-    <wire from="(550,180)" to="(550,290)"/>
     <wire from="(550,290)" to="(640,290)"/>
     <wire from="(570,160)" to="(700,160)"/>
     <wire from="(640,1070)" to="(640,1230)"/>
