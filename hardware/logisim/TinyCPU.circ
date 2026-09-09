@@ -3602,17 +3602,14 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
       <a name="type" val="output"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="1" loc="(1000,280)" name="AND Gate">
-      <a name="label" val="SIGN_OVERFLOW"/>
+    <comp lib="1" loc="(1000,280)" name="XOR Gate">
+      <a name="label" val="PRODUCT_SIGN_MISMATCH"/>
     </comp>
     <comp lib="1" loc="(1000,350)" name="AND Gate">
       <a name="label" val="RANGE_VALID"/>
     </comp>
     <comp lib="1" loc="(610,300)" name="XOR Gate">
       <a name="label" val="OPERAND_SIGN_DIFFERENT"/>
-    </comp>
-    <comp lib="1" loc="(840,240)" name="XOR Gate">
-      <a name="label" val="RESULT_SIGN_CHANGED"/>
     </comp>
     <comp lib="1" loc="(890,330)" name="NOT Gate">
       <a name="label" val="NO_OVERFLOW"/>
@@ -3627,7 +3624,7 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
       <a name="width" val="16"/>
     </comp>
     <comp lib="9" loc="(270,60)" name="Text">
-      <a name="text" val="signed MUL: overflow = (left_sign XOR right_sign) AND (left_sign XOR result_sign)"/>
+      <a name="text" val="signed MUL: overflow = (left_sign XOR right_sign) XOR result_sign"/>
     </comp>
     <wire from="(1000,280)" to="(1050,280)"/>
     <wire from="(1000,350)" to="(1050,350)"/>
@@ -3664,7 +3661,6 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(470,170)" to="(470,240)"/>
     <wire from="(470,170)" to="(490,170)"/>
     <wire from="(500,260)" to="(500,280)"/>
-    <wire from="(500,260)" to="(780,260)"/>
     <wire from="(500,280)" to="(550,280)"/>
     <wire from="(530,160)" to="(600,160)"/>
     <wire from="(600,100)" to="(600,160)"/>
@@ -3674,14 +3670,13 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(630,140)" to="(640,140)"/>
     <wire from="(640,150)" to="(730,150)"/>
     <wire from="(730,150)" to="(730,220)"/>
-    <wire from="(730,220)" to="(780,220)"/>
+    <wire from="(730,220)" to="(940,220)"/>
     <wire from="(790,300)" to="(790,330)"/>
     <wire from="(790,300)" to="(950,300)"/>
     <wire from="(790,330)" to="(860,330)"/>
-    <wire from="(840,240)" to="(940,240)"/>
     <wire from="(890,330)" to="(950,330)"/>
     <wire from="(930,100)" to="(930,160)"/>
-    <wire from="(940,240)" to="(940,260)"/>
+    <wire from="(940,220)" to="(940,260)"/>
     <wire from="(940,260)" to="(950,260)"/>
   </circuit>
   <circuit name="DivArithmeticCircuit">

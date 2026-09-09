@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Electrically verify the immediate/memory selection in ``Operations``."""
+"""Electrically verify repaired operand and arithmetic paths in ``Operations``."""
 
 from __future__ import annotations
 
@@ -73,14 +73,33 @@ def main() -> int:
                     "MEMORY_VALID": 1, "CONST_OPERAND": 0}, "0x1234"),
         "immediate": ({"MEMORY_VALUE": 0x1234, "IMMEDIATE_VALUE": 0xABCD,
                        "MEMORY_VALID": 0, "CONST_OPERAND": 1}, "0xabcd"),
+        "multiply-positive-overflow": ({"ACC_VALUE": 0x4000,
+                                         "MEMORY_VALUE": 0,
+                                         "IMMEDIATE_VALUE": 2,
+                                         "MEMORY_VALID": 1,
+                                         "CONST_OPERAND": 1,
+                                         "MUL_OPERAND": 1}, "0x8000"),
+        "multiply-in-range": ({"ACC_VALUE": 3, "MEMORY_VALUE": 0,
+                                "IMMEDIATE_VALUE": 2, "MEMORY_VALID": 1,
+                                "CONST_OPERAND": 1, "MUL_OPERAND": 1},
+                              "0x0006"),
     }
     for name, (specific, expected_value) in fixtures.items():
         actual = run_fixture(jar, name, INPUTS | specific)
-        expected = {"RESULT_VALUE": expected_value, "RESULT_IS_VALID": "1"}
+        expected = {"RESULT_VALUE": expected_value}
+        if name.startswith("multiply-"):
+            expected["OVERFLOW"] = (
+                "1" if name == "multiply-positive-overflow" else "0"
+            )
+        else:
+            expected["RESULT_IS_VALID"] = "1"
         differences = [key for key, value in expected.items() if actual.get(key) != value]
         if differences:
             raise LogisimError(f"operations fixture {name}: mismatched {', '.join(differences)}")
-    print("electrical operations acceptance passed: memory and immediate selection")
+    print(
+        "electrical operations acceptance passed: operand selection and "
+        "multiplication overflow"
+    )
     return 0
 
 
