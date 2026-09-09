@@ -83,6 +83,14 @@ def main() -> int:
                                 "IMMEDIATE_VALUE": 2, "MEMORY_VALID": 1,
                                 "CONST_OPERAND": 1, "MUL_OPERAND": 1},
                               "0x0006"),
+        "divide-in-range": ({"ACC_VALUE": 7, "MEMORY_VALUE": 0,
+                              "IMMEDIATE_VALUE": 2, "MEMORY_VALID": 1,
+                              "CONST_OPERAND": 1, "DIV_OPERAND": 1},
+                            "0x0003"),
+        "divide-by-zero": ({"ACC_VALUE": 7, "MEMORY_VALUE": 0,
+                             "IMMEDIATE_VALUE": 0, "MEMORY_VALID": 1,
+                             "CONST_OPERAND": 1, "DIV_OPERAND": 1},
+                           "0x0007"),
     }
     for name, (specific, expected_value) in fixtures.items():
         actual = run_fixture(jar, name, INPUTS | specific)
@@ -91,6 +99,10 @@ def main() -> int:
             expected["OVERFLOW"] = (
                 "1" if name == "multiply-positive-overflow" else "0"
             )
+        elif name.startswith("divide-"):
+            expected["DIVIDE_BY_ZERO"] = "1" if name == "divide-by-zero" else "0"
+            if name != "divide-by-zero":
+                expected["RESULT_IS_VALID"] = "1"
         else:
             expected["RESULT_IS_VALID"] = "1"
         differences = [key for key, value in expected.items() if actual.get(key) != value]
@@ -98,7 +110,7 @@ def main() -> int:
             raise LogisimError(f"operations fixture {name}: mismatched {', '.join(differences)}")
     print(
         "electrical operations acceptance passed: operand selection and "
-        "multiplication overflow"
+        "multiplication overflow and division validity"
     )
     return 0
 
