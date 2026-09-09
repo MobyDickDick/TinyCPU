@@ -169,6 +169,37 @@ class LogisimLauncherTests(unittest.TestCase):
                 for circuit in root.findall("circuit")
             ))
 
+    def test_program_limit_source_uses_profile_maximum(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+        sources = [
+            component
+            for component in main.findall("comp")
+            if component.get("name") == "Constant"
+            and any(
+                attribute.get("name") == "label"
+                and attribute.get("val") == "PROGRAM_LIMIT_MAX"
+                for attribute in component.findall("a")
+            )
+        ]
+        self.assertEqual(len(sources), 1)
+        attributes = {
+            attribute.get("name"): attribute.get("val")
+            for attribute in sources[0].findall("a")
+        }
+        self.assertEqual(attributes.get("width"), "16")
+        self.assertEqual(attributes.get("value"), "0xfff")
+
+        source = sources[0].get("loc")
+        attached_wires = [
+            wire for wire in main.findall("wire")
+            if source in (wire.get("from"), wire.get("to"))
+        ]
+        self.assertEqual(
+            len(attached_wires), 1,
+            "the named program-limit source must exclusively drive its existing fetch net",
+        )
+
     def test_add_operand_reaches_operations_input(self):
         expected = ("(1270,930)", "(2520,930)")
         operation_routes = {
