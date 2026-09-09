@@ -17,7 +17,7 @@ Canvas-Koordinaten verändert.
 | 19.5 Akkumulator und Rechenpfad debuggen | abgeschlossen mit Abweichung | Der isolierte Akkumulator schreibt Wert und Validität gemeinsam; 12 von 20 Operationsfällen stimmen. Speicherwahl, Invalidität, Multiplikationsüberlauf und Division weichen bereits im kombinatorischen Blatt ab. |
 | 19.6 Adresspfad und Speicher debuggen | abgeschlossen mit Abweichung | Adressregister und beide RAMs arbeiten gekoppelt; `EffectiveAddress` wählt Direkt-/Registeradresse und Offset jedoch mit vertauschter zweiter Multiplexerpolarität, wodurch auch die Bereichsprüfung die falsche Adresse bewertet. |
 | 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen | abgeschlossen mit Abweichung | Fünf Sprungsteuersignale enden nur an Monitoren; die vier Enable-/Halteausgänge sind vollständig unverdrahtet. Die sechs Sticky-Flags sind dagegen set-dominant und gemeinsam löschbar aufgebaut. |
-| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Die ersten drei belegten Übergänge sind repariert: Programmgrenze, vollständige Opcode-Zuordnung und die gemeinsame Speicher-/Direktoperandwahl. Multiplikationsüberlauf und Division sind die nächsten Rechenpfadabweichungen. |
+| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Die ersten vier belegten Übergänge sind repariert: Programmgrenze, vollständige Opcode-Zuordnung, die gemeinsame Speicher-/Direktoperandwahl und die Vorzeichenprüfung der Multiplikation. Division ist die nächste Rechenpfadabweichung. |
 | 19.9–19.10 | offen | Noch nicht begonnen. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
@@ -849,12 +849,41 @@ Gesamtprojekts bestehen. Die Offline-Suite endet weiterhin nur mit den zwei
 seit 19.1 bekannten koordinatengebundenen ADD-/SUB-Altprüfungen. Die weiteren
 in 19.5 isolierten Abweichungen wurden gemäß Stop-Regel nicht vorgezogen.
 
+### Vierte Reparatur: Multiplikationsüberlauf
+
+Der nächste Fall aus 19.5, `0x4000 * 2`, lieferte zwar das gekürzte Ergebnis
+`0x8000`, setzte aber `OVERFLOW` nicht. Das vorhandene Blatt verglich bereits
+die beiden Operandenvorzeichen und das Ergebnisvorzeichen, verknüpfte die
+beiden Abweichungen jedoch mit AND. Bei zwei positiven Operanden war der erste
+Term damit stets null und unterdrückte gerade den beobachteten positiven
+Überlauf.
+
+Der Ausgang vergleicht nun per XOR das erwartete Produktvorzeichen
+`left_sign XOR right_sign` direkt mit dem tatsächlichen Ergebnisvorzeichen.
+Die unnötige Zwischenstufe `left_sign XOR result_sign` wurde aus diesem Pfad
+entfernt; Ergebnisbus, Multiplikator und die übrigen Operationszweige blieben
+unverändert. Die elektrische Operationsregression enthält jetzt zusätzlich
+den zuvor fehlschlagenden Grenzfall und eine nicht überlaufende Multiplikation:
+
+```bash
+LOGISIM_JAR=.venv/Include/logisim-evolution-4.1.0-all.jar \
+  scripts/test-logisim-operations.py
+python3 src/tiny_cpu_verify.py
+timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty stats hardware/logisim/TinyCPU.circ
+scripts/test-offline.sh
+```
+
+Der fokussierte Lauf meldet für `0x4000 * 2` jetzt `RESULT_VALUE=0x8000` und
+`OVERFLOW=1`; `3 * 2` bleibt bei `0x0006` mit `OVERFLOW=0`. Strukturprüfung
+und Projektladung bestehen ebenfalls. Die beiden koordinatengebundenen
+ADD-/SUB-Altprüfungen bleiben von dieser lokalen Korrektur unberührt.
+
 ### Offene Risiken und nächster Übergang
 
-- Die Decoderreparatur beseitigt die zweite belegte Abweichung, schließt 19.8
-  noch nicht ab. Nach der nun ebenfalls reparierten Operandwahl folgen
-  Multiplikationsüberlauf und Division gemäß Stop-Regel als nächste
-  Rechenpfadunterschiede.
+- Die Decoderreparatur, Operandwahl und Vorzeichenprüfung schließen 19.8 noch
+  nicht ab. Division folgt gemäß Stop-Regel als nächster
+  Rechenpfadunterschied.
 - Der integrierte Minimal- und Matrixlauf bleibt zusätzlich durch die später
   diagnostizierten Adress-, Sprung- und Haltepfade blockiert. Diese werden
   nicht in dieselbe Änderung vorgezogen.
