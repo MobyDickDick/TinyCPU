@@ -15,8 +15,9 @@ Canvas-Koordinaten verändert.
 | 19.3 Takt, Reset, PC und Fetch prüfen | abgeschlossen mit Abweichung | Das Minimalprogramm erreicht elektrisch keinen Halt. Der erste bereits vor Takt 0 abweichende benannte Fetch-Eingang ist `PROGRAM_LIMIT`: `TinyCPUMain` treibt ihn konstant mit 0 statt mit der Profilgrenze `0xfff`. Zwei Reset-Läufe sind fachlich identisch. |
 | 19.4 Decoder-Steuerfläche vollständig abgleichen | abgeschlossen mit Abweichung | Die elektrische 64-Zeilen-Tabelle stimmt nur für die reservierten Codes 54–63: `FetchDecodeControls` dekodiert eine veraltete, gegenüber dem Maschinenformat verschobene Belegung. |
 | 19.5 Akkumulator und Rechenpfad debuggen | abgeschlossen mit Abweichung | Der isolierte Akkumulator schreibt Wert und Validität gemeinsam; 12 von 20 Operationsfällen stimmen. Speicherwahl, Invalidität, Multiplikationsüberlauf und Division weichen bereits im kombinatorischen Blatt ab. |
-| 19.6 Adresspfad und Speicher debuggen | als Nächstes | Die vier Adressierungsarten, Daten-/Valid-RAM und Adressgrenzen müssen elektrisch eingegrenzt werden. |
-| 19.7–19.10 | offen | Noch nicht begonnen. |
+| 19.6 Adresspfad und Speicher debuggen | abgeschlossen mit Abweichung | Adressregister und beide RAMs arbeiten gekoppelt; `EffectiveAddress` wählt Direkt-/Registeradresse und Offset jedoch mit vertauschter zweiter Multiplexerpolarität, wodurch auch die Bereichsprüfung die falsche Adresse bewertet. |
+| 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen | als Nächstes | Kontrollfluss, Ausgaben, beide Haltarten und die sechs Sticky-Flags müssen elektrisch eingegrenzt werden. |
+| 19.8–19.10 | offen | Noch nicht begonnen. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
 
@@ -509,3 +510,91 @@ diese späteren Operationsfehler noch der Decoder vor 19.8 repariert.
 - 19.6 untersucht nun zuerst den direkten Speicherpfad, weil dessen Wert und
   Validität schon am Eingang von `Operations` falsch ausgewählt werden
   könnten. Reparaturen bleiben weiterhin bis 19.8 ausgesetzt.
+
+## 19.6 Adresspfad und Speicher debuggen
+
+### Ausgangslage
+
+Wegen der bekannten Opcode-Abweichung aus 19.4 wurden `AddressPath`,
+`EffectiveAddress` und `Memory` erneut direkt über ihre benannten Pins
+angeregt. So ließen sich Adressregister, Auswahl und RAM von Decoder und
+Operationsblatt trennen. Geprüft wurden Direktadresse, Adressregister und
+Register-plus-Offset, die Grenze `0x0fff`, ein Wert außerhalb des bestückten
+Speichers sowie gültige und ungültige Schreibdaten. Die eingecheckte Schaltung
+blieb unverändert.
+
+### Kommando oder Bedienfolge
+
+Ein lokales Python-Skript erzeugte temporäre Projektkopien, setzte jeweils nur
+die Eingabepins der drei vorhandenen Unterblätter auf Konstanten und ersetzte
+Takt und Startreset für die synchronen Versuche durch `Clock` und
+`PowerOnReset`. Die Ausgänge wurden mit Logisim-evolution 4.1.0 tabellarisch
+aufgenommen:
+
+```bash
+PYTHONPATH=src python3 /tmp/ap196.py
+
+/root/.local/share/mise/installs/java/21.0.2/bin/java \
+  -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table /tmp/ap196-EFFECTIVE-CASE.circ
+
+/root/.local/share/mise/installs/java/21.0.2/bin/java \
+  -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table,halt /tmp/ap196-SEQUENTIAL-CASE.circ
+```
+
+Für die synchronen Kopien diente ausschließlich ein temporärer Ausgang als
+Haltebedingung. Die ignorierten Rohdaten liegen unter
+`artifacts/ap19.6-address-memory/`. Repräsentative SHA-256-Digests sind:
+
+```text
+a49d49e2c9dd6310ba0c575bf4f0978299d2f1c078554deb5ad08c681d495887  address-path.tsv
+ef05ea7d01416e5cfbae9609b3aa0702e4802191a91ea04c9cea470efcd2f996  address-path-carry.tsv
+629a2cc094f5233a2e6fd124767ca5d8bad4270795b3becefa7aa8bc0404326f  memvalid.tsv
+b08ad4ce46b9713ba4f0620353760a23ad97424a28f081673a257472e388cb3f  meminvalid.tsv
+```
+
+### Beobachteter Nachweis
+
+`AddressPath` startete definiert bei Adresse 0 mit ungültigem Register. An der
+nächsten aktiven Flanke wurden Adresse 20 und ihr Validitätsbit gemeinsam
+übernommen; der Offset 1 ergab Adresse 21 ohne Carry. Der Grenzfall
+`0xffff + 1` ergab `0x0000` und `OFFSET_CARRY=1`. Damit sind Registerwert,
+Registervalidität und der 16-Bit-Addierer im isolierten Blatt konsistent.
+
+Auch die beiden RAMs teilen im isolierten `Memory`-Blatt tatsächlich Adresse,
+Write-Enable und Takt. Ein gültiger Schreibzugriff auf Adresse 20 lieferte nach
+derselben Flanke `MEMORY_DATA=0x1234` und `MEMORY_VALID=1`; ein ungültiger
+Schreibzugriff auf Adresse 21 lieferte gekoppelt `0x5678` und
+`MEMORY_VALID=0`. Ein Speicher-Schreibzugriff veränderte in diesen isolierten
+Versuchen keinen Akkumulator, weil `Memory` keine Verbindung zu dessen
+Write-Enable besitzt. Der integrierte Nachweis für `STORE` bleibt wegen des
+vorgelagerten Decoders bis zur Reparatur offen.
+
+`EffectiveAddress` wich dagegen in allen drei Auswahlarten ab. Sein erster
+Multiplexer exportierte Direktadresse beziehungsweise Adressregister und das
+zugehörige Modussignal korrekt. Der zweite Multiplexer verwendete jedoch bei
+inaktivem `ADDR_REG_OFFS_ARGUMENT` die Offsetadresse und bei aktivem Signal die
+zuvor gewählte Direkt-/Registeradresse – genau umgekehrt zum Vertrag. So wurde
+im Direktfall statt Adresse 10 die Offsetadresse 21 ausgegeben, im
+Registerfall ebenfalls 21 statt 20 und im Offsetfall 20 statt 21.
+
+Die Bereichsprüfung ist an den Ausgang dieses falsch gepolten Multiplexers
+gekoppelt. Bei ausgewähltem Registerwert `0x0fff` oder `0x1000` prüfte sie
+deshalb in den Versuchen die inaktive Offsetadresse 0 und meldete in beiden
+Fällen `ADDRESS_OUT_OF_RANGE=0`. Die Grenzentscheidung selbst ist damit noch
+nicht als defekter Vergleicher belegt; nachgewiesen ist der erste lokale
+Übergang am zweiten Auswahlmultiplexer. Das vollständige Abnahmekriterium von
+19.6 besteht folglich nicht, und die Reparatur bleibt Aufgabe 19.8 vorbehalten.
+
+### Offene Risiken und Übergabe an 19.7
+
+- Die RAM-Versuche belegen gekoppelte Einzelzugriffe, aber wegen des bekannten
+  Decoders noch keine vollständigen Schreib-/Leseprogramme als Maschinenwörter.
+- Ob der Bereichsvergleicher nach Korrektur der Auswahl exakt bei `0x0fff`
+  trennt, muss der fokussierte Regressionstest in 19.8 erneut elektrisch
+  belegen.
+- Die Versuche verwendeten Java 21.0.2 statt Temurin 21.0.8. Die gepinnte
+  Logisim-Version war 4.1.0; die vollständig gepinnte Abnahme bleibt 19.9.
+- Aufgabe 19.7 untersucht nun Sprünge, beide Ausgabekanäle, Normal- und
+  Fehlerhalt sowie alle Sticky-Flags weiterhin ohne vorgezogene Reparatur.
