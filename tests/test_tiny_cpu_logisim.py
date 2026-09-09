@@ -133,7 +133,7 @@ class LogisimLauncherTests(unittest.TestCase):
             root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             wires = {(w.get("from"), w.get("to")) for w in main.findall("wire")}
-            expected = (("(2280,1990)", "(2520,1990)") if name == "TinyCPU.circ"
+            expected = (("(2280,1310)", "(2530,1310)") if name == "TinyCPU.circ"
                         else ("(2280,2130)", "(2470,2130)"))
             self.assertIn(
                 expected, wires,
@@ -170,10 +170,8 @@ class LogisimLauncherTests(unittest.TestCase):
             ))
 
     def test_add_operand_reaches_operations_input(self):
-        # These coordinates are deliberately paired with the current F-box pin
-        # labels below.  A pin reorder must update the route by label rather
-        # than silently retaining the old, visually adjacent terminal.
-        expected = {
+        expected = ("(1270,930)", "(2520,930)")
+        wrong_error_flags_route = {
             ("(1270,930)", "(2170,930)"),
             ("(2170,450)", "(2170,930)"),
             ("(2170,450)", "(2490,450)"),
@@ -197,19 +195,18 @@ class LogisimLauncherTests(unittest.TestCase):
             self.assertEqual(operation_pins.get("ADD_OPERAND"), "(330,450)")
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             wires = {(wire.get("from"), wire.get("to")) for wire in main.findall("wire")}
-            self.assertTrue(expected.issubset(wires), f"{name} leaves ADD_OPERAND disconnected")
+            self.assertIn(expected, wires, f"{name} leaves ADD_OPERAND disconnected")
+            self.assertTrue(
+                wrong_error_flags_route.isdisjoint(wires),
+                f"{name} routes ADD_OPERAND into the ErrorFlags instance",
+            )
             self.assertTrue(
                 stale_load_const_route.isdisjoint(wires),
                 f"{name} still routes ADD_OPERAND to the LOAD_CONST monitor",
             )
 
     def test_sub_operand_reaches_operations_input(self):
-        expected = {
-            ("(1270,950)", "(2190,950)"),
-            ("(2190,470)", "(2190,950)"),
-            ("(2190,470)", "(2510,470)"),
-            ("(2510,470)", "(2520,470)"),
-        }
+        expected = ("(1270,950)", "(2520,950)")
         stale_sub_monitor_route = {
             ("(1270,950)", "(1740,950)"),
             ("(1740,950)", "(1740,2500)"),
@@ -231,7 +228,7 @@ class LogisimLauncherTests(unittest.TestCase):
             self.assertEqual(operation_pins.get("SUB_OPERAND"), "(330,470)")
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             wires = {(wire.get("from"), wire.get("to")) for wire in main.findall("wire")}
-            self.assertTrue(expected.issubset(wires), f"{name} leaves SUB_OPERAND disconnected")
+            self.assertIn(expected, wires, f"{name} leaves SUB_OPERAND disconnected")
             self.assertTrue(
                 stale_sub_monitor_route.isdisjoint(wires),
                 f"{name} still routes SUB_OPERAND to the stale monitor net",
