@@ -207,6 +207,17 @@ class LogisimLauncherTests(unittest.TestCase):
 
     def test_sub_operand_reaches_operations_input(self):
         expected = ("(1270,950)", "(2520,950)")
+        decoder_route = ("(1460,90)", "(1610,90)")
+        operation_routes = {
+            ("(330,470)", "(670,470)"),
+            ("(670,470)", "(680,470)"),
+            ("(670,470)", "(670,490)"),
+            ("(670,490)", "(680,490)"),
+            ("(670,490)", "(670,510)"),
+            ("(670,510)", "(680,510)"),
+            ("(670,510)", "(670,530)"),
+            ("(670,530)", "(680,530)"),
+        }
         stale_sub_monitor_route = {
             ("(1270,950)", "(1740,950)"),
             ("(1740,950)", "(1740,2500)"),
@@ -226,6 +237,27 @@ class LogisimLauncherTests(unittest.TestCase):
                 if attribute.get("name") == "label"
             }
             self.assertEqual(operation_pins.get("SUB_OPERAND"), "(330,470)")
+            operation_wires = {
+                (wire.get("from"), wire.get("to"))
+                for wire in operations.findall("wire")
+            }
+            self.assertTrue(
+                operation_routes.issubset(operation_wires),
+                f"{name} does not fan SUB_OPERAND out to every subtraction mode",
+            )
+
+            controls = next(
+                c for c in root.findall("circuit")
+                if c.get("name") == "FetchDecodeControls"
+            )
+            control_wires = {
+                (wire.get("from"), wire.get("to"))
+                for wire in controls.findall("wire")
+            }
+            self.assertIn(
+                decoder_route, control_wires,
+                f"{name} does not drive the public SUB_OPERAND output",
+            )
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             wires = {(wire.get("from"), wire.get("to")) for wire in main.findall("wire")}
             self.assertIn(expected, wires, f"{name} leaves SUB_OPERAND disconnected")

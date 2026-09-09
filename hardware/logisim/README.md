@@ -80,6 +80,14 @@ hierarchische Integrationsseite unmittelbar die öffentliche, gruppierte
 Decodergrenze; eine zweite Kopie des alten Kombinationsdecoders ist weder
 instanziiert noch als Schemablatt im Projekt verblieben.
 
+Die `SUB_OPERAND`-Strecke im primären 16/12-Profil ist durchgängig geprüft:
+Das vierfach-ODER `SUB_OPERAND_SELECT` treibt den gleichnamigen Decoder-Ausgang,
+der auf `TinyCPUMain` direkt zum `SUB_OPERAND`-Eingang von `Operations` führt.
+Innerhalb dieses Blatts wird die Freigabe an alle vier Subtraktionsarten
+(Konstante, direkte Adresse, Adressregister und Register plus Offset) verteilt.
+Der Strukturtest sichert alle drei Abschnitte dieser Verbindung gegen eine
+versehentliche Umleitung oder Unterbrechung ab.
+
 This directory contains the TinyCPU hardware baseline with a dedicated arithmetic sheet.
 Open `TinyCPU.circ` with Logisim-evolution 4.1.x. Das Blatt **`TinyCPUMain` ist
 die hierarchische Integrationsseite**. Die fachliche Logik liegt in benannten
