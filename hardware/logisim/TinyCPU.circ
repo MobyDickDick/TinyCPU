@@ -249,7 +249,6 @@
       <a name="labelloc" val="east"/>
     </comp>
     <comp lib="0" loc="(660,430)" name="Constant">
-      <a name="label" val="PROGRAM_LIMIT_MAX"/>
       <a name="value" val="0xfff"/>
       <a name="width" val="16"/>
     </comp>
@@ -367,7 +366,7 @@
     <wire from="(1560,70)" to="(1560,1510)"/>
     <wire from="(1580,50)" to="(1580,1530)"/>
     <wire from="(1660,210)" to="(1660,410)"/>
-    <wire from="(1660,210)" to="(2790,210)"/>
+    <wire from="(1660,210)" to="(2420,210)"/>
     <wire from="(1660,410)" to="(1730,410)"/>
     <wire from="(1680,390)" to="(1680,690)"/>
     <wire from="(1680,390)" to="(1730,390)"/>
@@ -430,28 +429,30 @@
     <wire from="(2400,780)" to="(2410,780)"/>
     <wire from="(2410,780)" to="(2410,830)"/>
     <wire from="(2410,830)" to="(2520,830)"/>
+    <wire from="(2420,210)" to="(2420,370)"/>
+    <wire from="(2420,210)" to="(2790,210)"/>
+    <wire from="(2420,370)" to="(2520,370)"/>
     <wire from="(2430,750)" to="(2430,810)"/>
     <wire from="(2430,810)" to="(2520,810)"/>
+    <wire from="(2440,250)" to="(2440,430)"/>
+    <wire from="(2440,250)" to="(2810,250)"/>
+    <wire from="(2440,430)" to="(2520,430)"/>
     <wire from="(2440,910)" to="(2440,1110)"/>
     <wire from="(2440,910)" to="(2520,910)"/>
-    <wire from="(2450,370)" to="(2520,370)"/>
     <wire from="(2450,550)" to="(2450,870)"/>
     <wire from="(2450,550)" to="(3350,550)"/>
     <wire from="(2450,870)" to="(2520,870)"/>
     <wire from="(2460,1070)" to="(2460,1190)"/>
     <wire from="(2460,1070)" to="(2520,1070)"/>
-    <wire from="(2470,250)" to="(2470,430)"/>
-    <wire from="(2470,250)" to="(2810,250)"/>
-    <wire from="(2470,430)" to="(2520,430)"/>
+    <wire from="(2460,270)" to="(2460,410)"/>
+    <wire from="(2460,270)" to="(3170,270)"/>
+    <wire from="(2460,410)" to="(2520,410)"/>
     <wire from="(2480,1170)" to="(2480,1290)"/>
     <wire from="(2480,1170)" to="(2780,1170)"/>
     <wire from="(2480,1290)" to="(2530,1290)"/>
-    <wire from="(2490,270)" to="(2490,410)"/>
-    <wire from="(2490,270)" to="(3170,270)"/>
-    <wire from="(2490,410)" to="(2520,410)"/>
-    <wire from="(2510,290)" to="(2510,390)"/>
-    <wire from="(2510,290)" to="(2750,290)"/>
-    <wire from="(2510,390)" to="(2520,390)"/>
+    <wire from="(2480,290)" to="(2480,390)"/>
+    <wire from="(2480,290)" to="(2750,290)"/>
+    <wire from="(2480,390)" to="(2520,390)"/>
     <wire from="(2530,990)" to="(2530,1000)"/>
     <wire from="(260,550)" to="(400,550)"/>
     <wire from="(260,90)" to="(1530,90)"/>
@@ -1416,6 +1417,355 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <a name="circuit" val="FetchDecodeControls"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
     <a name="simulationFrequency" val="1.0"/>
+    <comp lib="0" loc="(1410,10)" name="Tunnel">
+      <a name="label" val="DECODE_04"/>
+    </comp>
+    <comp lib="0" loc="(1410,100)" name="Tunnel">
+      <a name="label" val="DECODE_10"/>
+    </comp>
+    <comp lib="0" loc="(1410,110)" name="Tunnel">
+      <a name="label" val="DECODE_11"/>
+    </comp>
+    <comp lib="0" loc="(1410,130)" name="Tunnel">
+      <a name="label" val="DECODE_12"/>
+    </comp>
+    <comp lib="0" loc="(1410,140)" name="Tunnel">
+      <a name="label" val="DECODE_13"/>
+    </comp>
+    <comp lib="0" loc="(1410,160)" name="Tunnel">
+      <a name="label" val="DECODE_14"/>
+    </comp>
+    <comp lib="0" loc="(1410,1660)" name="Tunnel">
+      <a name="label" val="DECODE_00"/>
+    </comp>
+    <comp lib="0" loc="(1410,1670)" name="Tunnel">
+      <a name="label" val="DECODE_04"/>
+    </comp>
+    <comp lib="0" loc="(1410,1680)" name="Tunnel">
+      <a name="label" val="DECODE_08"/>
+    </comp>
+    <comp lib="0" loc="(1410,1690)" name="Tunnel">
+      <a name="label" val="DECODE_12"/>
+    </comp>
+    <comp lib="0" loc="(1410,170)" name="Tunnel">
+      <a name="label" val="DECODE_15"/>
+    </comp>
+    <comp lib="0" loc="(1410,1710)" name="Tunnel">
+      <a name="label" val="DECODE_16"/>
+    </comp>
+    <comp lib="0" loc="(1410,1720)" name="Tunnel">
+      <a name="label" val="DECODE_20"/>
+    </comp>
+    <comp lib="0" loc="(1410,1730)" name="Tunnel">
+      <a name="label" val="DECODE_24"/>
+    </comp>
+    <comp lib="0" loc="(1410,1740)" name="Tunnel">
+      <a name="label" val="DECODE_31"/>
+    </comp>
+    <comp lib="0" loc="(1410,1860)" name="Tunnel">
+      <a name="label" val="DECODE_01"/>
+    </comp>
+    <comp lib="0" loc="(1410,1870)" name="Tunnel">
+      <a name="label" val="DECODE_05"/>
+    </comp>
+    <comp lib="0" loc="(1410,1880)" name="Tunnel">
+      <a name="label" val="DECODE_09"/>
+    </comp>
+    <comp lib="0" loc="(1410,1890)" name="Tunnel">
+      <a name="label" val="DECODE_13"/>
+    </comp>
+    <comp lib="0" loc="(1410,190)" name="Tunnel">
+      <a name="label" val="DECODE_16"/>
+    </comp>
+    <comp lib="0" loc="(1410,1910)" name="Tunnel">
+      <a name="label" val="DECODE_17"/>
+    </comp>
+    <comp lib="0" loc="(1410,1920)" name="Tunnel">
+      <a name="label" val="DECODE_21"/>
+    </comp>
+    <comp lib="0" loc="(1410,1930)" name="Tunnel">
+      <a name="label" val="DECODE_25"/>
+    </comp>
+    <comp lib="0" loc="(1410,1940)" name="Tunnel">
+      <a name="label" val="DECODE_28"/>
+    </comp>
+    <comp lib="0" loc="(1410,20)" name="Tunnel">
+      <a name="label" val="DECODE_05"/>
+    </comp>
+    <comp lib="0" loc="(1410,200)" name="Tunnel">
+      <a name="label" val="DECODE_17"/>
+    </comp>
+    <comp lib="0" loc="(1410,2060)" name="Tunnel">
+      <a name="label" val="DECODE_02"/>
+    </comp>
+    <comp lib="0" loc="(1410,2070)" name="Tunnel">
+      <a name="label" val="DECODE_06"/>
+    </comp>
+    <comp lib="0" loc="(1410,2080)" name="Tunnel">
+      <a name="label" val="DECODE_10"/>
+    </comp>
+    <comp lib="0" loc="(1410,2090)" name="Tunnel">
+      <a name="label" val="DECODE_14"/>
+    </comp>
+    <comp lib="0" loc="(1410,2110)" name="Tunnel">
+      <a name="label" val="DECODE_18"/>
+    </comp>
+    <comp lib="0" loc="(1410,2120)" name="Tunnel">
+      <a name="label" val="DECODE_22"/>
+    </comp>
+    <comp lib="0" loc="(1410,2130)" name="Tunnel">
+      <a name="label" val="DECODE_26"/>
+    </comp>
+    <comp lib="0" loc="(1410,2140)" name="Tunnel">
+      <a name="label" val="DECODE_29"/>
+    </comp>
+    <comp lib="0" loc="(1410,220)" name="Tunnel">
+      <a name="label" val="DECODE_18"/>
+    </comp>
+    <comp lib="0" loc="(1410,2260)" name="Tunnel">
+      <a name="label" val="DECODE_03"/>
+    </comp>
+    <comp lib="0" loc="(1410,2270)" name="Tunnel">
+      <a name="label" val="DECODE_07"/>
+    </comp>
+    <comp lib="0" loc="(1410,2280)" name="Tunnel">
+      <a name="label" val="DECODE_11"/>
+    </comp>
+    <comp lib="0" loc="(1410,2290)" name="Tunnel">
+      <a name="label" val="DECODE_15"/>
+    </comp>
+    <comp lib="0" loc="(1410,230)" name="Tunnel">
+      <a name="label" val="DECODE_19"/>
+    </comp>
+    <comp lib="0" loc="(1410,2310)" name="Tunnel">
+      <a name="label" val="DECODE_19"/>
+    </comp>
+    <comp lib="0" loc="(1410,2320)" name="Tunnel">
+      <a name="label" val="DECODE_23"/>
+    </comp>
+    <comp lib="0" loc="(1410,2330)" name="Tunnel">
+      <a name="label" val="DECODE_27"/>
+    </comp>
+    <comp lib="0" loc="(1410,2340)" name="Tunnel">
+      <a name="label" val="DECODE_30"/>
+    </comp>
+    <comp lib="0" loc="(1410,2460)" name="Tunnel">
+      <a name="label" val="DECODE_50"/>
+    </comp>
+    <comp lib="0" loc="(1410,2470)" name="Tunnel">
+      <a name="label" val="DECODE_51"/>
+    </comp>
+    <comp lib="0" loc="(1410,2480)" name="Tunnel">
+      <a name="label" val="DECODE_52"/>
+    </comp>
+    <comp lib="0" loc="(1410,2490)" name="Tunnel">
+      <a name="label" val="DECODE_53"/>
+    </comp>
+    <comp lib="0" loc="(1410,250)" name="Tunnel">
+      <a name="label" val="DECODE_20"/>
+    </comp>
+    <comp lib="0" loc="(1410,2510)" name="Tunnel">
+      <a name="label" val="DECODE_54"/>
+    </comp>
+    <comp lib="0" loc="(1410,2520)" name="Tunnel">
+      <a name="label" val="DECODE_55"/>
+    </comp>
+    <comp lib="0" loc="(1410,2530)" name="Tunnel">
+      <a name="label" val="DECODE_56"/>
+    </comp>
+    <comp lib="0" loc="(1410,2540)" name="Tunnel">
+      <a name="label" val="DECODE_57"/>
+    </comp>
+    <comp lib="0" loc="(1410,260)" name="Tunnel">
+      <a name="label" val="DECODE_21"/>
+    </comp>
+    <comp lib="0" loc="(1410,2680)" name="Tunnel">
+      <a name="label" val="DECODE_46"/>
+    </comp>
+    <comp lib="0" loc="(1410,280)" name="Tunnel">
+      <a name="label" val="DECODE_22"/>
+    </comp>
+    <comp lib="0" loc="(1410,2880)" name="Tunnel">
+      <a name="label" val="DECODE_32"/>
+    </comp>
+    <comp lib="0" loc="(1410,290)" name="Tunnel">
+      <a name="label" val="DECODE_23"/>
+    </comp>
+    <comp lib="0" loc="(1410,2900)" name="Tunnel">
+      <a name="label" val="DECODE_43"/>
+    </comp>
+    <comp lib="0" loc="(1410,2920)" name="Tunnel">
+      <a name="label" val="DECODE_47"/>
+    </comp>
+    <comp lib="0" loc="(1410,3080)" name="Tunnel">
+      <a name="label" val="DECODE_48"/>
+    </comp>
+    <comp lib="0" loc="(1410,310)" name="Tunnel">
+      <a name="label" val="DECODE_24"/>
+    </comp>
+    <comp lib="0" loc="(1410,320)" name="Tunnel">
+      <a name="label" val="DECODE_25"/>
+    </comp>
+    <comp lib="0" loc="(1410,3280)" name="Tunnel">
+      <a name="label" val="DECODE_49"/>
+    </comp>
+    <comp lib="0" loc="(1410,340)" name="Tunnel">
+      <a name="label" val="DECODE_26"/>
+    </comp>
+    <comp lib="0" loc="(1410,3470)" name="Tunnel">
+      <a name="label" val="DECODE_58"/>
+    </comp>
+    <comp lib="0" loc="(1410,3480)" name="Tunnel">
+      <a name="label" val="DECODE_59"/>
+    </comp>
+    <comp lib="0" loc="(1410,3490)" name="Tunnel">
+      <a name="label" val="DECODE_60"/>
+    </comp>
+    <comp lib="0" loc="(1410,350)" name="Tunnel">
+      <a name="label" val="DECODE_27"/>
+    </comp>
+    <comp lib="0" loc="(1410,3510)" name="Tunnel">
+      <a name="label" val="DECODE_61"/>
+    </comp>
+    <comp lib="0" loc="(1410,3520)" name="Tunnel">
+      <a name="label" val="DECODE_62"/>
+    </comp>
+    <comp lib="0" loc="(1410,3530)" name="Tunnel">
+      <a name="label" val="DECODE_63"/>
+    </comp>
+    <comp lib="0" loc="(1410,370)" name="Tunnel">
+      <a name="label" val="DECODE_46"/>
+    </comp>
+    <comp lib="0" loc="(1410,380)" name="Tunnel">
+      <a name="label" val="DECODE_47"/>
+    </comp>
+    <comp lib="0" loc="(1410,40)" name="Tunnel">
+      <a name="label" val="DECODE_06"/>
+    </comp>
+    <comp lib="0" loc="(1410,400)" name="Tunnel">
+      <a name="label" val="DECODE_48"/>
+    </comp>
+    <comp lib="0" loc="(1410,410)" name="Tunnel">
+      <a name="label" val="DECODE_49"/>
+    </comp>
+    <comp lib="0" loc="(1410,430)" name="Tunnel">
+      <a name="label" val="DECODE_00"/>
+    </comp>
+    <comp lib="0" loc="(1410,440)" name="Tunnel">
+      <a name="label" val="DECODE_01"/>
+    </comp>
+    <comp lib="0" loc="(1410,460)" name="Tunnel">
+      <a name="label" val="DECODE_02"/>
+    </comp>
+    <comp lib="0" loc="(1410,470)" name="Tunnel">
+      <a name="label" val="DECODE_03"/>
+    </comp>
+    <comp lib="0" loc="(1410,490)" name="Tunnel">
+      <a name="label" val="DECODE_28"/>
+    </comp>
+    <comp lib="0" loc="(1410,50)" name="Tunnel">
+      <a name="label" val="DECODE_07"/>
+    </comp>
+    <comp lib="0" loc="(1410,510)" name="Tunnel">
+      <a name="label" val="DECODE_29"/>
+    </comp>
+    <comp lib="0" loc="(1410,530)" name="Tunnel">
+      <a name="label" val="DECODE_30"/>
+    </comp>
+    <comp lib="0" loc="(1410,570)" name="Tunnel">
+      <a name="label" val="BANK_70_A"/>
+    </comp>
+    <comp lib="0" loc="(1410,590)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(1410,610)" name="Tunnel">
+      <a name="label" val="BANK_70_B"/>
+    </comp>
+    <comp lib="0" loc="(1410,670)" name="Tunnel">
+      <a name="label" val="BANK_71_A"/>
+    </comp>
+    <comp lib="0" loc="(1410,690)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(1410,70)" name="Tunnel">
+      <a name="label" val="DECODE_08"/>
+    </comp>
+    <comp lib="0" loc="(1410,710)" name="Tunnel">
+      <a name="label" val="BANK_71_B"/>
+    </comp>
+    <comp lib="0" loc="(1410,770)" name="Tunnel">
+      <a name="label" val="BANK_72_A"/>
+    </comp>
+    <comp lib="0" loc="(1410,790)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(1410,80)" name="Tunnel">
+      <a name="label" val="DECODE_09"/>
+    </comp>
+    <comp lib="0" loc="(1410,810)" name="Tunnel">
+      <a name="label" val="BANK_72_B"/>
+    </comp>
+    <comp lib="0" loc="(1410,870)" name="Tunnel">
+      <a name="label" val="BANK_73_A"/>
+    </comp>
+    <comp lib="0" loc="(1410,890)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(1410,910)" name="Tunnel">
+      <a name="label" val="BANK_73_B"/>
+    </comp>
+    <comp lib="0" loc="(1440,1360)" name="Tunnel">
+      <a name="label" val="BANK_74_A"/>
+    </comp>
+    <comp lib="0" loc="(1440,1380)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
+    <comp lib="0" loc="(1440,1400)" name="Tunnel">
+      <a name="label" val="BANK_74_B"/>
+    </comp>
+    <comp lib="0" loc="(1460,1700)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="BANK_70_A"/>
+    </comp>
+    <comp lib="0" loc="(1460,1900)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="BANK_71_A"/>
+    </comp>
+    <comp lib="0" loc="(1460,2100)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="BANK_72_A"/>
+    </comp>
+    <comp lib="0" loc="(1460,2300)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="BANK_73_A"/>
+    </comp>
+    <comp lib="0" loc="(1460,2500)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="BANK_74_A"/>
+    </comp>
+    <comp lib="0" loc="(1460,2700)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="BANK_70_B"/>
+    </comp>
+    <comp lib="0" loc="(1460,2900)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="BANK_71_B"/>
+    </comp>
+    <comp lib="0" loc="(1460,3100)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="BANK_72_B"/>
+    </comp>
+    <comp lib="0" loc="(1460,3300)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="BANK_73_B"/>
+    </comp>
+    <comp lib="0" loc="(1460,3500)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="BANK_74_B"/>
+    </comp>
+    <comp lib="0" loc="(1510,1150)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
     <comp lib="0" loc="(1600,790)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
@@ -1428,11 +1778,17 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
       <a name="label" val="JUMP_NOT_ZERO"/>
       <a name="type" val="output"/>
     </comp>
+    <comp lib="0" loc="(1610,1010)" name="Tunnel">
+      <a name="label" val="DECODE_36"/>
+    </comp>
     <comp lib="0" loc="(1610,1030)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="JUMP_NEGATIVE"/>
       <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(1610,1030)" name="Tunnel">
+      <a name="label" val="DECODE_37"/>
     </comp>
     <comp lib="0" loc="(1610,1050)" name="Pin">
       <a name="appearance" val="classic"/>
@@ -1440,11 +1796,17 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
       <a name="label" val="JUMP_ERROR"/>
       <a name="type" val="output"/>
     </comp>
+    <comp lib="0" loc="(1610,1050)" name="Tunnel">
+      <a name="label" val="DECODE_38"/>
+    </comp>
     <comp lib="0" loc="(1610,1070)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="JUMP_NOT_ERROR"/>
       <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(1610,1070)" name="Tunnel">
+      <a name="label" val="DECODE_39"/>
     </comp>
     <comp lib="0" loc="(1610,1090)" name="Pin">
       <a name="appearance" val="classic"/>
@@ -1488,11 +1850,17 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
       <a name="label" val="CLEAR_ERROR"/>
       <a name="type" val="output"/>
     </comp>
+    <comp lib="0" loc="(1610,1210)" name="Tunnel">
+      <a name="label" val="DECODE_40"/>
+    </comp>
     <comp lib="0" loc="(1610,1230)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="INPUT"/>
       <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(1610,1230)" name="Tunnel">
+      <a name="label" val="DECODE_41"/>
     </comp>
     <comp lib="0" loc="(1610,1250)" name="Pin">
       <a name="appearance" val="classic"/>
@@ -1500,11 +1868,17 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
       <a name="label" val="PRINT"/>
       <a name="type" val="output"/>
     </comp>
+    <comp lib="0" loc="(1610,1250)" name="Tunnel">
+      <a name="label" val="DECODE_42"/>
+    </comp>
     <comp lib="0" loc="(1610,1270)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="PRINT_ADR"/>
       <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(1610,1270)" name="Tunnel">
+      <a name="label" val="DECODE_43"/>
     </comp>
     <comp lib="0" loc="(1610,1290)" name="Pin">
       <a name="appearance" val="classic"/>
@@ -1512,11 +1886,17 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
       <a name="label" val="HALT"/>
       <a name="type" val="output"/>
     </comp>
+    <comp lib="0" loc="(1610,1290)" name="Tunnel">
+      <a name="label" val="DECODE_44"/>
+    </comp>
     <comp lib="0" loc="(1610,1310)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="HALT_ERROR"/>
       <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(1610,1310)" name="Tunnel">
+      <a name="label" val="DECODE_45"/>
     </comp>
     <comp lib="0" loc="(1610,1380)" name="Pin">
       <a name="appearance" val="classic"/>
@@ -1602,11 +1982,17 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
       <a name="label" val="NOT"/>
       <a name="type" val="output"/>
     </comp>
+    <comp lib="0" loc="(1610,950)" name="Tunnel">
+      <a name="label" val="DECODE_33"/>
+    </comp>
     <comp lib="0" loc="(1610,970)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="JUMP_ADR"/>
       <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(1610,970)" name="Tunnel">
+      <a name="label" val="DECODE_34"/>
     </comp>
     <comp lib="0" loc="(1610,990)" name="Pin">
       <a name="appearance" val="classic"/>
@@ -1614,30 +2000,329 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
       <a name="label" val="JUMP_ZERO"/>
       <a name="type" val="output"/>
     </comp>
+    <comp lib="0" loc="(1610,990)" name="Tunnel">
+      <a name="label" val="DECODE_35"/>
+    </comp>
     <comp lib="0" loc="(350,680)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="OPCODE"/>
       <a name="width" val="6"/>
     </comp>
+    <comp lib="0" loc="(420,10)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_00"/>
+    </comp>
+    <comp lib="0" loc="(420,100)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_09"/>
+    </comp>
+    <comp lib="0" loc="(420,110)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_10"/>
+    </comp>
+    <comp lib="0" loc="(420,120)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_11"/>
+    </comp>
+    <comp lib="0" loc="(420,130)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_12"/>
+    </comp>
+    <comp lib="0" loc="(420,140)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_13"/>
+    </comp>
+    <comp lib="0" loc="(420,150)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_14"/>
+    </comp>
+    <comp lib="0" loc="(420,160)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_15"/>
+    </comp>
+    <comp lib="0" loc="(420,170)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_16"/>
+    </comp>
+    <comp lib="0" loc="(420,180)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_17"/>
+    </comp>
+    <comp lib="0" loc="(420,190)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_18"/>
+    </comp>
+    <comp lib="0" loc="(420,20)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_01"/>
+    </comp>
+    <comp lib="0" loc="(420,200)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_19"/>
+    </comp>
+    <comp lib="0" loc="(420,210)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_20"/>
+    </comp>
+    <comp lib="0" loc="(420,220)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_21"/>
+    </comp>
+    <comp lib="0" loc="(420,230)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_22"/>
+    </comp>
+    <comp lib="0" loc="(420,240)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_23"/>
+    </comp>
+    <comp lib="0" loc="(420,250)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_24"/>
+    </comp>
+    <comp lib="0" loc="(420,260)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_25"/>
+    </comp>
+    <comp lib="0" loc="(420,270)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_26"/>
+    </comp>
+    <comp lib="0" loc="(420,280)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_27"/>
+    </comp>
+    <comp lib="0" loc="(420,290)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_28"/>
+    </comp>
+    <comp lib="0" loc="(420,30)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_02"/>
+    </comp>
+    <comp lib="0" loc="(420,300)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_29"/>
+    </comp>
+    <comp lib="0" loc="(420,310)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_30"/>
+    </comp>
+    <comp lib="0" loc="(420,320)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_31"/>
+    </comp>
+    <comp lib="0" loc="(420,330)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_32"/>
+    </comp>
+    <comp lib="0" loc="(420,340)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_33"/>
+    </comp>
+    <comp lib="0" loc="(420,350)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_34"/>
+    </comp>
+    <comp lib="0" loc="(420,360)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_35"/>
+    </comp>
+    <comp lib="0" loc="(420,370)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_36"/>
+    </comp>
+    <comp lib="0" loc="(420,380)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_37"/>
+    </comp>
+    <comp lib="0" loc="(420,390)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_38"/>
+    </comp>
+    <comp lib="0" loc="(420,40)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_03"/>
+    </comp>
+    <comp lib="0" loc="(420,400)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_39"/>
+    </comp>
+    <comp lib="0" loc="(420,410)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_40"/>
+    </comp>
+    <comp lib="0" loc="(420,420)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_41"/>
+    </comp>
+    <comp lib="0" loc="(420,430)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_42"/>
+    </comp>
+    <comp lib="0" loc="(420,440)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_43"/>
+    </comp>
+    <comp lib="0" loc="(420,450)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_44"/>
+    </comp>
+    <comp lib="0" loc="(420,460)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_45"/>
+    </comp>
+    <comp lib="0" loc="(420,470)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_46"/>
+    </comp>
+    <comp lib="0" loc="(420,480)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_47"/>
+    </comp>
+    <comp lib="0" loc="(420,490)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_48"/>
+    </comp>
+    <comp lib="0" loc="(420,50)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_04"/>
+    </comp>
+    <comp lib="0" loc="(420,500)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_49"/>
+    </comp>
+    <comp lib="0" loc="(420,510)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_50"/>
+    </comp>
+    <comp lib="0" loc="(420,520)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_51"/>
+    </comp>
+    <comp lib="0" loc="(420,530)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_52"/>
+    </comp>
+    <comp lib="0" loc="(420,540)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_53"/>
+    </comp>
+    <comp lib="0" loc="(420,550)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_54"/>
+    </comp>
+    <comp lib="0" loc="(420,560)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_55"/>
+    </comp>
+    <comp lib="0" loc="(420,570)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_56"/>
+    </comp>
+    <comp lib="0" loc="(420,580)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_57"/>
+    </comp>
+    <comp lib="0" loc="(420,590)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_58"/>
+    </comp>
+    <comp lib="0" loc="(420,60)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_05"/>
+    </comp>
+    <comp lib="0" loc="(420,600)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_59"/>
+    </comp>
+    <comp lib="0" loc="(420,610)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_60"/>
+    </comp>
+    <comp lib="0" loc="(420,620)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_61"/>
+    </comp>
+    <comp lib="0" loc="(420,630)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_62"/>
+    </comp>
+    <comp lib="0" loc="(420,640)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_63"/>
+    </comp>
+    <comp lib="0" loc="(420,70)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_06"/>
+    </comp>
+    <comp lib="0" loc="(420,80)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_07"/>
+    </comp>
+    <comp lib="0" loc="(420,90)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="DECODE_08"/>
+    </comp>
     <comp lib="1" loc="(1460,150)" name="OR Gate">
       <a name="inputs" val="4"/>
       <a name="label" val="MUL_OPERAND_SELECT"/>
+    </comp>
+    <comp lib="1" loc="(1460,1700)" name="OR Gate">
+      <a name="inputs" val="8"/>
+      <a name="label" val="CONST_ARGUMENT_PRIMARY"/>
+    </comp>
+    <comp lib="1" loc="(1460,1900)" name="OR Gate">
+      <a name="inputs" val="8"/>
+      <a name="label" val="ADDR_ARGUMENT_PRIMARY"/>
     </comp>
     <comp lib="1" loc="(1460,210)" name="OR Gate">
       <a name="inputs" val="4"/>
       <a name="label" val="DIV_OPERAND_SELECT"/>
     </comp>
+    <comp lib="1" loc="(1460,2100)" name="OR Gate">
+      <a name="inputs" val="8"/>
+      <a name="label" val="ADDR_REG_ARGUMENT_PRIMARY"/>
+    </comp>
+    <comp lib="1" loc="(1460,2300)" name="OR Gate">
+      <a name="inputs" val="8"/>
+      <a name="label" val="ADDR_REG_OFFS_ARGUMENT_PRIMARY"/>
+    </comp>
+    <comp lib="1" loc="(1460,2500)" name="OR Gate">
+      <a name="inputs" val="8"/>
+      <a name="label" val="INVALID_OPERAND_PRIMARY"/>
+    </comp>
     <comp lib="1" loc="(1460,270)" name="OR Gate">
       <a name="inputs" val="4"/>
       <a name="label" val="AND_OPERAND_SELECT"/>
+    </comp>
+    <comp lib="1" loc="(1460,2700)" name="OR Gate">
+      <a name="inputs" val="3"/>
+      <a name="label" val="CONST_ARGUMENT_EXTRA"/>
+    </comp>
+    <comp lib="1" loc="(1460,2900)" name="OR Gate">
+      <a name="inputs" val="3"/>
+      <a name="label" val="ADDR_ARGUMENT_EXTRA"/>
     </comp>
     <comp lib="1" loc="(1460,30)" name="OR Gate">
       <a name="inputs" val="4"/>
       <a name="label" val="ADD_OPERAND_SELECT"/>
     </comp>
+    <comp lib="1" loc="(1460,3100)" name="OR Gate">
+      <a name="inputs" val="3"/>
+      <a name="label" val="ADDR_REG_ARGUMENT_EXTRA"/>
+    </comp>
     <comp lib="1" loc="(1460,330)" name="OR Gate">
       <a name="inputs" val="4"/>
       <a name="label" val="OR_OPERAND_SELECT"/>
+    </comp>
+    <comp lib="1" loc="(1460,3300)" name="OR Gate">
+      <a name="inputs" val="3"/>
+      <a name="label" val="ADDR_REG_OFFS_ARGUMENT_EXTRA"/>
+    </comp>
+    <comp lib="1" loc="(1460,3500)" name="OR Gate">
+      <a name="inputs" val="6"/>
+      <a name="label" val="INVALID_OPERAND_EXTRA"/>
     </comp>
     <comp lib="1" loc="(1460,390)" name="OR Gate">
       <a name="inputs" val="4"/>
@@ -1678,814 +2363,10 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <comp lib="2" loc="(400,650)" name="Decoder">
       <a name="select" val="6"/>
     </comp>
-    <comp lib="1" loc="(1460,1700)" name="OR Gate">
-      <a name="inputs" val="8"/>
-      <a name="label" val="CONST_ARGUMENT_PRIMARY"/>
-    </comp>
-    <comp lib="1" loc="(1460,1900)" name="OR Gate">
-      <a name="inputs" val="8"/>
-      <a name="label" val="ADDR_ARGUMENT_PRIMARY"/>
-    </comp>
-    <comp lib="1" loc="(1460,2100)" name="OR Gate">
-      <a name="inputs" val="8"/>
-      <a name="label" val="ADDR_REG_ARGUMENT_PRIMARY"/>
-    </comp>
-    <comp lib="1" loc="(1460,2300)" name="OR Gate">
-      <a name="inputs" val="8"/>
-      <a name="label" val="ADDR_REG_OFFS_ARGUMENT_PRIMARY"/>
-    </comp>
-    <comp lib="1" loc="(1460,2500)" name="OR Gate">
-      <a name="inputs" val="8"/>
-      <a name="label" val="INVALID_OPERAND_PRIMARY"/>
-    </comp>
-    <comp lib="1" loc="(1460,2700)" name="OR Gate">
-      <a name="inputs" val="3"/>
-      <a name="label" val="CONST_ARGUMENT_EXTRA"/>
-    </comp>
-    <comp lib="1" loc="(1460,2900)" name="OR Gate">
-      <a name="inputs" val="3"/>
-      <a name="label" val="ADDR_ARGUMENT_EXTRA"/>
-    </comp>
-    <comp lib="1" loc="(1460,3100)" name="OR Gate">
-      <a name="inputs" val="3"/>
-      <a name="label" val="ADDR_REG_ARGUMENT_EXTRA"/>
-    </comp>
-    <comp lib="1" loc="(1460,3300)" name="OR Gate">
-      <a name="inputs" val="3"/>
-      <a name="label" val="ADDR_REG_OFFS_ARGUMENT_EXTRA"/>
-    </comp>
-    <comp lib="1" loc="(1460,3500)" name="OR Gate">
-      <a name="inputs" val="6"/>
-      <a name="label" val="INVALID_OPERAND_EXTRA"/>
-    </comp>
-    <comp lib="0" loc="(1510,1150)" name="Constant">
-      <a name="facing" val="east"/>
-      <a name="label" val="NO_RUNTIME_ERROR"/>
-      <a name="value" val="0x0"/>
-    </comp>
-    <comp lib="0" loc="(420,10)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_00"/>
-    </comp>
-    <comp lib="0" loc="(1410,430)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_00"/>
-    </comp>
-    <comp lib="0" loc="(1410,1660)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_00"/>
-    </comp>
-    <comp lib="0" loc="(420,20)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_01"/>
-    </comp>
-    <comp lib="0" loc="(1410,440)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_01"/>
-    </comp>
-    <comp lib="0" loc="(1410,1860)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_01"/>
-    </comp>
-    <comp lib="0" loc="(420,30)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_02"/>
-    </comp>
-    <comp lib="0" loc="(1410,460)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_02"/>
-    </comp>
-    <comp lib="0" loc="(1410,2060)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_02"/>
-    </comp>
-    <comp lib="0" loc="(420,40)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_03"/>
-    </comp>
-    <comp lib="0" loc="(1410,470)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_03"/>
-    </comp>
-    <comp lib="0" loc="(1410,2260)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_03"/>
-    </comp>
-    <comp lib="0" loc="(420,50)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_04"/>
-    </comp>
-    <comp lib="0" loc="(1410,10)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_04"/>
-    </comp>
-    <comp lib="0" loc="(1410,1670)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_04"/>
-    </comp>
-    <comp lib="0" loc="(420,60)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_05"/>
-    </comp>
-    <comp lib="0" loc="(1410,20)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_05"/>
-    </comp>
-    <comp lib="0" loc="(1410,1870)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_05"/>
-    </comp>
-    <comp lib="0" loc="(420,70)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_06"/>
-    </comp>
-    <comp lib="0" loc="(1410,40)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_06"/>
-    </comp>
-    <comp lib="0" loc="(1410,2070)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_06"/>
-    </comp>
-    <comp lib="0" loc="(420,80)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_07"/>
-    </comp>
-    <comp lib="0" loc="(1410,50)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_07"/>
-    </comp>
-    <comp lib="0" loc="(1410,2270)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_07"/>
-    </comp>
-    <comp lib="0" loc="(420,90)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_08"/>
-    </comp>
-    <comp lib="0" loc="(1410,70)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_08"/>
-    </comp>
-    <comp lib="0" loc="(1410,1680)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_08"/>
-    </comp>
-    <comp lib="0" loc="(420,100)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_09"/>
-    </comp>
-    <comp lib="0" loc="(1410,80)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_09"/>
-    </comp>
-    <comp lib="0" loc="(1410,1880)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_09"/>
-    </comp>
-    <comp lib="0" loc="(420,110)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_10"/>
-    </comp>
-    <comp lib="0" loc="(1410,100)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_10"/>
-    </comp>
-    <comp lib="0" loc="(1410,2080)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_10"/>
-    </comp>
-    <comp lib="0" loc="(420,120)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_11"/>
-    </comp>
-    <comp lib="0" loc="(1410,110)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_11"/>
-    </comp>
-    <comp lib="0" loc="(1410,2280)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_11"/>
-    </comp>
-    <comp lib="0" loc="(420,130)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_12"/>
-    </comp>
-    <comp lib="0" loc="(1410,130)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_12"/>
-    </comp>
-    <comp lib="0" loc="(1410,1690)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_12"/>
-    </comp>
-    <comp lib="0" loc="(420,140)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_13"/>
-    </comp>
-    <comp lib="0" loc="(1410,140)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_13"/>
-    </comp>
-    <comp lib="0" loc="(1410,1890)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_13"/>
-    </comp>
-    <comp lib="0" loc="(420,150)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_14"/>
-    </comp>
-    <comp lib="0" loc="(1410,160)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_14"/>
-    </comp>
-    <comp lib="0" loc="(1410,2090)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_14"/>
-    </comp>
-    <comp lib="0" loc="(420,160)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_15"/>
-    </comp>
-    <comp lib="0" loc="(1410,170)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_15"/>
-    </comp>
-    <comp lib="0" loc="(1410,2290)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_15"/>
-    </comp>
-    <comp lib="0" loc="(420,170)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_16"/>
-    </comp>
-    <comp lib="0" loc="(1410,190)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_16"/>
-    </comp>
-    <comp lib="0" loc="(1410,1710)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_16"/>
-    </comp>
-    <comp lib="0" loc="(420,180)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_17"/>
-    </comp>
-    <comp lib="0" loc="(1410,200)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_17"/>
-    </comp>
-    <comp lib="0" loc="(1410,1910)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_17"/>
-    </comp>
-    <comp lib="0" loc="(420,190)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_18"/>
-    </comp>
-    <comp lib="0" loc="(1410,220)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_18"/>
-    </comp>
-    <comp lib="0" loc="(1410,2110)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_18"/>
-    </comp>
-    <comp lib="0" loc="(420,200)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_19"/>
-    </comp>
-    <comp lib="0" loc="(1410,230)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_19"/>
-    </comp>
-    <comp lib="0" loc="(1410,2310)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_19"/>
-    </comp>
-    <comp lib="0" loc="(420,210)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_20"/>
-    </comp>
-    <comp lib="0" loc="(1410,250)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_20"/>
-    </comp>
-    <comp lib="0" loc="(1410,1720)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_20"/>
-    </comp>
-    <comp lib="0" loc="(420,220)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_21"/>
-    </comp>
-    <comp lib="0" loc="(1410,260)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_21"/>
-    </comp>
-    <comp lib="0" loc="(1410,1920)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_21"/>
-    </comp>
-    <comp lib="0" loc="(420,230)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_22"/>
-    </comp>
-    <comp lib="0" loc="(1410,280)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_22"/>
-    </comp>
-    <comp lib="0" loc="(1410,2120)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_22"/>
-    </comp>
-    <comp lib="0" loc="(420,240)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_23"/>
-    </comp>
-    <comp lib="0" loc="(1410,290)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_23"/>
-    </comp>
-    <comp lib="0" loc="(1410,2320)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_23"/>
-    </comp>
-    <comp lib="0" loc="(420,250)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_24"/>
-    </comp>
-    <comp lib="0" loc="(1410,310)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_24"/>
-    </comp>
-    <comp lib="0" loc="(1410,1730)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_24"/>
-    </comp>
-    <comp lib="0" loc="(420,260)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_25"/>
-    </comp>
-    <comp lib="0" loc="(1410,320)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_25"/>
-    </comp>
-    <comp lib="0" loc="(1410,1930)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_25"/>
-    </comp>
-    <comp lib="0" loc="(420,270)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_26"/>
-    </comp>
-    <comp lib="0" loc="(1410,340)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_26"/>
-    </comp>
-    <comp lib="0" loc="(1410,2130)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_26"/>
-    </comp>
-    <comp lib="0" loc="(420,280)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_27"/>
-    </comp>
-    <comp lib="0" loc="(1410,350)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_27"/>
-    </comp>
-    <comp lib="0" loc="(1410,2330)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_27"/>
-    </comp>
-    <comp lib="0" loc="(420,290)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_28"/>
-    </comp>
-    <comp lib="0" loc="(1410,490)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_28"/>
-    </comp>
-    <comp lib="0" loc="(1410,1940)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_28"/>
-    </comp>
-    <comp lib="0" loc="(420,300)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_29"/>
-    </comp>
-    <comp lib="0" loc="(1410,510)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_29"/>
-    </comp>
-    <comp lib="0" loc="(1410,2140)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_29"/>
-    </comp>
-    <comp lib="0" loc="(420,310)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_30"/>
-    </comp>
-    <comp lib="0" loc="(1410,530)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_30"/>
-    </comp>
-    <comp lib="0" loc="(1410,2340)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_30"/>
-    </comp>
-    <comp lib="0" loc="(420,320)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_31"/>
-    </comp>
-    <comp lib="0" loc="(1410,1740)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_31"/>
-    </comp>
-    <comp lib="0" loc="(420,330)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_32"/>
-    </comp>
-    <comp lib="0" loc="(1410,2880)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_32"/>
-    </comp>
-    <comp lib="0" loc="(420,340)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_33"/>
-    </comp>
-    <comp lib="0" loc="(1610,950)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_33"/>
-    </comp>
-    <comp lib="0" loc="(420,350)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_34"/>
-    </comp>
-    <comp lib="0" loc="(1610,970)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_34"/>
-    </comp>
-    <comp lib="0" loc="(420,360)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_35"/>
-    </comp>
-    <comp lib="0" loc="(1610,990)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_35"/>
-    </comp>
-    <comp lib="0" loc="(420,370)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_36"/>
-    </comp>
-    <comp lib="0" loc="(1610,1010)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_36"/>
-    </comp>
-    <comp lib="0" loc="(420,380)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_37"/>
-    </comp>
-    <comp lib="0" loc="(1610,1030)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_37"/>
-    </comp>
-    <comp lib="0" loc="(420,390)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_38"/>
-    </comp>
-    <comp lib="0" loc="(1610,1050)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_38"/>
-    </comp>
-    <comp lib="0" loc="(420,400)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_39"/>
-    </comp>
-    <comp lib="0" loc="(1610,1070)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_39"/>
-    </comp>
-    <comp lib="0" loc="(420,410)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_40"/>
-    </comp>
-    <comp lib="0" loc="(1610,1210)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_40"/>
-    </comp>
-    <comp lib="0" loc="(420,420)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_41"/>
-    </comp>
-    <comp lib="0" loc="(1610,1230)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_41"/>
-    </comp>
-    <comp lib="0" loc="(420,430)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_42"/>
-    </comp>
-    <comp lib="0" loc="(1610,1250)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_42"/>
-    </comp>
-    <comp lib="0" loc="(420,440)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_43"/>
-    </comp>
-    <comp lib="0" loc="(1410,2900)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_43"/>
-    </comp>
-    <comp lib="0" loc="(1610,1270)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_43"/>
-    </comp>
-    <comp lib="0" loc="(420,450)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_44"/>
-    </comp>
-    <comp lib="0" loc="(1610,1290)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_44"/>
-    </comp>
-    <comp lib="0" loc="(420,460)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_45"/>
-    </comp>
-    <comp lib="0" loc="(1610,1310)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_45"/>
-    </comp>
-    <comp lib="0" loc="(420,470)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_46"/>
-    </comp>
-    <comp lib="0" loc="(1410,370)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_46"/>
-    </comp>
-    <comp lib="0" loc="(1410,2680)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_46"/>
-    </comp>
-    <comp lib="0" loc="(420,480)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_47"/>
-    </comp>
-    <comp lib="0" loc="(1410,380)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_47"/>
-    </comp>
-    <comp lib="0" loc="(1410,2920)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_47"/>
-    </comp>
-    <comp lib="0" loc="(420,490)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_48"/>
-    </comp>
-    <comp lib="0" loc="(1410,400)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_48"/>
-    </comp>
-    <comp lib="0" loc="(1410,3080)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_48"/>
-    </comp>
-    <comp lib="0" loc="(420,500)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_49"/>
-    </comp>
-    <comp lib="0" loc="(1410,410)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_49"/>
-    </comp>
-    <comp lib="0" loc="(1410,3280)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_49"/>
-    </comp>
-    <comp lib="0" loc="(420,510)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_50"/>
-    </comp>
-    <comp lib="0" loc="(1410,2460)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_50"/>
-    </comp>
-    <comp lib="0" loc="(420,520)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_51"/>
-    </comp>
-    <comp lib="0" loc="(1410,2470)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_51"/>
-    </comp>
-    <comp lib="0" loc="(420,530)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_52"/>
-    </comp>
-    <comp lib="0" loc="(1410,2480)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_52"/>
-    </comp>
-    <comp lib="0" loc="(420,540)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_53"/>
-    </comp>
-    <comp lib="0" loc="(1410,2490)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_53"/>
-    </comp>
-    <comp lib="0" loc="(420,550)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_54"/>
-    </comp>
-    <comp lib="0" loc="(1410,2510)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_54"/>
-    </comp>
-    <comp lib="0" loc="(420,560)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_55"/>
-    </comp>
-    <comp lib="0" loc="(1410,2520)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_55"/>
-    </comp>
-    <comp lib="0" loc="(420,570)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_56"/>
-    </comp>
-    <comp lib="0" loc="(1410,2530)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_56"/>
-    </comp>
-    <comp lib="0" loc="(420,580)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_57"/>
-    </comp>
-    <comp lib="0" loc="(1410,2540)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_57"/>
-    </comp>
-    <comp lib="0" loc="(420,590)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_58"/>
-    </comp>
-    <comp lib="0" loc="(1410,3470)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_58"/>
-    </comp>
-    <comp lib="0" loc="(420,600)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_59"/>
-    </comp>
-    <comp lib="0" loc="(1410,3480)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_59"/>
-    </comp>
-    <comp lib="0" loc="(420,610)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_60"/>
-    </comp>
-    <comp lib="0" loc="(1410,3490)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_60"/>
-    </comp>
-    <comp lib="0" loc="(420,620)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_61"/>
-    </comp>
-    <comp lib="0" loc="(1410,3510)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_61"/>
-    </comp>
-    <comp lib="0" loc="(420,630)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_62"/>
-    </comp>
-    <comp lib="0" loc="(1410,3520)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_62"/>
-    </comp>
-    <comp lib="0" loc="(420,640)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="DECODE_63"/>
-    </comp>
-    <comp lib="0" loc="(1410,3530)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="DECODE_63"/>
-    </comp>
-    <comp lib="0" loc="(1460,1700)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="BANK_70_A"/>
-    </comp>
-    <comp lib="0" loc="(1410,570)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="BANK_70_A"/>
-    </comp>
-    <comp lib="0" loc="(1460,2700)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="BANK_70_B"/>
-    </comp>
-    <comp lib="0" loc="(1410,610)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="BANK_70_B"/>
-    </comp>
-    <comp lib="0" loc="(1410,590)" name="Constant">
-      <a name="facing" val="east"/>
-      <a name="value" val="0x0"/>
-    </comp>
-    <comp lib="0" loc="(1460,1900)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="BANK_71_A"/>
-    </comp>
-    <comp lib="0" loc="(1410,670)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="BANK_71_A"/>
-    </comp>
-    <comp lib="0" loc="(1460,2900)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="BANK_71_B"/>
-    </comp>
-    <comp lib="0" loc="(1410,710)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="BANK_71_B"/>
-    </comp>
-    <comp lib="0" loc="(1410,690)" name="Constant">
-      <a name="facing" val="east"/>
-      <a name="value" val="0x0"/>
-    </comp>
-    <comp lib="0" loc="(1460,2100)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="BANK_72_A"/>
-    </comp>
-    <comp lib="0" loc="(1410,770)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="BANK_72_A"/>
-    </comp>
-    <comp lib="0" loc="(1460,3100)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="BANK_72_B"/>
-    </comp>
-    <comp lib="0" loc="(1410,810)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="BANK_72_B"/>
-    </comp>
-    <comp lib="0" loc="(1410,790)" name="Constant">
-      <a name="facing" val="east"/>
-      <a name="value" val="0x0"/>
-    </comp>
-    <comp lib="0" loc="(1460,2300)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="BANK_73_A"/>
-    </comp>
-    <comp lib="0" loc="(1410,870)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="BANK_73_A"/>
-    </comp>
-    <comp lib="0" loc="(1460,3300)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="BANK_73_B"/>
-    </comp>
-    <comp lib="0" loc="(1410,910)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="BANK_73_B"/>
-    </comp>
-    <comp lib="0" loc="(1410,890)" name="Constant">
-      <a name="facing" val="east"/>
-      <a name="value" val="0x0"/>
-    </comp>
-    <comp lib="0" loc="(1460,2500)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="BANK_74_A"/>
-    </comp>
-    <comp lib="0" loc="(1440,1360)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="BANK_74_A"/>
-    </comp>
-    <comp lib="0" loc="(1460,3500)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="BANK_74_B"/>
-    </comp>
-    <comp lib="0" loc="(1440,1400)" name="Tunnel">
-      <a name="facing" val="west"/>
-      <a name="label" val="BANK_74_B"/>
-    </comp>
-    <comp lib="0" loc="(1440,1380)" name="Constant">
-      <a name="facing" val="east"/>
-      <a name="value" val="0x0"/>
-    </comp>
-    <wire from="(350,680)" to="(400,680)"/>
-    <wire from="(400,650)" to="(400,680)"/>
-    <wire from="(1460,30)" to="(1610,30)"/>
-    <wire from="(1460,90)" to="(1610,90)"/>
     <wire from="(1460,150)" to="(1610,150)"/>
     <wire from="(1460,210)" to="(1610,210)"/>
     <wire from="(1460,270)" to="(1610,270)"/>
+    <wire from="(1460,30)" to="(1610,30)"/>
     <wire from="(1460,330)" to="(1610,330)"/>
     <wire from="(1460,390)" to="(1610,390)"/>
     <wire from="(1460,450)" to="(1610,450)"/>
@@ -2494,19 +2375,22 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(1460,690)" to="(1610,690)"/>
     <wire from="(1460,790)" to="(1600,790)"/>
     <wire from="(1460,890)" to="(1610,890)"/>
+    <wire from="(1460,90)" to="(1610,90)"/>
     <wire from="(1490,1380)" to="(1610,1380)"/>
     <wire from="(1510,1150)" to="(1530,1150)"/>
-    <wire from="(1530,1150)" to="(1530,1090)"/>
+    <wire from="(1530,1090)" to="(1530,1110)"/>
     <wire from="(1530,1090)" to="(1610,1090)"/>
-    <wire from="(1530,1150)" to="(1530,1110)"/>
+    <wire from="(1530,1110)" to="(1530,1130)"/>
     <wire from="(1530,1110)" to="(1610,1110)"/>
-    <wire from="(1530,1150)" to="(1530,1130)"/>
+    <wire from="(1530,1130)" to="(1530,1150)"/>
     <wire from="(1530,1130)" to="(1610,1130)"/>
-    <wire from="(1530,1150)" to="(1610,1150)"/>
     <wire from="(1530,1150)" to="(1530,1170)"/>
+    <wire from="(1530,1150)" to="(1610,1150)"/>
+    <wire from="(1530,1170)" to="(1530,1190)"/>
     <wire from="(1530,1170)" to="(1610,1170)"/>
-    <wire from="(1530,1150)" to="(1530,1190)"/>
     <wire from="(1530,1190)" to="(1610,1190)"/>
+    <wire from="(350,680)" to="(400,680)"/>
+    <wire from="(400,650)" to="(400,680)"/>
   </circuit>
   <circuit name="IntegrationClock">
     <a name="appearance" val="logisim_evolution"/>
@@ -2783,10 +2667,6 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <a name="circuit" val="Operations"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
     <a name="simulationFrequency" val="1.0"/>
-    <comp lib="0" loc="(1870,940)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="SELECTED_OPERAND_VALID"/>
-    </comp>
     <comp lib="0" loc="(2090,1040)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
@@ -2822,9 +2702,7 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
       <a name="appearance" val="classic"/>
       <a name="label" val="MEMORY_VALID"/>
     </comp>
-    <comp lib="0" loc="(260,280)" name="Constant">
-      <a name="value" val="0x1"/>
-    </comp>
+    <comp lib="0" loc="(260,280)" name="Constant"/>
     <comp lib="0" loc="(330,360)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="ACC_VALID"/>
@@ -2912,18 +2790,6 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <comp lib="2" loc="(570,160)" name="Multiplexer">
       <a name="width" val="16"/>
     </comp>
-    <comp lib="0" loc="(410,270)" name="Tunnel">
-      <a name="label" val="SELECTED_OPERAND_VALID"/>
-    </comp>
-    <comp lib="0" loc="(570,160)" name="Tunnel">
-      <a name="label" val="SELECTED_OPERAND_VALUE"/>
-      <a name="width" val="16"/>
-    </comp>
-    <comp lib="0" loc="(1660,210)" name="Tunnel">
-      <a name="facing" val="east"/>
-      <a name="label" val="SELECTED_OPERAND_VALUE"/>
-      <a name="width" val="16"/>
-    </comp>
     <comp loc="(940,1010)" name="DivArithmeticCircuit">
       <a name="label" val="DIV_OPERATION"/>
     </comp>
@@ -3006,7 +2872,7 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(1620,870)" to="(2090,870)"/>
     <wire from="(1630,1060)" to="(1810,1060)"/>
     <wire from="(1630,960)" to="(1690,960)"/>
-    <wire from="(1660,210)" to="(1660,770)"/>
+    <wire from="(1660,160)" to="(1660,770)"/>
     <wire from="(1660,770)" to="(1800,770)"/>
     <wire from="(1690,1020)" to="(1750,1020)"/>
     <wire from="(1690,960)" to="(1690,1020)"/>
@@ -3017,7 +2883,8 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(1810,1060)" to="(1910,1060)"/>
     <wire from="(1810,800)" to="(1810,1000)"/>
     <wire from="(1830,780)" to="(2090,780)"/>
-    <wire from="(1870,940)" to="(1890,940)"/>
+    <wire from="(1860,290)" to="(1860,940)"/>
+    <wire from="(1860,940)" to="(1890,940)"/>
     <wire from="(1900,970)" to="(1900,1000)"/>
     <wire from="(1920,950)" to="(2090,950)"/>
     <wire from="(1960,1040)" to="(2090,1040)"/>
@@ -3031,9 +2898,9 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(340,960)" to="(710,960)"/>
     <wire from="(350,1140)" to="(720,1140)"/>
     <wire from="(350,1290)" to="(720,1290)"/>
-    <wire from="(350,290)" to="(350,390)"/>
     <wire from="(350,180)" to="(350,290)"/>
     <wire from="(350,180)" to="(550,180)"/>
+    <wire from="(350,290)" to="(350,390)"/>
     <wire from="(360,1460)" to="(720,1460)"/>
     <wire from="(360,1620)" to="(710,1620)"/>
     <wire from="(370,270)" to="(410,270)"/>
@@ -3041,13 +2908,12 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(400,310)" to="(410,310)"/>
     <wire from="(460,140)" to="(490,140)"/>
     <wire from="(460,190)" to="(490,190)"/>
+    <wire from="(460,290)" to="(640,290)"/>
     <wire from="(460,90)" to="(680,90)"/>
     <wire from="(490,140)" to="(490,150)"/>
     <wire from="(490,150)" to="(540,150)"/>
     <wire from="(490,170)" to="(490,190)"/>
-    <wire from="(490,170)" to="(510,170)"/>
-    <wire from="(510,170)" to="(540,170)"/>
-    <wire from="(550,290)" to="(640,290)"/>
+    <wire from="(490,170)" to="(540,170)"/>
     <wire from="(570,160)" to="(700,160)"/>
     <wire from="(640,1070)" to="(640,1230)"/>
     <wire from="(640,1070)" to="(720,1070)"/>
@@ -3058,6 +2924,7 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(640,1560)" to="(640,1700)"/>
     <wire from="(640,1560)" to="(730,1560)"/>
     <wire from="(640,1700)" to="(730,1700)"/>
+    <wire from="(640,290)" to="(1860,290)"/>
     <wire from="(640,290)" to="(640,550)"/>
     <wire from="(640,550)" to="(640,700)"/>
     <wire from="(640,550)" to="(730,550)"/>
@@ -3088,6 +2955,7 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(700,1370)" to="(700,1540)"/>
     <wire from="(700,1370)" to="(730,1370)"/>
     <wire from="(700,1540)" to="(730,1540)"/>
+    <wire from="(700,160)" to="(1660,160)"/>
     <wire from="(700,160)" to="(700,530)"/>
     <wire from="(700,530)" to="(700,680)"/>
     <wire from="(700,530)" to="(730,530)"/>
@@ -3672,12 +3540,13 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(730,150)" to="(730,220)"/>
     <wire from="(730,220)" to="(940,220)"/>
     <wire from="(790,300)" to="(790,330)"/>
-    <wire from="(790,300)" to="(950,300)"/>
+    <wire from="(790,300)" to="(940,300)"/>
     <wire from="(790,330)" to="(860,330)"/>
     <wire from="(890,330)" to="(950,330)"/>
     <wire from="(930,100)" to="(930,160)"/>
     <wire from="(940,220)" to="(940,260)"/>
     <wire from="(940,260)" to="(950,260)"/>
+    <wire from="(940,300)" to="(950,300)"/>
   </circuit>
   <circuit name="DivArithmeticCircuit">
     <a name="appearance" val="logisim_evolution"/>
