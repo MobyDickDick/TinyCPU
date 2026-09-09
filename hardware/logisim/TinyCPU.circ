@@ -249,7 +249,6 @@
       <a name="labelloc" val="east"/>
     </comp>
     <comp lib="0" loc="(660,430)" name="Constant">
-      <a name="label" val="PROGRAM_LIMIT_MAX"/>
       <a name="value" val="0xfff"/>
       <a name="width" val="16"/>
     </comp>
@@ -2899,9 +2898,8 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(340,960)" to="(710,960)"/>
     <wire from="(350,1140)" to="(720,1140)"/>
     <wire from="(350,1290)" to="(720,1290)"/>
-    <wire from="(350,180)" to="(350,290)"/>
-    <wire from="(350,180)" to="(550,180)"/>
     <wire from="(350,290)" to="(350,390)"/>
+    <wire from="(350,390)" to="(550,390)"/>
     <wire from="(360,1460)" to="(720,1460)"/>
     <wire from="(360,1620)" to="(710,1620)"/>
     <wire from="(370,270)" to="(410,270)"/>
@@ -2915,6 +2913,7 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(490,150)" to="(540,150)"/>
     <wire from="(490,170)" to="(490,190)"/>
     <wire from="(490,170)" to="(540,170)"/>
+    <wire from="(550,180)" to="(550,390)"/>
     <wire from="(570,160)" to="(700,160)"/>
     <wire from="(640,1070)" to="(640,1230)"/>
     <wire from="(640,1070)" to="(720,1070)"/>
