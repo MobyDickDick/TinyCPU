@@ -249,6 +249,7 @@
       <a name="labelloc" val="east"/>
     </comp>
     <comp lib="0" loc="(660,430)" name="Constant">
+      <a name="label" val="PROGRAM_LIMIT_MAX"/>
       <a name="value" val="0xfff"/>
       <a name="width" val="16"/>
     </comp>
@@ -3641,13 +3642,13 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(430,200)" to="(670,200)"/>
     <wire from="(530,160)" to="(970,160)"/>
     <wire from="(610,220)" to="(670,220)"/>
-    <wire from="(710,200)" to="(730,200)"/>
-    <wire from="(730,200)" to="(730,300)"/>
-    <wire from="(730,200)" to="(790,200)"/>
-    <wire from="(730,300)" to="(970,300)"/>
-    <wire from="(820,200)" to="(860,200)"/>
-    <wire from="(860,200)" to="(860,210)"/>
-    <wire from="(860,210)" to="(880,210)"/>
+    <wire from="(710,200)" to="(760,200)"/>
+    <wire from="(760,200)" to="(760,210)"/>
+    <wire from="(760,200)" to="(790,200)"/>
+    <wire from="(760,210)" to="(880,210)"/>
+    <wire from="(820,200)" to="(840,200)"/>
+    <wire from="(840,200)" to="(840,300)"/>
+    <wire from="(840,300)" to="(970,300)"/>
     <wire from="(930,230)" to="(970,230)"/>
   </circuit>
   <circuit name="AddArithmeticCircuit">

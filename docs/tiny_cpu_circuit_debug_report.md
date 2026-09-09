@@ -881,8 +881,47 @@ ADD-/SUB-Altprüfungen bleiben von dieser lokalen Korrektur unberührt.
 
 ### Offene Risiken und nächster Übergang
 
+### Fünfte Reparatur: Division-durch-null-Erkennung
+
+Der nächste Rechenpfadunterschied lag im `DivArithmeticCircuit`: Der vorhandene
+Vergleicher erzeugte das Signal „Divisor größer als null“, dieses war jedoch
+direkt mit dem Fehlersignal und nach der Invertierung mit der
+Gültigkeitsfreigabe verbunden. Bei einem positiven Divisor wurde deshalb
+fälschlich `DIVIDE_BY_ZERO=1` gemeldet, während ein Divisor von null das
+Ergebnis als gültig passieren ließ.
+
+Das Nichtnullsignal erreicht nun direkt die Gültigkeitsfreigabe; erst seine
+Invertierung treibt `DIVIDE_BY_ZERO`. Der Vergleicher erhält unverändert den
+ausgewählten Divisor und die 16-Bit-Nullkonstante; Ergebnisbus, Divider und
+Aktivierungsmultiplexer wurden nicht verändert. Die elektrische
+Operationsregression prüft jetzt sowohl
+`7 / 2` als auch `7 / 0`. Der erste Fall liefert `0x0003`, bleibt gültig und
+setzt keinen Fehler; der zweite setzt nun `DIVIDE_BY_ZERO`. Das isolierte
+Divisionsblatt macht dabei sein Ergebnis ungültig. Am zusammengeführten
+`Operations.RESULT_IS_VALID` wird diese Null jedoch noch von den
+Gültigkeitsausgängen inaktiver Operationszweige überdeckt; das ist gemäß
+Stop-Regel der nächste zu reparierende Netzübergang und wird von dieser
+lokalen Fehlerleitungsreparatur noch nicht verdeckt.
+
+Beim aktuellen manuellen Redraw war außerdem nur die stabile Beschriftung der
+unverändert korrekt dimensionierten und belegten Programmgrenzen-Konstante
+verloren gegangen. `PROGRAM_LIMIT_MAX` wurde deshalb wiederhergestellt, damit
+die bereits vorhandene topologische Regression die Quelle weiterhin ohne
+Canvas-Koordinate identifizieren kann.
+
+Die fokussierte Abnahme lautet:
+
+```bash
+LOGISIM_JAR=.venv/Include/logisim-evolution-4.1.0-all.jar \
+  scripts/test-logisim-operations.py
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_program_limit_source_uses_profile_maximum
+timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty stats hardware/logisim/TinyCPU.circ
+```
+
 - Die Decoderreparatur, Operandwahl und Vorzeichenprüfung schließen 19.8 noch
-  nicht ab. Division folgt gemäß Stop-Regel als nächster
+  nicht ab. Nach der Division folgt gemäß Stop-Regel der nächste belegte
   Rechenpfadunterschied.
 - Der integrierte Minimal- und Matrixlauf bleibt zusätzlich durch die später
   diagnostizierten Adress-, Sprung- und Haltepfade blockiert. Diese werden
