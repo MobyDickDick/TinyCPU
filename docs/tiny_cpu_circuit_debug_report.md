@@ -17,7 +17,7 @@ Canvas-Koordinaten verändert.
 | 19.5 Akkumulator und Rechenpfad debuggen | abgeschlossen mit Abweichung | Der isolierte Akkumulator schreibt Wert und Validität gemeinsam; 12 von 20 Operationsfällen stimmen. Speicherwahl, Invalidität, Multiplikationsüberlauf und Division weichen bereits im kombinatorischen Blatt ab. |
 | 19.6 Adresspfad und Speicher debuggen | abgeschlossen mit Abweichung | Adressregister und beide RAMs arbeiten gekoppelt; `EffectiveAddress` wählt Direkt-/Registeradresse und Offset jedoch mit vertauschter zweiter Multiplexerpolarität, wodurch auch die Bereichsprüfung die falsche Adresse bewertet. |
 | 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen | abgeschlossen mit Abweichung | Fünf Sprungsteuersignale enden nur an Monitoren; die vier Enable-/Halteausgänge sind vollständig unverdrahtet. Die sechs Sticky-Flags sind dagegen set-dominant und gemeinsam löschbar aufgebaut. |
-| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Die ersten beiden belegten Übergänge sind repariert: `PROGRAM_LIMIT_MAX` treibt `0xfff`, und `FetchDecodeControls` bildet alle 50 Opcodes sowie 14 reservierte Codes elektrisch vertragsgemäß ab. Der Rechenpfad ist der nächste Übergang. |
+| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Die ersten drei belegten Übergänge sind repariert: Programmgrenze, vollständige Opcode-Zuordnung und die gemeinsame Speicher-/Direktoperandwahl. Multiplikationsüberlauf und Division sind die nächsten Rechenpfadabweichungen. |
 | 19.9–19.10 | offen | Noch nicht begonnen. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
@@ -813,11 +813,48 @@ Strukturprüfung und die Projektladung bestehen ebenfalls. Die Offline-Suite
 endet weiterhin ausschließlich mit den zwei seit 19.1 bekannten,
 koordinatengebundenen Altprüfungen für `ADD_OPERAND` und `SUB_OPERAND`.
 
+### Dritte Reparatur: Speicher-/Direktoperandwahl
+
+Der erste Rechenpfadunterschied aus 19.5 entstand vor den einzelnen
+Operationszweigen: Der Datenmultiplexer wurde fälschlich von der bereits
+berechneten Operandengültigkeit ausgewählt, und der inaktive Ergebniszweig
+führte unabhängig von der Auswahl stets `IMMEDIATE_VALUE` sowie eine konstante
+Gültigkeit. Dadurch konnte ein gültiger Speicherwert das Blatt nicht als
+`RESULT_VALUE` verlassen.
+
+Die vorhandenen Multiplexer werden nun beide direkt von `CONST_OPERAND`
+gesteuert. Ihre Daten- und Gültigkeitsausgänge sind über die benannten Netze
+`SELECTED_OPERAND_VALUE` und `SELECTED_OPERAND_VALID` sowohl mit den
+Operationszweigen als auch mit dem inaktiven Ergebniszweig verbunden. Bei
+einem Direktoperanden ist dessen Gültigkeit definitionsgemäß eins, bei einem
+Speicheroperanden stammt sie weiterhin von `MEMORY_VALID`. Es wurde kein
+Operationszweig und keine ISA-Semantik geändert.
+
+Die neue elektrische Regression ersetzt in einer temporären Projektkopie nur
+die benannten Eingabepins von `Operations` durch Konstanten. Vor der Reparatur
+lieferte der Speicherfall `0xabcd` statt `0x1234`; danach bestehen Speicher-
+und Direktfall mit parallel ausgewählter Gültigkeit:
+
+```bash
+LOGISIM_JAR=.venv/Include/logisim-evolution-4.1.0-all.jar \
+  scripts/test-logisim-operations.py
+python3 src/tiny_cpu_verify.py
+timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty stats hardware/logisim/TinyCPU.circ
+scripts/test-offline.sh
+```
+
+Die fokussierte elektrische Abnahme, die Strukturprüfung und das Laden des
+Gesamtprojekts bestehen. Die Offline-Suite endet weiterhin nur mit den zwei
+seit 19.1 bekannten koordinatengebundenen ADD-/SUB-Altprüfungen. Die weiteren
+in 19.5 isolierten Abweichungen wurden gemäß Stop-Regel nicht vorgezogen.
+
 ### Offene Risiken und nächster Übergang
 
 - Die Decoderreparatur beseitigt die zweite belegte Abweichung, schließt 19.8
-  aber noch nicht ab; die in 19.5 nachgewiesenen Rechenpfadfehler folgen nun
-  gemäß Stop-Regel als nächster erster Unterschied.
+  noch nicht ab. Nach der nun ebenfalls reparierten Operandwahl folgen
+  Multiplikationsüberlauf und Division gemäß Stop-Regel als nächste
+  Rechenpfadunterschiede.
 - Der integrierte Minimal- und Matrixlauf bleibt zusätzlich durch die später
   diagnostizierten Adress-, Sprung- und Haltepfade blockiert. Diese werden
   nicht in dieselbe Änderung vorgezogen.
