@@ -14,8 +14,9 @@ Canvas-Koordinaten verändert.
 | 19.2 Projektladung und Hierarchie isolieren | abgeschlossen | Alle drei Smoke-Projekte, 24 Diagnoseblätter und `TinyCPU.circ` laden mit Logisim-evolution 4.1.0 fehlerfrei; die Strukturprüfung findet weder Hierarchie- noch Leitungsfehler. |
 | 19.3 Takt, Reset, PC und Fetch prüfen | abgeschlossen mit Abweichung | Das Minimalprogramm erreicht elektrisch keinen Halt. Der erste bereits vor Takt 0 abweichende benannte Fetch-Eingang ist `PROGRAM_LIMIT`: `TinyCPUMain` treibt ihn konstant mit 0 statt mit der Profilgrenze `0xfff`. Zwei Reset-Läufe sind fachlich identisch. |
 | 19.4 Decoder-Steuerfläche vollständig abgleichen | abgeschlossen mit Abweichung | Die elektrische 64-Zeilen-Tabelle stimmt nur für die reservierten Codes 54–63: `FetchDecodeControls` dekodiert eine veraltete, gegenüber dem Maschinenformat verschobene Belegung. |
-| 19.5 Akkumulator und Rechenpfad debuggen | als Nächstes | Operandenauswahl, Operationspfad, Ergebnis/Validität und Write-Enable müssen elektrisch gegen kleine ROMs geprüft werden. |
-| 19.6–19.10 | offen | Noch nicht begonnen. |
+| 19.5 Akkumulator und Rechenpfad debuggen | abgeschlossen mit Abweichung | Der isolierte Akkumulator schreibt Wert und Validität gemeinsam; 12 von 20 Operationsfällen stimmen. Speicherwahl, Invalidität, Multiplikationsüberlauf und Division weichen bereits im kombinatorischen Blatt ab. |
+| 19.6 Adresspfad und Speicher debuggen | als Nächstes | Die vier Adressierungsarten, Daten-/Valid-RAM und Adressgrenzen müssen elektrisch eingegrenzt werden. |
+| 19.7–19.10 | offen | Noch nicht begonnen. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
 
@@ -401,3 +402,110 @@ Taktflanke, wird aber wegen der Paket-Stop-Regel noch nicht repariert.
   Logikprogramme von der gewählten Argumentquelle bis zum Akkumulator. Wegen
   der nachgewiesenen Decoder-Verschiebung muss sie den erwarteten und den
   tatsächlich aktivierten Steuerzweig getrennt protokollieren.
+
+## 19.5 Akkumulator und Rechenpfad debuggen
+
+### Ausgangslage
+
+Die Decoderabweichung aus 19.4 verhindert weiterhin, dass ein Maschinenwort
+am integrierten Top-Level zuverlässig die beabsichtigte Operation auswählt.
+Damit dieser bekannte vorgelagerte Fehler keine Datenpfadfehler verdeckt,
+wurde das vorhandene Blatt `Operations` direkt über seine **benannten Pins**
+angeregt. Untersucht wurden Laden aus Konstante und Speicher, `NOT`, alle
+sieben binären Familien, Null und die vorzeichenbehafteten Grenzen sowie
+ungültige Akkumulator- und Speicheroperanden. Das Blatt `Datapath` wurde
+anschließend separat mit einem autonomen Takt geprüft. Die eingecheckte
+Schaltung blieb bei beiden Untersuchungen unverändert.
+
+### Kommando oder Bedienfolge
+
+Ein lokales Python-Skript erzeugte für 20 Fälle je eine temporäre Kopie,
+wählte `Operations` als Startblatt und ersetzte ausschließlich dessen
+benannte Eingabepins durch gleich breite Konstanten. Jede Kopie wurde mit
+Logisim-evolution 4.1.0 ausgeführt:
+
+```bash
+PYTHONPATH=src python3 /tmp/run_ap195.py
+
+/root/.local/share/mise/installs/java/21.0.2/bin/java \
+  -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table /tmp/ap195-FALL.circ
+```
+
+Der Vergleich berechnete die erwarteten 16-Bit-Ergebnisse und Statussignale
+nach dem VM-Vertrag und verglich `RESULT_VALUE`, `OVERFLOW`,
+`RESULT_IS_VALID`, `INVALID_OPERAND` und `DIVIDE_BY_ZERO`. Für den
+Akkumulatortest wurden `DATA_IN=0x8000`, `ACC_LOAD=1` und `VALID_IN=1`
+gesetzt, `CLK` durch den Simulator-Takt und
+`DATAPATH_STARTUP_RESET` durch `PowerOnReset` ersetzt. Der negative
+Akkumulatorstatus diente in der temporären Kopie als Haltsignal:
+
+```bash
+timeout 20s /root/.local/share/mise/installs/java/21.0.2/bin/java \
+  -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table,halt /tmp/ap195-datapath.circ
+```
+
+Die ignorierten Rohdaten liegen unter `artifacts/ap19.5-operations/`. Ihre
+SHA-256-Digests sind:
+
+```text
+936a200a548095839f50eb66c6f738367dc38a95381bd47db9c2b30be53d8455  raw-results.json
+681ab5d0bb884435a8a1f4781b2d63386bb137f6d045afc607acd4057cc4d121  comparison.json
+de2f065e8b25e072911b4732466833e9d33f6d834f0dbd2cde9dc20e09f1f453  datapath-write.tsv
+```
+
+### Beobachteter Nachweis
+
+`Datapath` startete definiert bei `ACC_OUT=0x0000` und erreichte an der
+nächsten aktiven Flanke gemeinsam `ACC_OUT=0x8000`,
+`ACC_VALID_OUT=1`, `ZERO=0` und `NEGATIVE=1`. Wert und Validität werden im
+isolierten Akkumulator somit an derselben vorgesehenen Flanke geschrieben.
+
+Im kombinatorischen Operationsblatt stimmten dagegen nur **12 von 20**
+gezielten Fällen vollständig mit dem VM-Vertrag überein. Erfolgreich waren
+Konstantladen einschließlich Null und `0x8000`, gültiges `NOT`, normale
+Addition, Subtraktion und Multiplikation, Additions- und
+Subtraktionsüberlauf sowie `AND`, `OR` und `XOR`. Dabei blieben die Ausgänge
+der jeweils inaktiven Rechenfamilien neutral genug, um das ausgewählte
+Ergebnis nicht zu überschreiben.
+
+Die acht Abweichungen lassen sich bereits an den benannten Ausgängen des
+isolierten Blatts beobachten:
+
+| Fall | Erwartung | Elektrisch |
+|---|---|---|
+| Speicherladen, gültig | `0x1234`, valid | `0x0000`, valid |
+| Speicherladen, ungültig | `0x0000`, invalid + `INVALID_OPERAND` | `0x0000`, valid |
+| `NOT` bei ungültigem ACC | neutrales Ergebnis, invalid + Fehler | `0xffff`, invalid + Fehler |
+| `0x4000 * 2` | `0x8000`, `OVERFLOW=1` | `0x8000`, `OVERFLOW=0` |
+| `-7 / 2` | `-3` (`0xfffd`), valid | `-4` (`0xfffc`), valid + `DIVIDE_BY_ZERO` |
+| `7 / 0` | invalid + `DIVIDE_BY_ZERO` | unverändert `7`, valid, kein Fehler |
+| `XOR` bei ungültigem ACC | neutrales Ergebnis, invalid + Fehler | `0x55aa`, invalid + Fehler |
+| Speicher-`ADD` bei ungültigem Wert | neutrales Ergebnis, invalid + Fehler | unverändert `5`, valid |
+
+Der erste Operations-Unterschied liegt damit in der Wahl des Speicherwerts:
+Schon ein reines Speicherladen erreicht nicht `RESULT_VALUE`. Unabhängig
+davon sind weitere lokale Fehler nachgewiesen: Multiplikationsüberlauf wird
+nicht gemeldet, und der Divisionspfad rundet anders als die VM und wertet die
+Nullteilerbedingung ersichtlich falsch aus. Diese Befunde sind keine Folge der
+alten Opcode-Belegung, da der Decoder bei diesem isolierten Lauf nicht
+beteiligt war.
+
+Das vollständige Abnahmekriterium von 19.5 besteht folglich nicht. Die Aufgabe
+ist als Diagnose mit Abweichung abgeschlossen; gemäß Stop-Regel werden weder
+diese späteren Operationsfehler noch der Decoder vor 19.8 repariert.
+
+### Offene Risiken und Übergabe an 19.6
+
+- Die 20 Fälle isolieren `Operations` und `Datapath`, sind aber wegen des
+  bekannten Decoderfehlers noch keine durch Maschinenwörter ausgelösten
+  Ende-zu-Ende-ROM-Läufe. Diese folgen nach der minimalen Reparatur in 19.8.
+- Ein einzelner Akkumulatorlauf belegt die gekoppelte Schreibflanke, aber noch
+  nicht alle Write-Enable-Kombinationen im integrierten Top-Level. Dessen
+  inaktive Zweige werden in der Regression nach Reparatur erneut geprüft.
+- Erneut kam Java 21.0.2 statt Temurin 21.0.8 zum Einsatz; die gepinnte
+  Logisim-Version war 4.1.0. Die finale Abnahme bleibt 19.9 vorbehalten.
+- 19.6 untersucht nun zuerst den direkten Speicherpfad, weil dessen Wert und
+  Validität schon am Eingang von `Operations` falsch ausgewählt werden
+  könnten. Reparaturen bleiben weiterhin bis 19.8 ausgesetzt.
