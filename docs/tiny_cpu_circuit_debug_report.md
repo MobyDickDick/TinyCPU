@@ -12,8 +12,9 @@ Canvas-Koordinaten verändert.
 |---|---|---|
 | 19.1 Fehlerbild und Baseline einfrieren | abgeschlossen | Baseline und Umgebung sind festgehalten; die Offline-Suite reproduziert zwei Fehler, der elektrische Lauf ist mangels Simulator-JAR noch offen. |
 | 19.2 Projektladung und Hierarchie isolieren | abgeschlossen | Alle drei Smoke-Projekte, 24 Diagnoseblätter und `TinyCPU.circ` laden mit Logisim-evolution 4.1.0 fehlerfrei; die Strukturprüfung findet weder Hierarchie- noch Leitungsfehler. |
-| 19.3 Takt, Reset, PC und Fetch prüfen | als Nächstes | Reset und die ersten Fetch-Flanken müssen elektrisch gegen den VM-Kerntrace geprüft werden. |
-| 19.4–19.10 | offen | Noch nicht begonnen. |
+| 19.3 Takt, Reset, PC und Fetch prüfen | abgeschlossen mit Abweichung | Das Minimalprogramm erreicht elektrisch keinen Halt. Der erste bereits vor Takt 0 abweichende benannte Fetch-Eingang ist `PROGRAM_LIMIT`: `TinyCPUMain` treibt ihn konstant mit 0 statt mit der Profilgrenze `0xfff`. Zwei Reset-Läufe sind fachlich identisch. |
+| 19.4 Decoder-Steuerfläche vollständig abgleichen | als Nächstes | Die Steuerleitungen aller 50 Opcodes und die Negativfälle müssen gegen die Opcode-Tabelle geprüft werden. |
+| 19.5–19.10 | offen | Noch nicht begonnen. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
 
@@ -182,3 +183,114 @@ der Prozessor elektrisch korrekt arbeiten.
 - Aufgabe 19.3 beginnt deshalb ohne Schaltungsänderung mit einem Reset und dem
   kleinsten Fetch-Trace. Erst die erste abweichende Flanke beziehungsweise ein
   abweichender benannter Port darf die weitere Diagnose bestimmen.
+
+## 19.3 Takt, Reset, PC und Fetch prüfen
+
+### Ausgangslage
+
+Die Untersuchung blieb auf der in 19.1 festgehaltenen Schaltungsquelle. Als
+kleinstes Fetch-Programm wurden genau zwei Wörter in eine temporäre Kopie des
+Instruktions-ROMs geschrieben:
+
+```text
+0: LOAD_CONST(7)  = 0x000007
+1: HALT()         = 0x2c0000
+```
+
+Die VM beginnt damit bei `PC=0`, übernimmt an der ersten Flanke den Wert 7 und
+steht bei `PC=1`; an der zweiten Flanke führt sie `HALT` aus und steht bei
+`PC=2` im normalen Halt. Es werden weder ein Bereichsfehler noch ein
+Fehlerhalt erwartet. Die Schaltung wurde nicht geändert. Insbesondere sind
+die nachfolgenden Versuche ausschließlich temporäre Dateien unter `/tmp` und
+keine neue Schaltungsquelle.
+
+### Kommando oder Bedienfolge
+
+Das Programm wurde mit `assemble()` und `encode_program()` aus den bestehenden
+Python-Modulen erzeugt. `autonomous_project()` ersetzte in einer temporären
+Kopie nur `CLK` durch den Simulator-Takt, `RESET` durch `PowerOnReset`, den
+ROM-Inhalt durch die beiden Wörter und den gewählten normalen Haltausgang durch
+den von Logisim erwarteten Namen `halt`. Anschließend liefen zwei unabhängige
+Reset-/Taktversuche mit Logisim-evolution 4.1.0:
+
+```bash
+PYTHONPATH=src python3 - <<'PY'
+from pathlib import Path
+from tiny_cpu_assembler import assemble, encode_program
+from tiny_cpu_logisim import autonomous_project
+from tiny_cpu_profiles import load_profile
+
+profile = load_profile("tinycpu-16-12")
+program = assemble("LOAD_CONST(7)\nHALT()\n", profile)
+for run in (1, 2):
+    autonomous_project(
+        Path("hardware/logisim/TinyCPU.circ"),
+        Path(f"/tmp/ap19.3-fetch-{run}.circ"),
+        profile.top_circuit,
+        tuple(encode_program(program)),
+    )
+PY
+
+for run in 1 2; do
+  timeout 30s /root/.local/share/mise/installs/java/21.0.2/bin/java \
+    -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+    -tty table,halt "/tmp/ap19.3-fetch-$run.circ" \
+    >"/tmp/ap19.3-fetch-$run.tsv"
+done
+```
+
+Zusätzlich wurden die `FetchDecode`-Portreihenfolge und die angeschlossene
+Konstante direkt aus dem aktuellen XML gelesen. Der fünfte linke Eingang des
+Symbols ist laut gepflegtem Unterblatt `PROGRAM_LIMIT` (16 Bit). Auf
+`TinyCPUMain` endet dessen Netz an der 16-Bit-Konstante bei `(660,430)`. Die
+Konstante besitzt kein `value`-Attribut und hat nach Logisim-Semantik daher den
+Wert 0. Das Profil und das Unterblatt erwarten dagegen die 12-Bit-Grenze
+`0xfff`.
+
+### Beobachteter Nachweis
+
+Beide elektrischen Läufe erreichten `halt` nicht und wurden nach 30 Sekunden
+beendet. Vor dem Stillstand lieferte jeder Lauf dieselben vier Tabellenzeilen;
+beide Rohtraces hatten denselben SHA-256-Digest
+`c40de99880802f043459bebda80066816802d30761f89e1237d7e0a377cedd21`.
+Der erste Zustand war definiert null. Nach der ersten Flanke erschien wie von
+der VM erwartet der Akkumulatorwert 7 am Ausgabebus. Danach wurden jedoch erst
+einzelne und schließlich fast alle beobachteten Signale mit Logisims
+Fehlerwert `E` belegt; der normale Haltausgang blieb aus. Der elektrische Trace
+weicht damit spätestens beim Übergang zu Instruktion 1 vom VM-Trace ab.
+
+Die Eingrenzung findet einen noch früheren, benannten Unterschied: Bereits vor
+Takt 0 sieht `FetchDecode.PROGRAM_LIMIT` am Top-Level den Wert 0, obwohl das
+16/12-Profil und der Default des isolierten Unterblatts `0xfff` vorgeben. Somit
+ist schon die Fortschaltung von `PC=0` nach `PC=1` außerhalb der elektrisch
+erlaubten Programmgrenze. Das erklärt den verfrühten Bereichsfehlerpfad, belegt
+aber noch nicht, dass es die einzige Ursache der späteren `E`-Werte ist. Ein
+Kontrolllauf, der ausschließlich in einer temporären Kopie diese Konstante auf
+`0xfff` setzte, erzeugte weiterhin die gleichen vier Zeilen. Entsprechend wird
+hier weder eine Reparatur behauptet noch eine Änderung an `TinyCPU.circ`
+vorgenommen.
+
+Das Reset-Kriterium ist reproduzierbar: Beide frischen autonomen Projekte
+starteten mit demselben definierten Nullzustand und erzeugten denselben
+fachlichen Verlauf. Das vollständige Abnahmekriterium (elektrische Parität bis
+zum normalen Halt) besteht dagegen nicht. Aufgabe 19.3 ist als Diagnoseaufgabe
+mit belegter Abweichung abgeschlossen; die minimale Reparatur bleibt gemäß
+Paketreihenfolge Aufgabe 19.8 vorbehalten.
+
+### Offene Risiken und Übergabe an 19.4
+
+- Der Lauf verwendete das lokal verfügbare Java 21.0.2. Die in der
+  Kompatibilitätsmatrix vorgesehene Temurin-Version 21.0.8 muss spätestens in
+  19.9 erneut verwendet werden; die identischen Resultate mit Java 25.0.2
+  sprechen derzeit gegen eine reine JVM-Abweichung.
+- `PC_OUT` und das ROM-Wort sind im Unterblatt benannt, aber nicht als
+  Top-Level-Tabellenspalten exportiert. Die Eingrenzung beruht deshalb auf dem
+  benannten Portvertrag, dem fest verdrahteten `PROGRAM_LIMIT`-Netz und den
+  beobachtbaren Endpunkten, nicht auf vermuteten Canvas-Koordinaten eines
+  historischen Standes.
+- Die temporäre Korrektur von `PROGRAM_LIMIT` beseitigte die späteren
+  Fehlerwerte nicht. Weitere Abweichungen sind wahrscheinlich und werden nicht
+  vorgezogen repariert.
+- Aufgabe 19.4 prüft nun die Decoder-Steuerfläche. Der Befund zu
+  `PROGRAM_LIMIT` bleibt für 19.8 als erster nachgewiesener Übergang
+  `Konstante → FetchDecode.PROGRAM_LIMIT` vorgemerkt.
