@@ -171,6 +171,11 @@ class LogisimLauncherTests(unittest.TestCase):
 
     def test_add_operand_reaches_operations_input(self):
         expected = ("(1270,930)", "(2520,930)")
+        operation_routes = {
+            ("(330,430)", "(600,430)"),
+            ("(600,320)", "(600,430)"),
+            ("(600,320)", "(680,320)"),
+        }
         wrong_error_flags_route = {
             ("(1270,930)", "(2170,930)"),
             ("(2170,450)", "(2170,930)"),
@@ -185,14 +190,22 @@ class LogisimLauncherTests(unittest.TestCase):
         for name in ("TinyCPU.circ",):
             root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
             operations = next(c for c in root.findall("circuit") if c.get("name") == "Operations")
-            operation_pins = {
-                attribute.get("val"): component.get("loc")
+            operation_labels = {
+                attribute.get("val")
                 for component in operations.findall("comp")
-                if component.get("name") == "Pin"
                 for attribute in component.findall("a")
                 if attribute.get("name") == "label"
             }
-            self.assertEqual(operation_pins.get("ADD_OPERAND"), "(330,450)")
+            self.assertIn("ADD_OPERAND", operation_labels)
+            self.assertIn("ADD_OPERATION", operation_labels)
+            operation_wires = {
+                (wire.get("from"), wire.get("to"))
+                for wire in operations.findall("wire")
+            }
+            self.assertTrue(
+                operation_routes.issubset(operation_wires),
+                f"{name} does not drive the addition enable input",
+            )
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             wires = {(wire.get("from"), wire.get("to")) for wire in main.findall("wire")}
             self.assertIn(expected, wires, f"{name} leaves ADD_OPERAND disconnected")

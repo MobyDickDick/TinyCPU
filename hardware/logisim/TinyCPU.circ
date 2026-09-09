@@ -2376,7 +2376,7 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
       <a name="label" val="NOT_OPERATION"/>
     </comp>
     <comp loc="(900,320)" name="AddArithmeticCircuit">
-      <a name="label" val="ADD_ITHMETIC_CIRCUIT_INSTANCE"/>
+      <a name="label" val="ADD_OPERATION"/>
     </comp>
     <comp loc="(900,470)" name="SubSubCircuit">
       <a name="label" val="SUB_OPERATION"/>
