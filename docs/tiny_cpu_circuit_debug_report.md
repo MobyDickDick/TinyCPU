@@ -11,8 +11,9 @@ Canvas-Koordinaten verändert.
 | Aufgabe | Status | Ergebnis |
 |---|---|---|
 | 19.1 Fehlerbild und Baseline einfrieren | abgeschlossen | Baseline und Umgebung sind festgehalten; die Offline-Suite reproduziert zwei Fehler, der elektrische Lauf ist mangels Simulator-JAR noch offen. |
-| 19.2 Projektladung und Hierarchie isolieren | als Nächstes | Smoke-Projekte, Diagnoseblätter und Hauptprojekt müssen mit Logisim-evolution 4.1.0 geladen werden. |
-| 19.3–19.10 | offen | Noch nicht begonnen. |
+| 19.2 Projektladung und Hierarchie isolieren | abgeschlossen | Alle drei Smoke-Projekte, 24 Diagnoseblätter und `TinyCPU.circ` laden mit Logisim-evolution 4.1.0 fehlerfrei; die Strukturprüfung findet weder Hierarchie- noch Leitungsfehler. |
+| 19.3 Takt, Reset, PC und Fetch prüfen | als Nächstes | Reset und die ersten Fetch-Flanken müssen elektrisch gegen den VM-Kerntrace geprüft werden. |
+| 19.4–19.10 | offen | Noch nicht begonnen. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
 
@@ -106,3 +107,78 @@ allgemeine Beobachtung „CPU funktioniert nicht“ bleibt ausdrücklich offen.
 - Aufgabe 19.2 benötigt die unveränderte gepinnte JAR. Danach sind zuerst die
   drei `smoke/`-Projekte, anschließend die erzeugten Diagnoseblätter und erst
   zuletzt `TinyCPU.circ` mit Startdauer und Simulatorprotokoll zu prüfen.
+
+## 19.2 Projektladung und Hierarchie isolieren
+
+### Ausgangslage
+
+Die in 19.1 fehlende, unveränderte Logisim-evolution-JAR war für diesen Lauf
+unter `.venv/Include/logisim-evolution-4.1.0-all.jar` verfügbar und meldete
+Version 4.1.0. Untersucht wurde weiterhin ausschließlich die Schaltungsquelle
+des in 19.1 festgehaltenen Ausgangsstands. Die Stufen bestanden aus den drei
+Projekten in `smoke/`, allen 24 eingecheckten Diagnoseprojekten und zuletzt dem
+integrierten Hauptprojekt.
+
+### Kommando oder Bedienfolge
+
+Jede Datei wurde in einem eigenen JVM-Prozess mit einem Zeitlimit von 30
+Sekunden geladen. Der Modus `stats` erzwingt das Parsen und Aufbauen der
+ausgewählten Projekthierarchie, beendet sich anschließend aber ohne Taktlauf:
+
+```bash
+timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty stats PROJEKT.circ
+```
+
+Die Reihenfolge war `hardware/logisim/smoke/*.circ`, danach
+`hardware/logisim/diagnostics/*.circ` und schließlich
+`hardware/logisim/TinyCPU.circ`. Für jeden Prozess wurden Exitcode, monotone
+Laufzeit, Standardausgabe und Standardfehler erfasst. Die lokalen Rohdaten
+liegen unter `artifacts/ap19.2-load/` und bleiben wie vorgesehen außerhalb von
+Git. Anschließend prüfte
+
+```bash
+PYTHONPATH=src python3 src/tiny_cpu_verify.py
+```
+
+projektspezifische Unterblattverweise und Rekursion sowie sämtliche Leitungen
+auf diagonale oder identische Endpunkte.
+
+### Beobachteter Nachweis
+
+Alle **28 Projekte** wurden in der vorgesehenen Reihenfolge geladen und
+lieferten Exitcode 0 ohne Ausgabe auf Standardfehler:
+
+| Stufe | Projekte | Laufzeit pro Projekt | größter beobachteter RSS |
+|---|---:|---:|---:|
+| Smoke | 3 | 1,076–1,167 s | 88.536 KiB |
+| Diagnoseblätter | 24 | 1,207–1,466 s | 97.624 KiB |
+| `TinyCPU.circ` | 1 | 1,676 s | 109.920 KiB |
+
+Damit gibt es keine erste scheiternde Ladestufe. Die Hauptdatei meldete 421
+Bauteilinstanzen ohne und 470 Instanzen mit aufgelösten Unterblättern. Die
+ergänzende Strukturprüfung akzeptierte 30 Logisim-Dateien mit 81 Schaltungen
+und 4579 orthogonalen Leitungen. Sie fand keine fehlenden Unterblätter, keinen
+Hierarchiezyklus und weder diagonale noch Null-Längen-Leitungen. Der moderate
+Anstieg von Laufzeit und Speicherbedarf bis zur Integration ist kein Hinweis
+auf auffälligen Ressourcenverbrauch oder unendliche Rekursion.
+
+Die in 19.1 beobachteten koordinatengebundenen Unit-Testfehler sind damit nicht
+auf einen Parser-, Hierarchie- oder allgemeinen Ladefehler zurückzuführen. Aus
+dem reinen Ladelauf folgt jedoch noch nicht, dass die betreffenden Netze oder
+der Prozessor elektrisch korrekt arbeiten.
+
+### Offene Risiken und Übergabe an 19.3
+
+- Der Lauf verwendete die vorhandene OpenJDK-Version 25.0.2 statt des für die
+  vollständige Abnahme gepinnten Temurin 21.0.8. Da alle Projekte mit der
+  korrekten Logisim-Version geladen wurden, ist die Hierarchie eingegrenzt;
+  die finale elektrische Regression muss dennoch die gepinnte Java-Version
+  verwenden.
+- `-tty stats` lädt und expandiert die Hierarchie, taktet die Schaltung aber
+  nicht. Elektrische Probleme in Reset, Fetch oder Datenpfad bleiben möglich.
+- Die beiden Offline-Unit-Testfehler aus 19.1 bleiben als mögliche veraltete
+  Layoutannahmen offen. Sie rechtfertigen weiterhin keine Verdrahtungsänderung.
+- Aufgabe 19.3 beginnt deshalb ohne Schaltungsänderung mit einem Reset und dem
+  kleinsten Fetch-Trace. Erst die erste abweichende Flanke beziehungsweise ein
+  abweichender benannter Port darf die weitere Diagnose bestimmen.
