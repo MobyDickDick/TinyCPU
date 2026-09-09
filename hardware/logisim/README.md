@@ -88,6 +88,13 @@ Innerhalb dieses Blatts wird die Freigabe an alle vier Subtraktionsarten
 Der Strukturtest sichert alle drei Abschnitte dieser Verbindung gegen eine
 versehentliche Umleitung oder Unterbrechung ab.
 
+Die entsprechende `ADD_OPERAND`-Prüfung folgt nun ebenfalls dem benannten
+Signalweg statt einer festen Zeichenblattkoordinate. Nach dem jüngsten Redraw
+liegt der Eingang im Blatt `Operations` bei einer anderen Rasterposition, ist
+aber weiterhin mit dem Aktivierungseingang der als `ADD_OPERATION` benannten
+Additions-FBox verbunden. Dadurch wird eine echte Unterbrechung weiterhin
+erkannt, ohne eine elektrisch gleichwertige manuelle Anordnung zurückzusetzen.
+
 This directory contains the TinyCPU hardware baseline with a dedicated arithmetic sheet.
 Open `TinyCPU.circ` with Logisim-evolution 4.1.x. Das Blatt **`TinyCPUMain` ist
 die hierarchische Integrationsseite**. Die fachliche Logik liegt in benannten
