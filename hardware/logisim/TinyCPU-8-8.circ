@@ -539,7 +539,7 @@
     <wire from="(2260,350)" to="(2520,350)"/>
     <wire from="(2260,550)" to="(2260,1050)"/>
     <wire from="(2260,550)" to="(3350,550)"/>
-    <wire from="(2280,2130)" to="(2520,2130)"/>
+    <wire from="(2280,2130)" to="(2470,2130)"/>
     <wire from="(2280,330)" to="(2280,430)"/>
     <wire from="(2280,330)" to="(2520,330)"/>
     <wire from="(2280,510)" to="(2280,2130)"/>
@@ -1592,6 +1592,7 @@
       <a name="label" val="PC"/>
     </comp>
     <comp lib="5" loc="(790,640)" name="ROM">
+      <a name="addrWidth" val="8"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="contents">addr/data: 8 14
 ff 1c65 3 1c64 2a00 4ff 1c64 2404
