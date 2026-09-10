@@ -17,7 +17,7 @@ Canvas-Koordinaten verändert.
 | 19.5 Akkumulator und Rechenpfad debuggen | abgeschlossen mit Abweichung | Der isolierte Akkumulator schreibt Wert und Validität gemeinsam; 12 von 20 Operationsfällen stimmen. Speicherwahl, Invalidität, Multiplikationsüberlauf und Division weichen bereits im kombinatorischen Blatt ab. |
 | 19.6 Adresspfad und Speicher debuggen | abgeschlossen mit Abweichung | Adressregister und beide RAMs arbeiten gekoppelt; `EffectiveAddress` wählt Direkt-/Registeradresse und Offset jedoch mit vertauschter zweiter Multiplexerpolarität, wodurch auch die Bereichsprüfung die falsche Adresse bewertet. |
 | 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen | abgeschlossen mit Abweichung | Fünf Sprungsteuersignale enden nur an Monitoren; die vier Enable-/Halteausgänge sind vollständig unverdrahtet. Die sechs Sticky-Flags sind dagegen set-dominant und gemeinsam löschbar aufgebaut. |
-| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Die ersten vier belegten Übergänge sind repariert: Programmgrenze, vollständige Opcode-Zuordnung, die gemeinsame Speicher-/Direktoperandwahl und die Vorzeichenprüfung der Multiplikation. Division ist die nächste Rechenpfadabweichung. |
+| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Sechs belegte Übergänge sind repariert: Programmgrenze, Opcode-Zuordnung, Speicher-/Direktoperandwahl, Multiplikationsvorzeichen, Division-durch-null-Signal und die Gültigkeit der Division. Die Aktivierung des Divisionsfehlers ist die nächste Rechenpfadabweichung. |
 | 19.9–19.10 | offen | Noch nicht begonnen. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
@@ -909,6 +909,23 @@ verloren gegangen. `PROGRAM_LIMIT_MAX` wurde deshalb wiederhergestellt, damit
 die bereits vorhandene topologische Regression die Quelle weiterhin ohne
 Canvas-Koordinate identifizieren kann.
 
+### Sechste Reparatur: aktivierungsgebundene Ergebnisgültigkeit
+
+Der nächste Unterschied lag am Übergang vom Divisionsblatt zum gemeinsamen
+`Operations.RESULT_IS_VALID`: `DivArithmeticCircuit.RESULT_VALID` wurde nur
+aus Eingabegültigkeit und Nichtnullprüfung gebildet. Daher lieferte der
+inaktive Divisionszweig bei einem beliebigen Nichtnulloperanden weiterhin eine
+Eins an das gemeinsame ODER; bei einer aktiven Division durch null wurde
+umgekehrt deren Null von den inaktiven Zweigen überdeckt.
+
+Die vorhandenen `RANGE_VALID`-UND-Gatter der vier arithmetischen Zweige
+verknüpfen nun zusätzlich das jeweilige `*_ACTIVATED`-Signal. Damit sind ihre
+Gültigkeitsausgänge im inaktiven Zustand neutral; eine aktive Division ist nur
+mit gültiger Eingabe und einem Divisor ungleich null gültig. Die Regression
+verlangt für `7 / 0` jetzt ausdrücklich `RESULT_IS_VALID=0`; vor der Änderung
+lieferte dieser Fall 1. Ergebnisbusse, Rechenbausteine und Fehlerausgänge
+wurden nicht verändert.
+
 Die fokussierte Abnahme lautet:
 
 ```bash
@@ -920,9 +937,10 @@ timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
   -tty stats hardware/logisim/TinyCPU.circ
 ```
 
-- Die Decoderreparatur, Operandwahl und Vorzeichenprüfung schließen 19.8 noch
-  nicht ab. Nach der Division folgt gemäß Stop-Regel der nächste belegte
-  Rechenpfadunterschied.
+- Die bisherigen Reparaturen schließen 19.8 noch nicht ab. Der
+  `DIVIDE_BY_ZERO`-Ausgang wird bei Divisor null weiterhin auch dann gesetzt,
+  wenn `DIV_OPERAND=0` ist; seine Aktivierung ist gemäß Stop-Regel der nächste
+  belegte Rechenpfadunterschied.
 - Der integrierte Minimal- und Matrixlauf bleibt zusätzlich durch die später
   diagnostizierten Adress-, Sprung- und Haltepfade blockiert. Diese werden
   nicht in dieselbe Änderung vorgezogen.

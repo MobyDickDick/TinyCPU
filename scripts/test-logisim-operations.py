@@ -101,8 +101,7 @@ def main() -> int:
             )
         elif name.startswith("divide-"):
             expected["DIVIDE_BY_ZERO"] = "1" if name == "divide-by-zero" else "0"
-            if name != "divide-by-zero":
-                expected["RESULT_IS_VALID"] = "1"
+            expected["RESULT_IS_VALID"] = "0" if name == "divide-by-zero" else "1"
         else:
             expected["RESULT_IS_VALID"] = "1"
         differences = [key for key, value in expected.items() if actual.get(key) != value]
