@@ -249,6 +249,7 @@
       <a name="labelloc" val="east"/>
     </comp>
     <comp lib="0" loc="(660,430)" name="Constant">
+      <a name="label" val="PROGRAM_LIMIT_MAX"/>
       <a name="value" val="0xfff"/>
       <a name="width" val="16"/>
     </comp>
@@ -3401,6 +3402,9 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
       <a name="appearance" val="classic"/>
       <a name="label" val="MUL_ACTIVATED"/>
     </comp>
+    <comp lib="0" loc="(230,80)" name="Tunnel">
+      <a name="label" val="MUL_ACTIVE_VALID"/>
+    </comp>
     <comp lib="0" loc="(210,370)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="INPUT_VALID"/>
@@ -3474,7 +3478,11 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
       <a name="label" val="PRODUCT_SIGN_MISMATCH"/>
     </comp>
     <comp lib="1" loc="(1000,350)" name="AND Gate">
+      <a name="inputs" val="3"/>
       <a name="label" val="RANGE_VALID"/>
+    </comp>
+    <comp lib="0" loc="(920,350)" name="Tunnel">
+      <a name="label" val="MUL_ACTIVE_VALID"/>
     </comp>
     <comp lib="1" loc="(610,300)" name="XOR Gate">
       <a name="label" val="OPERAND_SIGN_DIFFERENT"/>
@@ -3542,6 +3550,7 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(790,300)" to="(790,330)"/>
     <wire from="(790,300)" to="(940,300)"/>
     <wire from="(790,330)" to="(860,330)"/>
+    <wire from="(920,350)" to="(950,350)"/>
     <wire from="(890,330)" to="(950,330)"/>
     <wire from="(930,100)" to="(930,160)"/>
     <wire from="(940,220)" to="(940,260)"/>
@@ -3570,6 +3579,9 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <comp lib="0" loc="(190,80)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="DIV_ACTIVATED"/>
+    </comp>
+    <comp lib="0" loc="(230,80)" name="Tunnel">
+      <a name="label" val="DIV_ACTIVE_VALID"/>
     </comp>
     <comp lib="0" loc="(240,100)" name="Constant">
       <a name="value" val="0x0"/>
@@ -3604,7 +3616,11 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
       <a name="label" val="NONZERO_DIVISOR"/>
     </comp>
     <comp lib="1" loc="(930,230)" name="AND Gate">
+      <a name="inputs" val="3"/>
       <a name="label" val="RANGE_VALID"/>
+    </comp>
+    <comp lib="0" loc="(850,230)" name="Tunnel">
+      <a name="label" val="DIV_ACTIVE_VALID"/>
     </comp>
     <comp lib="2" loc="(300,120)" name="Multiplexer">
       <a name="width" val="16"/>
@@ -3648,6 +3664,7 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(820,200)" to="(840,200)"/>
     <wire from="(840,200)" to="(840,300)"/>
     <wire from="(840,300)" to="(970,300)"/>
+    <wire from="(850,230)" to="(880,230)"/>
     <wire from="(930,230)" to="(970,230)"/>
   </circuit>
   <circuit name="AddArithmeticCircuit">
@@ -3675,6 +3692,9 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <comp lib="0" loc="(190,80)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="ADD_ACTIVATED"/>
+    </comp>
+    <comp lib="0" loc="(230,80)" name="Tunnel">
+      <a name="label" val="ADD_ACTIVE_VALID"/>
     </comp>
     <comp lib="0" loc="(200,210)" name="Pin">
       <a name="appearance" val="classic"/>
@@ -3754,7 +3774,11 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
       <a name="label" val="SIGN_OVERFLOW"/>
     </comp>
     <comp lib="1" loc="(1020,350)" name="AND Gate">
+      <a name="inputs" val="3"/>
       <a name="label" val="RANGE_VALID"/>
+    </comp>
+    <comp lib="0" loc="(940,350)" name="Tunnel">
+      <a name="label" val="ADD_ACTIVE_VALID"/>
     </comp>
     <comp lib="1" loc="(540,300)" name="XOR Gate">
       <a name="label" val="OPERAND_SIGN_DIFFERENT"/>
@@ -3833,6 +3857,7 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(790,300)" to="(970,300)"/>
     <wire from="(790,330)" to="(860,330)"/>
     <wire from="(860,240)" to="(960,240)"/>
+    <wire from="(940,350)" to="(970,350)"/>
     <wire from="(890,330)" to="(970,330)"/>
     <wire from="(960,240)" to="(960,260)"/>
     <wire from="(960,260)" to="(970,260)"/>
@@ -3868,6 +3893,9 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <comp lib="0" loc="(190,80)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="SUB_ACTIVATED"/>
+    </comp>
+    <comp lib="0" loc="(230,80)" name="Tunnel">
+      <a name="label" val="SUB_ACTIVE_VALID"/>
     </comp>
     <comp lib="0" loc="(210,370)" name="Pin">
       <a name="appearance" val="classic"/>
@@ -3942,7 +3970,11 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
       <a name="label" val="SIGN_OVERFLOW"/>
     </comp>
     <comp lib="1" loc="(1000,350)" name="AND Gate">
+      <a name="inputs" val="3"/>
       <a name="label" val="RANGE_VALID"/>
+    </comp>
+    <comp lib="0" loc="(920,350)" name="Tunnel">
+      <a name="label" val="SUB_ACTIVE_VALID"/>
     </comp>
     <comp lib="1" loc="(610,300)" name="XOR Gate">
       <a name="label" val="OPERAND_SIGN_DIFFERENT"/>
@@ -4016,6 +4048,7 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(790,300)" to="(950,300)"/>
     <wire from="(790,330)" to="(860,330)"/>
     <wire from="(840,240)" to="(940,240)"/>
+    <wire from="(920,350)" to="(950,350)"/>
     <wire from="(890,330)" to="(950,330)"/>
     <wire from="(940,240)" to="(940,260)"/>
     <wire from="(940,260)" to="(950,260)"/>
