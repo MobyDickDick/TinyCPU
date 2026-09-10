@@ -17,7 +17,7 @@ Canvas-Koordinaten verändert.
 | 19.5 Akkumulator und Rechenpfad debuggen | abgeschlossen mit Abweichung | Der isolierte Akkumulator schreibt Wert und Validität gemeinsam; 12 von 20 Operationsfällen stimmen. Speicherwahl, Invalidität, Multiplikationsüberlauf und Division weichen bereits im kombinatorischen Blatt ab. |
 | 19.6 Adresspfad und Speicher debuggen | abgeschlossen mit Abweichung | Adressregister und beide RAMs arbeiten gekoppelt; `EffectiveAddress` wählt Direkt-/Registeradresse und Offset jedoch mit vertauschter zweiter Multiplexerpolarität, wodurch auch die Bereichsprüfung die falsche Adresse bewertet. |
 | 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen | abgeschlossen mit Abweichung | Fünf Sprungsteuersignale enden nur an Monitoren; die vier Enable-/Halteausgänge sind vollständig unverdrahtet. Die sechs Sticky-Flags sind dagegen set-dominant und gemeinsam löschbar aufgebaut. |
-| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Zehn belegte Übergänge sind repariert; zuletzt die Auswahl der effektiven Adresse und der Ausgabe-Freigabepfad. Als Nächstes wird der erste integrierte Unterschied hinter `PRINT_ENABLE` untersucht. |
+| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Elf belegte Übergänge sind repariert; zuletzt der Ausgabe-Freigabepfad und der beobachtbare Normalhalt. Als Nächstes wird der erste integrierte Unterschied nach `HALTED` untersucht. |
 | 19.9–19.10 | offen | Noch nicht begonnen. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
@@ -1108,3 +1108,38 @@ scripts/test-offline.sh
   bleiben entsprechend dem Befund aus 19.7 unangetastet.
 - Die vollständige elektrische Matrix und die gepinnte Java-Umgebung bleiben
   weiterhin der Abnahme in 19.9 vorbehalten.
+
+### Elfte Reparatur: beobachtbarer Normalhalt
+
+Der bereits hinter `PRINT_ENABLE` dokumentierte nächste Unterschied lag am
+Normalhalt des Countdown-Programms. `FetchDecodeControls.HALT` wurde korrekt
+dekodiert und war auf dem Top-Level bereits mit dem vorhandenen Monitornetz
+verbunden, erreichte den öffentlichen Ausgang `HALTED` jedoch nicht. Damit
+konnte der Tabellenlauf den fachlich erreichten Endzustand nicht beobachten.
+
+Eine neue orthogonale Abzweigung verbindet den `HALT`-Ausgang der vorhandenen
+Decoderinstanz direkt mit `HALTED`. Decoder, Monitornetz und der getrennte
+Fehlerhaltpfad bleiben unverändert. Die Regression findet den öffentlichen Pin
+über seinen Namen und verfolgt das vollständige Netz ab dem benannten
+Decoderport, ohne Zwischenkoordinaten der Leitungsführung festzuschreiben. Vor
+der Reparatur schlug dieser Test fehl; danach besteht er.
+
+Die fokussierte Abnahme lautet:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_halt_control_reaches_public_halted_pin
+python3 src/tiny_cpu_verify.py
+timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty stats hardware/logisim/TinyCPU.circ
+scripts/test-offline.sh
+```
+
+- Die bisherigen Reparaturen schließen 19.8 noch nicht ab. Gemäß Stop-Regel
+  muss der nächste integrierte Lauf den ersten Unterschied nach dem nun
+  beobachtbaren Normalhalt bestimmen, bevor ein weiterer Steuerpfad geändert
+  wird.
+- `PRINT_ADDRESS_ENABLE`, `HALTED_WITH_ERROR` und fünf Sprungpfade bleiben
+  entsprechend dem Befund aus 19.7 unangetastet.
+- Die vollständige elektrische Matrix und die GUI-Kurzabnahme bleiben Aufgabe
+  19.9 vorbehalten.
