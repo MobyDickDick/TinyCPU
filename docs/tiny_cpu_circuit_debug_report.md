@@ -17,8 +17,8 @@ Canvas-Koordinaten verändert.
 | 19.5 Akkumulator und Rechenpfad debuggen | abgeschlossen mit Abweichung | Der isolierte Akkumulator schreibt Wert und Validität gemeinsam; 12 von 20 Operationsfällen stimmen. Speicherwahl, Invalidität, Multiplikationsüberlauf und Division weichen bereits im kombinatorischen Blatt ab. |
 | 19.6 Adresspfad und Speicher debuggen | abgeschlossen mit Abweichung | Adressregister und beide RAMs arbeiten gekoppelt; `EffectiveAddress` wählt Direkt-/Registeradresse und Offset jedoch mit vertauschter zweiter Multiplexerpolarität, wodurch auch die Bereichsprüfung die falsche Adresse bewertet. |
 | 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen | abgeschlossen mit Abweichung | Fünf Sprungsteuersignale enden nur an Monitoren; die vier Enable-/Halteausgänge sind vollständig unverdrahtet. Die sechs Sticky-Flags sind dagegen set-dominant und gemeinsam löschbar aufgebaut. |
-| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Siebzehn belegte Übergänge sind repariert; zuletzt der Fehlersprung zum gemeinsamen PC-Auswahlpfad. Als Nächstes wird `JUMP_NOT_ERROR` untersucht. |
-| 19.9–19.10 | offen | Noch nicht begonnen. |
+| 19.8 Ersten abweichenden Netzübergang minimal reparieren | abgeschlossen | Achtzehn belegte Übergänge sind repariert; zuletzt wurde `JUMP_NOT_ERROR` mit der invertierten Sammelfehlerbedingung an den gemeinsamen PC-Auswahlpfad angeschlossen. |
+| 19.9–19.10 | offen | Als Nächstes folgt die vollständige elektrische Regression. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
 
@@ -1385,3 +1385,22 @@ drei Eingängen verloren. Beide Attribute sowie die dritte, beim Redraw
 abgetrennte Schreibanforderung sind wiederhergestellt. Damit bestehen die fünf
 zuvor gemeldeten Regressionen und die vollständige Offline-Suite gemeinsam;
 an Opcode-, Maschinenformat- oder VM-Vertrag wurde nichts geändert.
+
+### Achtzehnte Reparatur: Sprung ohne Fehler zum gemeinsamen PC-Auswahlpfad
+
+Der letzte in 19.7 nachgewiesene offene Sprungübergang war
+`JUMP_NOT_ERROR`. Der Decoder-Ausgang erreichte zuvor ausschließlich seinen
+Monitor. Nun invertiert `INVERT_ANY_ERROR_FOR_JUMP_NOT_ERROR` denselben aus
+allen sechs Sticky-Flags gebildeten Sammelfehler, den auch `JUMP_ERROR`
+verwendet. `JUMP_NOT_ERROR_AND_NO_ERROR` qualifiziert damit die
+Taken-Bedingung. Zwei weitere ODER-Stufen ergänzen den Decodersteuerzweig und
+die qualifizierte Bedingung hinter den zuvor reparierten Sprungstufen, ohne
+deren Verbindungen zu ersetzen.
+
+Die topologische Regression identifiziert alle vier neuen Gatter über Labels
+und verfolgt Decodersteuerung, Sammelfehlerinvertierung, Taken-Bedingung und
+beide gemeinsamen `FetchDecode`-Eingänge. Projektparser, Strukturprüfung und
+Logisim-evolution 4.1.0 akzeptieren das geänderte Projekt. Damit sind alle fünf
+in 19.7 als offen belegten Sprungsteuersignale an den PC-Auswahlpfad
+angeschlossen und Aufgabe 19.8 ist abgeschlossen. Die vollständige elektrische
+Profilmatrix und die GUI-Kurzabnahme bleiben Aufgabe 19.9 vorbehalten.

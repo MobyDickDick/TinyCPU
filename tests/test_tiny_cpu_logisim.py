@@ -368,8 +368,8 @@ class LogisimLauncherTests(unittest.TestCase):
         ))
         self.assertTrue(_wire_path_exists(main, "(1400,1330)", "(2580,1930)"))
         self.assertTrue(_wire_path_exists(main, "(1400,1370)", "(2580,1910)"))
-        self.assertTrue(_wire_path_exists(main, "(3960,1960)", "(800,510)"))
-        self.assertTrue(_wire_path_exists(main, "(3960,2110)", "(800,530)"))
+        self.assertTrue(_wire_path_exists(main, "(3960,1960)", "(4210,1940)"))
+        self.assertTrue(_wire_path_exists(main, "(3960,2110)", "(4210,2090)"))
 
     def test_jump_zero_reaches_common_pc_select(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
@@ -422,6 +422,33 @@ class LogisimLauncherTests(unittest.TestCase):
         self.assertTrue(_wire_path_exists(main, "(3310,1960)", "(3910,1940)"))
         self.assertTrue(_wire_path_exists(main, "(3640,2110)", "(3910,2090)"))
         self.assertTrue(_wire_path_exists(main, error_taken.get("loc"), "(3910,2130)"))
+        self.assertTrue(_wire_path_exists(main, control_merge.get("loc"), "(4210,1940)"))
+        self.assertTrue(_wire_path_exists(main, taken_merge.get("loc"), "(4210,2090)"))
+
+    def test_jump_not_error_reaches_common_pc_select(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+
+        any_error = _component_by_label(main, "ANY_ERROR_FOR_JUMP")
+        no_error = _component_by_label(main, "INVERT_ANY_ERROR_FOR_JUMP_NOT_ERROR")
+        not_error_taken = _component_by_label(main, "JUMP_NOT_ERROR_AND_NO_ERROR")
+        control_merge = _component_by_label(main, "JUMP_NOT_ERROR_OR_PREVIOUS_CONTROLS")
+        taken_merge = _component_by_label(main, "JUMP_NOT_ERROR_OR_PREVIOUS_TAKEN")
+        self.assertEqual(no_error.get("name"), "NOT Gate")
+        self.assertEqual(not_error_taken.get("name"), "AND Gate")
+        self.assertEqual(control_merge.get("name"), "OR Gate")
+        self.assertEqual(taken_merge.get("name"), "OR Gate")
+
+        # (1400,1430) is FetchDecodeControls.JUMP_NOT_ERROR.  Selecting the
+        # jump target is independent of the condition; taking it additionally
+        # requires the inverse of the combined sticky-error state.
+        self.assertTrue(_wire_path_exists(main, "(1400,1430)", "(4210,1980)"))
+        self.assertTrue(_wire_path_exists(main, "(1400,1430)", "(3570,2420)"))
+        self.assertTrue(_wire_path_exists(main, any_error.get("loc"), "(3230,2440)"))
+        self.assertTrue(_wire_path_exists(main, no_error.get("loc"), "(3570,2460)"))
+        self.assertTrue(_wire_path_exists(main, "(3960,1960)", "(4210,1940)"))
+        self.assertTrue(_wire_path_exists(main, "(3960,2110)", "(4210,2090)"))
+        self.assertTrue(_wire_path_exists(main, not_error_taken.get("loc"), "(4210,2130)"))
         self.assertTrue(_wire_path_exists(main, control_merge.get("loc"), "(800,510)"))
         self.assertTrue(_wire_path_exists(main, taken_merge.get("loc"), "(800,530)"))
 
