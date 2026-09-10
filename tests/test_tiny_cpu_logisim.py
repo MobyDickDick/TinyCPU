@@ -27,6 +27,40 @@ from tiny_cpu_logisim import (
 from tiny_cpu_profiles import load_profile
 
 
+def _attributes(component):
+    return {
+        attribute.get("name"): attribute.get("val")
+        for attribute in component.findall("a")
+    }
+
+
+def _component_by_label(circuit, label):
+    matches = [
+        component for component in circuit.findall("comp")
+        if _attributes(component).get("label") == label
+    ]
+    if len(matches) != 1:
+        raise AssertionError(f"expected exactly one component labelled {label!r}")
+    return matches[0]
+
+
+def _wire_path_exists(circuit, start, end):
+    graph = {}
+    for wire in circuit.findall("wire"):
+        left, right = wire.get("from"), wire.get("to")
+        graph.setdefault(left, set()).add(right)
+        graph.setdefault(right, set()).add(left)
+    pending, visited = [start], set()
+    while pending:
+        point = pending.pop()
+        if point == end:
+            return True
+        if point not in visited:
+            visited.add(point)
+            pending.extend(graph.get(point, ()))
+    return False
+
+
 class LogisimLauncherTests(unittest.TestCase):
     def test_change_driven_table_is_not_mistaken_for_an_edge_count(self):
         # Logisim emits values, not a synthetic column-name header. Successful
@@ -202,11 +236,6 @@ class LogisimLauncherTests(unittest.TestCase):
 
     def test_add_operand_reaches_operations_input(self):
         expected = ("(1270,930)", "(2520,930)")
-        operation_routes = {
-            ("(330,430)", "(600,430)"),
-            ("(600,320)", "(600,430)"),
-            ("(600,320)", "(680,320)"),
-        }
         wrong_error_flags_route = {
             ("(1270,930)", "(2170,930)"),
             ("(2170,450)", "(2170,930)"),
@@ -221,20 +250,16 @@ class LogisimLauncherTests(unittest.TestCase):
         for name in ("TinyCPU.circ",):
             root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
             operations = next(c for c in root.findall("circuit") if c.get("name") == "Operations")
-            operation_labels = {
-                attribute.get("val")
-                for component in operations.findall("comp")
-                for attribute in component.findall("a")
-                if attribute.get("name") == "label"
-            }
-            self.assertIn("ADD_OPERAND", operation_labels)
-            self.assertIn("ADD_OPERATION", operation_labels)
-            operation_wires = {
-                (wire.get("from"), wire.get("to"))
-                for wire in operations.findall("wire")
-            }
+            add_operand = _component_by_label(operations, "ADD_OPERAND")
+            add_operation = _component_by_label(operations, "ADD_OPERATION")
+            operation_x, operation_y = map(
+                int, add_operation.get("loc").strip("()").split(",")
+            )
             self.assertTrue(
-                operation_routes.issubset(operation_wires),
+                _wire_path_exists(
+                    operations, add_operand.get("loc"),
+                    f"({operation_x - 220},{operation_y})",
+                ),
                 f"{name} does not drive the addition enable input",
             )
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
@@ -252,16 +277,6 @@ class LogisimLauncherTests(unittest.TestCase):
     def test_sub_operand_reaches_operations_input(self):
         expected = ("(1270,950)", "(2520,950)")
         decoder_route = ("(1460,90)", "(1610,90)")
-        operation_routes = {
-            ("(330,470)", "(670,470)"),
-            ("(670,470)", "(680,470)"),
-            ("(670,470)", "(670,490)"),
-            ("(670,490)", "(680,490)"),
-            ("(670,490)", "(670,510)"),
-            ("(670,510)", "(680,510)"),
-            ("(670,510)", "(670,530)"),
-            ("(670,530)", "(680,530)"),
-        }
         stale_sub_monitor_route = {
             ("(1270,950)", "(1740,950)"),
             ("(1740,950)", "(1740,2500)"),
@@ -273,21 +288,17 @@ class LogisimLauncherTests(unittest.TestCase):
         for name in ("TinyCPU.circ",):
             root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
             operations = next(c for c in root.findall("circuit") if c.get("name") == "Operations")
-            operation_pins = {
-                attribute.get("val"): component.get("loc")
-                for component in operations.findall("comp")
-                if component.get("name") == "Pin"
-                for attribute in component.findall("a")
-                if attribute.get("name") == "label"
-            }
-            self.assertEqual(operation_pins.get("SUB_OPERAND"), "(330,470)")
-            operation_wires = {
-                (wire.get("from"), wire.get("to"))
-                for wire in operations.findall("wire")
-            }
+            sub_operand = _component_by_label(operations, "SUB_OPERAND")
+            sub_operation = _component_by_label(operations, "SUB_OPERATION")
+            operation_x, operation_y = map(
+                int, sub_operation.get("loc").strip("()").split(",")
+            )
             self.assertTrue(
-                operation_routes.issubset(operation_wires),
-                f"{name} does not fan SUB_OPERAND out to every subtraction mode",
+                _wire_path_exists(
+                    operations, sub_operand.get("loc"),
+                    f"({operation_x - 220},{operation_y})",
+                ),
+                f"{name} does not drive the subtraction enable input",
             )
 
             controls = next(

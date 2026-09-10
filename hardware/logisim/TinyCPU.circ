@@ -249,6 +249,7 @@
       <a name="labelloc" val="east"/>
     </comp>
     <comp lib="0" loc="(660,430)" name="Constant">
+      <a name="label" val="PROGRAM_LIMIT_MAX"/>
       <a name="value" val="0xfff"/>
       <a name="width" val="16"/>
     </comp>
@@ -3631,6 +3632,7 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
       <a name="width" val="16"/>
     </comp>
     <comp lib="3" loc="(530,160)" name="Divider">
+      <a name="mode" val="twosComplement"/>
       <a name="width" val="16"/>
     </comp>
     <comp lib="3" loc="(710,210)" name="Comparator">

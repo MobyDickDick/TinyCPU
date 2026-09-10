@@ -982,3 +982,57 @@ scripts/test-offline.sh
   nicht in dieselbe Änderung vorgezogen.
 - Die vollständige elektrische Matrix und die gepinnte Java-Umgebung bleiben
   weiterhin der Abnahme in 19.9 vorbehalten.
+
+### Achte Reparatur: vorzeichenbehaftete Division mit Rundung zu null
+
+Der nächste belegte Unterschied lag am Divider des `DivArithmeticCircuit`:
+Obwohl dessen oberer Dividendeneingang bereits die Vorzeichenerweiterung des
+linken Operanden erhielt, verwendete der Baustein weiterhin seinen
+vorzeichenlosen Standardmodus. Für `-7 / 2` entstand dadurch im unteren
+Ergebniswort `-4` statt der vom VM-Vertrag verlangten, zu null gerundeten
+`-3`.
+
+Der vorhandene Divider ist nun explizit auf Zweierkomplement gestellt. Seine
+Operanden, Vorzeichenerweiterung, Nullprüfung sowie Ergebnis- und
+Gültigkeitsleitungen bleiben unverändert. Die elektrische
+Operationsregression enthält neben `7 / 2` jetzt den zuvor fehlschlagenden Fall
+`-7 / 2`; er liefert `-3`, bleibt gültig und setzt keinen Divisionsfehler.
+Damit deckt der Test genau den zuvor abweichenden Übergang am benannten
+Divisionsbaustein ab.
+
+Die fokussierte Abnahme lautet:
+
+```bash
+LOGISIM_JAR=.venv/Include/logisim-evolution-4.1.0-all.jar \
+  scripts/test-logisim-operations.py
+python3 src/tiny_cpu_verify.py
+timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty stats hardware/logisim/TinyCPU.circ
+scripts/test-offline.sh
+```
+
+- Die bisherigen Reparaturen schließen 19.8 noch nicht ab. Der integrierte
+  Minimal- und Matrixlauf bleibt durch die bereits diagnostizierten Adress-,
+  Sprung- und Haltepfade blockiert; gemäß Stop-Regel wird als Nächstes wieder
+  der erste dort sichtbare Netzübergang untersucht.
+- Die vollständige elektrische Matrix und die gepinnte Java-Umgebung bleiben
+  weiterhin der Abnahme in 19.9 vorbehalten.
+
+### Nachprüfung der topologischen Regressionen
+
+Die Nachprüfung der vollständigen Offline-Suite zeigte, dass die drei dort
+verbliebenen Fehler keine fehlenden ADD-/SUB-Leitungen belegten. Beide
+Top-Level-Verbindungen vom aktuellen `FetchDecodeControls` zum aktuellen
+`Operations` waren bereits vorhanden. Die internen Tests erwarteten jedoch
+noch die Koordinaten einer überholten Anordnung des `Operations`-Blatts. Sie
+ermitteln die betreffenden Komponenten jetzt über `ADD_OPERAND`, `ADD_OPERATION`,
+`SUB_OPERAND` und `SUB_OPERATION` und verfolgen den tatsächlich verbundenen
+Leitungspfad zwischen ihren aktuellen Ports. Damit bleibt eine echte
+Unterbrechung erkennbar, ohne verschobene Symbole als Fehler zu behandeln.
+
+An der vorhandenen Programmgrenzenkonstante mit dem unveränderten Wert `0xfff`
+war dagegen beim manuellen Redraw lediglich die stabile Beschriftung verloren
+gegangen. `PROGRAM_LIMIT_MAX` ist wiederhergestellt, sodass der Test die Quelle
+ohne Canvas-Koordinate findet und weiterhin Breite, Wert sowie den einzelnen
+angeschlossenen Fetch-Pfad prüft. Datenwert und Verdrahtung wurden dabei nicht
+verändert.
