@@ -298,6 +298,20 @@ class LogisimLauncherTests(unittest.TestCase):
             "FetchDecodeControls.HALT does not reach TinyCPUMain.HALTED",
         )
 
+    def test_halt_error_control_reaches_public_halted_with_error_pin(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+        halted_with_error = _component_by_label(main, "HALTED_WITH_ERROR")
+
+        # Follow the complete net instead of fixing the test to a particular
+        # canvas route.  (1270,1550) is the HALT_ERROR port of the controls
+        # instance.
+        self.assertTrue(
+            _wire_path_exists(main, "(1270,1550)", halted_with_error.get("loc")),
+            "FetchDecodeControls.HALT_ERROR does not reach "
+            "TinyCPUMain.HALTED_WITH_ERROR",
+        )
+
     def test_sub_operand_reaches_operations_input(self):
         expected = ("(1270,950)", "(2520,950)")
         decoder_route = ("(1460,90)", "(1610,90)")

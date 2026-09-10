@@ -17,7 +17,7 @@ Canvas-Koordinaten verändert.
 | 19.5 Akkumulator und Rechenpfad debuggen | abgeschlossen mit Abweichung | Der isolierte Akkumulator schreibt Wert und Validität gemeinsam; 12 von 20 Operationsfällen stimmen. Speicherwahl, Invalidität, Multiplikationsüberlauf und Division weichen bereits im kombinatorischen Blatt ab. |
 | 19.6 Adresspfad und Speicher debuggen | abgeschlossen mit Abweichung | Adressregister und beide RAMs arbeiten gekoppelt; `EffectiveAddress` wählt Direkt-/Registeradresse und Offset jedoch mit vertauschter zweiter Multiplexerpolarität, wodurch auch die Bereichsprüfung die falsche Adresse bewertet. |
 | 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen | abgeschlossen mit Abweichung | Fünf Sprungsteuersignale enden nur an Monitoren; die vier Enable-/Halteausgänge sind vollständig unverdrahtet. Die sechs Sticky-Flags sind dagegen set-dominant und gemeinsam löschbar aufgebaut. |
-| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Elf belegte Übergänge sind repariert; zuletzt der Ausgabe-Freigabepfad und der beobachtbare Normalhalt. Als Nächstes wird der erste integrierte Unterschied nach `HALTED` untersucht. |
+| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Zwölf belegte Übergänge sind repariert; zuletzt der beobachtbare Normal- und Fehlerhalt. Als Nächstes wird der erste integrierte Unterschied nach `HALTED_WITH_ERROR` untersucht. |
 | 19.9–19.10 | offen | Noch nicht begonnen. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
@@ -1141,5 +1141,42 @@ scripts/test-offline.sh
   wird.
 - `PRINT_ADDRESS_ENABLE`, `HALTED_WITH_ERROR` und fünf Sprungpfade bleiben
   entsprechend dem Befund aus 19.7 unangetastet.
+- Die vollständige elektrische Matrix und die GUI-Kurzabnahme bleiben Aufgabe
+  19.9 vorbehalten.
+
+### Zwölfte Reparatur: beobachtbarer Fehlerhalt
+
+Der erste integrierte Unterschied nach dem beobachtbaren Normalhalt lag am
+expliziten Fehlerhalt. `FetchDecodeControls.HALT_ERROR` wurde korrekt dekodiert,
+endete auf `TinyCPUMain` aber weiterhin an einem offenen Monitornetz. Der
+öffentliche Ausgang `HALTED_WITH_ERROR` war vollständig isoliert und konnte
+das fachlich erreichte Programmende deshalb nicht an den Tabellenlogger
+weitergeben.
+
+Eine neue orthogonale Leitung verbindet den `HALT_ERROR`-Ausgang der
+vorhandenen Decoderinstanz direkt mit `HALTED_WITH_ERROR`. Normalhalt,
+Monitornetz und die benachbarten Ausgabe-Freigaben bleiben getrennt. Die
+Regression findet den öffentlichen Pin über seinen Namen und verfolgt das
+vollständige Netz ab dem benannten Decoderport; sie enthält keine Annahme über
+die Zwischenkoordinaten. Vor der Reparatur schlug dieser Test fehl, danach
+besteht er.
+
+Die fokussierte Abnahme lautet:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_halt_error_control_reaches_public_halted_with_error_pin
+python3 src/tiny_cpu_verify.py
+timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty stats hardware/logisim/TinyCPU.circ
+scripts/test-offline.sh
+```
+
+- Die bisherigen Reparaturen schließen 19.8 noch nicht ab. Gemäß Stop-Regel
+  muss der nächste integrierte Lauf den ersten Unterschied nach dem nun
+  beobachtbaren Fehlerhalt bestimmen, bevor ein weiterer Steuerpfad geändert
+  wird.
+- `PRINT_ADDRESS_ENABLE` und fünf Sprungpfade bleiben entsprechend dem Befund
+  aus 19.7 unangetastet.
 - Die vollständige elektrische Matrix und die GUI-Kurzabnahme bleiben Aufgabe
   19.9 vorbehalten.
