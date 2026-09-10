@@ -17,7 +17,7 @@ Canvas-Koordinaten verändert.
 | 19.5 Akkumulator und Rechenpfad debuggen | abgeschlossen mit Abweichung | Der isolierte Akkumulator schreibt Wert und Validität gemeinsam; 12 von 20 Operationsfällen stimmen. Speicherwahl, Invalidität, Multiplikationsüberlauf und Division weichen bereits im kombinatorischen Blatt ab. |
 | 19.6 Adresspfad und Speicher debuggen | abgeschlossen mit Abweichung | Adressregister und beide RAMs arbeiten gekoppelt; `EffectiveAddress` wählt Direkt-/Registeradresse und Offset jedoch mit vertauschter zweiter Multiplexerpolarität, wodurch auch die Bereichsprüfung die falsche Adresse bewertet. |
 | 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen | abgeschlossen mit Abweichung | Fünf Sprungsteuersignale enden nur an Monitoren; die vier Enable-/Halteausgänge sind vollständig unverdrahtet. Die sechs Sticky-Flags sind dagegen set-dominant und gemeinsam löschbar aufgebaut. |
-| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Fünfzehn belegte Übergänge sind repariert; zuletzt der Nullsprung zum gemeinsamen PC-Auswahlpfad. Als Nächstes wird `JUMP_NEGATIVE` untersucht. |
+| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Sechzehn belegte Übergänge sind repariert; zuletzt der Negativsprung zum gemeinsamen PC-Auswahlpfad. Als Nächstes wird `JUMP_ERROR` untersucht. |
 | 19.9–19.10 | offen | Noch nicht begonnen. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
@@ -1293,5 +1293,40 @@ scripts/test-offline.sh
   `JUMP_ERROR` und `JUMP_NOT_ERROR` besitzen weiterhin keinen Pfad zur
   gemeinsamen PC-Auswahl; gemäß Stop-Regel ist `JUMP_NEGATIVE` der nächste zu
   untersuchende Übergang.
+- Die vollständige elektrische Matrix und die GUI-Kurzabnahme bleiben Aufgabe
+  19.9 vorbehalten.
+
+### Sechzehnte Reparatur: Negativsprung zum gemeinsamen PC-Auswahlpfad
+
+Der nächste belegte Unterschied war `JUMP_NEGATIVE`: Sein Decoder-Ausgang
+endete weiterhin am Monitor und war nicht Teil der gemeinsamen PC-Auswahl.
+Ein Sprung mit gesetztem Vorzeichenflag konnte deshalb das adressierte Ziel
+nicht übernehmen.
+
+Eine weitere ODER-Stufe ergänzt `JUMP_NEGATIVE` hinter der bereits
+qualifizierten Nullsprungstufe. Der Bedingungszweig verknüpft
+`JUMP_NEGATIVE AND NEGATIVE` und führt dieses Ergebnis mit der bisherigen
+Taken-Bedingung zusammen. Das Vorzeichenflag wird am vorhandenen
+`Datapath.NEGATIVE`-Netz abgezweigt. Der endgültige Ausgang behält die beiden
+bestehenden Netznamen `ANY_JUMP_CONTROL` und `ANY_JUMP_CONDITION`, sodass die
+Eingänge des PC-Multiplexers unverändert bleiben.
+
+Die topologische Regression findet die drei neuen Gatter über ihre Labels und
+prüft Decodersteuerung, Vorzeichenflag, beide Zwischenresultate und die
+vorhandenen `FetchDecode`-Eingänge. Ohne die neuen Verbindungen schlägt sie
+fehl. Die fokussierte Abnahme lautet:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_jump_negative_reaches_common_pc_select
+python3 src/tiny_cpu_verify.py
+timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty stats hardware/logisim/TinyCPU.circ
+scripts/test-offline.sh
+```
+
+- Die bisherigen Reparaturen schließen 19.8 noch nicht ab. `JUMP_ERROR` und
+  `JUMP_NOT_ERROR` besitzen weiterhin keinen Pfad zur gemeinsamen PC-Auswahl;
+  gemäß Stop-Regel ist `JUMP_ERROR` der nächste zu untersuchende Übergang.
 - Die vollständige elektrische Matrix und die GUI-Kurzabnahme bleiben Aufgabe
   19.9 vorbehalten.
