@@ -17,7 +17,7 @@ Canvas-Koordinaten verändert.
 | 19.5 Akkumulator und Rechenpfad debuggen | abgeschlossen mit Abweichung | Der isolierte Akkumulator schreibt Wert und Validität gemeinsam; 12 von 20 Operationsfällen stimmen. Speicherwahl, Invalidität, Multiplikationsüberlauf und Division weichen bereits im kombinatorischen Blatt ab. |
 | 19.6 Adresspfad und Speicher debuggen | abgeschlossen mit Abweichung | Adressregister und beide RAMs arbeiten gekoppelt; `EffectiveAddress` wählt Direkt-/Registeradresse und Offset jedoch mit vertauschter zweiter Multiplexerpolarität, wodurch auch die Bereichsprüfung die falsche Adresse bewertet. |
 | 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen | abgeschlossen mit Abweichung | Fünf Sprungsteuersignale enden nur an Monitoren; die vier Enable-/Halteausgänge sind vollständig unverdrahtet. Die sechs Sticky-Flags sind dagegen set-dominant und gemeinsam löschbar aufgebaut. |
-| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Sieben belegte Übergänge sind repariert: Programmgrenze, Opcode-Zuordnung, Speicher-/Direktoperandwahl, Multiplikationsvorzeichen, Division-durch-null-Signal, Divisionsgültigkeit und Aktivierung des Divisionsfehlers. Die Rundung vorzeichenbehafteter Division ist die nächste Rechenpfadabweichung. |
+| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Neun belegte Übergänge sind repariert; zuletzt die vorzeichenbehaftete Division und die Auswahl der effektiven Adresse. Als Nächstes wird der erste integrierte Unterschied hinter dem Adresspfad untersucht. |
 | 19.9–19.10 | offen | Noch nicht begonnen. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
@@ -1015,6 +1015,41 @@ scripts/test-offline.sh
   Minimal- und Matrixlauf bleibt durch die bereits diagnostizierten Adress-,
   Sprung- und Haltepfade blockiert; gemäß Stop-Regel wird als Nächstes wieder
   der erste dort sichtbare Netzübergang untersucht.
+- Die vollständige elektrische Matrix und die gepinnte Java-Umgebung bleiben
+  weiterhin der Abnahme in 19.9 vorbehalten.
+
+### Neunte Reparatur: Auswahl der effektiven Adresse
+
+Der nächste bereits in 19.6 belegte Unterschied lag am zweiten Multiplexer des
+Blatts `EffectiveAddress`. Seine Eingänge waren gegenüber dem Steuersignal
+`ADDR_REG_OFFS_ARGUMENT` vertauscht: Ohne Offset wurde `OFFSET_ADDR` gewählt,
+mit Offset dagegen die zuvor ausgewählte Direkt- oder Registeradresse. Da auch
+die Bereichsprüfung vom Multiplexerausgang gespeist wird, prüfte sie dadurch
+dieselbe falsche Adresse.
+
+Die beiden vorhandenen 16-Bit-Eingangsnetze wurden unmittelbar vor dem
+Multiplexer getauscht. Bei Steuersignal 0 liegt nun `REG_SELECTED`, bei 1
+`OFFSET_ADDR` an; Multiplexer, Steuernetz, Ausgang und Bereichsvergleicher
+bleiben unverändert. Die neue elektrische Regression regt das Blatt nur über
+seine benannten Pins an und prüft Direkt-, Register- und Offsetmodus sowie die
+Profilgrenze `0x0fff` und die erste unzulässige Adresse `0x1000`. Vor der
+Reparatur scheiterte bereits der Direktfall; danach bestehen alle fünf Fälle.
+
+Die fokussierte Abnahme lautet:
+
+```bash
+LOGISIM_JAR=.venv/Include/logisim-evolution-4.1.0-all.jar \
+  scripts/test-logisim-effective-address.py
+python3 src/tiny_cpu_verify.py
+timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty stats hardware/logisim/TinyCPU.circ
+scripts/test-offline.sh
+```
+
+- Die bisherigen Reparaturen schließen 19.8 noch nicht ab. Der nächste
+  integrierte Lauf muss nun den ersten Unterschied hinter dem korrigierten
+  Adresspfad bestimmen; Sprung-, Ausgabe- und Haltepfade werden nicht
+  vorgezogen.
 - Die vollständige elektrische Matrix und die gepinnte Java-Umgebung bleiben
   weiterhin der Abnahme in 19.9 vorbehalten.
 
