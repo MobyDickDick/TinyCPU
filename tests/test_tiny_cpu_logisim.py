@@ -274,6 +274,18 @@ class LogisimLauncherTests(unittest.TestCase):
                 f"{name} still routes ADD_OPERAND to the LOAD_CONST monitor",
             )
 
+    def test_print_control_reaches_public_enable_pin(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+        print_enable = _component_by_label(main, "PRINT_ENABLE")
+
+        # Follow the complete net instead of fixing the test to a particular
+        # canvas route.  (1270,1490) is the PRINT port of the controls instance.
+        self.assertTrue(
+            _wire_path_exists(main, "(1270,1490)", print_enable.get("loc")),
+            "FetchDecodeControls.PRINT does not reach TinyCPUMain.PRINT_ENABLE",
+        )
+
     def test_sub_operand_reaches_operations_input(self):
         expected = ("(1270,950)", "(2520,950)")
         decoder_route = ("(1460,90)", "(1610,90)")
