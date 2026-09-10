@@ -276,6 +276,7 @@
       <a name="labelloc" val="east"/>
     </comp>
     <comp lib="0" loc="(790,550)" name="Constant">
+      <a name="label" val="PROGRAM_LIMIT_MAX"/>
       <a name="value" val="0xfff"/>
       <a name="width" val="16"/>
     </comp>
@@ -321,6 +322,7 @@
       <a name="label" val="JUMP_ERROR_OR_PREVIOUS_TAKEN"/>
     </comp>
     <comp lib="1" loc="(580,690)" name="OR Gate">
+      <a name="inputs" val="3"/>
       <a name="label" val="MEMORY_WRITE_REQUEST"/>
     </comp>
     <comp lib="2" loc="(2530,900)" name="Multiplexer">
@@ -674,6 +676,33 @@
     <wire from="(750,710)" to="(800,710)"/>
     <wire from="(790,550)" to="(800,550)"/>
     <wire from="(790,570)" to="(800,570)"/>
+    <wire from="(2560,1900)" to="(2560,1910)"/>
+    <wire from="(2560,1910)" to="(2580,1910)"/>
+    <wire from="(2560,1940)" to="(2580,1940)"/>
+    <wire from="(2580,1930)" to="(2580,1940)"/>
+    <wire from="(2870,1920)" to="(2890,1920)"/>
+    <wire from="(2890,1920)" to="(2890,1930)"/>
+    <wire from="(2870,1960)" to="(2890,1960)"/>
+    <wire from="(2890,1950)" to="(2890,1960)"/>
+    <wire from="(2870,2030)" to="(2890,2030)"/>
+    <wire from="(2890,2030)" to="(2890,2040)"/>
+    <wire from="(2870,2070)" to="(2890,2070)"/>
+    <wire from="(2890,2060)" to="(2890,2070)"/>
+    <wire from="(2870,2100)" to="(2890,2100)"/>
+    <wire from="(2890,2100)" to="(2890,2110)"/>
+    <wire from="(2870,2140)" to="(2890,2140)"/>
+    <wire from="(2890,2130)" to="(2890,2140)"/>
+    <wire from="(2870,2170)" to="(2890,2170)"/>
+    <wire from="(2890,2170)" to="(2890,2180)"/>
+    <wire from="(2870,2210)" to="(2890,2210)"/>
+    <wire from="(2890,2200)" to="(2890,2210)"/>
+    <wire from="(3260,1940)" to="(3280,1940)"/>
+    <wire from="(3280,1940)" to="(3280,1950)"/>
+    <wire from="(3260,1980)" to="(3280,1980)"/>
+    <wire from="(3280,1970)" to="(3280,1980)"/>
+    <wire from="(450,210)" to="(1660,210)"/>
+    <wire from="(450,210)" to="(450,690)"/>
+    <wire from="(450,690)" to="(530,690)"/>
   </circuit>
   <circuit name="EffectiveAddress">
     <a name="appearance" val="logisim_evolution"/>

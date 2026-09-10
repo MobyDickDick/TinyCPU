@@ -1366,3 +1366,22 @@ scripts/test-offline.sh
   Stop-Regel der nächste zu untersuchende Übergang.
 - Die vollständige elektrische Matrix und die GUI-Kurzabnahme bleiben Aufgabe
   19.9 vorbehalten.
+
+### Nachprüfung nach der manuellen Symbolverschiebung
+
+Die vollständige Offline-Suite zeigte nach der siebzehnten Reparatur fünf
+strukturelle Regressionen aus der zwischenzeitlichen manuellen Anpassung der
+Übersichtsseite. Die Bauteile der drei bereits reparierten Sprungstufen waren
+verschoben worden, ihre Leitungsenden waren aber an den früheren
+Eingangskoordinaten verblieben. Die Leitungen enden nun wieder an den
+tatsächlichen Eingängen von `JUMP_ADR_OR_JNZ_CONTROL`,
+`JUMP_ZERO_AND_ZERO`, `JUMP_NEGATIVE_AND_NEGATIVE` und den nachfolgenden
+ODER-Stufen. Die Tests folgen den aktuellen Anschlüssen und schreiben die
+überholte Symbolposition nicht wieder fest.
+
+Außerdem hatten die vorhandene Konstante `0xfff` ihre Bezeichnung
+`PROGRAM_LIMIT_MAX` und `MEMORY_WRITE_REQUEST` seine deklarierte Anzahl von
+drei Eingängen verloren. Beide Attribute sowie die dritte, beim Redraw
+abgetrennte Schreibanforderung sind wiederhergestellt. Damit bestehen die fünf
+zuvor gemeldeten Regressionen und die vollständige Offline-Suite gemeinsam;
+an Opcode-, Maschinenformat- oder VM-Vertrag wurde nichts geändert.

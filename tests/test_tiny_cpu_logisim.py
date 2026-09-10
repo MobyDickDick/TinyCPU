@@ -246,9 +246,9 @@ class LogisimLauncherTests(unittest.TestCase):
             "JUMP_ADR_OR_JNZ_CONTROL": {"(2580,1910)", "(2580,1930)"},
             "JUMP_ZERO_OR_PREVIOUS_CONTROLS": {"(2890,1930)", "(2890,1950)"},
             "JUMP_NEGATIVE_OR_PREVIOUS_CONTROLS": {"(3280,1950)", "(3280,1970)"},
-            "JUMP_ADR_OR_NOT_ZERO": {"(2930,2040)", "(2930,2060)"},
-            "JUMP_ZERO_OR_PREVIOUS_TAKEN": {"(3200,2080)", "(3200,2100)"},
-            "JUMP_NEGATIVE_OR_PREVIOUS_TAKEN": {"(3520,2100)", "(3520,2120)"},
+            "JUMP_ADR_OR_NOT_ZERO": {"(2890,2040)", "(2890,2060)"},
+            "JUMP_ZERO_OR_PREVIOUS_TAKEN": {"(3270,2070)", "(3270,2110)"},
+            "JUMP_NEGATIVE_OR_PREVIOUS_TAKEN": {"(3590,2090)", "(3590,2130)"},
         }
         wire_endpoints = {
             endpoint
@@ -368,26 +368,26 @@ class LogisimLauncherTests(unittest.TestCase):
         ))
         self.assertTrue(_wire_path_exists(main, "(1400,1330)", "(2580,1930)"))
         self.assertTrue(_wire_path_exists(main, "(1400,1370)", "(2580,1910)"))
-        self.assertTrue(_wire_path_exists(main, "(3310,1960)", "(800,510)"))
-        self.assertTrue(_wire_path_exists(main, "(3550,2110)", "(800,530)"))
+        self.assertTrue(_wire_path_exists(main, "(3960,1960)", "(800,510)"))
+        self.assertTrue(_wire_path_exists(main, "(3960,2110)", "(800,530)"))
 
     def test_jump_zero_reaches_common_pc_select(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
 
-        self.assertTrue(_wire_path_exists(main, "(1400,1350)", "(2930,2110)"))
-        self.assertTrue(_wire_path_exists(main, "(2080,490)", "(2930,2130)"))
-        self.assertTrue(_wire_path_exists(main, "(2960,2120)", "(3200,2100)"))
+        self.assertTrue(_wire_path_exists(main, "(1400,1350)", "(2890,2110)"))
+        self.assertTrue(_wire_path_exists(main, "(2080,490)", "(2890,2130)"))
+        self.assertTrue(_wire_path_exists(main, "(2920,2120)", "(3270,2110)"))
         self.assertTrue(_wire_path_exists(main, "(2920,1940)", "(3280,1950)"))
 
     def test_jump_negative_reaches_common_pc_select(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
 
-        self.assertTrue(_wire_path_exists(main, "(1400,1390)", "(2930,2180)"))
-        self.assertTrue(_wire_path_exists(main, "(2080,510)", "(2930,2200)"))
-        self.assertTrue(_wire_path_exists(main, "(2960,2190)", "(3520,2120)"))
-        self.assertTrue(_wire_path_exists(main, "(3230,2090)", "(3520,2100)"))
+        self.assertTrue(_wire_path_exists(main, "(1400,1390)", "(2890,2180)"))
+        self.assertTrue(_wire_path_exists(main, "(2080,510)", "(2890,2200)"))
+        self.assertTrue(_wire_path_exists(main, "(2920,2190)", "(3590,2130)"))
+        self.assertTrue(_wire_path_exists(main, "(3320,2090)", "(3590,2090)"))
 
     def test_jump_error_reaches_common_pc_select(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
