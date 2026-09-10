@@ -17,7 +17,7 @@ Canvas-Koordinaten verändert.
 | 19.5 Akkumulator und Rechenpfad debuggen | abgeschlossen mit Abweichung | Der isolierte Akkumulator schreibt Wert und Validität gemeinsam; 12 von 20 Operationsfällen stimmen. Speicherwahl, Invalidität, Multiplikationsüberlauf und Division weichen bereits im kombinatorischen Blatt ab. |
 | 19.6 Adresspfad und Speicher debuggen | abgeschlossen mit Abweichung | Adressregister und beide RAMs arbeiten gekoppelt; `EffectiveAddress` wählt Direkt-/Registeradresse und Offset jedoch mit vertauschter zweiter Multiplexerpolarität, wodurch auch die Bereichsprüfung die falsche Adresse bewertet. |
 | 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen | abgeschlossen mit Abweichung | Fünf Sprungsteuersignale enden nur an Monitoren; die vier Enable-/Halteausgänge sind vollständig unverdrahtet. Die sechs Sticky-Flags sind dagegen set-dominant und gemeinsam löschbar aufgebaut. |
-| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Zwölf belegte Übergänge sind repariert; zuletzt der beobachtbare Normal- und Fehlerhalt. Als Nächstes wird der erste integrierte Unterschied nach `HALTED_WITH_ERROR` untersucht. |
+| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Dreizehn belegte Übergänge sind repariert; zuletzt die Freigabe der adressierten Ausgabe. Als Nächstes wird der erste integrierte Unterschied nach `PRINT_ADDRESS_ENABLE` untersucht. |
 | 19.9–19.10 | offen | Noch nicht begonnen. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
@@ -1178,5 +1178,40 @@ scripts/test-offline.sh
   wird.
 - `PRINT_ADDRESS_ENABLE` und fünf Sprungpfade bleiben entsprechend dem Befund
   aus 19.7 unangetastet.
+- Die vollständige elektrische Matrix und die GUI-Kurzabnahme bleiben Aufgabe
+  19.9 vorbehalten.
+
+### Dreizehnte Reparatur: Freigabe der adressierten Ausgabe
+
+Der erste noch offene beobachtbare Endpunkt nach dem Fehlerhalt war die
+Freigabe von `PRINT_ADDRESS`. Der Decoder stellte das Signal an
+`FetchDecodeControls.PRINT_ADDRESS` bereit, und Wert sowie Gültigkeit kamen
+bereits aus dem Speicherpfad am Top-Level an. Der öffentliche Ausgang
+`PRINT_ADDRESS_ENABLE` blieb jedoch isoliert, sodass ein adressierter
+Ausgabebefehl trotz korrekter Daten nicht als Ausgabe beobachtet werden konnte.
+
+Eine neue orthogonale Abzweigung verbindet den vorhandenen Decoderpfad direkt
+mit `PRINT_ADDRESS_ENABLE`. Der benachbarte Akkumulator-Ausgabepfad, beide
+Haltepfade sowie Wert und Gültigkeit der adressierten Ausgabe bleiben
+unverändert. Die Regression findet den öffentlichen Pin anhand seines Namens
+und verfolgt das vollständige Netz vom benannten Decoderport, ohne
+Zwischenkoordinaten festzuschreiben. Sie schlägt bei gezieltem Entfernen der
+neuen Verbindung fehl und besteht mit der reparierten Leitung.
+
+Die fokussierte Abnahme lautet:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_print_address_control_reaches_public_enable_pin
+python3 src/tiny_cpu_verify.py
+timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty stats hardware/logisim/TinyCPU.circ
+scripts/test-offline.sh
+```
+
+- Die bisherigen Reparaturen schließen 19.8 noch nicht ab. Gemäß Stop-Regel
+  muss der nächste integrierte Lauf den ersten Unterschied nach der nun
+  beobachtbaren adressierten Ausgabe bestimmen.
+- Die fünf Sprungpfade bleiben entsprechend dem Befund aus 19.7 unangetastet.
 - Die vollständige elektrische Matrix und die GUI-Kurzabnahme bleiben Aufgabe
   19.9 vorbehalten.
