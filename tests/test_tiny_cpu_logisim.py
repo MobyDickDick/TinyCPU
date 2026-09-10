@@ -234,6 +234,38 @@ class LogisimLauncherTests(unittest.TestCase):
             "the named program-limit source must exclusively drive its existing fetch net",
         )
 
+    def test_visible_top_level_or_gates_have_every_input_connected(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+
+        # These are the input terminals rendered by Logisim for the OR gates
+        # highlighted on the integration sheet.  Keep the count explicit so a
+        # redraw cannot silently leave an input at its default/floating value.
+        expected_inputs = {
+            "MEMORY_WRITE_REQUEST": {"(400,550)", "(400,570)", "(400,590)"},
+            "JUMP_ADR_OR_JNZ_CONTROL": {"(820,1750)", "(820,1770)"},
+            "JUMP_ZERO_OR_PREVIOUS_CONTROLS": {"(1050,1770)", "(1050,1790)"},
+            "JUMP_NEGATIVE_OR_PREVIOUS_CONTROLS": {"(1070,2580)", "(1070,2600)"},
+            "JUMP_ADR_OR_NOT_ZERO": {"(1080,2340)", "(1080,2360)"},
+            "JUMP_ZERO_OR_PREVIOUS_TAKEN": {"(1510,2330)", "(1510,2350)"},
+            "JUMP_NEGATIVE_OR_PREVIOUS_TAKEN": {"(1780,2290)", "(1780,2310)"},
+        }
+        wire_endpoints = {
+            endpoint
+            for wire in main.findall("wire")
+            for endpoint in (wire.get("from"), wire.get("to"))
+        }
+
+        for label, terminals in expected_inputs.items():
+            gate = _component_by_label(main, label)
+            attributes = _attributes(gate)
+            self.assertEqual(gate.get("name"), "OR Gate")
+            self.assertEqual(int(attributes.get("inputs", "2")), len(terminals))
+            self.assertTrue(
+                terminals.issubset(wire_endpoints),
+                f"{label} has an unconnected input terminal",
+            )
+
     def test_add_operand_reaches_operations_input(self):
         expected = ("(1270,930)", "(2520,930)")
         wrong_error_flags_route = {
