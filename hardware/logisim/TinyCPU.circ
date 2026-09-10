@@ -3617,6 +3617,9 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <comp lib="1" loc="(820,200)" name="NOT Gate">
       <a name="label" val="NONZERO_DIVISOR"/>
     </comp>
+    <comp lib="1" loc="(930,300)" name="AND Gate">
+      <a name="label" val="DIVIDE_BY_ZERO_ACTIVE"/>
+    </comp>
     <comp lib="1" loc="(930,230)" name="AND Gate">
       <a name="inputs" val="3"/>
       <a name="label" val="RANGE_VALID"/>
@@ -3638,6 +3641,7 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(190,250)" to="(880,250)"/>
     <wire from="(190,80)" to="(230,80)"/>
     <wire from="(230,80)" to="(260,80)"/>
+    <wire from="(230,80)" to="(870,80)"/>
     <wire from="(240,100)" to="(250,100)"/>
     <wire from="(240,190)" to="(300,190)"/>
     <wire from="(250,100)" to="(250,110)"/>
@@ -3662,9 +3666,12 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(760,200)" to="(790,200)"/>
     <wire from="(760,210)" to="(880,210)"/>
     <wire from="(820,200)" to="(840,200)"/>
-    <wire from="(840,200)" to="(840,300)"/>
-    <wire from="(840,300)" to="(970,300)"/>
+    <wire from="(840,200)" to="(840,280)"/>
+    <wire from="(840,280)" to="(880,280)"/>
     <wire from="(850,230)" to="(880,230)"/>
+    <wire from="(870,80)" to="(870,320)"/>
+    <wire from="(870,320)" to="(880,320)"/>
+    <wire from="(930,300)" to="(970,300)"/>
     <wire from="(930,230)" to="(970,230)"/>
   </circuit>
   <circuit name="AddArithmeticCircuit">

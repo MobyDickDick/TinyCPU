@@ -17,7 +17,7 @@ Canvas-Koordinaten verändert.
 | 19.5 Akkumulator und Rechenpfad debuggen | abgeschlossen mit Abweichung | Der isolierte Akkumulator schreibt Wert und Validität gemeinsam; 12 von 20 Operationsfällen stimmen. Speicherwahl, Invalidität, Multiplikationsüberlauf und Division weichen bereits im kombinatorischen Blatt ab. |
 | 19.6 Adresspfad und Speicher debuggen | abgeschlossen mit Abweichung | Adressregister und beide RAMs arbeiten gekoppelt; `EffectiveAddress` wählt Direkt-/Registeradresse und Offset jedoch mit vertauschter zweiter Multiplexerpolarität, wodurch auch die Bereichsprüfung die falsche Adresse bewertet. |
 | 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen | abgeschlossen mit Abweichung | Fünf Sprungsteuersignale enden nur an Monitoren; die vier Enable-/Halteausgänge sind vollständig unverdrahtet. Die sechs Sticky-Flags sind dagegen set-dominant und gemeinsam löschbar aufgebaut. |
-| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Sechs belegte Übergänge sind repariert: Programmgrenze, Opcode-Zuordnung, Speicher-/Direktoperandwahl, Multiplikationsvorzeichen, Division-durch-null-Signal und die Gültigkeit der Division. Die Aktivierung des Divisionsfehlers ist die nächste Rechenpfadabweichung. |
+| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Sieben belegte Übergänge sind repariert: Programmgrenze, Opcode-Zuordnung, Speicher-/Direktoperandwahl, Multiplikationsvorzeichen, Division-durch-null-Signal, Divisionsgültigkeit und Aktivierung des Divisionsfehlers. Die Rundung vorzeichenbehafteter Division ist die nächste Rechenpfadabweichung. |
 | 19.9–19.10 | offen | Noch nicht begonnen. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
@@ -941,6 +941,42 @@ timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
   `DIVIDE_BY_ZERO`-Ausgang wird bei Divisor null weiterhin auch dann gesetzt,
   wenn `DIV_OPERAND=0` ist; seine Aktivierung ist gemäß Stop-Regel der nächste
   belegte Rechenpfadunterschied.
+- Der integrierte Minimal- und Matrixlauf bleibt zusätzlich durch die später
+  diagnostizierten Adress-, Sprung- und Haltepfade blockiert. Diese werden
+  nicht in dieselbe Änderung vorgezogen.
+- Die vollständige elektrische Matrix und die gepinnte Java-Umgebung bleiben
+  weiterhin der Abnahme in 19.9 vorbehalten.
+
+### Siebte Reparatur: aktivierungsgebundener Divisionsfehler
+
+Der nächste belegte Unterschied lag am Ausgang `DIVIDE_BY_ZERO` des
+`DivArithmeticCircuit`: Das invertierte Nichtnullsignal erreichte den Ausgang
+unabhängig von `DIV_ACTIVATED`. Deshalb meldete bereits ein inaktiver
+Divisionszweig mit einem zufällig ausgewählten Nulloperanden einen
+Divisionsfehler.
+
+Ein neues UND-Gatter verknüpft das vorhandene Nullsignal unmittelbar vor dem
+Ausgang mit `DIV_ACTIVATED`. Die Nichtnullprüfung, Ergebnisberechnung und
+Gültigkeitslogik bleiben unverändert. Die elektrische Operationsregression
+enthält nun zusätzlich den zuvor fehlschlagenden Fall mit Nulloperand und
+`DIV_OPERAND=0`; er setzt `DIVIDE_BY_ZERO` nicht mehr. Die beiden aktiven Fälle
+belegen weiterhin, dass `7 / 2` keinen Fehler und `7 / 0` genau diesen Fehler
+meldet.
+
+Die fokussierte Abnahme lautet:
+
+```bash
+LOGISIM_JAR=.venv/Include/logisim-evolution-4.1.0-all.jar \
+  scripts/test-logisim-operations.py
+python3 src/tiny_cpu_verify.py
+timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty stats hardware/logisim/TinyCPU.circ
+scripts/test-offline.sh
+```
+
+- Die bisherigen Reparaturen schließen 19.8 noch nicht ab. Der in 19.5
+  dokumentierte Unterschied bei der Rundung vorzeichenbehafteter Division ist
+  gemäß Stop-Regel der nächste zu untersuchende Rechenpfadübergang.
 - Der integrierte Minimal- und Matrixlauf bleibt zusätzlich durch die später
   diagnostizierten Adress-, Sprung- und Haltepfade blockiert. Diese werden
   nicht in dieselbe Änderung vorgezogen.
