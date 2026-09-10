@@ -249,7 +249,6 @@
       <a name="labelloc" val="east"/>
     </comp>
     <comp lib="0" loc="(660,430)" name="Constant">
-      <a name="label" val="PROGRAM_LIMIT_MAX"/>
       <a name="value" val="0xfff"/>
       <a name="width" val="16"/>
     </comp>
@@ -336,9 +335,9 @@
     <wire from="(1270,1030)" to="(2520,1030)"/>
     <wire from="(1270,1050)" to="(2520,1050)"/>
     <wire from="(1270,1110)" to="(2440,1110)"/>
-    <wire from="(1270,1130)" to="(2240,1130)"/>
-    <wire from="(1270,1150)" to="(2260,1150)"/>
-    <wire from="(1270,1170)" to="(2220,1170)"/>
+    <wire from="(1270,1130)" to="(2260,1130)"/>
+    <wire from="(1270,1150)" to="(2220,1150)"/>
+    <wire from="(1270,1170)" to="(2240,1170)"/>
     <wire from="(1270,1190)" to="(2460,1190)"/>
     <wire from="(1270,1210)" to="(1280,1210)"/>
     <wire from="(1270,1230)" to="(1280,1230)"/>
@@ -352,7 +351,6 @@
     <wire from="(1270,1490)" to="(3200,1490)"/>
     <wire from="(1270,1510)" to="(1560,1510)"/>
     <wire from="(1270,1530)" to="(1580,1530)"/>
-    <wire from="(1270,1530)" to="(3220,1530)"/>
     <wire from="(1270,1550)" to="(3240,1550)"/>
     <wire from="(1270,930)" to="(2520,930)"/>
     <wire from="(1270,950)" to="(2520,950)"/>
@@ -368,6 +366,7 @@
     <wire from="(1400,670)" to="(3350,670)"/>
     <wire from="(1400,820)" to="(2380,820)"/>
     <wire from="(1560,70)" to="(1560,1510)"/>
+    <wire from="(1580,1530)" to="(3220,1530)"/>
     <wire from="(1580,50)" to="(1580,1530)"/>
     <wire from="(1660,210)" to="(1660,410)"/>
     <wire from="(1660,210)" to="(2420,210)"/>
@@ -404,13 +403,13 @@
     <wire from="(220,50)" to="(1580,50)"/>
     <wire from="(220,50)" to="(220,590)"/>
     <wire from="(220,590)" to="(400,590)"/>
-    <wire from="(2220,1170)" to="(2220,1330)"/>
-    <wire from="(2220,1330)" to="(2530,1330)"/>
+    <wire from="(2220,1150)" to="(2220,1380)"/>
+    <wire from="(2220,1380)" to="(2930,1380)"/>
     <wire from="(2240,110)" to="(2240,370)"/>
-    <wire from="(2240,1130)" to="(2240,1270)"/>
-    <wire from="(2240,1270)" to="(2530,1270)"/>
-    <wire from="(2260,1150)" to="(2260,1380)"/>
-    <wire from="(2260,1380)" to="(2930,1380)"/>
+    <wire from="(2240,1170)" to="(2240,1330)"/>
+    <wire from="(2240,1330)" to="(2530,1330)"/>
+    <wire from="(2260,1130)" to="(2260,1270)"/>
+    <wire from="(2260,1270)" to="(2530,1270)"/>
     <wire from="(2260,310)" to="(2260,350)"/>
     <wire from="(2260,350)" to="(2520,350)"/>
     <wire from="(2280,1310)" to="(2530,1310)"/>
@@ -498,19 +497,19 @@
     <wire from="(2910,1270)" to="(3350,1270)"/>
     <wire from="(2910,170)" to="(2910,1270)"/>
     <wire from="(3150,1300)" to="(3170,1300)"/>
-    <wire from="(3200,1070)" to="(3200,1490)"/>
-    <wire from="(3200,1070)" to="(3350,1070)"/>
-    <wire from="(3220,1110)" to="(3220,1530)"/>
-    <wire from="(3220,1110)" to="(3350,1110)"/>
-    <wire from="(3240,1130)" to="(3240,1550)"/>
-    <wire from="(3240,1130)" to="(3350,1130)"/>
     <wire from="(3170,270)" to="(3170,1300)"/>
     <wire from="(3190,430)" to="(3190,980)"/>
     <wire from="(3190,980)" to="(3340,980)"/>
+    <wire from="(3200,1070)" to="(3200,1490)"/>
+    <wire from="(3200,1070)" to="(3350,1070)"/>
     <wire from="(3210,410)" to="(3210,960)"/>
     <wire from="(3210,960)" to="(3340,960)"/>
+    <wire from="(3220,1110)" to="(3220,1530)"/>
+    <wire from="(3220,1110)" to="(3350,1110)"/>
     <wire from="(3230,390)" to="(3230,940)"/>
     <wire from="(3230,940)" to="(3340,940)"/>
+    <wire from="(3240,1130)" to="(3240,1550)"/>
+    <wire from="(3240,1130)" to="(3350,1130)"/>
     <wire from="(3250,370)" to="(3250,920)"/>
     <wire from="(3250,920)" to="(3340,920)"/>
     <wire from="(3270,350)" to="(3270,900)"/>
@@ -3627,12 +3626,12 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <comp lib="1" loc="(820,200)" name="NOT Gate">
       <a name="label" val="NONZERO_DIVISOR"/>
     </comp>
-    <comp lib="1" loc="(930,300)" name="AND Gate">
-      <a name="label" val="DIVIDE_BY_ZERO_ACTIVE"/>
-    </comp>
     <comp lib="1" loc="(930,230)" name="AND Gate">
       <a name="inputs" val="3"/>
       <a name="label" val="RANGE_VALID"/>
+    </comp>
+    <comp lib="1" loc="(930,300)" name="AND Gate">
+      <a name="label" val="DIVIDE_BY_ZERO_ACTIVE"/>
     </comp>
     <comp lib="2" loc="(300,120)" name="Multiplexer">
       <a name="width" val="16"/>
@@ -3652,13 +3651,13 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(190,250)" to="(880,250)"/>
     <wire from="(190,80)" to="(230,80)"/>
     <wire from="(230,80)" to="(260,80)"/>
-    <wire from="(230,80)" to="(870,80)"/>
     <wire from="(240,100)" to="(250,100)"/>
     <wire from="(240,190)" to="(300,190)"/>
     <wire from="(250,100)" to="(250,110)"/>
     <wire from="(250,110)" to="(270,110)"/>
     <wire from="(260,150)" to="(280,150)"/>
     <wire from="(260,80)" to="(260,150)"/>
+    <wire from="(260,80)" to="(870,80)"/>
     <wire from="(280,140)" to="(280,150)"/>
     <wire from="(280,150)" to="(280,230)"/>
     <wire from="(280,230)" to="(310,230)"/>
@@ -3680,10 +3679,10 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(840,200)" to="(840,280)"/>
     <wire from="(840,280)" to="(880,280)"/>
     <wire from="(850,230)" to="(880,230)"/>
-    <wire from="(870,80)" to="(870,320)"/>
     <wire from="(870,320)" to="(880,320)"/>
-    <wire from="(930,300)" to="(970,300)"/>
+    <wire from="(870,80)" to="(870,320)"/>
     <wire from="(930,230)" to="(970,230)"/>
+    <wire from="(930,300)" to="(970,300)"/>
   </circuit>
   <circuit name="AddArithmeticCircuit">
     <a name="appearance" val="logisim_evolution"/>
