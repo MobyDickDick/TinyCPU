@@ -1017,3 +1017,22 @@ scripts/test-offline.sh
   der erste dort sichtbare Netzübergang untersucht.
 - Die vollständige elektrische Matrix und die gepinnte Java-Umgebung bleiben
   weiterhin der Abnahme in 19.9 vorbehalten.
+
+### Nachprüfung der topologischen Regressionen
+
+Die Nachprüfung der vollständigen Offline-Suite zeigte, dass die drei dort
+verbliebenen Fehler keine fehlenden ADD-/SUB-Leitungen belegten. Beide
+Top-Level-Verbindungen vom aktuellen `FetchDecodeControls` zum aktuellen
+`Operations` waren bereits vorhanden. Die internen Tests erwarteten jedoch
+noch die Koordinaten einer überholten Anordnung des `Operations`-Blatts. Sie
+ermitteln die betreffenden Komponenten jetzt über `ADD_OPERAND`, `ADD_OPERATION`,
+`SUB_OPERAND` und `SUB_OPERATION` und verfolgen den tatsächlich verbundenen
+Leitungspfad zwischen ihren aktuellen Ports. Damit bleibt eine echte
+Unterbrechung erkennbar, ohne verschobene Symbole als Fehler zu behandeln.
+
+An der vorhandenen Programmgrenzenkonstante mit dem unveränderten Wert `0xfff`
+war dagegen beim manuellen Redraw lediglich die stabile Beschriftung verloren
+gegangen. `PROGRAM_LIMIT_MAX` ist wiederhergestellt, sodass der Test die Quelle
+ohne Canvas-Koordinate findet und weiterhin Breite, Wert sowie den einzelnen
+angeschlossenen Fetch-Pfad prüft. Datenwert und Verdrahtung wurden dabei nicht
+verändert.
