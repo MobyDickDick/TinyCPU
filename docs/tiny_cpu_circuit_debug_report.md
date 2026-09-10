@@ -17,7 +17,7 @@ Canvas-Koordinaten verändert.
 | 19.5 Akkumulator und Rechenpfad debuggen | abgeschlossen mit Abweichung | Der isolierte Akkumulator schreibt Wert und Validität gemeinsam; 12 von 20 Operationsfällen stimmen. Speicherwahl, Invalidität, Multiplikationsüberlauf und Division weichen bereits im kombinatorischen Blatt ab. |
 | 19.6 Adresspfad und Speicher debuggen | abgeschlossen mit Abweichung | Adressregister und beide RAMs arbeiten gekoppelt; `EffectiveAddress` wählt Direkt-/Registeradresse und Offset jedoch mit vertauschter zweiter Multiplexerpolarität, wodurch auch die Bereichsprüfung die falsche Adresse bewertet. |
 | 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen | abgeschlossen mit Abweichung | Fünf Sprungsteuersignale enden nur an Monitoren; die vier Enable-/Halteausgänge sind vollständig unverdrahtet. Die sechs Sticky-Flags sind dagegen set-dominant und gemeinsam löschbar aufgebaut. |
-| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Dreizehn belegte Übergänge sind repariert; zuletzt die Freigabe der adressierten Ausgabe. Als Nächstes wird der erste integrierte Unterschied nach `PRINT_ADDRESS_ENABLE` untersucht. |
+| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Vierzehn belegte Übergänge sind repariert; zuletzt der unbedingte Sprung zum gemeinsamen PC-Auswahlpfad. Als Nächstes wird `JUMP_ZERO` untersucht. |
 | 19.9–19.10 | offen | Noch nicht begonnen. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
@@ -1213,5 +1213,47 @@ scripts/test-offline.sh
   muss der nächste integrierte Lauf den ersten Unterschied nach der nun
   beobachtbaren adressierten Ausgabe bestimmen.
 - Die fünf Sprungpfade bleiben entsprechend dem Befund aus 19.7 unangetastet.
+- Die vollständige elektrische Matrix und die GUI-Kurzabnahme bleiben Aufgabe
+  19.9 vorbehalten.
+
+### Vierzehnte Reparatur: unbedingter Sprung zum gemeinsamen PC-Auswahlpfad
+
+Der nächste belegte Unterschied nach der adressierten Ausgabe lag am
+unbedingten `JUMP_ADR`. Der Decoder führte das Signal bisher ausschließlich
+zum Monitor `MONITOR_JUMP_ADR`; der PC-Multiplexer erhielt nur die Verknüpfung
+für `JUMP_NOT_ZERO`. Ein Sprungziel konnte deshalb für `JUMP_ADR` nie ausgewählt
+werden.
+
+Zwei benannte ODER-Stufen bilden nun am Top-Level die logisch äquivalente
+gemeinsame Taken-Bedingung
+`JUMP_ADR OR (JUMP_NOT_ZERO AND NOT_ZERO)`: Die erste Stufe führt beide
+Steuersignale zusammen, die zweite setzt für den unbedingten Sprung die
+Bedingung auf wahr. Die vorhandene UND-Stufe `JNZ_TAKEN` und der
+PC-Multiplexer in `FetchDecode` bleiben unverändert. Benannte Tunnel halten
+die neue Verbindung von den dicht belegten Daten- und Fehlernetzen getrennt.
+
+Die topologische Regression findet beide ODER-Gatter über ihre Labels, prüft
+alle Quell- und Ziel-Tunnel sowie die beiden vorhandenen Eingänge von
+`FetchDecode`. Ohne die neue Verbindung schlägt sie fehl. Die fokussierte
+Abnahme lautet:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_unconditional_jump_reaches_common_pc_select
+python3 src/tiny_cpu_verify.py
+timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty stats hardware/logisim/TinyCPU.circ
+scripts/test-offline.sh
+```
+
+- Die bisherigen Reparaturen schließen 19.8 noch nicht ab. `JUMP_ZERO`,
+  `JUMP_NEGATIVE`, `JUMP_ERROR` und `JUMP_NOT_ERROR` besitzen weiterhin keinen
+  Pfad zur gemeinsamen PC-Auswahl; gemäß Stop-Regel ist `JUMP_ZERO` der nächste
+  zu untersuchende Übergang.
+- Der isolierte `jump-address`-Matrixlauf erreicht weiterhin keinen
+  beobachtbaren Normalhalt und läuft in den Timeout. Damit bleibt hinter der
+  reparierten Steuerverbindung mindestens ein weiterer integrierter
+  Unterschied offen; die Reparatur wird nicht als vollständige elektrische
+  Sprungabnahme ausgegeben.
 - Die vollständige elektrische Matrix und die GUI-Kurzabnahme bleiben Aufgabe
   19.9 vorbehalten.

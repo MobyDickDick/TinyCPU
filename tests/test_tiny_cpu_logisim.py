@@ -326,6 +326,35 @@ class LogisimLauncherTests(unittest.TestCase):
             "TinyCPUMain.HALTED_WITH_ERROR",
         )
 
+    def test_unconditional_jump_reaches_common_pc_select(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+        control_select = _component_by_label(main, "JUMP_ADR_OR_JNZ_CONTROL")
+        condition_select = _component_by_label(main, "JUMP_ADR_OR_NOT_ZERO")
+        tunnels = {}
+        for component in main.findall("comp"):
+            label = _attributes(component).get("label")
+            if component.get("name") == "Tunnel" and label:
+                tunnels.setdefault(label, []).append(component.get("loc"))
+
+        self.assertTrue(_wire_path_exists(main, "(1270,1210)", "(1300,1210)"))
+        self.assertEqual(len(tunnels["JUMP_ADR_CONTROL"]), 3)
+        self.assertEqual(len(tunnels["JNZ_CONTROL"]), 2)
+        self.assertEqual(len(tunnels["NOT_ZERO_CONDITION"]), 2)
+        self.assertEqual(len(tunnels["ANY_JUMP_CONTROL"]), 2)
+        self.assertEqual(len(tunnels["ANY_JUMP_CONDITION"]), 2)
+
+        control_x, control_y = map(int, control_select.get("loc").strip("()").split(","))
+        condition_x, condition_y = map(int, condition_select.get("loc").strip("()").split(","))
+        self.assertIn(f"({control_x - 50},{control_y - 10})", tunnels["JNZ_CONTROL"])
+        self.assertIn(f"({control_x - 50},{control_y + 10})", tunnels["JUMP_ADR_CONTROL"])
+        self.assertIn(f"({condition_x - 50},{condition_y - 10})", tunnels["NOT_ZERO_CONDITION"])
+        self.assertIn(f"({condition_x - 50},{condition_y + 10})", tunnels["JUMP_ADR_CONTROL"])
+        self.assertTrue(_wire_path_exists(main, control_select.get("loc"), "(630,1600)"))
+        self.assertTrue(_wire_path_exists(main, condition_select.get("loc"), "(630,1660)"))
+        self.assertTrue(_wire_path_exists(main, "(660,390)", "(670,390)"))
+        self.assertTrue(_wire_path_exists(main, "(660,410)", "(670,410)"))
+
     def test_sub_operand_reaches_operations_input(self):
         expected = ("(1270,950)", "(2520,950)")
         decoder_route = ("(1460,90)", "(1610,90)")
