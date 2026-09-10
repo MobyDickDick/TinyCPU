@@ -286,6 +286,20 @@ class LogisimLauncherTests(unittest.TestCase):
             "FetchDecodeControls.PRINT does not reach TinyCPUMain.PRINT_ENABLE",
         )
 
+    def test_print_address_control_reaches_public_enable_pin(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+        print_address_enable = _component_by_label(main, "PRINT_ADDRESS_ENABLE")
+
+        # Follow the complete net instead of fixing the test to a particular
+        # canvas route.  (1270,1510) is the PRINT_ADDRESS port of the controls
+        # instance.
+        self.assertTrue(
+            _wire_path_exists(main, "(1270,1510)", print_address_enable.get("loc")),
+            "FetchDecodeControls.PRINT_ADDRESS does not reach "
+            "TinyCPUMain.PRINT_ADDRESS_ENABLE",
+        )
+
     def test_halt_control_reaches_public_halted_pin(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
