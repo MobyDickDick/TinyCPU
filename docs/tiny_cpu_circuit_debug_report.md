@@ -982,3 +982,38 @@ scripts/test-offline.sh
   nicht in dieselbe Änderung vorgezogen.
 - Die vollständige elektrische Matrix und die gepinnte Java-Umgebung bleiben
   weiterhin der Abnahme in 19.9 vorbehalten.
+
+### Achte Reparatur: vorzeichenbehaftete Division mit Rundung zu null
+
+Der nächste belegte Unterschied lag am Divider des `DivArithmeticCircuit`:
+Obwohl dessen oberer Dividendeneingang bereits die Vorzeichenerweiterung des
+linken Operanden erhielt, verwendete der Baustein weiterhin seinen
+vorzeichenlosen Standardmodus. Für `-7 / 2` entstand dadurch im unteren
+Ergebniswort `-4` statt der vom VM-Vertrag verlangten, zu null gerundeten
+`-3`.
+
+Der vorhandene Divider ist nun explizit auf Zweierkomplement gestellt. Seine
+Operanden, Vorzeichenerweiterung, Nullprüfung sowie Ergebnis- und
+Gültigkeitsleitungen bleiben unverändert. Die elektrische
+Operationsregression enthält neben `7 / 2` jetzt den zuvor fehlschlagenden Fall
+`-7 / 2`; er liefert `-3`, bleibt gültig und setzt keinen Divisionsfehler.
+Damit deckt der Test genau den zuvor abweichenden Übergang am benannten
+Divisionsbaustein ab.
+
+Die fokussierte Abnahme lautet:
+
+```bash
+LOGISIM_JAR=.venv/Include/logisim-evolution-4.1.0-all.jar \
+  scripts/test-logisim-operations.py
+python3 src/tiny_cpu_verify.py
+timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty stats hardware/logisim/TinyCPU.circ
+scripts/test-offline.sh
+```
+
+- Die bisherigen Reparaturen schließen 19.8 noch nicht ab. Der integrierte
+  Minimal- und Matrixlauf bleibt durch die bereits diagnostizierten Adress-,
+  Sprung- und Haltepfade blockiert; gemäß Stop-Regel wird als Nächstes wieder
+  der erste dort sichtbare Netzübergang untersucht.
+- Die vollständige elektrische Matrix und die gepinnte Java-Umgebung bleiben
+  weiterhin der Abnahme in 19.9 vorbehalten.

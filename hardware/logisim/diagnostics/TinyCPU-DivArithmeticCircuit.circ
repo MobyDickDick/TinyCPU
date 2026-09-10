@@ -80,6 +80,7 @@
       <a name="width" val="16"/>
     </comp>
     <comp lib="3" loc="(530,160)" name="Divider">
+      <a name="mode" val="twosComplement"/>
       <a name="width" val="16"/>
     </comp>
     <comp lib="3" loc="(710,210)" name="Comparator">

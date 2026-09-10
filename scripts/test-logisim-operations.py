@@ -87,6 +87,10 @@ def main() -> int:
                               "IMMEDIATE_VALUE": 2, "MEMORY_VALID": 1,
                               "CONST_OPERAND": 1, "DIV_OPERAND": 1},
                             "0x0003"),
+        "divide-negative-dividend": ({"ACC_VALUE": 0xFFF9, "MEMORY_VALUE": 0,
+                                        "IMMEDIATE_VALUE": 2, "MEMORY_VALID": 1,
+                                        "CONST_OPERAND": 1, "DIV_OPERAND": 1},
+                                      "0xfffd"),
         "divide-by-zero": ({"ACC_VALUE": 7, "MEMORY_VALUE": 0,
                              "IMMEDIATE_VALUE": 0, "MEMORY_VALID": 1,
                              "CONST_OPERAND": 1, "DIV_OPERAND": 1},
@@ -114,7 +118,8 @@ def main() -> int:
             raise LogisimError(f"operations fixture {name}: mismatched {', '.join(differences)}")
     print(
         "electrical operations acceptance passed: operand selection and "
-        "multiplication overflow, division validity, and activated division errors"
+        "multiplication overflow, signed division, division validity, and "
+        "activated division errors"
     )
     return 0
 
