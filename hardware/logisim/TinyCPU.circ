@@ -312,11 +312,11 @@
     </comp>
     <comp lib="0" loc="(630,1600)" name="Tunnel">
       <a name="facing" val="east"/>
-      <a name="label" val="ANY_JUMP_CONTROL"/>
+      <a name="label" val="JUMP_ADR_OR_JNZ_CONTROL_RESULT"/>
     </comp>
     <comp lib="0" loc="(630,1660)" name="Tunnel">
       <a name="facing" val="east"/>
-      <a name="label" val="ANY_JUMP_CONDITION"/>
+      <a name="label" val="JUMP_ADR_OR_JNZ_TAKEN"/>
     </comp>
     <comp lib="0" loc="(660,390)" name="Tunnel">
       <a name="label" val="ANY_JUMP_CONTROL"/>
@@ -329,6 +329,52 @@
     </comp>
     <comp lib="1" loc="(600,1660)" name="OR Gate">
       <a name="label" val="JUMP_ADR_OR_NOT_ZERO"/>
+    </comp>
+    <comp lib="0" loc="(750,1590)" name="Tunnel">
+      <a name="label" val="JUMP_ADR_OR_JNZ_CONTROL_RESULT"/>
+    </comp>
+    <comp lib="0" loc="(750,1610)" name="Tunnel">
+      <a name="label" val="JUMP_ZERO_CONTROL"/>
+    </comp>
+    <comp lib="0" loc="(830,1600)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="ANY_JUMP_CONTROL"/>
+    </comp>
+    <comp lib="1" loc="(800,1600)" name="OR Gate">
+      <a name="label" val="JUMP_ZERO_OR_PREVIOUS_CONTROLS"/>
+    </comp>
+    <comp lib="0" loc="(690,1710)" name="Tunnel">
+      <a name="label" val="JUMP_ZERO_CONTROL"/>
+    </comp>
+    <comp lib="0" loc="(690,1730)" name="Tunnel">
+      <a name="label" val="ZERO_CONDITION"/>
+    </comp>
+    <comp lib="0" loc="(770,1720)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="JUMP_ZERO_TAKEN"/>
+    </comp>
+    <comp lib="1" loc="(740,1720)" name="AND Gate">
+      <a name="label" val="JUMP_ZERO_AND_ZERO"/>
+    </comp>
+    <comp lib="0" loc="(750,1650)" name="Tunnel">
+      <a name="label" val="JUMP_ADR_OR_JNZ_TAKEN"/>
+    </comp>
+    <comp lib="0" loc="(750,1670)" name="Tunnel">
+      <a name="label" val="JUMP_ZERO_TAKEN"/>
+    </comp>
+    <comp lib="0" loc="(830,1660)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="ANY_JUMP_CONDITION"/>
+    </comp>
+    <comp lib="1" loc="(800,1660)" name="OR Gate">
+      <a name="label" val="JUMP_ZERO_OR_PREVIOUS_TAKEN"/>
+    </comp>
+    <comp lib="0" loc="(1300,1230)" name="Tunnel">
+      <a name="label" val="JUMP_ZERO_CONTROL"/>
+    </comp>
+    <comp lib="0" loc="(2110,390)" name="Tunnel">
+      <a name="facing" val="east"/>
+      <a name="label" val="ZERO_CONDITION"/>
     </comp>
     <comp lib="2" loc="(2400,780)" name="Multiplexer">
       <a name="width" val="16"/>
@@ -386,6 +432,7 @@
     <wire from="(1270,1210)" to="(1280,1210)"/>
     <wire from="(1270,1210)" to="(1300,1210)"/>
     <wire from="(1270,1230)" to="(1280,1230)"/>
+    <wire from="(1270,1230)" to="(1300,1230)"/>
     <wire from="(1270,1270)" to="(1280,1270)"/>
     <wire from="(1270,1290)" to="(1280,1290)"/>
     <wire from="(1270,1310)" to="(1280,1310)"/>
@@ -427,7 +474,10 @@
     <wire from="(1720,350)" to="(1730,350)"/>
     <wire from="(1720,370)" to="(1730,370)"/>
     <wire from="(1950,350)" to="(2010,350)"/>
-    <wire from="(1950,370)" to="(2110,370)"/>
+    <wire from="(1950,370)" to="(2070,370)"/>
+    <wire from="(2070,370)" to="(2110,370)"/>
+    <wire from="(2070,370)" to="(2070,390)"/>
+    <wire from="(2070,390)" to="(2110,390)"/>
     <wire from="(1950,390)" to="(2050,390)"/>
     <wire from="(1950,410)" to="(1990,410)"/>
     <wire from="(1990,130)" to="(1990,410)"/>
@@ -587,6 +637,9 @@
     <wire from="(650,210)" to="(650,390)"/>
     <wire from="(600,1600)" to="(630,1600)"/>
     <wire from="(600,1660)" to="(630,1660)"/>
+    <wire from="(740,1720)" to="(770,1720)"/>
+    <wire from="(800,1600)" to="(830,1600)"/>
+    <wire from="(800,1660)" to="(830,1660)"/>
     <wire from="(660,390)" to="(670,390)"/>
     <wire from="(660,410)" to="(670,410)"/>
     <wire from="(660,430)" to="(670,430)"/>
