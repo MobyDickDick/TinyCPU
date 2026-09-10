@@ -439,6 +439,54 @@ class LogisimLauncherTests(unittest.TestCase):
         self.assertTrue(_wire_path_exists(main, "(660,390)", "(670,390)"))
         self.assertTrue(_wire_path_exists(main, "(660,410)", "(670,410)"))
 
+    def test_jump_error_reaches_common_pc_select(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+        control_select = _component_by_label(main, "JUMP_ERROR_OR_PREVIOUS_CONTROLS")
+        any_error = _component_by_label(main, "ANY_ERROR_FLAG")
+        jump_error_taken = _component_by_label(main, "JUMP_ERROR_AND_ANY_ERROR")
+        condition_select = _component_by_label(main, "JUMP_ERROR_OR_PREVIOUS_TAKEN")
+        tunnels = {}
+        for component in main.findall("comp"):
+            label = _attributes(component).get("label")
+            if component.get("name") == "Tunnel" and label:
+                tunnels.setdefault(label, []).append(component.get("loc"))
+
+        self.assertTrue(_wire_path_exists(main, "(1270,1290)", "(1300,1290)"))
+        self.assertEqual(len(tunnels["JUMP_ERROR_CONTROL"]), 3)
+        self.assertEqual(len(tunnels["ANY_ERROR_CONDITION"]), 2)
+        self.assertEqual(len(tunnels["JUMP_ERROR_TAKEN"]), 2)
+
+        error_sources = {
+            "ERROR_OVF_CONDITION": "(3290,330)",
+            "ERROR_DIV0_CONDITION": "(3270,350)",
+            "ERROR_ADDR_CONDITION": "(3250,370)",
+            "ERROR_INV_CONDITION": "(3230,390)",
+            "ERROR_ILL_CONDITION": "(3210,410)",
+            "ERROR_INPUT_CONDITION": "(3190,430)",
+        }
+        any_error_x, any_error_y = map(int, any_error.get("loc").strip("()").split(","))
+        input_ys = (any_error_y - 30, any_error_y - 20, any_error_y - 10,
+                     any_error_y + 10, any_error_y + 20, any_error_y + 30)
+        for (label, source), input_y in zip(error_sources.items(), input_ys):
+            self.assertEqual(len(tunnels[label]), 2)
+            self.assertIn(source, tunnels[label])
+            self.assertIn(f"({any_error_x - 50},{input_y})", tunnels[label])
+
+        control_x, control_y = map(int, control_select.get("loc").strip("()").split(","))
+        taken_x, taken_y = map(int, jump_error_taken.get("loc").strip("()").split(","))
+        condition_x, condition_y = map(int, condition_select.get("loc").strip("()").split(","))
+        self.assertIn(f"({control_x - 50},{control_y + 10})", tunnels["JUMP_ERROR_CONTROL"])
+        self.assertIn(f"({taken_x - 50},{taken_y - 10})", tunnels["JUMP_ERROR_CONTROL"])
+        self.assertIn(f"({taken_x - 50},{taken_y + 10})", tunnels["ANY_ERROR_CONDITION"])
+        self.assertIn(f"({condition_x - 50},{condition_y + 10})", tunnels["JUMP_ERROR_TAKEN"])
+        self.assertTrue(_wire_path_exists(main, control_select.get("loc"), "(1230,1600)"))
+        self.assertTrue(_wire_path_exists(main, any_error.get("loc"), "(1170,1900)"))
+        self.assertTrue(_wire_path_exists(main, jump_error_taken.get("loc"), "(1170,1840)"))
+        self.assertTrue(_wire_path_exists(main, condition_select.get("loc"), "(1230,1660)"))
+        self.assertTrue(_wire_path_exists(main, "(660,390)", "(670,390)"))
+        self.assertTrue(_wire_path_exists(main, "(660,410)", "(670,410)"))
+
     def test_sub_operand_reaches_operations_input(self):
         expected = ("(1270,950)", "(2520,950)")
         decoder_route = ("(1460,90)", "(1610,90)")
