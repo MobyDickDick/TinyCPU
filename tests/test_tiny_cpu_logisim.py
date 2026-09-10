@@ -329,115 +329,33 @@ class LogisimLauncherTests(unittest.TestCase):
     def test_unconditional_jump_reaches_common_pc_select(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
-        control_select = _component_by_label(main, "JUMP_ADR_OR_JNZ_CONTROL")
-        condition_select = _component_by_label(main, "JUMP_ADR_OR_NOT_ZERO")
-        tunnels = {}
-        for component in main.findall("comp"):
-            label = _attributes(component).get("label")
-            if component.get("name") == "Tunnel" and label:
-                tunnels.setdefault(label, []).append(component.get("loc"))
 
-        self.assertTrue(_wire_path_exists(main, "(1270,1210)", "(1300,1210)"))
-        self.assertEqual(len(tunnels["JUMP_ADR_CONTROL"]), 3)
-        self.assertEqual(len(tunnels["JNZ_CONTROL"]), 2)
-        self.assertEqual(len(tunnels["NOT_ZERO_CONDITION"]), 2)
-        self.assertEqual(len(tunnels["ANY_JUMP_CONTROL"]), 2)
-        self.assertEqual(len(tunnels["ANY_JUMP_CONDITION"]), 2)
-
-        control_x, control_y = map(int, control_select.get("loc").strip("()").split(","))
-        condition_x, condition_y = map(int, condition_select.get("loc").strip("()").split(","))
-        self.assertIn(f"({control_x - 50},{control_y - 10})", tunnels["JNZ_CONTROL"])
-        self.assertIn(f"({control_x - 50},{control_y + 10})", tunnels["JUMP_ADR_CONTROL"])
-        self.assertIn(f"({condition_x - 50},{condition_y - 10})", tunnels["NOT_ZERO_CONDITION"])
-        self.assertIn(f"({condition_x - 50},{condition_y + 10})", tunnels["JUMP_ADR_CONTROL"])
-        self.assertTrue(_wire_path_exists(main, control_select.get("loc"), "(630,1600)"))
-        self.assertTrue(_wire_path_exists(main, condition_select.get("loc"), "(630,1660)"))
-        self.assertTrue(_wire_path_exists(main, "(660,390)", "(670,390)"))
-        self.assertTrue(_wire_path_exists(main, "(660,410)", "(670,410)"))
+        self.assertFalse(any(
+            component.get("name") == "Tunnel"
+            for component in main.findall("comp")
+        ))
+        self.assertTrue(_wire_path_exists(main, "(1270,1210)", "(820,1770)"))
+        self.assertTrue(_wire_path_exists(main, "(1270,1210)", "(1080,2340)"))
+        self.assertTrue(_wire_path_exists(main, "(1120,2590)", "(670,390)"))
+        self.assertTrue(_wire_path_exists(main, "(1830,2300)", "(670,410)"))
 
     def test_jump_zero_reaches_common_pc_select(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
-        control_select = _component_by_label(main, "JUMP_ZERO_OR_PREVIOUS_CONTROLS")
-        jump_zero_taken = _component_by_label(main, "JUMP_ZERO_AND_ZERO")
-        condition_select = _component_by_label(main, "JUMP_ZERO_OR_PREVIOUS_TAKEN")
-        tunnels = {}
-        for component in main.findall("comp"):
-            label = _attributes(component).get("label")
-            if component.get("name") == "Tunnel" and label:
-                tunnels.setdefault(label, []).append(component.get("loc"))
 
-        # The decoder control, accumulator zero flag, and both FetchDecode
-        # inputs are checked by their named tunnel nets rather than by a
-        # particular route through the canvas.
-        self.assertTrue(_wire_path_exists(main, "(1270,1230)", "(1300,1230)"))
-        self.assertTrue(_wire_path_exists(main, "(1950,370)", "(2110,390)"))
-        self.assertEqual(len(tunnels["JUMP_ZERO_CONTROL"]), 3)
-        self.assertEqual(len(tunnels["ZERO_CONDITION"]), 2)
-        self.assertEqual(len(tunnels["JUMP_ZERO_TAKEN"]), 2)
-
-        control_x, control_y = map(int, control_select.get("loc").strip("()").split(","))
-        taken_x, taken_y = map(int, jump_zero_taken.get("loc").strip("()").split(","))
-        condition_x, condition_y = map(
-            int, condition_select.get("loc").strip("()").split(",")
-        )
-        self.assertIn(
-            f"({control_x - 50},{control_y + 10})", tunnels["JUMP_ZERO_CONTROL"]
-        )
-        self.assertIn(
-            f"({taken_x - 50},{taken_y - 10})", tunnels["JUMP_ZERO_CONTROL"]
-        )
-        self.assertIn(f"({taken_x - 50},{taken_y + 10})", tunnels["ZERO_CONDITION"])
-        self.assertIn(
-            f"({condition_x - 50},{condition_y + 10})", tunnels["JUMP_ZERO_TAKEN"]
-        )
-        self.assertTrue(_wire_path_exists(main, control_select.get("loc"), "(830,1600)"))
-        self.assertTrue(_wire_path_exists(main, jump_zero_taken.get("loc"), "(770,1720)"))
-        self.assertTrue(_wire_path_exists(main, condition_select.get("loc"), "(830,1660)"))
-        self.assertTrue(_wire_path_exists(main, "(660,390)", "(670,390)"))
-        self.assertTrue(_wire_path_exists(main, "(660,410)", "(670,410)"))
+        self.assertTrue(_wire_path_exists(main, "(1270,1230)", "(1050,1790)"))
+        self.assertTrue(_wire_path_exists(main, "(1270,1230)", "(1080,2090)"))
+        self.assertTrue(_wire_path_exists(main, "(1950,370)", "(1080,2110)"))
+        self.assertTrue(_wire_path_exists(main, "(1130,2100)", "(1510,2330)"))
 
     def test_jump_negative_reaches_common_pc_select(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
-        control_select = _component_by_label(main, "JUMP_NEGATIVE_OR_PREVIOUS_CONTROLS")
-        jump_negative_taken = _component_by_label(main, "JUMP_NEGATIVE_AND_NEGATIVE")
-        condition_select = _component_by_label(main, "JUMP_NEGATIVE_OR_PREVIOUS_TAKEN")
-        tunnels = {}
-        for component in main.findall("comp"):
-            label = _attributes(component).get("label")
-            if component.get("name") == "Tunnel" and label:
-                tunnels.setdefault(label, []).append(component.get("loc"))
 
-        self.assertTrue(_wire_path_exists(main, "(1270,1270)", "(1300,1270)"))
-        self.assertTrue(_wire_path_exists(main, "(1950,390)", "(2110,450)"))
-        self.assertEqual(len(tunnels["JUMP_NEGATIVE_CONTROL"]), 3)
-        self.assertEqual(len(tunnels["NEGATIVE_CONDITION"]), 2)
-        self.assertEqual(len(tunnels["JUMP_NEGATIVE_TAKEN"]), 2)
-
-        control_x, control_y = map(int, control_select.get("loc").strip("()").split(","))
-        taken_x, taken_y = map(int, jump_negative_taken.get("loc").strip("()").split(","))
-        condition_x, condition_y = map(
-            int, condition_select.get("loc").strip("()").split(",")
-        )
-        self.assertIn(
-            f"({control_x - 50},{control_y + 10})", tunnels["JUMP_NEGATIVE_CONTROL"]
-        )
-        self.assertIn(
-            f"({taken_x - 50},{taken_y - 10})", tunnels["JUMP_NEGATIVE_CONTROL"]
-        )
-        self.assertIn(
-            f"({taken_x - 50},{taken_y + 10})", tunnels["NEGATIVE_CONDITION"]
-        )
-        self.assertIn(
-            f"({condition_x - 50},{condition_y + 10})",
-            tunnels["JUMP_NEGATIVE_TAKEN"],
-        )
-        self.assertTrue(_wire_path_exists(main, control_select.get("loc"), "(1030,1600)"))
-        self.assertTrue(_wire_path_exists(main, jump_negative_taken.get("loc"), "(970,1780)"))
-        self.assertTrue(_wire_path_exists(main, condition_select.get("loc"), "(1030,1660)"))
-        self.assertTrue(_wire_path_exists(main, "(660,390)", "(670,390)"))
-        self.assertTrue(_wire_path_exists(main, "(660,410)", "(670,410)"))
+        self.assertTrue(_wire_path_exists(main, "(1270,1270)", "(1070,2600)"))
+        self.assertTrue(_wire_path_exists(main, "(1270,1270)", "(1090,2170)"))
+        self.assertTrue(_wire_path_exists(main, "(1950,390)", "(1090,2190)"))
+        self.assertTrue(_wire_path_exists(main, "(1140,2180)", "(1780,2290)"))
 
     def test_sub_operand_reaches_operations_input(self):
         expected = ("(1270,950)", "(2520,950)")
