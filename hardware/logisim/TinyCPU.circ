@@ -307,6 +307,19 @@
     <comp lib="1" loc="(3640,2110)" name="OR Gate">
       <a name="label" val="JUMP_NEGATIVE_OR_PREVIOUS_TAKEN"/>
     </comp>
+    <comp lib="1" loc="(3020,2310)" name="OR Gate">
+      <a name="inputs" val="6"/>
+      <a name="label" val="ANY_ERROR_FOR_JUMP"/>
+    </comp>
+    <comp lib="1" loc="(3320,2310)" name="AND Gate">
+      <a name="label" val="JUMP_ERROR_AND_ANY_ERROR"/>
+    </comp>
+    <comp lib="1" loc="(3960,1960)" name="OR Gate">
+      <a name="label" val="JUMP_ERROR_OR_PREVIOUS_CONTROLS"/>
+    </comp>
+    <comp lib="1" loc="(3960,2110)" name="OR Gate">
+      <a name="label" val="JUMP_ERROR_OR_PREVIOUS_TAKEN"/>
+    </comp>
     <comp lib="1" loc="(580,690)" name="OR Gate">
       <a name="label" val="MEMORY_WRITE_REQUEST"/>
     </comp>
@@ -573,7 +586,9 @@
     <wire from="(3300,390)" to="(3300,1420)"/>
     <wire from="(3310,1210)" to="(3310,1630)"/>
     <wire from="(3310,1210)" to="(3480,1210)"/>
-    <wire from="(3310,1960)" to="(3990,1960)"/>
+    <wire from="(3310,1960)" to="(3800,1960)"/>
+    <wire from="(3800,1940)" to="(3800,1960)"/>
+    <wire from="(3800,1940)" to="(3900,1940)"/>
     <wire from="(3320,1100)" to="(3470,1100)"/>
     <wire from="(3320,2090)" to="(3590,2090)"/>
     <wire from="(3320,550)" to="(3320,1100)"/>
@@ -599,7 +614,35 @@
     <wire from="(3470,710)" to="(3480,710)"/>
     <wire from="(3530,2130)" to="(3530,2190)"/>
     <wire from="(3530,2130)" to="(3590,2130)"/>
-    <wire from="(3640,2110)" to="(4010,2110)"/>
+    <wire from="(3640,2110)" to="(3820,2110)"/>
+    <wire from="(3820,2090)" to="(3820,2110)"/>
+    <wire from="(3820,2090)" to="(3910,2090)"/>
+    <wire from="(1400,1410)" to="(3880,1410)"/>
+    <wire from="(3880,1410)" to="(3880,1980)"/>
+    <wire from="(3880,1980)" to="(3910,1980)"/>
+    <wire from="(3900,1940)" to="(3910,1940)"/>
+    <wire from="(3960,1960)" to="(3990,1960)"/>
+    <wire from="(3420,1000)" to="(3420,2260)"/>
+    <wire from="(2970,2260)" to="(3420,2260)"/>
+    <wire from="(3400,1020)" to="(3400,2280)"/>
+    <wire from="(2970,2280)" to="(3400,2280)"/>
+    <wire from="(3380,1040)" to="(3380,2300)"/>
+    <wire from="(2970,2300)" to="(3380,2300)"/>
+    <wire from="(3360,1060)" to="(3360,2320)"/>
+    <wire from="(2970,2320)" to="(3360,2320)"/>
+    <wire from="(3340,1080)" to="(3340,2340)"/>
+    <wire from="(2970,2340)" to="(3340,2340)"/>
+    <wire from="(3320,1100)" to="(3320,2360)"/>
+    <wire from="(2970,2360)" to="(3320,2360)"/>
+    <wire from="(3020,2310)" to="(3200,2310)"/>
+    <wire from="(3200,2310)" to="(3200,2330)"/>
+    <wire from="(3200,2330)" to="(3270,2330)"/>
+    <wire from="(3880,1980)" to="(3880,2290)"/>
+    <wire from="(3270,2290)" to="(3880,2290)"/>
+    <wire from="(3320,2310)" to="(3850,2310)"/>
+    <wire from="(3850,2130)" to="(3850,2310)"/>
+    <wire from="(3850,2130)" to="(3910,2130)"/>
+    <wire from="(3960,2110)" to="(4010,2110)"/>
     <wire from="(3990,150)" to="(3990,1960)"/>
     <wire from="(4010,130)" to="(4010,2110)"/>
     <wire from="(410,170)" to="(1710,170)"/>
