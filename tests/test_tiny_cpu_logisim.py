@@ -367,6 +367,8 @@ class LogisimLauncherTests(unittest.TestCase):
         ))
 
         # Generated-box inputs are ordered by the child sheet's pin position.
+        # The instance anchor is its first output at x=4360; Logisim derives a
+        # 220-unit-wide symbol here, so its input pins are at x=4140.
         sources = [
             "(2870,450)", "(2870,470)", "(2870,490)", "(2870,510)",
             "(2870,530)", "(2870,550)", "(1400,1360)", "(1400,1380)",
@@ -375,7 +377,7 @@ class LogisimLauncherTests(unittest.TestCase):
         ]
         for source, y in zip(sources, range(450, 730, 20)):
             self.assertTrue(
-                _wire_path_exists(main, source, f"(4060,{y})"),
+                _wire_path_exists(main, source, f"(4140,{y})"),
                 f"{source} does not reach its JumpBox input",
             )
         self.assertTrue(_wire_path_exists(main, "(4360,450)", "(800,510)"))
