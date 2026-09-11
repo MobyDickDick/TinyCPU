@@ -10,8 +10,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class CircuitCheckTests(unittest.TestCase):
-    def test_primary_project_has_no_static_gate_wiring_faults(self):
-        self.assertEqual(inspect_project(ROOT / "hardware/logisim/TinyCPU.circ"), [])
+    def test_profile_projects_have_no_static_gate_wiring_faults(self):
+        for project in ("TinyCPU.circ", "TinyCPU-8-8.circ"):
+            with self.subTest(project=project):
+                self.assertEqual(
+                    inspect_project(ROOT / "hardware/logisim" / project), []
+                )
 
     def test_detects_outputs_joined_through_endpoint_on_segment(self):
         circuit = ET.fromstring("""
