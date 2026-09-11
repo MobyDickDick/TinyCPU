@@ -362,14 +362,18 @@ class LogisimLauncherTests(unittest.TestCase):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
 
-        self.assertFalse(any(
-            component.get("name") == "Tunnel"
-            for component in main.findall("comp")
-        ))
+        jump_tunnels = [
+            component for component in main.findall("comp")
+            if component.get("name") == "Tunnel"
+        ]
+        self.assertEqual(
+            [_attributes(component).get("label") for component in jump_tunnels],
+            ["NEGATIVE_FOR_JUMP", "NEGATIVE_FOR_JUMP", "NEGATIVE_FOR_JUMP"],
+        )
         self.assertTrue(_wire_path_exists(main, "(1400,1330)", "(2580,1930)"))
         self.assertTrue(_wire_path_exists(main, "(1400,1370)", "(2580,1910)"))
         self.assertTrue(_wire_path_exists(main, "(3950,1940)", "(4230,1950)"))
-        self.assertTrue(_wire_path_exists(main, "(3960,2130)", "(4310,2140)"))
+        self.assertTrue(_wire_path_exists(main, "(3980,2200)", "(4400,2400)"))
 
     def test_jump_zero_reaches_common_pc_select(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
@@ -385,7 +389,8 @@ class LogisimLauncherTests(unittest.TestCase):
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
 
         self.assertTrue(_wire_path_exists(main, "(1400,1390)", "(2890,2180)"))
-        self.assertTrue(_wire_path_exists(main, "(2080,510)", "(2890,2200)"))
+        self.assertTrue(_wire_path_exists(main, "(2080,510)", "(2100,510)"))
+        self.assertTrue(_wire_path_exists(main, "(2870,2200)", "(2890,2200)"))
         self.assertTrue(_wire_path_exists(main, "(2920,2190)", "(3610,2180)"))
         self.assertTrue(_wire_path_exists(main, "(3300,2090)", "(3610,2160)"))
 
@@ -406,8 +411,8 @@ class LogisimLauncherTests(unittest.TestCase):
         for error_pin, terminal in zip((
             "ERROR_OVF", "ERROR_DIV0", "ERROR_ADDR",
             "ERROR_INV", "ERROR_ILL", "ERROR_INPUT",
-        ), ("(3600,2190)", "(3600,2210)", "(3600,2230)",
-            "(3600,2250)", "(3600,2270)", "(3600,2290)")):
+        ), ("(3520,2220)", "(3520,2240)", "(3520,2260)",
+            "(3520,2280)", "(3520,2300)", "(3520,2320)")):
             self.assertTrue(
                 _wire_path_exists(main, _component_by_label(main, error_pin).get("loc"), terminal),
                 f"{error_pin} does not contribute to the JUMP_ERROR condition",
@@ -420,10 +425,10 @@ class LogisimLauncherTests(unittest.TestCase):
         self.assertTrue(_wire_path_exists(main, "(1400,1410)", "(3920,1930)"))
         self.assertTrue(_wire_path_exists(main, any_error.get("loc"), "(3810,2270)"))
         self.assertTrue(_wire_path_exists(main, "(3310,1960)", "(3920,1950)"))
-        self.assertTrue(_wire_path_exists(main, "(3640,2170)", "(3930,2120)"))
-        self.assertTrue(_wire_path_exists(main, error_taken.get("loc"), "(3930,2140)"))
+        self.assertTrue(_wire_path_exists(main, "(3640,2170)", "(3950,2190)"))
+        self.assertTrue(_wire_path_exists(main, error_taken.get("loc"), "(3950,2210)"))
         self.assertTrue(_wire_path_exists(main, control_merge.get("loc"), "(4230,1950)"))
-        self.assertTrue(_wire_path_exists(main, taken_merge.get("loc"), "(4310,2140)"))
+        self.assertTrue(_wire_path_exists(main, taken_merge.get("loc"), "(4400,2400)"))
 
     def test_jump_error_routes_stop_at_gate_inputs(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
@@ -440,8 +445,8 @@ class LogisimLauncherTests(unittest.TestCase):
 
         # Keep the two doglegs on separate x coordinates: sharing one would
         # join JUMP_ERROR to ANY_ERROR before the AND gate.
-        self.assertIn(("(3790,2200)", "(3790,2250)"), wires)
-        self.assertIn(("(3770,2240)", "(3770,2270)"), wires)
+        self.assertIn(("(3790,1920)", "(3790,2250)"), wires)
+        self.assertIn(("(3770,2270)", "(3770,2440)"), wires)
 
     def test_jump_not_error_reaches_common_pc_select(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
@@ -465,8 +470,8 @@ class LogisimLauncherTests(unittest.TestCase):
         self.assertTrue(_wire_path_exists(main, any_error.get("loc"), "(3810,2440)"))
         self.assertTrue(_wire_path_exists(main, no_error.get("loc"), "(4180,2430)"))
         self.assertTrue(_wire_path_exists(main, "(3950,1940)", "(4230,1950)"))
-        self.assertTrue(_wire_path_exists(main, "(3960,2130)", "(4310,2140)"))
-        self.assertTrue(_wire_path_exists(main, not_error_taken.get("loc"), "(4310,2160)"))
+        self.assertTrue(_wire_path_exists(main, "(3980,2200)", "(4400,2400)"))
+        self.assertTrue(_wire_path_exists(main, not_error_taken.get("loc"), "(4400,2420)"))
         self.assertTrue(_wire_path_exists(main, control_merge.get("loc"), "(800,510)"))
         self.assertTrue(_wire_path_exists(main, taken_merge.get("loc"), "(800,530)"))
 
