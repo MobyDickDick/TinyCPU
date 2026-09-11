@@ -234,7 +234,7 @@ class LogisimLauncherTests(unittest.TestCase):
             "the named program-limit source must exclusively drive its existing fetch net",
         )
 
-    def test_visible_top_level_or_gates_have_every_input_connected(self):
+    def test_visible_top_level_memory_or_gate_has_every_input_connected(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
 
@@ -243,12 +243,6 @@ class LogisimLauncherTests(unittest.TestCase):
         # redraw cannot silently leave an input at its default/floating value.
         expected_inputs = {
             "MEMORY_WRITE_REQUEST": {"(530,670)", "(530,690)", "(530,710)"},
-            "JUMP_ADR_OR_JNZ_CONTROL": {"(2580,1910)", "(2580,1930)"},
-            "JUMP_ZERO_OR_PREVIOUS_CONTROLS": {"(2890,1930)", "(2890,1950)"},
-            "JUMP_NEGATIVE_OR_PREVIOUS_CONTROLS": {"(3280,1950)", "(3280,1970)"},
-            "JUMP_ADR_OR_NOT_ZERO": {"(2890,2040)", "(2890,2060)"},
-            "JUMP_ZERO_OR_PREVIOUS_TAKEN": {"(3270,2080)", "(3270,2100)"},
-            "JUMP_NEGATIVE_OR_PREVIOUS_TAKEN": {"(3610,2160)", "(3610,2180)"},
         }
         wire_endpoints = {
             endpoint
@@ -358,122 +352,34 @@ class LogisimLauncherTests(unittest.TestCase):
             "TinyCPUMain.HALTED_WITH_ERROR",
         )
 
-    def test_unconditional_jump_reaches_common_pc_select(self):
+    def test_jump_wiring_is_encapsulated_in_jump_box(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+        boxes = [component for component in main.findall("comp")
+                 if component.get("name") == "JumpBox"]
+        self.assertEqual(len(boxes), 1)
+        self.assertEqual(_attributes(boxes[0]).get("label"), "JUMP_BOX")
+        self.assertFalse(any(
+            component.get("name") in {"AND Gate", "NOT Gate"}
+            or (component.get("name") == "OR Gate"
+                and _attributes(component).get("label", "").startswith("JUMP_"))
+            for component in main.findall("comp")
+        ))
 
-        jump_tunnels = [
-            component for component in main.findall("comp")
-            if component.get("name") == "Tunnel"
+        # Generated-box inputs are ordered by the child sheet's pin position.
+        sources = [
+            "(2870,450)", "(2870,470)", "(2870,490)", "(2870,510)",
+            "(2870,530)", "(2870,550)", "(1400,1330)", "(1400,1350)",
+            "(1400,1370)", "(1400,1390)", "(1400,1410)", "(1400,1430)",
+            "(2080,510)", "(2080,490)",
         ]
-        self.assertEqual(
-            [_attributes(component).get("label") for component in jump_tunnels],
-            ["NEGATIVE_FOR_JUMP", "NEGATIVE_FOR_JUMP", "NEGATIVE_FOR_JUMP"],
-        )
-        self.assertTrue(_wire_path_exists(main, "(1400,1330)", "(2580,1930)"))
-        self.assertTrue(_wire_path_exists(main, "(1400,1370)", "(2580,1910)"))
-        self.assertTrue(_wire_path_exists(main, "(3950,1940)", "(4230,1950)"))
-        self.assertTrue(_wire_path_exists(main, "(3980,2200)", "(4400,2400)"))
-
-    def test_jump_zero_reaches_common_pc_select(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
-        main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
-
-        self.assertTrue(_wire_path_exists(main, "(1400,1350)", "(2890,2110)"))
-        self.assertTrue(_wire_path_exists(main, "(2080,490)", "(2890,2130)"))
-        self.assertTrue(_wire_path_exists(main, "(2920,2120)", "(3270,2100)"))
-        self.assertTrue(_wire_path_exists(main, "(2920,1940)", "(3280,1950)"))
-
-    def test_jump_negative_reaches_common_pc_select(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
-        main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
-
-        self.assertTrue(_wire_path_exists(main, "(1400,1390)", "(2890,2180)"))
-        self.assertTrue(_wire_path_exists(main, "(2080,510)", "(2100,510)"))
-        self.assertTrue(_wire_path_exists(main, "(2870,2200)", "(2890,2200)"))
-        self.assertTrue(_wire_path_exists(main, "(2920,2190)", "(3610,2180)"))
-        self.assertTrue(_wire_path_exists(main, "(3300,2090)", "(3610,2160)"))
-
-    def test_jump_error_reaches_common_pc_select(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
-        main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
-
-        any_error = _component_by_label(main, "ANY_ERROR_FOR_JUMP")
-        error_taken = _component_by_label(main, "JUMP_ERROR_AND_ANY_ERROR")
-        control_merge = _component_by_label(main, "JUMP_ERROR_OR_PREVIOUS_CONTROLS")
-        taken_merge = _component_by_label(main, "JUMP_ERROR_OR_PREVIOUS_TAKEN")
-        self.assertEqual(any_error.get("name"), "OR Gate")
-        self.assertEqual(_attributes(any_error).get("inputs"), "6")
-        self.assertEqual(error_taken.get("name"), "AND Gate")
-        self.assertEqual(control_merge.get("name"), "OR Gate")
-        self.assertEqual(taken_merge.get("name"), "OR Gate")
-
-        for error_pin, terminal in zip((
-            "ERROR_OVF", "ERROR_DIV0", "ERROR_ADDR",
-            "ERROR_INV", "ERROR_ILL", "ERROR_INPUT",
-        ), ("(3520,2220)", "(3520,2240)", "(3520,2260)",
-            "(3520,2280)", "(3520,2300)", "(3520,2320)")):
+        for source, y in zip(sources, range(1900, 2180, 20)):
             self.assertTrue(
-                _wire_path_exists(main, _component_by_label(main, error_pin).get("loc"), terminal),
-                f"{error_pin} does not contribute to the JUMP_ERROR condition",
+                _wire_path_exists(main, source, f"(2900,{y})"),
+                f"{source} does not reach its JumpBox input",
             )
-
-        # (1400,1410) is FetchDecodeControls.JUMP_ERROR.  The two merge
-        # stages extend, rather than replace, the previously repaired jump
-        # control and taken-condition chains.
-        self.assertTrue(_wire_path_exists(main, "(1400,1410)", "(3810,2250)"))
-        self.assertTrue(_wire_path_exists(main, "(1400,1410)", "(3920,1930)"))
-        self.assertTrue(_wire_path_exists(main, any_error.get("loc"), "(3810,2270)"))
-        self.assertTrue(_wire_path_exists(main, "(3310,1960)", "(3920,1950)"))
-        self.assertTrue(_wire_path_exists(main, "(3640,2170)", "(3950,2190)"))
-        self.assertTrue(_wire_path_exists(main, error_taken.get("loc"), "(3950,2210)"))
-        self.assertTrue(_wire_path_exists(main, control_merge.get("loc"), "(4230,1950)"))
-        self.assertTrue(_wire_path_exists(main, taken_merge.get("loc"), "(4400,2400)"))
-
-    def test_jump_error_routes_stop_at_gate_inputs(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
-        main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
-        wires = {(wire.get("from"), wire.get("to")) for wire in main.findall("wire")}
-
-        # A source routed from the right of an east-facing gate continues
-        # through its symbol and is rendered as a misleading tail.  Both AND
-        # inputs must instead be approached from the left and end exactly at
-        # their terminals.
-        self.assertIn(("(3790,2250)", "(3810,2250)"), wires)
-        self.assertIn(("(3770,2270)", "(3810,2270)"), wires)
-        self.assertNotIn(("(3810,2250)", "(3880,2250)"), wires)
-
-        # Keep the two doglegs on separate x coordinates: sharing one would
-        # join JUMP_ERROR to ANY_ERROR before the AND gate.
-        self.assertIn(("(3790,1920)", "(3790,2250)"), wires)
-        self.assertIn(("(3770,2270)", "(3770,2440)"), wires)
-
-    def test_jump_not_error_reaches_common_pc_select(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
-        main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
-
-        any_error = _component_by_label(main, "ANY_ERROR_FOR_JUMP")
-        no_error = _component_by_label(main, "INVERT_ANY_ERROR_FOR_JUMP_NOT_ERROR")
-        not_error_taken = _component_by_label(main, "JUMP_NOT_ERROR_AND_NO_ERROR")
-        control_merge = _component_by_label(main, "JUMP_NOT_ERROR_OR_PREVIOUS_CONTROLS")
-        taken_merge = _component_by_label(main, "JUMP_NOT_ERROR_OR_PREVIOUS_TAKEN")
-        self.assertEqual(no_error.get("name"), "NOT Gate")
-        self.assertEqual(not_error_taken.get("name"), "AND Gate")
-        self.assertEqual(control_merge.get("name"), "OR Gate")
-        self.assertEqual(taken_merge.get("name"), "OR Gate")
-
-        # (1400,1430) is FetchDecodeControls.JUMP_NOT_ERROR.  Selecting the
-        # jump target is independent of the condition; taking it additionally
-        # requires the inverse of the combined sticky-error state.
-        self.assertTrue(_wire_path_exists(main, "(1400,1430)", "(4230,1970)"))
-        self.assertTrue(_wire_path_exists(main, "(1400,1430)", "(4180,2410)"))
-        self.assertTrue(_wire_path_exists(main, any_error.get("loc"), "(3810,2440)"))
-        self.assertTrue(_wire_path_exists(main, no_error.get("loc"), "(4180,2430)"))
-        self.assertTrue(_wire_path_exists(main, "(3950,1940)", "(4230,1950)"))
-        self.assertTrue(_wire_path_exists(main, "(3980,2200)", "(4400,2400)"))
-        self.assertTrue(_wire_path_exists(main, not_error_taken.get("loc"), "(4400,2420)"))
-        self.assertTrue(_wire_path_exists(main, control_merge.get("loc"), "(800,510)"))
-        self.assertTrue(_wire_path_exists(main, taken_merge.get("loc"), "(800,530)"))
+        self.assertTrue(_wire_path_exists(main, "(3200,1900)", "(800,510)"))
+        self.assertTrue(_wire_path_exists(main, "(3200,1920)", "(800,530)"))
 
     def test_sub_operand_reaches_operations_input(self):
         expected = ("(1400,1070)", "(2650,1070)")

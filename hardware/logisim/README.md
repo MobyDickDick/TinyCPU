@@ -88,6 +88,14 @@ hierarchische Integrationsseite unmittelbar die öffentliche, gruppierte
 Decodergrenze; eine zweite Kopie des alten Kombinationsdecoders ist weder
 instanziiert noch als Schemablatt im Projekt verblieben.
 
+Die Sprungauswertung ist auf `TinyCPUMain` vollständig in der FBox `JumpBox`
+gekapselt. Ihre Eingänge erhalten die sechs Sprungsteuerungen, die Statusbits
+`ZERO` und `NEGATIVE` sowie alle sechs Fehlerflags; ihre beiden Ausgänge führen
+die Adressauswahl und die Bedingung für die Übernahme des Sprungs zurück zu
+`FetchDecode`. Auch die Invertierung von `ZERO` für `JUMP_NOT_ZERO` liegt in
+diesem Unterblatt, sodass auf der Integrationsseite keine Sprunggatter mehr
+verbleiben.
+
 Die `SUB_OPERAND`-Strecke im primären 16/12-Profil ist durchgängig geprüft:
 Das vierfach-ODER `SUB_OPERAND_SELECT` treibt den gleichnamigen Decoder-Ausgang,
 der auf `TinyCPUMain` direkt zum `SUB_OPERAND`-Eingang von `Operations` führt.
