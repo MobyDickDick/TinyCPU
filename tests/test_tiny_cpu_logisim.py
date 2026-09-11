@@ -167,7 +167,7 @@ class LogisimLauncherTests(unittest.TestCase):
             root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             wires = {(w.get("from"), w.get("to")) for w in main.findall("wire")}
-            expected = (("(2410,1430)", "(2660,1430)") if name == "TinyCPU.circ"
+            expected = (("(2410,1460)", "(2660,1460)") if name == "TinyCPU.circ"
                         else ("(2280,2130)", "(2470,2130)"))
             self.assertIn(
                 expected, wires,
@@ -242,7 +242,7 @@ class LogisimLauncherTests(unittest.TestCase):
         # highlighted on the integration sheet.  Keep the count explicit so a
         # redraw cannot silently leave an input at its default/floating value.
         expected_inputs = {
-            "MEMORY_WRITE_REQUEST": {"(530,670)", "(530,690)", "(530,710)"},
+            "MEMORY_WRITE_REQUEST": {"(530,700)", "(530,720)", "(530,740)"},
         }
         wire_endpoints = {
             endpoint
@@ -261,7 +261,7 @@ class LogisimLauncherTests(unittest.TestCase):
             )
 
     def test_add_operand_reaches_operations_input(self):
-        expected = ("(1400,1050)", "(2650,1050)")
+        expected = ("(1400,1080)", "(2650,1080)")
         wrong_error_flags_route = {
             ("(1270,930)", "(2170,930)"),
             ("(2170,450)", "(2170,930)"),
@@ -306,9 +306,9 @@ class LogisimLauncherTests(unittest.TestCase):
         print_enable = _component_by_label(main, "PRINT_ENABLE")
 
         # Follow the complete net instead of fixing the test to a particular
-        # canvas route.  (1400,1610) is the PRINT port of the controls instance.
+        # canvas route.  (1400,1640) is the PRINT port of the controls instance.
         self.assertTrue(
-            _wire_path_exists(main, "(1400,1610)", print_enable.get("loc")),
+            _wire_path_exists(main, "(1400,1640)", print_enable.get("loc")),
             "FetchDecodeControls.PRINT does not reach TinyCPUMain.PRINT_ENABLE",
         )
 
@@ -318,10 +318,10 @@ class LogisimLauncherTests(unittest.TestCase):
         print_address_enable = _component_by_label(main, "PRINT_ADDRESS_ENABLE")
 
         # Follow the complete net instead of fixing the test to a particular
-        # canvas route.  (1400,1630) is the PRINT_ADDRESS port of the controls
+        # canvas route.  (1400,1660) is the PRINT_ADDRESS port of the controls
         # instance.
         self.assertTrue(
-            _wire_path_exists(main, "(1400,1630)", print_address_enable.get("loc")),
+            _wire_path_exists(main, "(1400,1660)", print_address_enable.get("loc")),
             "FetchDecodeControls.PRINT_ADDRESS does not reach "
             "TinyCPUMain.PRINT_ADDRESS_ENABLE",
         )
@@ -332,9 +332,9 @@ class LogisimLauncherTests(unittest.TestCase):
         halted = _component_by_label(main, "HALTED")
 
         # Follow the complete net instead of fixing the test to a particular
-        # canvas route.  (1400,1650) is the HALT port of the controls instance.
+        # canvas route.  (1400,1680) is the HALT port of the controls instance.
         self.assertTrue(
-            _wire_path_exists(main, "(1400,1650)", halted.get("loc")),
+            _wire_path_exists(main, "(1400,1680)", halted.get("loc")),
             "FetchDecodeControls.HALT does not reach TinyCPUMain.HALTED",
         )
 
@@ -344,10 +344,10 @@ class LogisimLauncherTests(unittest.TestCase):
         halted_with_error = _component_by_label(main, "HALTED_WITH_ERROR")
 
         # Follow the complete net instead of fixing the test to a particular
-        # canvas route.  (1400,1670) is the HALT_ERROR port of the controls
+        # canvas route.  (1400,1700) is the HALT_ERROR port of the controls
         # instance.
         self.assertTrue(
-            _wire_path_exists(main, "(1400,1670)", halted_with_error.get("loc")),
+            _wire_path_exists(main, "(1400,1700)", halted_with_error.get("loc")),
             "FetchDecodeControls.HALT_ERROR does not reach "
             "TinyCPUMain.HALTED_WITH_ERROR",
         )
@@ -369,20 +369,20 @@ class LogisimLauncherTests(unittest.TestCase):
         # Generated-box inputs are ordered by the child sheet's pin position.
         sources = [
             "(2870,450)", "(2870,470)", "(2870,490)", "(2870,510)",
-            "(2870,530)", "(2870,550)", "(1400,1330)", "(1400,1350)",
-            "(1400,1370)", "(1400,1390)", "(1400,1410)", "(1400,1430)",
+            "(2870,530)", "(2870,550)", "(1400,1360)", "(1400,1380)",
+            "(1400,1400)", "(1400,1420)", "(1400,1440)", "(1400,1460)",
             "(2080,510)", "(2080,490)",
         ]
-        for source, y in zip(sources, range(1900, 2180, 20)):
+        for source, y in zip(sources, range(450, 730, 20)):
             self.assertTrue(
-                _wire_path_exists(main, source, f"(2900,{y})"),
+                _wire_path_exists(main, source, f"(4060,{y})"),
                 f"{source} does not reach its JumpBox input",
             )
-        self.assertTrue(_wire_path_exists(main, "(3200,1900)", "(800,510)"))
-        self.assertTrue(_wire_path_exists(main, "(3200,1920)", "(800,530)"))
+        self.assertTrue(_wire_path_exists(main, "(4360,450)", "(800,510)"))
+        self.assertTrue(_wire_path_exists(main, "(4360,470)", "(800,530)"))
 
     def test_sub_operand_reaches_operations_input(self):
-        expected = ("(1400,1070)", "(2650,1070)")
+        expected = ("(1400,1100)", "(2650,1100)")
         decoder_route = ("(1460,90)", "(1610,90)")
         stale_sub_monitor_route = {
             ("(1270,950)", "(1740,950)"),

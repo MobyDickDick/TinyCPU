@@ -18,7 +18,7 @@ Canvas-Koordinaten verändert.
 | 19.6 Adresspfad und Speicher debuggen | abgeschlossen mit Abweichung | Adressregister und beide RAMs arbeiten gekoppelt; `EffectiveAddress` wählt Direkt-/Registeradresse und Offset jedoch mit vertauschter zweiter Multiplexerpolarität, wodurch auch die Bereichsprüfung die falsche Adresse bewertet. |
 | 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen | abgeschlossen mit Abweichung | Fünf Sprungsteuersignale enden nur an Monitoren; die vier Enable-/Halteausgänge sind vollständig unverdrahtet. Die sechs Sticky-Flags sind dagegen set-dominant und gemeinsam löschbar aufgebaut. |
 | 19.8 Ersten abweichenden Netzübergang minimal reparieren | abgeschlossen | Achtzehn belegte Übergänge sind repariert; zuletzt wurde `JUMP_NOT_ERROR` mit der invertierten Sammelfehlerbedingung an den gemeinsamen PC-Auswahlpfad angeschlossen. |
-| 19.9 Vollständige elektrische Regression und GUI-Kurztest | offen mit Abweichung | Die Offline-Abnahme besteht. Beide gepinnten elektrischen Kerntraces erreichen jedoch innerhalb von 90 Sekunden keinen Halt; Matrix und GUI-Kurztest dürfen deshalb noch nicht als bestanden gelten. |
+| 19.9 Vollständige elektrische Regression und GUI-Kurztest | teilweise abgeschlossen | Nach der Redraw-Korrektur bestehen Offline-Suite, 16/12-Kerntrace und alle 61 zugehörigen Fixtures. Der unveränderte 8/8-Kerntrace erreicht unter der verfügbaren JDK-Version weiterhin keinen Halt; auch der manuelle GUI-Kurztest bleibt offen. |
 | 19.10 Funktionsfähigen Kandidaten einfrieren | offen | Erst nach einer bestandenen elektrischen Abnahme zulässig. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
@@ -1447,17 +1447,29 @@ Schaltungen und 4.460 rechtwinkligen Leitungen sowie den Vertrag aus 50
 Opcodes und sechs Sticky-Fehlerfällen. Logisim-evolution 4.1.0 lädt
 `TinyCPU.circ` im Statistikmodus ohne Diagnosefehler.
 
-Die vollständige elektrische Abnahme stoppt dagegen bereits vor der
-ISA-Matrix: Sowohl `tinycpu-16-12 core` als auch `tinycpu-8-8 core` erreichen
-innerhalb des festgelegten 90-Sekunden-Limits keinen Halt. Damit ist die
-Abweichung profilübergreifend reproduziert. Sie wird nicht durch eine
-historische Datei oder eine bloße Erhöhung des Timeouts verdeckt.
+Die nachfolgende manuelle Neuanordnung ließ die `JumpBox` an ihrer neuen
+Position, führte ihre Eingänge jedoch irrtümlich bis zur um 80 Pixel zu weit
+rechts angenommenen Symbolkante. Außerdem waren ihre beiden Ausgänge beim
+Rückweg zu `FetchDecode` vertauscht. Die Korrektur setzt ausschließlich diese
+Leitungsendpunkte an die tatsächliche linke Boxkante und tauscht die beiden
+Rückwege; kein Bauteil wurde an eine frühere Position gesetzt. Die beim Redraw
+erneut verlorene stabile Beschriftung `PROGRAM_LIMIT_MAX` wurde ebenfalls
+wiederhergestellt, Wert und Anschluss der Konstante blieben unverändert.
+
+Danach besteht der 16/12-Kerntrace wieder und alle 61 elektrischen
+16/12-Fixtures einschließlich beider Pfade sämtlicher bedingter Sprünge sowie
+der sechs Fehlerfälle stimmen mit dem Referenzmodell überein. Das gemeinsame Profilgate bestätigt den 16/12-Teil, erreicht beim unveränderten
+8/8-Profil unter OpenJDK 25.0.2 jedoch innerhalb von 90 Sekunden keinen Halt;
+dessen Matrix wird deshalb nicht gestartet. Die an die neue Anordnung
+angepassten fokussierten Regressionen prüfen die sichtbaren Anschlusspunkte der
+verschobenen Instanzen und nicht die Positionen vor dem Redraw.
 
 ### Offene Risiken
 
-Aufgabe 19.9 bleibt offen, weil weder der Countdown-Kerntrace noch die
-nachfolgende ISA-/Fehlermatrix elektrisch bestanden sind. Der GUI-Kurztest ist
-in der nicht-interaktiven Umgebung nicht sinnvoll ausführbar und darf vor der
-Klärung des fehlenden Halts ohnehin nicht als Ersatznachweis dienen. Gemäß
-Stop-Regel muss als Nächstes die erste abweichende Flanke des aktuellen
-Kerntraces eingegrenzt werden; Aufgabe 19.10 beginnt noch nicht.
+Der 16/12-Anteil von Aufgabe 19.9 ist automatisiert abgeschlossen. Der
+unveränderte 8/8-Kerntrace muss noch mit der gepinnten Java-21-Umgebung
+wiederholt werden. Der GUI-Kurztest ist in der nicht-interaktiven Umgebung
+nicht sinnvoll ausführbar und bleibt ebenfalls offen. Aufgabe 19.10 darf
+deshalb noch nicht als vollständig abgenommener Kandidat markiert werden; ein manueller Lauf muss
+Reset, Takten, Ausgabe, Normalhalt und Fehlerhalt noch anhand der in
+`hardware/logisim/README.md` dokumentierten Beobachtungspunkte bestätigen.
