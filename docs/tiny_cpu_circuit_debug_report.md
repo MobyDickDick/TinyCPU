@@ -1448,11 +1448,13 @@ Opcodes und sechs Sticky-Fehlerfällen. Logisim-evolution 4.1.0 lädt
 `TinyCPU.circ` im Statistikmodus ohne Diagnosefehler.
 
 Die nachfolgende manuelle Neuanordnung ließ die `JumpBox` an ihrer neuen
-Position, führte ihre Eingänge jedoch irrtümlich bis zur um 80 Pixel zu weit
-rechts angenommenen Symbolkante. Außerdem waren ihre beiden Ausgänge beim
-Rückweg zu `FetchDecode` vertauscht. Die Korrektur setzt ausschließlich diese
-Leitungsendpunkte an die tatsächliche linke Boxkante und tauscht die beiden
-Rückwege; kein Bauteil wurde an eine frühere Position gesetzt. Die beim Redraw
+Position. Bei der ersten Korrektur wurde die linke Symbolkante jedoch aus der
+Instanzposition falsch abgeleitet: `(4360,450)` ist der Anker des ersten
+Ausgangs, und die von Logisim erzeugte Box ist 220 Einheiten breit. Ihre 14
+Eingänge liegen deshalb bei x=4140, nicht bei x=4060. Die vermeintliche
+Korrektur auf x=4060 erzeugte genau die sichtbare 80-Einheiten-Lücke. Die
+Leitungen enden nun wieder an der tatsächlichen Pinreihe bei x=4140; die
+korrigierte Zuordnung der beiden Ausgänge bleibt erhalten. Die beim Redraw
 erneut verlorene stabile Beschriftung `PROGRAM_LIMIT_MAX` wurde ebenfalls
 wiederhergestellt, Wert und Anschluss der Konstante blieben unverändert.
 
