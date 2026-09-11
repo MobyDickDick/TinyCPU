@@ -18,7 +18,8 @@ Canvas-Koordinaten verändert.
 | 19.6 Adresspfad und Speicher debuggen | abgeschlossen mit Abweichung | Adressregister und beide RAMs arbeiten gekoppelt; `EffectiveAddress` wählt Direkt-/Registeradresse und Offset jedoch mit vertauschter zweiter Multiplexerpolarität, wodurch auch die Bereichsprüfung die falsche Adresse bewertet. |
 | 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen | abgeschlossen mit Abweichung | Fünf Sprungsteuersignale enden nur an Monitoren; die vier Enable-/Halteausgänge sind vollständig unverdrahtet. Die sechs Sticky-Flags sind dagegen set-dominant und gemeinsam löschbar aufgebaut. |
 | 19.8 Ersten abweichenden Netzübergang minimal reparieren | abgeschlossen | Achtzehn belegte Übergänge sind repariert; zuletzt wurde `JUMP_NOT_ERROR` mit der invertierten Sammelfehlerbedingung an den gemeinsamen PC-Auswahlpfad angeschlossen. |
-| 19.9–19.10 | offen | Als Nächstes folgt die vollständige elektrische Regression. |
+| 19.9 Vollständige elektrische Regression und GUI-Kurztest | offen mit Abweichung | Die Offline-Abnahme besteht. Beide gepinnten elektrischen Kerntraces erreichen jedoch innerhalb von 90 Sekunden keinen Halt; Matrix und GUI-Kurztest dürfen deshalb noch nicht als bestanden gelten. |
+| 19.10 Funktionsfähigen Kandidaten einfrieren | offen | Erst nach einer bestandenen elektrischen Abnahme zulässig. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
 
@@ -1404,3 +1405,59 @@ Logisim-evolution 4.1.0 akzeptieren das geänderte Projekt. Damit sind alle fün
 in 19.7 als offen belegten Sprungsteuersignale an den PC-Auswahlpfad
 angeschlossen und Aufgabe 19.8 ist abgeschlossen. Die vollständige elektrische
 Profilmatrix und die GUI-Kurzabnahme bleiben Aufgabe 19.9 vorbehalten.
+
+## 19.9 Vollständige elektrische Regression und GUI-Kurztest
+
+### Ausgangslage
+
+Die von Hand verschobenen Sprunggatter des Commits `1fdb161` wurden als neue
+Ausgangsbasis kontrolliert; weder eine historische Schaltungsdatei noch deren
+frühere Symbolkoordinaten wurden eingespielt. Dabei waren mehrere gezeichnete
+Leitungen an den alten statt an den sichtbaren Gatteranschlüssen stehen
+geblieben. Zusätzlich fehlte der Name `PROGRAM_LIMIT_MAX` erneut.
+
+Die Leitungen wurden an den aktuellen Positionen rechtwinklig neu angelegt.
+Die sechs Fehlerleitungen enden einzeln am verschobenen Sammelgatter, und die
+Steuer- sowie Taken-Ketten erreichen wieder alle aktuellen Eingänge. Die
+topologischen Regressionen wurden auf diese eingecheckte Anordnung
+ausgerichtet; sie schreiben keine Vorgängerversion fest. Nur das mehrfach
+verwendete `NEGATIVE`-Signal nutzt drei gleichnamige Tunnelanschlüsse: Eine
+direkte senkrechte Fortsetzung hätte den verschobenen Akkumulatorbus sichtbar
+gekreuzt und elektrisch verbunden. Die beiden abschließenden Sprungnetze
+laufen stattdessen im freien unteren Außenkorridor direkt zurück zu
+`FetchDecode`.
+
+### Kommando oder Bedienfolge
+
+```bash
+python3 -m unittest tests.test_tiny_cpu_logisim -v
+python3 src/tiny_cpu_verify.py
+timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty stats hardware/logisim/TinyCPU.circ
+LOGISIM_JAR=.venv/Include/logisim-evolution-4.1.0-all.jar \
+  LOGISIM_OUTPUT=/tmp/tinycpu-ap19-9 LOGISIM_JOBS=4 \
+  scripts/test-logisim.sh
+```
+
+### Beobachteter Nachweis
+
+Die 34 fokussierten Logisim-Launcher- und Verdrahtungstests bestehen. Der
+Verifier akzeptiert alle 14 JSON-Dateien, 30 Logisim-Projekte mit 81
+Schaltungen und 4.460 rechtwinkligen Leitungen sowie den Vertrag aus 50
+Opcodes und sechs Sticky-Fehlerfällen. Logisim-evolution 4.1.0 lädt
+`TinyCPU.circ` im Statistikmodus ohne Diagnosefehler.
+
+Die vollständige elektrische Abnahme stoppt dagegen bereits vor der
+ISA-Matrix: Sowohl `tinycpu-16-12 core` als auch `tinycpu-8-8 core` erreichen
+innerhalb des festgelegten 90-Sekunden-Limits keinen Halt. Damit ist die
+Abweichung profilübergreifend reproduziert. Sie wird nicht durch eine
+historische Datei oder eine bloße Erhöhung des Timeouts verdeckt.
+
+### Offene Risiken
+
+Aufgabe 19.9 bleibt offen, weil weder der Countdown-Kerntrace noch die
+nachfolgende ISA-/Fehlermatrix elektrisch bestanden sind. Der GUI-Kurztest ist
+in der nicht-interaktiven Umgebung nicht sinnvoll ausführbar und darf vor der
+Klärung des fehlenden Halts ohnehin nicht als Ersatznachweis dienen. Gemäß
+Stop-Regel muss als Nächstes die erste abweichende Flanke des aktuellen
+Kerntraces eingegrenzt werden; Aufgabe 19.10 beginnt noch nicht.
