@@ -134,8 +134,8 @@ class LogisimLauncherTests(unittest.TestCase):
             root = ET.parse(target).getroot()
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             parts = {(c.get("name"), c.get("loc")) for c in main.findall("comp")}
-            self.assertIn(("Clock", "(200,310)"), parts)
-            self.assertIn(("PowerOnReset", "(200,370)"), parts)
+            self.assertIn(("Clock", "(330,390)"), parts)
+            self.assertIn(("PowerOnReset", "(330,440)"), parts)
             labels = [a.get("val") for a in main.findall("comp/a") if a.get("name") == "label"]
             self.assertIn("halt", labels)
             self.assertIn("HALTED_WITH_ERROR", labels)
@@ -168,7 +168,7 @@ class LogisimLauncherTests(unittest.TestCase):
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             wires = {(w.get("from"), w.get("to")) for w in main.findall("wire")}
             expected = (("(2410,1460)", "(2660,1460)") if name == "TinyCPU.circ"
-                        else ("(2280,2130)", "(2470,2130)"))
+                        else ("(2720,1760)", "(2940,1760)"))
             self.assertIn(
                 expected, wires,
                 f"{name} leaves the register-plus-offset selector floating",
