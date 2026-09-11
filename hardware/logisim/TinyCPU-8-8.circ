@@ -322,378 +322,606 @@
     <comp loc="(1120,570)" name="Memory">
       <a name="label" val="MEMORY_INSTANCE"/>
     </comp>
+    <comp lib="0" loc="(1540,420)" name="Tunnel">
+      <a name="label" val="CPU8_NET_001"/>
+    </comp>
+    <comp lib="0" loc="(3000,1620)" name="Tunnel">
+      <a name="label" val="CPU8_NET_001"/>
+    </comp>
+    <comp lib="0" loc="(1540,440)" name="Tunnel">
+      <a name="label" val="CPU8_NET_002"/>
+    </comp>
+    <comp lib="0" loc="(2940,1560)" name="Tunnel">
+      <a name="label" val="CPU8_NET_002"/>
+    </comp>
+    <comp lib="0" loc="(3000,1770)" name="Tunnel">
+      <a name="label" val="CPU8_NET_002"/>
+    </comp>
+    <comp lib="0" loc="(1540,450)" name="Tunnel">
+      <a name="label" val="CPU8_NET_003"/>
+    </comp>
+    <comp lib="0" loc="(3480,1970)" name="Tunnel">
+      <a name="label" val="CPU8_NET_003"/>
+    </comp>
+    <comp lib="0" loc="(1540,460)" name="Tunnel">
+      <a name="label" val="CPU8_NET_004"/>
+    </comp>
+    <comp lib="0" loc="(3950,640)" name="Tunnel">
+      <a name="label" val="CPU8_NET_004"/>
+    </comp>
+    <comp lib="0" loc="(1550,660)" name="Tunnel">
+      <a name="label" val="CPU8_NET_005"/>
+    </comp>
+    <comp lib="0" loc="(2830,900)" name="Tunnel">
+      <a name="label" val="CPU8_NET_005"/>
+    </comp>
+    <comp lib="0" loc="(3950,660)" name="Tunnel">
+      <a name="label" val="CPU8_NET_005"/>
+    </comp>
+    <comp lib="0" loc="(1280,440)" name="Tunnel">
+      <a name="label" val="CPU8_NET_006"/>
+    </comp>
+    <comp lib="0" loc="(1550,680)" name="Tunnel">
+      <a name="label" val="CPU8_NET_006"/>
+    </comp>
+    <comp lib="0" loc="(2090,450)" name="Tunnel">
+      <a name="label" val="CPU8_NET_006"/>
+    </comp>
+    <comp lib="0" loc="(1560,930)" name="Tunnel">
+      <a name="label" val="CPU8_NET_007"/>
+    </comp>
+    <comp lib="0" loc="(3480,2050)" name="Tunnel">
+      <a name="label" val="CPU8_NET_007"/>
+    </comp>
+    <comp lib="0" loc="(1560,940)" name="Tunnel">
+      <a name="label" val="CPU8_NET_008"/>
+    </comp>
+    <comp lib="0" loc="(3000,870)" name="Tunnel">
+      <a name="label" val="CPU8_NET_008"/>
+    </comp>
+    <comp lib="0" loc="(3000,1650)" name="Tunnel">
+      <a name="label" val="CPU8_NET_008"/>
+    </comp>
+    <comp lib="0" loc="(1560,960)" name="Tunnel">
+      <a name="label" val="CPU8_NET_009"/>
+    </comp>
+    <comp lib="0" loc="(3000,890)" name="Tunnel">
+      <a name="label" val="CPU8_NET_009"/>
+    </comp>
+    <comp lib="0" loc="(3000,1800)" name="Tunnel">
+      <a name="label" val="CPU8_NET_009"/>
+    </comp>
+    <comp lib="0" loc="(1560,980)" name="Tunnel">
+      <a name="label" val="CPU8_NET_010"/>
+    </comp>
+    <comp lib="0" loc="(3000,980)" name="Tunnel">
+      <a name="label" val="CPU8_NET_010"/>
+    </comp>
+    <comp lib="0" loc="(1560,990)" name="Tunnel">
+      <a name="label" val="CPU8_NET_011"/>
+    </comp>
+    <comp lib="0" loc="(3000,990)" name="Tunnel">
+      <a name="label" val="CPU8_NET_011"/>
+    </comp>
+    <comp lib="0" loc="(3480,2060)" name="Tunnel">
+      <a name="label" val="CPU8_NET_011"/>
+    </comp>
+    <comp lib="0" loc="(1560,1000)" name="Tunnel">
+      <a name="label" val="CPU8_NET_012"/>
+    </comp>
+    <comp lib="0" loc="(3000,1000)" name="Tunnel">
+      <a name="label" val="CPU8_NET_012"/>
+    </comp>
+    <comp lib="0" loc="(3000,1660)" name="Tunnel">
+      <a name="label" val="CPU8_NET_012"/>
+    </comp>
+    <comp lib="0" loc="(1560,1020)" name="Tunnel">
+      <a name="label" val="CPU8_NET_013"/>
+    </comp>
+    <comp lib="0" loc="(3000,1020)" name="Tunnel">
+      <a name="label" val="CPU8_NET_013"/>
+    </comp>
+    <comp lib="0" loc="(3000,1820)" name="Tunnel">
+      <a name="label" val="CPU8_NET_013"/>
+    </comp>
+    <comp lib="0" loc="(1560,1040)" name="Tunnel">
+      <a name="label" val="CPU8_NET_014"/>
+    </comp>
+    <comp lib="0" loc="(3000,1050)" name="Tunnel">
+      <a name="label" val="CPU8_NET_014"/>
+    </comp>
+    <comp lib="0" loc="(1560,1050)" name="Tunnel">
+      <a name="label" val="CPU8_NET_015"/>
+    </comp>
+    <comp lib="0" loc="(3000,1060)" name="Tunnel">
+      <a name="label" val="CPU8_NET_015"/>
+    </comp>
+    <comp lib="0" loc="(3480,2080)" name="Tunnel">
+      <a name="label" val="CPU8_NET_015"/>
+    </comp>
+    <comp lib="0" loc="(1560,1060)" name="Tunnel">
+      <a name="label" val="CPU8_NET_016"/>
+    </comp>
+    <comp lib="0" loc="(3000,1080)" name="Tunnel">
+      <a name="label" val="CPU8_NET_016"/>
+    </comp>
+    <comp lib="0" loc="(3000,1680)" name="Tunnel">
+      <a name="label" val="CPU8_NET_016"/>
+    </comp>
+    <comp lib="0" loc="(1560,1080)" name="Tunnel">
+      <a name="label" val="CPU8_NET_017"/>
+    </comp>
+    <comp lib="0" loc="(3000,1100)" name="Tunnel">
+      <a name="label" val="CPU8_NET_017"/>
+    </comp>
+    <comp lib="0" loc="(3000,1830)" name="Tunnel">
+      <a name="label" val="CPU8_NET_017"/>
+    </comp>
+    <comp lib="0" loc="(1560,1100)" name="Tunnel">
+      <a name="label" val="CPU8_NET_018"/>
+    </comp>
+    <comp lib="0" loc="(3000,1110)" name="Tunnel">
+      <a name="label" val="CPU8_NET_018"/>
+    </comp>
+    <comp lib="0" loc="(1560,1110)" name="Tunnel">
+      <a name="label" val="CPU8_NET_019"/>
+    </comp>
+    <comp lib="0" loc="(3000,1140)" name="Tunnel">
+      <a name="label" val="CPU8_NET_019"/>
+    </comp>
+    <comp lib="0" loc="(3480,2090)" name="Tunnel">
+      <a name="label" val="CPU8_NET_019"/>
+    </comp>
+    <comp lib="0" loc="(1560,1120)" name="Tunnel">
+      <a name="label" val="CPU8_NET_020"/>
+    </comp>
+    <comp lib="0" loc="(3000,1160)" name="Tunnel">
+      <a name="label" val="CPU8_NET_020"/>
+    </comp>
+    <comp lib="0" loc="(3000,1700)" name="Tunnel">
+      <a name="label" val="CPU8_NET_020"/>
+    </comp>
+    <comp lib="0" loc="(1560,1140)" name="Tunnel">
+      <a name="label" val="CPU8_NET_021"/>
+    </comp>
+    <comp lib="0" loc="(3000,1120)" name="Tunnel">
+      <a name="label" val="CPU8_NET_021"/>
+    </comp>
+    <comp lib="0" loc="(3000,1840)" name="Tunnel">
+      <a name="label" val="CPU8_NET_021"/>
+    </comp>
+    <comp lib="0" loc="(1560,1160)" name="Tunnel">
+      <a name="label" val="CPU8_NET_022"/>
+    </comp>
+    <comp lib="0" loc="(3000,1170)" name="Tunnel">
+      <a name="label" val="CPU8_NET_022"/>
+    </comp>
+    <comp lib="0" loc="(1560,1170)" name="Tunnel">
+      <a name="label" val="CPU8_NET_023"/>
+    </comp>
+    <comp lib="0" loc="(3000,1200)" name="Tunnel">
+      <a name="label" val="CPU8_NET_023"/>
+    </comp>
+    <comp lib="0" loc="(3480,2110)" name="Tunnel">
+      <a name="label" val="CPU8_NET_023"/>
+    </comp>
+    <comp lib="0" loc="(1560,1180)" name="Tunnel">
+      <a name="label" val="CPU8_NET_024"/>
+    </comp>
+    <comp lib="0" loc="(3000,1220)" name="Tunnel">
+      <a name="label" val="CPU8_NET_024"/>
+    </comp>
+    <comp lib="0" loc="(3000,1710)" name="Tunnel">
+      <a name="label" val="CPU8_NET_024"/>
+    </comp>
+    <comp lib="0" loc="(1560,1200)" name="Tunnel">
+      <a name="label" val="CPU8_NET_025"/>
+    </comp>
+    <comp lib="0" loc="(3000,1180)" name="Tunnel">
+      <a name="label" val="CPU8_NET_025"/>
+    </comp>
+    <comp lib="0" loc="(3000,1860)" name="Tunnel">
+      <a name="label" val="CPU8_NET_025"/>
+    </comp>
+    <comp lib="0" loc="(1560,1220)" name="Tunnel">
+      <a name="label" val="CPU8_NET_026"/>
+    </comp>
+    <comp lib="0" loc="(3000,1230)" name="Tunnel">
+      <a name="label" val="CPU8_NET_026"/>
+    </comp>
+    <comp lib="0" loc="(1560,1230)" name="Tunnel">
+      <a name="label" val="CPU8_NET_027"/>
+    </comp>
+    <comp lib="0" loc="(3000,1260)" name="Tunnel">
+      <a name="label" val="CPU8_NET_027"/>
+    </comp>
+    <comp lib="0" loc="(3480,2120)" name="Tunnel">
+      <a name="label" val="CPU8_NET_027"/>
+    </comp>
+    <comp lib="0" loc="(1560,1240)" name="Tunnel">
+      <a name="label" val="CPU8_NET_028"/>
+    </comp>
+    <comp lib="0" loc="(3000,1280)" name="Tunnel">
+      <a name="label" val="CPU8_NET_028"/>
+    </comp>
+    <comp lib="0" loc="(3000,1720)" name="Tunnel">
+      <a name="label" val="CPU8_NET_028"/>
+    </comp>
+    <comp lib="0" loc="(1560,1260)" name="Tunnel">
+      <a name="label" val="CPU8_NET_029"/>
+    </comp>
+    <comp lib="0" loc="(3000,1240)" name="Tunnel">
+      <a name="label" val="CPU8_NET_029"/>
+    </comp>
+    <comp lib="0" loc="(3000,1880)" name="Tunnel">
+      <a name="label" val="CPU8_NET_029"/>
+    </comp>
+    <comp lib="0" loc="(560,570)" name="Tunnel">
+      <a name="label" val="CPU8_NET_030"/>
+    </comp>
+    <comp lib="0" loc="(1560,1280)" name="Tunnel">
+      <a name="label" val="CPU8_NET_030"/>
+    </comp>
+    <comp lib="0" loc="(3480,2140)" name="Tunnel">
+      <a name="label" val="CPU8_NET_030"/>
+    </comp>
+    <comp lib="0" loc="(560,580)" name="Tunnel">
+      <a name="label" val="CPU8_NET_031"/>
+    </comp>
+    <comp lib="0" loc="(1560,1290)" name="Tunnel">
+      <a name="label" val="CPU8_NET_031"/>
+    </comp>
+    <comp lib="0" loc="(3000,1740)" name="Tunnel">
+      <a name="label" val="CPU8_NET_031"/>
+    </comp>
+    <comp lib="0" loc="(560,600)" name="Tunnel">
+      <a name="label" val="CPU8_NET_032"/>
+    </comp>
+    <comp lib="0" loc="(1560,1300)" name="Tunnel">
+      <a name="label" val="CPU8_NET_032"/>
+    </comp>
+    <comp lib="0" loc="(3000,1890)" name="Tunnel">
+      <a name="label" val="CPU8_NET_032"/>
+    </comp>
+    <comp lib="0" loc="(1560,1350)" name="Tunnel">
+      <a name="label" val="CPU8_NET_033"/>
+    </comp>
+    <comp lib="0" loc="(3000,1040)" name="Tunnel">
+      <a name="label" val="CPU8_NET_033"/>
+    </comp>
+    <comp lib="0" loc="(870,450)" name="Tunnel">
+      <a name="label" val="CPU8_NET_034"/>
+    </comp>
+    <comp lib="0" loc="(1560,1400)" name="Tunnel">
+      <a name="label" val="CPU8_NET_034"/>
+    </comp>
+    <comp lib="0" loc="(1560,1460)" name="Tunnel">
+      <a name="label" val="CPU8_NET_035"/>
+    </comp>
+    <comp lib="0" loc="(3000,400)" name="Tunnel">
+      <a name="label" val="CPU8_NET_035"/>
+    </comp>
+    <comp lib="0" loc="(1560,1480)" name="Tunnel">
+      <a name="label" val="CPU8_NET_036"/>
+    </comp>
+    <comp lib="0" loc="(3940,1480)" name="Tunnel">
+      <a name="label" val="CPU8_NET_036"/>
+    </comp>
+    <comp lib="0" loc="(1560,1500)" name="Tunnel">
+      <a name="label" val="CPU8_NET_037"/>
+    </comp>
+    <comp lib="0" loc="(3940,1500)" name="Tunnel">
+      <a name="label" val="CPU8_NET_037"/>
+    </comp>
+    <comp lib="0" loc="(1560,1520)" name="Tunnel">
+      <a name="label" val="CPU8_NET_038"/>
+    </comp>
+    <comp lib="0" loc="(3940,1520)" name="Tunnel">
+      <a name="label" val="CPU8_NET_038"/>
+    </comp>
+    <comp lib="0" loc="(1560,1530)" name="Tunnel">
+      <a name="label" val="CPU8_NET_039"/>
+    </comp>
+    <comp lib="0" loc="(3940,1530)" name="Tunnel">
+      <a name="label" val="CPU8_NET_039"/>
+    </comp>
+    <comp lib="0" loc="(1560,1540)" name="Tunnel">
+      <a name="label" val="CPU8_NET_040"/>
+    </comp>
+    <comp lib="0" loc="(3000,440)" name="Tunnel">
+      <a name="label" val="CPU8_NET_040"/>
+    </comp>
+    <comp lib="0" loc="(1560,1600)" name="Tunnel">
+      <a name="label" val="CPU8_NET_041"/>
+    </comp>
+    <comp lib="0" loc="(3000,500)" name="Tunnel">
+      <a name="label" val="CPU8_NET_041"/>
+    </comp>
+    <comp lib="0" loc="(1560,1620)" name="Tunnel">
+      <a name="label" val="CPU8_NET_042"/>
+    </comp>
+    <comp lib="0" loc="(3000,510)" name="Tunnel">
+      <a name="label" val="CPU8_NET_042"/>
+    </comp>
+    <comp lib="0" loc="(1560,1640)" name="Tunnel">
+      <a name="label" val="CPU8_NET_043"/>
+    </comp>
+    <comp lib="0" loc="(3000,1290)" name="Tunnel">
+      <a name="label" val="CPU8_NET_043"/>
+    </comp>
+    <comp lib="0" loc="(1560,1650)" name="Tunnel">
+      <a name="label" val="CPU8_NET_044"/>
+    </comp>
+    <comp lib="0" loc="(3000,1320)" name="Tunnel">
+      <a name="label" val="CPU8_NET_044"/>
+    </comp>
+    <comp lib="0" loc="(1560,1660)" name="Tunnel">
+      <a name="label" val="CPU8_NET_045"/>
+    </comp>
+    <comp lib="0" loc="(3000,1340)" name="Tunnel">
+      <a name="label" val="CPU8_NET_045"/>
+    </comp>
+    <comp lib="0" loc="(1560,1680)" name="Tunnel">
+      <a name="label" val="CPU8_NET_046"/>
+    </comp>
+    <comp lib="0" loc="(3000,1300)" name="Tunnel">
+      <a name="label" val="CPU8_NET_046"/>
+    </comp>
+    <comp lib="0" loc="(1560,860)" name="Tunnel">
+      <a name="label" val="CPU8_NET_047"/>
+    </comp>
+    <comp lib="0" loc="(3000,840)" name="Tunnel">
+      <a name="label" val="CPU8_NET_047"/>
+    </comp>
+    <comp lib="0" loc="(1560,870)" name="Tunnel">
+      <a name="label" val="CPU8_NET_048"/>
+    </comp>
+    <comp lib="0" loc="(3000,860)" name="Tunnel">
+      <a name="label" val="CPU8_NET_048"/>
+    </comp>
+    <comp lib="0" loc="(1560,890)" name="Tunnel">
+      <a name="label" val="CPU8_NET_049"/>
+    </comp>
+    <comp lib="0" loc="(3000,1640)" name="Tunnel">
+      <a name="label" val="CPU8_NET_049"/>
+    </comp>
+    <comp lib="0" loc="(1560,910)" name="Tunnel">
+      <a name="label" val="CPU8_NET_050"/>
+    </comp>
+    <comp lib="0" loc="(3000,1780)" name="Tunnel">
+      <a name="label" val="CPU8_NET_050"/>
+    </comp>
+    <comp lib="0" loc="(2090,460)" name="Tunnel">
+      <a name="label" val="CPU8_NET_051"/>
+    </comp>
+    <comp lib="0" loc="(3250,860)" name="Tunnel">
+      <a name="label" val="CPU8_NET_051"/>
+    </comp>
+    <comp lib="0" loc="(330,390)" name="Tunnel">
+      <a name="label" val="CPU8_NET_052"/>
+    </comp>
+    <comp lib="0" loc="(870,420)" name="Tunnel">
+      <a name="label" val="CPU8_NET_052"/>
+    </comp>
+    <comp lib="0" loc="(870,600)" name="Tunnel">
+      <a name="label" val="CPU8_NET_052"/>
+    </comp>
+    <comp lib="0" loc="(1280,480)" name="Tunnel">
+      <a name="label" val="CPU8_NET_052"/>
+    </comp>
+    <comp lib="0" loc="(2090,480)" name="Tunnel">
+      <a name="label" val="CPU8_NET_052"/>
+    </comp>
+    <comp lib="0" loc="(3000,420)" name="Tunnel">
+      <a name="label" val="CPU8_NET_052"/>
+    </comp>
+    <comp lib="0" loc="(2090,420)" name="Tunnel">
+      <a name="label" val="CPU8_NET_053"/>
+    </comp>
+    <comp lib="0" loc="(3250,840)" name="Tunnel">
+      <a name="label" val="CPU8_NET_053"/>
+    </comp>
+    <comp lib="0" loc="(2100,2030)" name="Tunnel">
+      <a name="label" val="CPU8_NET_054"/>
+    </comp>
+    <comp lib="0" loc="(3480,2030)" name="Tunnel">
+      <a name="label" val="CPU8_NET_054"/>
+    </comp>
+    <comp lib="0" loc="(870,630)" name="Tunnel">
+      <a name="label" val="CPU8_NET_055"/>
+    </comp>
+    <comp lib="0" loc="(2340,420)" name="Tunnel">
+      <a name="label" val="CPU8_NET_055"/>
+    </comp>
+    <comp lib="0" loc="(3000,910)" name="Tunnel">
+      <a name="label" val="CPU8_NET_055"/>
+    </comp>
+    <comp lib="0" loc="(3920,270)" name="Tunnel">
+      <a name="label" val="CPU8_NET_055"/>
+    </comp>
+    <comp lib="0" loc="(2340,450)" name="Tunnel">
+      <a name="label" val="CPU8_NET_056"/>
+    </comp>
+    <comp lib="0" loc="(3950,720)" name="Tunnel">
+      <a name="label" val="CPU8_NET_056"/>
+    </comp>
+    <comp lib="0" loc="(870,620)" name="Tunnel">
+      <a name="label" val="CPU8_NET_057"/>
+    </comp>
+    <comp lib="0" loc="(2340,460)" name="Tunnel">
+      <a name="label" val="CPU8_NET_057"/>
+    </comp>
+    <comp lib="0" loc="(3000,960)" name="Tunnel">
+      <a name="label" val="CPU8_NET_057"/>
+    </comp>
+    <comp lib="0" loc="(3950,630)" name="Tunnel">
+      <a name="label" val="CPU8_NET_057"/>
+    </comp>
+    <comp lib="0" loc="(330,440)" name="Tunnel">
+      <a name="label" val="CPU8_NET_058"/>
+    </comp>
+    <comp lib="0" loc="(870,440)" name="Tunnel">
+      <a name="label" val="CPU8_NET_058"/>
+    </comp>
+    <comp lib="0" loc="(870,460)" name="Tunnel">
+      <a name="label" val="CPU8_NET_059"/>
+    </comp>
+    <comp lib="0" loc="(2560,440)" name="Tunnel">
+      <a name="label" val="CPU8_NET_059"/>
+    </comp>
+    <comp lib="0" loc="(1120,570)" name="Tunnel">
+      <a name="label" val="CPU8_NET_060"/>
+    </comp>
+    <comp lib="0" loc="(3000,940)" name="Tunnel">
+      <a name="label" val="CPU8_NET_060"/>
+    </comp>
+    <comp lib="0" loc="(3950,570)" name="Tunnel">
+      <a name="label" val="CPU8_NET_060"/>
+    </comp>
+    <comp lib="0" loc="(1180,480)" name="Tunnel">
+      <a name="label" val="CPU8_NET_061"/>
+    </comp>
+    <comp lib="0" loc="(2810,870)" name="Tunnel">
+      <a name="label" val="CPU8_NET_061"/>
+    </comp>
+    <comp lib="0" loc="(3000,1600)" name="Tunnel">
+      <a name="label" val="CPU8_NET_061"/>
+    </comp>
+    <comp lib="0" loc="(1120,580)" name="Tunnel">
+      <a name="label" val="CPU8_NET_062"/>
+    </comp>
+    <comp lib="0" loc="(2810,890)" name="Tunnel">
+      <a name="label" val="CPU8_NET_062"/>
+    </comp>
+    <comp lib="0" loc="(3000,920)" name="Tunnel">
+      <a name="label" val="CPU8_NET_062"/>
+    </comp>
+    <comp lib="0" loc="(3950,600)" name="Tunnel">
+      <a name="label" val="CPU8_NET_062"/>
+    </comp>
+    <comp lib="0" loc="(3000,480)" name="Tunnel">
+      <a name="label" val="CPU8_NET_063"/>
+    </comp>
+    <comp lib="0" loc="(3250,890)" name="Tunnel">
+      <a name="label" val="CPU8_NET_063"/>
+    </comp>
+    <comp lib="0" loc="(3000,460)" name="Tunnel">
+      <a name="label" val="CPU8_NET_064"/>
+    </comp>
+    <comp lib="0" loc="(3730,1970)" name="Tunnel">
+      <a name="label" val="CPU8_NET_064"/>
+    </comp>
+    <comp lib="0" loc="(3000,450)" name="Tunnel">
+      <a name="label" val="CPU8_NET_065"/>
+    </comp>
+    <comp lib="0" loc="(3250,910)" name="Tunnel">
+      <a name="label" val="CPU8_NET_065"/>
+    </comp>
+    <comp lib="0" loc="(3250,1600)" name="Tunnel">
+      <a name="label" val="CPU8_NET_066"/>
+    </comp>
+    <comp lib="0" loc="(3940,1600)" name="Tunnel">
+      <a name="label" val="CPU8_NET_066"/>
+    </comp>
+    <comp lib="0" loc="(3250,1620)" name="Tunnel">
+      <a name="label" val="CPU8_NET_067"/>
+    </comp>
+    <comp lib="0" loc="(3480,1990)" name="Tunnel">
+      <a name="label" val="CPU8_NET_067"/>
+    </comp>
+    <comp lib="0" loc="(870,570)" name="Tunnel">
+      <a name="label" val="CPU8_NET_068"/>
+    </comp>
+    <comp lib="0" loc="(3250,1640)" name="Tunnel">
+      <a name="label" val="CPU8_NET_068"/>
+    </comp>
+    <comp lib="0" loc="(3940,1640)" name="Tunnel">
+      <a name="label" val="CPU8_NET_068"/>
+    </comp>
+    <comp lib="0" loc="(3250,1650)" name="Tunnel">
+      <a name="label" val="CPU8_NET_069"/>
+    </comp>
+    <comp lib="0" loc="(3480,2000)" name="Tunnel">
+      <a name="label" val="CPU8_NET_069"/>
+    </comp>
+    <comp lib="0" loc="(3250,1660)" name="Tunnel">
+      <a name="label" val="CPU8_NET_070"/>
+    </comp>
+    <comp lib="0" loc="(3480,2020)" name="Tunnel">
+      <a name="label" val="CPU8_NET_070"/>
+    </comp>
+    <comp lib="0" loc="(3250,400)" name="Tunnel">
+      <a name="label" val="CPU8_NET_071"/>
+    </comp>
+    <comp lib="0" loc="(3930,1300)" name="Tunnel">
+      <a name="label" val="CPU8_NET_071"/>
+    </comp>
+    <comp lib="0" loc="(3250,420)" name="Tunnel">
+      <a name="label" val="CPU8_NET_072"/>
+    </comp>
+    <comp lib="0" loc="(3930,1320)" name="Tunnel">
+      <a name="label" val="CPU8_NET_072"/>
+    </comp>
+    <comp lib="0" loc="(3250,440)" name="Tunnel">
+      <a name="label" val="CPU8_NET_073"/>
+    </comp>
+    <comp lib="0" loc="(3930,1340)" name="Tunnel">
+      <a name="label" val="CPU8_NET_073"/>
+    </comp>
+    <comp lib="0" loc="(3250,450)" name="Tunnel">
+      <a name="label" val="CPU8_NET_074"/>
+    </comp>
+    <comp lib="0" loc="(3930,1350)" name="Tunnel">
+      <a name="label" val="CPU8_NET_074"/>
+    </comp>
+    <comp lib="0" loc="(3250,460)" name="Tunnel">
+      <a name="label" val="CPU8_NET_075"/>
+    </comp>
+    <comp lib="0" loc="(3930,1360)" name="Tunnel">
+      <a name="label" val="CPU8_NET_075"/>
+    </comp>
+    <comp lib="0" loc="(3250,480)" name="Tunnel">
+      <a name="label" val="CPU8_NET_076"/>
+    </comp>
+    <comp lib="0" loc="(3930,1380)" name="Tunnel">
+      <a name="label" val="CPU8_NET_076"/>
+    </comp>
+    <comp lib="0" loc="(3250,870)" name="Tunnel">
+      <a name="label" val="CPU8_NET_077"/>
+    </comp>
+    <comp lib="0" loc="(3930,870)" name="Tunnel">
+      <a name="label" val="CPU8_NET_077"/>
+    </comp>
+    <comp lib="0" loc="(1160,480)" name="Tunnel">
+      <a name="label" val="CPU8_NET_078"/>
+    </comp>
+    <comp lib="0" loc="(1300,660)" name="Tunnel">
+      <a name="label" val="CPU8_NET_078"/>
+    </comp>
+    <comp lib="0" loc="(1310,860)" name="Tunnel">
+      <a name="label" val="CPU8_NET_078"/>
+    </comp>
     <wire from="(1270,420)" to="(1280,420)"/>
     <wire from="(1270,450)" to="(1280,450)"/>
     <wire from="(1270,460)" to="(1280,460)"/>
     <wire from="(1270,500)" to="(1280,500)"/>
-    <wire from="(1540,420)" to="(1660,420)"/>
-    <wire from="(1540,440)" to="(1640,440)"/>
-    <wire from="(1540,450)" to="(1620,450)"/>
-    <wire from="(1540,460)" to="(1570,460)"/>
-    <wire from="(1550,660)" to="(1710,660)"/>
-    <wire from="(1550,680)" to="(2030,680)"/>
-    <wire from="(1560,930)" to="(2080,930)"/>
-    <wire from="(1560,940)" to="(2450,940)"/>
-    <wire from="(1560,960)" to="(2610,960)"/>
-    <wire from="(1560,980)" to="(3000,980)"/>
-    <wire from="(1560,990)" to="(2060,990)"/>
-    <wire from="(1560,1000)" to="(2560,1000)"/>
-    <wire from="(1560,1020)" to="(2520,1020)"/>
-    <wire from="(1560,1040)" to="(2960,1040)"/>
-    <wire from="(1560,1050)" to="(2030,1050)"/>
-    <wire from="(1560,1060)" to="(2380,1060)"/>
-    <wire from="(1560,1080)" to="(2310,1080)"/>
-    <wire from="(1560,1100)" to="(2870,1100)"/>
-    <wire from="(1560,1110)" to="(2010,1110)"/>
-    <wire from="(1560,1120)" to="(2630,1120)"/>
-    <wire from="(1560,1140)" to="(2260,1140)"/>
-    <wire from="(1560,1160)" to="(2700,1160)"/>
-    <wire from="(1560,1170)" to="(1990,1170)"/>
-    <wire from="(1560,1180)" to="(2490,1180)"/>
-    <wire from="(1560,1200)" to="(2650,1200)"/>
-    <wire from="(1560,1220)" to="(2470,1220)"/>
-    <wire from="(1560,1230)" to="(1960,1230)"/>
-    <wire from="(1560,1240)" to="(2120,1240)"/>
-    <wire from="(1560,1260)" to="(2240,1260)"/>
-    <wire from="(1560,1280)" to="(1860,1280)"/>
-    <wire from="(1560,1290)" to="(1880,1290)"/>
-    <wire from="(1560,1300)" to="(1920,1300)"/>
     <wire from="(1560,1320)" to="(1620,1320)"/>
     <wire from="(1560,1340)" to="(1620,1340)"/>
-    <wire from="(1560,1350)" to="(2990,1350)"/>
     <wire from="(1560,1360)" to="(1620,1360)"/>
     <wire from="(1560,1380)" to="(1620,1380)"/>
-    <wire from="(1560,1400)" to="(1600,1400)"/>
     <wire from="(1560,1410)" to="(1620,1410)"/>
     <wire from="(1560,1420)" to="(1620,1420)"/>
     <wire from="(1560,1440)" to="(1620,1440)"/>
-    <wire from="(1560,1460)" to="(2580,1460)"/>
     <wire from="(1560,1470)" to="(1620,1470)"/>
-    <wire from="(1560,1480)" to="(3940,1480)"/>
-    <wire from="(1560,1500)" to="(3940,1500)"/>
-    <wire from="(1560,1520)" to="(3940,1520)"/>
-    <wire from="(1560,1530)" to="(3940,1530)"/>
-    <wire from="(1560,1540)" to="(2280,1540)"/>
     <wire from="(1560,1560)" to="(1620,1560)"/>
     <wire from="(1560,1580)" to="(1620,1580)"/>
     <wire from="(1560,1590)" to="(1620,1590)"/>
-    <wire from="(1560,1600)" to="(2330,1600)"/>
-    <wire from="(1560,1620)" to="(2350,1620)"/>
-    <wire from="(1560,1640)" to="(2400,1640)"/>
-    <wire from="(1560,1650)" to="(2190,1650)"/>
-    <wire from="(1560,1660)" to="(2220,1660)"/>
-    <wire from="(1560,1680)" to="(2240,1680)"/>
-    <wire from="(1560,860)" to="(2600,860)"/>
-    <wire from="(1560,870)" to="(2620,870)"/>
-    <wire from="(1560,890)" to="(2420,890)"/>
-    <wire from="(1560,910)" to="(2540,910)"/>
-    <wire from="(1570,460)" to="(1570,640)"/>
-    <wire from="(1570,640)" to="(3950,640)"/>
-    <wire from="(1600,320)" to="(1600,1400)"/>
-    <wire from="(1620,450)" to="(1620,630)"/>
-    <wire from="(1620,630)" to="(3350,630)"/>
-    <wire from="(1640,440)" to="(1640,540)"/>
-    <wire from="(1640,540)" to="(2720,540)"/>
-    <wire from="(1660,420)" to="(1660,520)"/>
-    <wire from="(1660,520)" to="(2740,520)"/>
-    <wire from="(1710,660)" to="(1710,760)"/>
-    <wire from="(1710,660)" to="(3950,660)"/>
-    <wire from="(1710,760)" to="(2650,760)"/>
-    <wire from="(1860,1280)" to="(1940,1280)"/>
-    <wire from="(1860,220)" to="(1860,1280)"/>
-    <wire from="(1880,1290)" to="(2150,1290)"/>
-    <wire from="(1880,210)" to="(1880,1290)"/>
-    <wire from="(1920,1300)" to="(2120,1300)"/>
-    <wire from="(1920,200)" to="(1920,1300)"/>
-    <wire from="(1940,1280)" to="(1940,2140)"/>
-    <wire from="(1940,2140)" to="(3480,2140)"/>
-    <wire from="(1960,1230)" to="(1960,2120)"/>
-    <wire from="(1960,1230)" to="(2400,1230)"/>
-    <wire from="(1960,2120)" to="(3480,2120)"/>
-    <wire from="(1990,1170)" to="(1990,2110)"/>
-    <wire from="(1990,1170)" to="(2680,1170)"/>
-    <wire from="(1990,2110)" to="(3480,2110)"/>
-    <wire from="(2010,1110)" to="(2010,2090)"/>
-    <wire from="(2010,1110)" to="(2850,1110)"/>
-    <wire from="(2010,320)" to="(2010,460)"/>
-    <wire from="(2010,320)" to="(3310,320)"/>
-    <wire from="(2010,2090)" to="(3480,2090)"/>
-    <wire from="(2010,460)" to="(2090,460)"/>
-    <wire from="(2030,1050)" to="(2030,2080)"/>
-    <wire from="(2030,1050)" to="(2940,1050)"/>
-    <wire from="(2030,2080)" to="(3480,2080)"/>
-    <wire from="(2030,450)" to="(2030,680)"/>
-    <wire from="(2030,450)" to="(2090,450)"/>
-    <wire from="(2030,680)" to="(3420,680)"/>
-    <wire from="(2060,990)" to="(2060,2060)"/>
-    <wire from="(2060,990)" to="(3000,990)"/>
-    <wire from="(2060,2060)" to="(3480,2060)"/>
-    <wire from="(2060,390)" to="(2060,480)"/>
-    <wire from="(2060,390)" to="(2700,390)"/>
-    <wire from="(2060,480)" to="(2090,480)"/>
-    <wire from="(2080,930)" to="(2080,2050)"/>
-    <wire from="(2080,330)" to="(2080,420)"/>
-    <wire from="(2080,330)" to="(3290,330)"/>
-    <wire from="(2080,2050)" to="(3480,2050)"/>
-    <wire from="(2080,420)" to="(2090,420)"/>
     <wire from="(2080,440)" to="(2090,440)"/>
-    <wire from="(2100,2030)" to="(3480,2030)"/>
-    <wire from="(2120,1240)" to="(2120,1280)"/>
-    <wire from="(2120,1280)" to="(2920,1280)"/>
-    <wire from="(2120,1300)" to="(2120,1890)"/>
-    <wire from="(2120,1890)" to="(3000,1890)"/>
-    <wire from="(2150,1290)" to="(2150,1740)"/>
-    <wire from="(2150,1740)" to="(3000,1740)"/>
-    <wire from="(2190,1320)" to="(2190,1650)"/>
-    <wire from="(2190,1320)" to="(3000,1320)"/>
-    <wire from="(2220,1340)" to="(2220,1660)"/>
-    <wire from="(2220,1340)" to="(3000,1340)"/>
-    <wire from="(2240,1240)" to="(2240,1260)"/>
-    <wire from="(2240,1240)" to="(2870,1240)"/>
-    <wire from="(2240,1300)" to="(2240,1680)"/>
-    <wire from="(2240,1300)" to="(3000,1300)"/>
-    <wire from="(2260,1140)" to="(2260,1840)"/>
-    <wire from="(2260,1140)" to="(2830,1140)"/>
-    <wire from="(2260,1840)" to="(3000,1840)"/>
-    <wire from="(2280,690)" to="(2280,1540)"/>
-    <wire from="(2280,690)" to="(2920,690)"/>
-    <wire from="(2310,1080)" to="(2310,1830)"/>
-    <wire from="(2310,1080)" to="(2890,1080)"/>
-    <wire from="(2310,1830)" to="(3000,1830)"/>
-    <wire from="(2330,720)" to="(2330,1600)"/>
-    <wire from="(2330,720)" to="(2960,720)"/>
-    <wire from="(2340,420)" to="(2410,420)"/>
     <wire from="(2340,440)" to="(2530,440)"/>
-    <wire from="(2340,450)" to="(2460,450)"/>
-    <wire from="(2340,460)" to="(2390,460)"/>
-    <wire from="(2350,750)" to="(2350,1620)"/>
-    <wire from="(2350,750)" to="(2990,750)"/>
-    <wire from="(2380,1060)" to="(2380,1680)"/>
-    <wire from="(2380,1060)" to="(2920,1060)"/>
-    <wire from="(2380,1680)" to="(3000,1680)"/>
-    <wire from="(2390,260)" to="(2390,460)"/>
-    <wire from="(2390,460)" to="(2430,460)"/>
-    <wire from="(330,390)" to="(810,390)"/>
-    <wire from="(330,440)" to="(870,440)"/>
-    <wire from="(2400,1230)" to="(2400,1260)"/>
-    <wire from="(2400,1260)" to="(3000,1260)"/>
-    <wire from="(2400,1290)" to="(2400,1640)"/>
-    <wire from="(2400,1290)" to="(3000,1290)"/>
-    <wire from="(2410,270)" to="(2410,420)"/>
-    <wire from="(2410,270)" to="(3920,270)"/>
-    <wire from="(2410,420)" to="(2410,600)"/>
-    <wire from="(2410,600)" to="(2890,600)"/>
-    <wire from="(2420,1640)" to="(3000,1640)"/>
-    <wire from="(2420,890)" to="(2420,1640)"/>
-    <wire from="(2430,460)" to="(2430,620)"/>
-    <wire from="(2430,460)" to="(2680,460)"/>
-    <wire from="(2430,620)" to="(3920,620)"/>
-    <wire from="(2450,940)" to="(2450,1650)"/>
-    <wire from="(2450,1650)" to="(3000,1650)"/>
-    <wire from="(2450,810)" to="(2450,940)"/>
-    <wire from="(2450,810)" to="(2940,810)"/>
-    <wire from="(2460,450)" to="(2460,700)"/>
-    <wire from="(2460,700)" to="(3930,700)"/>
-    <wire from="(2470,1220)" to="(2470,1230)"/>
-    <wire from="(2470,1230)" to="(3000,1230)"/>
-    <wire from="(2490,1180)" to="(2490,1220)"/>
-    <wire from="(2490,1220)" to="(2960,1220)"/>
-    <wire from="(2520,1020)" to="(2520,1820)"/>
-    <wire from="(2520,1020)" to="(3000,1020)"/>
-    <wire from="(2520,1820)" to="(3000,1820)"/>
-    <wire from="(2540,1780)" to="(3000,1780)"/>
-    <wire from="(2540,910)" to="(2540,1780)"/>
-    <wire from="(2560,1000)" to="(2560,1660)"/>
-    <wire from="(2560,1000)" to="(3000,1000)"/>
-    <wire from="(2560,1660)" to="(3000,1660)"/>
-    <wire from="(2560,440)" to="(2680,440)"/>
-    <wire from="(2580,480)" to="(2580,1460)"/>
-    <wire from="(2580,480)" to="(2720,480)"/>
-    <wire from="(2600,780)" to="(2600,860)"/>
-    <wire from="(2600,780)" to="(2990,780)"/>
-    <wire from="(2610,960)" to="(2610,1800)"/>
-    <wire from="(2610,1800)" to="(3000,1800)"/>
-    <wire from="(2610,820)" to="(2610,960)"/>
-    <wire from="(2610,820)" to="(2920,820)"/>
-    <wire from="(2620,800)" to="(2620,870)"/>
-    <wire from="(2620,800)" to="(2960,800)"/>
-    <wire from="(350,200)" to="(1920,200)"/>
-    <wire from="(350,200)" to="(350,600)"/>
-    <wire from="(350,600)" to="(560,600)"/>
-    <wire from="(2630,1120)" to="(2630,1700)"/>
-    <wire from="(2630,1120)" to="(2790,1120)"/>
-    <wire from="(2630,1700)" to="(3000,1700)"/>
-    <wire from="(2650,1180)" to="(2650,1200)"/>
-    <wire from="(2650,1180)" to="(2890,1180)"/>
-    <wire from="(2650,760)" to="(2650,910)"/>
-    <wire from="(2650,910)" to="(2830,910)"/>
-    <wire from="(2680,960)" to="(3000,960)"/>
-    <wire from="(2680,240)" to="(2680,440)"/>
-    <wire from="(2680,1170)" to="(2680,1200)"/>
-    <wire from="(2680,1200)" to="(3000,1200)"/>
-    <wire from="(2680,460)" to="(2680,960)"/>
-    <wire from="(2700,940)" to="(3000,940)"/>
-    <wire from="(2700,1160)" to="(2700,1170)"/>
-    <wire from="(2700,1170)" to="(3000,1170)"/>
-    <wire from="(2700,390)" to="(2700,420)"/>
-    <wire from="(2700,420)" to="(3000,420)"/>
-    <wire from="(2700,570)" to="(2700,940)"/>
-    <wire from="(2700,570)" to="(3950,570)"/>
-    <wire from="(2720,1760)" to="(2940,1760)"/>
-    <wire from="(2720,400)" to="(2720,480)"/>
-    <wire from="(2720,400)" to="(3000,400)"/>
-    <wire from="(2720,540)" to="(2720,1760)"/>
-    <wire from="(2740,1620)" to="(3000,1620)"/>
-    <wire from="(2740,520)" to="(2740,1620)"/>
-    <wire from="(2770,1600)" to="(3000,1600)"/>
-    <wire from="(2770,560)" to="(2770,870)"/>
-    <wire from="(2770,870)" to="(2770,1600)"/>
-    <wire from="(2770,870)" to="(2810,870)"/>
-    <wire from="(2790,920)" to="(3000,920)"/>
-    <wire from="(2790,1120)" to="(2790,1160)"/>
-    <wire from="(2790,1160)" to="(3000,1160)"/>
-    <wire from="(2790,580)" to="(2790,890)"/>
-    <wire from="(2790,580)" to="(3940,580)"/>
-    <wire from="(2790,890)" to="(2790,920)"/>
-    <wire from="(2790,890)" to="(2810,890)"/>
-    <wire from="(2830,1120)" to="(2830,1140)"/>
-    <wire from="(2830,1120)" to="(3000,1120)"/>
-    <wire from="(2830,900)" to="(2830,910)"/>
-    <wire from="(2850,1110)" to="(2850,1140)"/>
-    <wire from="(2850,1140)" to="(3000,1140)"/>
     <wire from="(2850,880)" to="(2870,880)"/>
-    <wire from="(380,580)" to="(560,580)"/>
-    <wire from="(380,210)" to="(1880,210)"/>
-    <wire from="(380,210)" to="(380,580)"/>
     <wire from="(2870,930)" to="(3000,930)"/>
-    <wire from="(2870,1100)" to="(2870,1110)"/>
-    <wire from="(2870,1110)" to="(3000,1110)"/>
-    <wire from="(2870,1240)" to="(2870,1880)"/>
-    <wire from="(2870,1240)" to="(3000,1240)"/>
-    <wire from="(2870,1880)" to="(3000,1880)"/>
     <wire from="(2870,880)" to="(2870,930)"/>
-    <wire from="(2890,1080)" to="(2890,1100)"/>
-    <wire from="(2890,1100)" to="(3000,1100)"/>
-    <wire from="(2890,1180)" to="(2890,1860)"/>
-    <wire from="(2890,1180)" to="(3000,1180)"/>
-    <wire from="(2890,1860)" to="(3000,1860)"/>
-    <wire from="(2890,600)" to="(2890,910)"/>
-    <wire from="(2890,910)" to="(3000,910)"/>
-    <wire from="(2920,1060)" to="(2920,1080)"/>
-    <wire from="(2920,1080)" to="(3000,1080)"/>
-    <wire from="(2920,1280)" to="(2920,1720)"/>
-    <wire from="(2920,1280)" to="(3000,1280)"/>
-    <wire from="(2920,1720)" to="(3000,1720)"/>
-    <wire from="(2920,440)" to="(2920,690)"/>
-    <wire from="(2920,440)" to="(3000,440)"/>
-    <wire from="(2920,820)" to="(2920,890)"/>
-    <wire from="(2920,890)" to="(3000,890)"/>
-    <wire from="(2940,1050)" to="(2940,1060)"/>
-    <wire from="(2940,1060)" to="(3000,1060)"/>
-    <wire from="(2940,1560)" to="(2940,1770)"/>
-    <wire from="(2940,1770)" to="(3000,1770)"/>
-    <wire from="(2940,340)" to="(2940,480)"/>
-    <wire from="(2940,340)" to="(3330,340)"/>
-    <wire from="(2940,480)" to="(3000,480)"/>
-    <wire from="(2940,810)" to="(2940,870)"/>
-    <wire from="(2940,870)" to="(3000,870)"/>
-    <wire from="(2960,1040)" to="(2960,1050)"/>
-    <wire from="(2960,1050)" to="(3000,1050)"/>
-    <wire from="(2960,1220)" to="(2960,1710)"/>
-    <wire from="(2960,1220)" to="(3000,1220)"/>
-    <wire from="(2960,1710)" to="(3000,1710)"/>
-    <wire from="(2960,360)" to="(2960,460)"/>
-    <wire from="(2960,360)" to="(3750,360)"/>
-    <wire from="(2960,460)" to="(3000,460)"/>
-    <wire from="(2960,500)" to="(2960,720)"/>
-    <wire from="(2960,500)" to="(3000,500)"/>
-    <wire from="(2960,800)" to="(2960,860)"/>
-    <wire from="(2960,860)" to="(3000,860)"/>
-    <wire from="(2990,1040)" to="(2990,1350)"/>
-    <wire from="(2990,1040)" to="(3000,1040)"/>
-    <wire from="(2990,380)" to="(2990,450)"/>
-    <wire from="(2990,380)" to="(3260,380)"/>
-    <wire from="(2990,450)" to="(3000,450)"/>
-    <wire from="(2990,510)" to="(2990,750)"/>
-    <wire from="(2990,510)" to="(3000,510)"/>
-    <wire from="(2990,780)" to="(2990,840)"/>
-    <wire from="(2990,840)" to="(3000,840)"/>
-    <wire from="(400,570)" to="(560,570)"/>
-    <wire from="(400,220)" to="(1860,220)"/>
-    <wire from="(400,220)" to="(400,570)"/>
-    <wire from="(3250,1600)" to="(3290,1600)"/>
-    <wire from="(3250,1620)" to="(3310,1620)"/>
-    <wire from="(3250,1640)" to="(3450,1640)"/>
-    <wire from="(3250,1650)" to="(3290,1650)"/>
-    <wire from="(3250,1660)" to="(3260,1660)"/>
-    <wire from="(3250,400)" to="(3880,400)"/>
-    <wire from="(3250,420)" to="(3860,420)"/>
-    <wire from="(3250,440)" to="(3840,440)"/>
-    <wire from="(3250,450)" to="(3810,450)"/>
-    <wire from="(3250,460)" to="(3790,460)"/>
-    <wire from="(3250,480)" to="(3770,480)"/>
-    <wire from="(3250,840)" to="(3290,840)"/>
-    <wire from="(3250,860)" to="(3310,860)"/>
-    <wire from="(3250,870)" to="(3930,870)"/>
-    <wire from="(3250,890)" to="(3330,890)"/>
-    <wire from="(3250,910)" to="(3260,910)"/>
-    <wire from="(3260,1660)" to="(3260,2020)"/>
-    <wire from="(3260,2020)" to="(3480,2020)"/>
-    <wire from="(3260,380)" to="(3260,910)"/>
-    <wire from="(3290,1600)" to="(3940,1600)"/>
-    <wire from="(3290,1650)" to="(3290,2000)"/>
-    <wire from="(3290,330)" to="(3290,840)"/>
-    <wire from="(3290,2000)" to="(3480,2000)"/>
-    <wire from="(3310,1620)" to="(3310,1990)"/>
-    <wire from="(3310,320)" to="(3310,860)"/>
-    <wire from="(3310,1990)" to="(3480,1990)"/>
-    <wire from="(3330,340)" to="(3330,890)"/>
-    <wire from="(3350,1970)" to="(3480,1970)"/>
-    <wire from="(3350,630)" to="(3350,1970)"/>
-    <wire from="(3420,300)" to="(3420,680)"/>
-    <wire from="(430,240)" to="(2680,240)"/>
-    <wire from="(430,240)" to="(430,460)"/>
-    <wire from="(430,460)" to="(870,460)"/>
-    <wire from="(3450,280)" to="(3450,1640)"/>
-    <wire from="(3450,1640)" to="(3940,1640)"/>
-    <wire from="(3730,1970)" to="(3750,1970)"/>
-    <wire from="(3750,360)" to="(3750,1970)"/>
-    <wire from="(3770,1380)" to="(3930,1380)"/>
-    <wire from="(3770,480)" to="(3770,1380)"/>
-    <wire from="(3790,1360)" to="(3930,1360)"/>
-    <wire from="(3790,460)" to="(3790,1360)"/>
-    <wire from="(3810,1350)" to="(3930,1350)"/>
-    <wire from="(3810,450)" to="(3810,1350)"/>
-    <wire from="(3840,1340)" to="(3930,1340)"/>
-    <wire from="(3840,440)" to="(3840,1340)"/>
-    <wire from="(3860,1320)" to="(3930,1320)"/>
-    <wire from="(3860,420)" to="(3860,1320)"/>
-    <wire from="(3880,1300)" to="(3930,1300)"/>
-    <wire from="(3880,400)" to="(3880,1300)"/>
-    <wire from="(3920,620)" to="(3920,630)"/>
-    <wire from="(3920,630)" to="(3950,630)"/>
-    <wire from="(3930,700)" to="(3930,720)"/>
-    <wire from="(3930,720)" to="(3950,720)"/>
-    <wire from="(3940,580)" to="(3940,600)"/>
-    <wire from="(3940,600)" to="(3950,600)"/>
     <wire from="(620,580)" to="(870,580)"/>
-    <wire from="(740,270)" to="(2410,270)"/>
-    <wire from="(740,270)" to="(740,630)"/>
-    <wire from="(740,630)" to="(870,630)"/>
-    <wire from="(770,260)" to="(2390,260)"/>
-    <wire from="(770,260)" to="(770,620)"/>
-    <wire from="(770,620)" to="(870,620)"/>
-    <wire from="(790,280)" to="(3450,280)"/>
-    <wire from="(790,280)" to="(790,570)"/>
-    <wire from="(790,570)" to="(870,570)"/>
-    <wire from="(810,390)" to="(810,420)"/>
-    <wire from="(810,390)" to="(1200,390)"/>
-    <wire from="(810,420)" to="(810,600)"/>
-    <wire from="(810,420)" to="(870,420)"/>
-    <wire from="(810,600)" to="(870,600)"/>
-    <wire from="(850,320)" to="(1600,320)"/>
-    <wire from="(850,320)" to="(850,450)"/>
-    <wire from="(850,450)" to="(870,450)"/>
     <wire from="(860,480)" to="(870,480)"/>
     <wire from="(860,500)" to="(870,500)"/>
     <wire from="(1120,330)" to="(1260,330)"/>
@@ -701,24 +929,11 @@
     <wire from="(1120,440)" to="(1150,440)"/>
     <wire from="(1120,450)" to="(1170,450)"/>
     <wire from="(1120,460)" to="(1150,460)"/>
-    <wire from="(1120,570)" to="(2700,570)"/>
-    <wire from="(1120,580)" to="(2790,580)"/>
     <wire from="(1150,340)" to="(1260,340)"/>
     <wire from="(1150,340)" to="(1150,440)"/>
-    <wire from="(1160,480)" to="(1160,660)"/>
-    <wire from="(1160,660)" to="(1300,660)"/>
-    <wire from="(1160,660)" to="(1160,860)"/>
-    <wire from="(1160,860)" to="(1310,860)"/>
     <wire from="(1170,370)" to="(1260,370)"/>
     <wire from="(1170,370)" to="(1170,450)"/>
-    <wire from="(1180,480)" to="(1180,560)"/>
-    <wire from="(1180,560)" to="(2770,560)"/>
-    <wire from="(1200,390)" to="(2060,390)"/>
-    <wire from="(1200,390)" to="(1200,480)"/>
-    <wire from="(1200,480)" to="(1280,480)"/>
-    <wire from="(1230,300)" to="(3420,300)"/>
-    <wire from="(1230,300)" to="(1230,440)"/>
-    <wire from="(1230,440)" to="(1280,440)"/>
+    <wire from="(2720,1760)" to="(2940,1760)"/>
   </circuit>
   <circuit name="EffectiveAddress">
     <a name="appearance" val="logisim_evolution"/>
