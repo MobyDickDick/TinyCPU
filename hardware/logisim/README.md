@@ -9,6 +9,12 @@ electrical gate used by CI with one command:
 scripts/test-logisim.sh
 ```
 
+Der schnelle Offline-Lauf `scripts/test-offline.sh` führt zusätzlich den
+statischen Verdrahtungscheck `scripts/check-logisim-circuit.py` aus. Er bildet
+auch Abzweige nach, deren Endpunkt mitten auf einem anderen Segment liegt, und
+weist Netze mit mehreren Gatterausgängen zurück. Damit werden die roten/orangen
+Konfliktnetze bereits ohne Logisim-JAR erkannt.
+
 The script accepts `JAVA`, `LOGISIM_JAR`, and `LOGISIM_OUTPUT` environment
 overrides. Logisim is an integrated, pinned project dependency; the circuits,
 fixtures, launcher, and CI provisioning are checked in. Only the unchanged
