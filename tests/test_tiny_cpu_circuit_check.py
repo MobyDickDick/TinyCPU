@@ -17,30 +17,18 @@ class CircuitCheckTests(unittest.TestCase):
                     inspect_project(ROOT / "hardware/logisim" / project), []
                 )
 
-    def test_8_bit_top_level_uses_named_tunnels_for_long_routes(self):
+    def test_8_bit_top_level_uses_visible_wires_instead_of_tunnels(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU-8-8.circ").getroot()
         main = next(
             circuit for circuit in root.findall("circuit")
             if circuit.get("name") == "TinyCPUMain"
         )
-        labels = [
-            attribute.get("val")
-            for component in main.findall("comp")
+        tunnels = [
+            component for component in main.findall("comp")
             if component.get("name") == "Tunnel"
-            for attribute in component.findall("a")
-            if attribute.get("name") == "label"
         ]
-        self.assertGreater(len(labels), 100)
-        self.assertTrue(all(label and label.startswith("CPU8_NET_") for label in labels))
-        self.assertTrue(all(labels.count(label) >= 2 for label in set(labels)))
 
-        for wire in main.findall("wire"):
-            left = tuple(map(int, wire.get("from").strip("()").split(",")))
-            right = tuple(map(int, wire.get("to").strip("()").split(",")))
-            self.assertLessEqual(
-                abs(left[0] - right[0]) + abs(left[1] - right[1]), 300,
-                f"sprawling top-level route remains: {wire.attrib}",
-            )
+        self.assertEqual(tunnels, [])
 
     def test_detects_outputs_joined_through_endpoint_on_segment(self):
         circuit = ET.fromstring("""
