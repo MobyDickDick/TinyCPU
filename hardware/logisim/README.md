@@ -1128,3 +1128,26 @@ write-data, and print-value lanes. Stable labels and one-valued constants on
 again without moving a component. The autonomous Logisim trace probes use the
 current opcode and clock contacts, and the JNZ status remains a visible direct
 wire rather than restoring the superseded tunnel pair.
+
+## Static output-collision check
+
+`scripts/check-logisim-circuit.py` now resolves the generated ports of every
+subcircuit instance in addition to primitive gate outputs.  This matters on
+`TinyCPUMain`: the previous implementation only classified the six primitive
+gate kinds as drivers and therefore returned success when a long control wire
+ran through an `EffectiveAddress`, `ErrorFlags`, `AddressPath`, or decoder
+output.  Logisim joins a wire endpoint to the interior of another orthogonal
+segment, so those visually inconspicuous overlaps formed real multi-driver
+nets (and appeared orange in the simulator).
+
+Run the check with:
+
+```bash
+python3 scripts/check-logisim-circuit.py hardware/logisim/TinyCPU.circ
+```
+
+`--fix` offers a deliberately conservative repair mode.  It removes a bridge
+only when testing every candidate proves that exactly one wire separates all
+colliding drivers into singly-driven nets; ambiguous nets remain reported and
+are never guessed away.  The maintained top-level routes have been separated
+into independent corridors so the checker now exits successfully.
