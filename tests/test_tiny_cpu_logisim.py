@@ -425,6 +425,24 @@ class LogisimLauncherTests(unittest.TestCase):
         self.assertTrue(_wire_path_exists(main, control_merge.get("loc"), "(4230,1950)"))
         self.assertTrue(_wire_path_exists(main, taken_merge.get("loc"), "(4310,2140)"))
 
+    def test_jump_error_routes_stop_at_gate_inputs(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+        wires = {(wire.get("from"), wire.get("to")) for wire in main.findall("wire")}
+
+        # A source routed from the right of an east-facing gate continues
+        # through its symbol and is rendered as a misleading tail.  Both AND
+        # inputs must instead be approached from the left and end exactly at
+        # their terminals.
+        self.assertIn(("(3790,2250)", "(3810,2250)"), wires)
+        self.assertIn(("(3770,2270)", "(3810,2270)"), wires)
+        self.assertNotIn(("(3810,2250)", "(3880,2250)"), wires)
+
+        # Keep the two doglegs on separate x coordinates: sharing one would
+        # join JUMP_ERROR to ANY_ERROR before the AND gate.
+        self.assertIn(("(3790,2200)", "(3790,2250)"), wires)
+        self.assertIn(("(3770,2240)", "(3770,2270)"), wires)
+
     def test_jump_not_error_reaches_common_pc_select(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
