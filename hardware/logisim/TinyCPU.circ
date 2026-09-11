@@ -372,6 +372,7 @@
     <comp loc="(3280,1420)" name="AddressRangeFBox">
       <a name="label" val="ADDRESS_RANGE_FBOX"/>
     </comp>
+    <comp loc="(3980,330)" name="JumpDetectection"/>
     <wire from="(1020,350)" to="(1020,470)"/>
     <wire from="(1020,350)" to="(1140,350)"/>
     <wire from="(1020,490)" to="(1040,490)"/>
