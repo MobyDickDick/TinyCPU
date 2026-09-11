@@ -247,8 +247,8 @@ class LogisimLauncherTests(unittest.TestCase):
             "JUMP_ZERO_OR_PREVIOUS_CONTROLS": {"(2890,1930)", "(2890,1950)"},
             "JUMP_NEGATIVE_OR_PREVIOUS_CONTROLS": {"(3280,1950)", "(3280,1970)"},
             "JUMP_ADR_OR_NOT_ZERO": {"(2890,2040)", "(2890,2060)"},
-            "JUMP_ZERO_OR_PREVIOUS_TAKEN": {"(3270,2070)", "(3270,2110)"},
-            "JUMP_NEGATIVE_OR_PREVIOUS_TAKEN": {"(3590,2090)", "(3590,2130)"},
+            "JUMP_ZERO_OR_PREVIOUS_TAKEN": {"(3270,2080)", "(3270,2100)"},
+            "JUMP_NEGATIVE_OR_PREVIOUS_TAKEN": {"(3610,2100)", "(3610,2120)"},
         }
         wire_endpoints = {
             endpoint
@@ -368,8 +368,8 @@ class LogisimLauncherTests(unittest.TestCase):
         ))
         self.assertTrue(_wire_path_exists(main, "(1400,1330)", "(2580,1930)"))
         self.assertTrue(_wire_path_exists(main, "(1400,1370)", "(2580,1910)"))
-        self.assertTrue(_wire_path_exists(main, "(3960,1960)", "(4210,1940)"))
-        self.assertTrue(_wire_path_exists(main, "(3960,2110)", "(4210,2090)"))
+        self.assertTrue(_wire_path_exists(main, "(3960,1960)", "(4230,1950)"))
+        self.assertTrue(_wire_path_exists(main, "(3960,2110)", "(4230,2100)"))
 
     def test_jump_zero_reaches_common_pc_select(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
@@ -386,8 +386,8 @@ class LogisimLauncherTests(unittest.TestCase):
 
         self.assertTrue(_wire_path_exists(main, "(1400,1390)", "(2890,2180)"))
         self.assertTrue(_wire_path_exists(main, "(2080,510)", "(2890,2200)"))
-        self.assertTrue(_wire_path_exists(main, "(2920,2190)", "(3590,2130)"))
-        self.assertTrue(_wire_path_exists(main, "(3320,2090)", "(3590,2090)"))
+        self.assertTrue(_wire_path_exists(main, "(2920,2190)", "(3610,2120)"))
+        self.assertTrue(_wire_path_exists(main, "(3300,2090)", "(3610,2100)"))
 
     def test_jump_error_reaches_common_pc_select(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
@@ -416,14 +416,14 @@ class LogisimLauncherTests(unittest.TestCase):
         # (1400,1410) is FetchDecodeControls.JUMP_ERROR.  The two merge
         # stages extend, rather than replace, the previously repaired jump
         # control and taken-condition chains.
-        self.assertTrue(_wire_path_exists(main, "(1400,1410)", "(3270,2290)"))
-        self.assertTrue(_wire_path_exists(main, "(1400,1410)", "(3910,1980)"))
-        self.assertTrue(_wire_path_exists(main, any_error.get("loc"), "(3270,2330)"))
-        self.assertTrue(_wire_path_exists(main, "(3310,1960)", "(3910,1940)"))
-        self.assertTrue(_wire_path_exists(main, "(3640,2110)", "(3910,2090)"))
-        self.assertTrue(_wire_path_exists(main, error_taken.get("loc"), "(3910,2130)"))
-        self.assertTrue(_wire_path_exists(main, control_merge.get("loc"), "(4210,1940)"))
-        self.assertTrue(_wire_path_exists(main, taken_merge.get("loc"), "(4210,2090)"))
+        self.assertTrue(_wire_path_exists(main, "(1400,1410)", "(3270,2300)"))
+        self.assertTrue(_wire_path_exists(main, "(1400,1410)", "(3930,1970)"))
+        self.assertTrue(_wire_path_exists(main, any_error.get("loc"), "(3270,2320)"))
+        self.assertTrue(_wire_path_exists(main, "(3310,1960)", "(3930,1950)"))
+        self.assertTrue(_wire_path_exists(main, "(3640,2110)", "(3930,2100)"))
+        self.assertTrue(_wire_path_exists(main, error_taken.get("loc"), "(3930,2120)"))
+        self.assertTrue(_wire_path_exists(main, control_merge.get("loc"), "(4230,1950)"))
+        self.assertTrue(_wire_path_exists(main, taken_merge.get("loc"), "(4230,2100)"))
 
     def test_jump_not_error_reaches_common_pc_select(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
@@ -442,13 +442,13 @@ class LogisimLauncherTests(unittest.TestCase):
         # (1400,1430) is FetchDecodeControls.JUMP_NOT_ERROR.  Selecting the
         # jump target is independent of the condition; taking it additionally
         # requires the inverse of the combined sticky-error state.
-        self.assertTrue(_wire_path_exists(main, "(1400,1430)", "(4210,1980)"))
-        self.assertTrue(_wire_path_exists(main, "(1400,1430)", "(3570,2420)"))
+        self.assertTrue(_wire_path_exists(main, "(1400,1430)", "(4230,1970)"))
+        self.assertTrue(_wire_path_exists(main, "(1400,1430)", "(3590,2430)"))
         self.assertTrue(_wire_path_exists(main, any_error.get("loc"), "(3230,2440)"))
-        self.assertTrue(_wire_path_exists(main, no_error.get("loc"), "(3570,2460)"))
-        self.assertTrue(_wire_path_exists(main, "(3960,1960)", "(4210,1940)"))
-        self.assertTrue(_wire_path_exists(main, "(3960,2110)", "(4210,2090)"))
-        self.assertTrue(_wire_path_exists(main, not_error_taken.get("loc"), "(4210,2130)"))
+        self.assertTrue(_wire_path_exists(main, no_error.get("loc"), "(3590,2450)"))
+        self.assertTrue(_wire_path_exists(main, "(3960,1960)", "(4230,1950)"))
+        self.assertTrue(_wire_path_exists(main, "(3960,2110)", "(4230,2100)"))
+        self.assertTrue(_wire_path_exists(main, not_error_taken.get("loc"), "(4230,2120)"))
         self.assertTrue(_wire_path_exists(main, control_merge.get("loc"), "(800,510)"))
         self.assertTrue(_wire_path_exists(main, taken_merge.get("loc"), "(800,530)"))
 
