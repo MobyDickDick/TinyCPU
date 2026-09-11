@@ -383,14 +383,9 @@ verwendet 8 Adressbits und 14 Datenbits. Die Datei ist bewusst ein eigenes
 Logisim-Projekt und keine zur Laufzeit umgeschaltete Parametrisierung von
 `TinyCPU.circ`; damit bleibt die abgenommene 16/12-Schaltung unverändert.
 
-Die Integrationsseite verwendet für die langen Verbindungen benannte
-`CPU8_NET_*`-Tunnel. Direkt sichtbare Leitungen bleiben auf die kurzen,
-lokalen Verbindungen an Bausteinen und Gattern beschränkt. Damit bleibt die
-vollständige elektrische Verdrahtung erhalten, ohne Daten-, Steuer- und
-Statusleitungen in einem unlesbaren Geflecht quer über das Blatt zu führen.
-Jeder Tunnelname kommt an mindestens zwei Anschlusspunkten vor; der
-Regressionstest verhindert sowohl verwaiste Tunnel als auch erneut eingefügte
-seitenweite Leitungssegmente.
+Die Integrationsseite bildet alle Verbindungen als sichtbare Leitungen ab.
+Sie verwendet keine Tunnel, sodass Daten-, Steuer- und Statuspfade direkt
+zwischen ihren Anschlusspunkten verfolgt werden können.
 
 Das portable Countdown-Programm liegt profilspezifisch als
 `ap17_countdown_8_8.tcpu`, `ap17_countdown_8_8.rom` und
