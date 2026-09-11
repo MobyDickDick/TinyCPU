@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-from tiny_cpu_circuit_check import inspect_circuit, inspect_project
+from tiny_cpu_circuit_check import inspect_circuit, inspect_project, repair_project
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -24,7 +24,37 @@ class CircuitCheckTests(unittest.TestCase):
           </circuit>
         """)
         messages = [issue.message for issue in inspect_circuit(circuit)]
-        self.assertIn("gate outputs share one net: FIRST, SECOND", messages)
+        self.assertIn("outputs share one net: FIRST, SECOND", messages)
+
+    def test_detects_and_repairs_subcircuit_output_bridge(self):
+        project = """<?xml version='1.0'?>
+          <project>
+            <circuit name="Producer">
+              <comp lib="0" loc="(100,100)" name="Pin">
+                <a name="label" val="VALUE"/><a name="type" val="output"/>
+              </comp>
+            </circuit>
+            <circuit name="Top">
+              <comp loc="(100,100)" name="Producer"><a name="label" val="LEFT"/></comp>
+              <comp loc="(300,100)" name="Producer"><a name="label" val="RIGHT"/></comp>
+              <wire from="(100,100)" to="(200,100)"/>
+              <wire from="(300,100)" to="(300,140)"/>
+              <wire from="(200,100)" to="(300,100)"/>
+            </circuit>
+          </project>"""
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "broken.circ"
+            path.write_text(project)
+            messages = [str(issue) for issue in inspect_project(path)]
+            self.assertEqual(messages, [
+                "Top: outputs share one net: VALUE of LEFT, VALUE of RIGHT"
+            ])
+            self.assertEqual(repair_project(path), [])
+            top = next(c for c in ET.parse(path).getroot().findall("circuit")
+                       if c.get("name") == "Top")
+            wires = {(w.get("from"), w.get("to")) for w in top.findall("wire")}
+            self.assertNotIn((("(200,100)"), ("(300,100)")), wires)
 
 
 
