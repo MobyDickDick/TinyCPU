@@ -1,10 +1,98 @@
-# AP 19: Diagnosebericht zu `TinyCPU.circ`
+# Diagnosebericht zu `TinyCPU.circ`
 
-Dieser Bericht wird entlang der zehn Aufgaben aus
-`tiny_cpu_circuit_debug_plan.md` fortgeschrieben. Er trennt nachgewiesene
-Fehler von noch nicht reproduzierten Beobachtungen. Die manuell gepflegte
-Schaltung wird insbesondere nicht allein aufgrund eines Tests mit historischen
-Canvas-Koordinaten verändert.
+Dieser Bericht wurde zunächst entlang der zehn Aufgaben aus
+`tiny_cpu_circuit_debug_plan.md` fortgeschrieben und führt nun die Nachweise
+der Wiederherstellungspakete aus `tiny_cpu_recovery_work_packages.md` weiter.
+Er trennt nachgewiesene Fehler von noch nicht reproduzierten Beobachtungen. Die
+manuell gepflegte Schaltung wird insbesondere nicht allein aufgrund eines
+Tests mit historischen Canvas-Koordinaten verändert.
+
+## AP 20: Wiederherstellung
+
+| Paket | Status | Ergebnis |
+|---|---|---|
+| 20.1 Reproduktionsstand einfrieren | abgeschlossen | Der unveränderte Ausgangsstand reproduziert zuerst den 16/12-Breitenrest im 8/8-Profil; beide elektrischen Profilläufe erreichen anschließend innerhalb von 90 Sekunden keinen normalen Halt. |
+| 20.2 Breitenfehler im 8/8-Profil isolieren | offen | Beginnt mit dem vom Verifier gemeldeten Attribut `width`. |
+
+### 20.1 Reproduktionsstand einfrieren
+
+#### Ausgangslage und Umgebung
+
+- **Zeitpunkt:** 2026-09-12T12:17:34Z
+- **Ausgangs-Commit:**
+  `6cef154eaf3a486ce4a8d2bc36110e4473f6fb3d`
+- **Arbeitsbaum vor der Untersuchung:** sauber (`git status --porcelain=v1`
+  lieferte keine Ausgabe).
+- **Java:** OpenJDK 25.0.2, Build `25.0.2+10-69`.
+- **Python:** 3.14.4.
+- **Logisim-evolution:** 4.1.0, lokale unveränderte JAR unter
+  `.venv/Include/logisim-evolution-4.1.0-all.jar`, SHA-256
+  `fe6386a3217a591bcc311a4eda49e1f43a389b499dd3d0f6f40f344fc85f2577`.
+
+Die vollständigen Rohdaten liegen unter `artifacts/ap20.1-baseline/` und
+bleiben gemäß `.gitignore` außerhalb von Git. Es wurde keine Schaltungsdatei
+verändert. `environment.txt` enthält Commit, anfänglichen Arbeitsbaumstatus
+und Werkzeugversionen. `test-offline.log` und `test-offline.meta` enthalten
+Ausgabe, Laufzeit und Exitcode des Offline-Gates. Die elektrische Ausgabe ist
+in `test-logisim.log` und `test-logisim.meta` zusammengefasst; die unveränderten
+Simulatorausgaben liegen getrennt unter
+`electrical/tinycpu-16-12/core-trace.tsv` und
+`electrical/tinycpu-8-8/core-trace.tsv`.
+
+#### Befehle
+
+Die Baseline wurde mit den unveränderten Projektbefehlen aufgenommen; die
+Laufzeiten wurden jeweils aus der Differenz der Nanosekundenwerte
+von `date +%s%N` ermittelt:
+
+```bash
+git rev-parse HEAD
+git status --porcelain=v1
+java -version
+python3 --version
+java -jar .venv/Include/logisim-evolution-4.1.0-all.jar --version
+sha256sum .venv/Include/logisim-evolution-4.1.0-all.jar
+scripts/test-offline.sh
+LOGISIM_JAR="$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  LOGISIM_OUTPUT="$PWD/artifacts/ap20.1-baseline/electrical" \
+  scripts/test-logisim.sh
+```
+
+#### Ergebnisse
+
+| Lauf | Exitcode | Laufzeit | Erstes Ergebnis | Artefakt |
+|---|---:|---:|---|---|
+| Offline-Gate | 1 | 1,124 s | `TinyCPU-8-8.circ: legacy 16/12 width remains in width` | `test-offline.log` |
+| Elektrisches Gesamt-Gate | 1 | 183,087 s | 16/12 erreicht innerhalb von 90 s keinen Halt; danach erreicht auch 8/8 innerhalb von 90 s keinen Halt | `test-logisim.log` |
+| Elektrischer 16/12-Trace | im Gesamt-Gate enthalten | 90-s-Timeout | 264.171 Tabellenzeilen, kein normaler Halt | `electrical/tinycpu-16-12/core-trace.tsv` |
+| Elektrischer 8/8-Trace | im Gesamt-Gate enthalten | 90-s-Timeout | zwei Tabellenzeilen mit undefinierten Signalen, kein normaler Halt | `electrical/tinycpu-8-8/core-trace.tsv` |
+
+Der Offline-Lauf stoppt vertragsgemäß beim ersten Verifier-Befund. Deshalb
+werden `scripts/check-logisim-circuit.py` und die Unit-Tests in diesem Lauf
+nicht mehr gestartet. Der elektrische Wrapper prüft dagegen beide Profile
+unabhängig und meldet beide als fehlgeschlagen. Ein Timeout wird hier nur als
+fehlender Halt-Nachweis festgehalten; er belegt noch keinen bestimmten
+Decoder-, Takt- oder Datenpfadfehler. Das nächste Paket 20.2 darf daher
+ausschließlich den zuvor statisch belegten Breitenrest isolieren.
+
+Die Digests der kleinen Baseline-Metadaten sind:
+
+```text
+676ed0d3dd6a9444792230429a03de11fdcfaf7d1092a26289d848e0b2e3e931  environment.txt
+bc182203d2890b5342e9320bb0706ccf5f2961fd58f2cf91cecc027c81bb3d3e  test-offline.log
+2249e43b63f5076909cbdfec72b20b1fe4cc4e0c4f98fb0243112813ad52ec9a  test-offline.meta
+165bd3c34947bf5a9f0ed5b99d2f4c9038d9fd65ec11706afcafb2ed0975405b  test-logisim.log
+bbf5e124e2ce70da00d57f245b522d66c2ad12a76e5c15e78d49de0c25be9224  test-logisim.meta
+```
+
+Die großen Rohtraces bleiben absichtlich nur im Artefaktverzeichnis. Ihre
+SHA-256-Digests sind
+`2f000686bbea5aac4d7fb280c8823553f1a26f667dd3f14203d776aaee84d2e6`
+(16/12) und
+`1e432f81c223f180e1eadf54651de89a8958aa4fd42e0caa52db88bf1bb375fd`
+(8/8).
+
+## AP 19: Ursprüngliche Diagnose
 
 ## Status
 
