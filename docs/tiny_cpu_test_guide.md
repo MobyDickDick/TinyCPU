@@ -77,7 +77,7 @@ branch protection setting in GitHub enforces them.
    scripts/test-logisim.sh
    ```
 
-The script loads `TinyCPU.circ` and `TinyCPU-8-8.circ` in the real simulator.
+The script loads `TinyCPU.circ` in the real simulator.
 For each profile it runs the complete 17-edge countdown and all isolated programs from
 the corresponding electrical matrix: one positive case for every opcode and
 the six sticky-error fixtures. Conditional jumps additionally have separate

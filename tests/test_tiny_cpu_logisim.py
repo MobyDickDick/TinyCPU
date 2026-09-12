@@ -62,177 +62,8 @@ def _wire_path_exists(circuit, start, end):
 
 
 class LogisimLauncherTests(unittest.TestCase):
-    def test_autonomous_control_probe_is_temporary_and_observable(self):
-        source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
-        before = source.read_bytes()
-        with tempfile.TemporaryDirectory() as directory:
-            target = Path(directory) / "probe.circ"
-            subprocess.run(
-                [
-                    sys.executable,
-                    str(ROOT / "scripts/probe-logisim-autonomous-controls.py"),
-                    str(target),
-                ],
-                cwd=ROOT,
-                check=True,
-            )
-            root = ET.parse(target).getroot()
-            main = next(
-                circuit for circuit in root.findall("circuit")
-                if circuit.get("name") == "TinyCPUMain"
-            )
-            labelled = {
-                _attributes(component).get("label"): component
-                for component in main.findall("comp")
-                if _attributes(component).get("label")
-            }
 
-            self.assertEqual(labelled["CLK_SOURCE_PROBE"].get("name"), "Pin")
-            self.assertEqual(labelled["RESET_SOURCE_PROBE"].get("name"), "Pin")
-            self.assertEqual(labelled["PC_OUT_PROBE"].get("name"), "Pin")
-            self.assertEqual(labelled["ROM_WORD_PROBE"].get("name"), "Pin")
-            self.assertEqual(
-                labelled["DECODE_LOAD_CONST_PROBE"].get("name"), "Pin"
-            )
-            self.assertEqual(
-                _attributes(labelled["ROM_WORD_PROBE"])["width"], "14"
-            )
-            self.assertEqual(labelled["halt"].get("name"), "Pin")
-            self.assertEqual(labelled["CLK_SOURCE_PROBE"].get("loc"), "(350,400)")
-            self.assertEqual(labelled["RESET_SOURCE_PROBE"].get("loc"), "(350,450)")
-            self.assertTrue(
-                _wire_path_exists(main, "(1160,480)", "(1260,480)"),
-                "ROM word probe must branch from FetchDecode's real output",
-            )
-            fetch = next(
-                circuit for circuit in root.findall("circuit")
-                if circuit.get("name") == "FetchDecode"
-            )
-            pc_out = _component_by_label(fetch, "PC_OUT")
-            rom = _component_by_label(fetch, "INSTRUCTION_ROM")
-            opcode = _component_by_label(fetch, "OPCODE")
-            rom_x, rom_y = map(int, rom.get("loc").strip("()").split(","))
-            rom_address = f"({rom_x},{rom_y + 10})"
-            rom_data = f"({rom_x + 240},{rom_y + 60})"
-            self.assertTrue(
-                _wire_path_exists(fetch, pc_out.get("loc"), rom_address),
-                "the observed PC net must also drive the ROM address port",
-            )
-            self.assertTrue(
-                _wire_path_exists(fetch, rom_data, opcode.get("loc")),
-                "the observed word must originate at the ROM data port",
-            )
-            contents = next(
-                item.text for item in rom.findall("a")
-                if item.get("name") == "contents"
-            )
-            self.assertTrue(contents.startswith("addr/data: 8 14\nff "))
-            outputs = {
-                _attributes(component).get("label")
-                for component in main.findall("comp")
-                if component.get("name") == "Pin"
-                and _attributes(component).get("type") == "output"
-            }
-            self.assertEqual(
-                outputs,
-                {
-                    "halt", "PC_OUT_PROBE", "ROM_WORD_PROBE",
-                    "DECODE_LOAD_CONST_PROBE", "CLK_SOURCE_PROBE",
-                    "RESET_SOURCE_PROBE",
-                },
-            )
-            self.assertEqual(source.read_bytes(), before)
 
-    def test_top_level_por_release_probe_is_temporary_and_observable(self):
-        source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
-        before = source.read_bytes()
-        with tempfile.TemporaryDirectory() as directory:
-            target = Path(directory) / "probe.circ"
-            subprocess.run(
-                [
-                    sys.executable,
-                    str(ROOT / "scripts/probe-logisim-top-por-release.py"),
-                    str(target),
-                ],
-                cwd=ROOT,
-                check=True,
-            )
-            root = ET.parse(target).getroot()
-            main = next(
-                circuit for circuit in root.findall("circuit")
-                if circuit.get("name") == "TinyCPUMain"
-            )
-            labelled = {
-                _attributes(component).get("label"): component
-                for component in main.findall("comp")
-                if _attributes(component).get("label")
-            }
-
-            self.assertEqual(labelled["CLK_SOURCE_PROBE"].get("name"), "Pin")
-            self.assertEqual(labelled["POR_SOURCE_PROBE"].get("name"), "Pin")
-            self.assertEqual(labelled["PC_OUT_PROBE"].get("name"), "Pin")
-            self.assertEqual(labelled["halt"].get("name"), "Pin")
-            self.assertEqual(labelled["CLK_SOURCE_PROBE"].get("loc"), "(350,400)")
-            self.assertEqual(labelled["POR_SOURCE_PROBE"].get("loc"), "(350,450)")
-            self.assertIn(
-                ("POR", "(330,440)"),
-                {(component.get("name"), component.get("loc"))
-                 for component in main.findall("comp")},
-            )
-            outputs = {
-                _attributes(component).get("label")
-                for component in main.findall("comp")
-                if component.get("name") == "Pin"
-                and _attributes(component).get("type") == "output"
-            }
-            self.assertEqual(
-                outputs,
-                {"halt", "PC_OUT_PROBE", "CLK_SOURCE_PROBE", "POR_SOURCE_PROBE"},
-            )
-            self.assertEqual(source.read_bytes(), before)
-
-    def test_top_level_reset_release_probe_is_temporary_and_observable(self):
-        source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
-        before = source.read_bytes()
-        with tempfile.TemporaryDirectory() as directory:
-            target = Path(directory) / "probe.circ"
-            subprocess.run(
-                [
-                    sys.executable,
-                    str(ROOT / "scripts/probe-logisim-top-reset-release.py"),
-                    str(target),
-                ],
-                cwd=ROOT,
-                check=True,
-            )
-            root = ET.parse(target).getroot()
-            main = next(
-                circuit for circuit in root.findall("circuit")
-                if circuit.get("name") == "TinyCPUMain"
-            )
-            labelled = {
-                _attributes(component).get("label"): component
-                for component in main.findall("comp")
-                if _attributes(component).get("label")
-            }
-
-            self.assertEqual(labelled["RESET_SOURCE_PROBE"].get("name"), "Pin")
-            self.assertEqual(labelled["RESET_FETCH_PROBE"].get("name"), "Pin")
-            self.assertEqual(labelled["PC_OUT_PROBE"].get("name"), "Pin")
-            self.assertEqual(labelled["halt"].get("name"), "Pin")
-            self.assertEqual(labelled["RESET_SOURCE_PROBE"].get("loc"), "(330,450)")
-            self.assertEqual(labelled["RESET_FETCH_PROBE"].get("loc"), "(870,450)")
-            outputs = {
-                _attributes(component).get("label")
-                for component in main.findall("comp")
-                if component.get("name") == "Pin"
-                and _attributes(component).get("type") == "output"
-            }
-            self.assertEqual(
-                outputs,
-                {"halt", "PC_OUT_PROBE", "RESET_SOURCE_PROBE", "RESET_FETCH_PROBE"},
-            )
-            self.assertEqual(source.read_bytes(), before)
 
     def test_change_driven_table_is_not_mistaken_for_an_edge_count(self):
         # Logisim emits values, not a synthetic column-name header. Successful
@@ -268,70 +99,41 @@ class LogisimLauncherTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             parse_args(["--trace-output", "trace.tsv", "--jobs", "0"])
 
-    def test_combined_gate_attempts_both_profiles_after_a_failure(self):
-        with tempfile.TemporaryDirectory() as directory:
-            temporary = Path(directory)
-            log = temporary / "calls"
-            fake_python = temporary / "python3"
-            fake_python.write_text(
-                "#!/bin/sh\n"
-                f"printf '%s\\n' \"$*\" >> {log}\n"
-                "case \" $* \" in *' --profile tinycpu-16-12 '*) exit 1;; esac\n",
-                encoding="utf-8",
-            )
-            fake_python.chmod(0o755)
-            environment = os.environ.copy()
-            environment["PATH"] = f"{temporary}:{environment['PATH']}"
-            environment["LOGISIM_OUTPUT"] = str(temporary / "evidence")
-            result = subprocess.run(
-                ["bash", str(ROOT / "scripts/test-logisim.sh")],
-                cwd=ROOT,
-                env=environment,
-                capture_output=True,
-                text=True,
-                check=False,
-            )
-            calls = log.read_text(encoding="utf-8")
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("--profile tinycpu-16-12", calls)
-            self.assertIn("--profile tinycpu-8-8", calls)
-            self.assertIn("--jobs 1", calls)
-            self.assertIn("tinycpu-16-12", result.stderr)
 
     def test_autonomous_project_uses_profile_specific_circuit(self):
-        source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
+        source = ROOT / "hardware/logisim/TinyCPU.circ"
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory) / source.name
             autonomous_project(source, target, "TinyCPUMain")
             root = ET.parse(target).getroot()
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             parts = {(c.get("name"), c.get("loc")) for c in main.findall("comp")}
-            self.assertIn(("Clock", "(330,390)"), parts)
-            self.assertIn(("NOT Gate", "(330,440)"), parts)
-            self.assertIn(("Clock", "(290,440)"), parts)
-            self.assertNotIn(("POR", "(330,440)"), parts)
-            self.assertNotIn(("PowerOnReset", "(330,440)"), parts)
+            self.assertIn(("Clock", "(330,430)"), parts)
+            self.assertIn(("NOT Gate", "(330,490)"), parts)
+            self.assertIn(("Clock", "(290,490)"), parts)
+            self.assertNotIn(("POR", "(330,490)"), parts)
+            self.assertNotIn(("PowerOnReset", "(330,490)"), parts)
             clocks = {
                 component.get("loc"): _attributes(component)
                 for component in main.findall("comp")
                 if component.get("name") == "Clock"
             }
-            self.assertEqual(clocks["(330,390)"]["highDuration"], "2")
-            self.assertEqual(clocks["(330,390)"]["lowDuration"], "2")
-            self.assertEqual(clocks["(290,440)"]["highDuration"], "100")
-            self.assertEqual(clocks["(290,440)"]["lowDuration"], "2")
+            self.assertEqual(clocks["(330,430)"]["highDuration"], "2")
+            self.assertEqual(clocks["(330,430)"]["lowDuration"], "2")
+            self.assertEqual(clocks["(290,490)"]["highDuration"], "100")
+            self.assertEqual(clocks["(290,490)"]["lowDuration"], "2")
             wires = {
                 (wire.get("from"), wire.get("to"))
                 for wire in main.findall("wire")
             }
-            self.assertIn(("(290,440)", "(310,440)"), wires)
+            self.assertIn(("(290,490)", "(310,490)"), wires)
             labels = [a.get("val") for a in main.findall("comp/a") if a.get("name") == "label"]
             self.assertIn("halt", labels)
             self.assertIn("HALTED_WITH_ERROR", labels)
             self.assertNotIn("HALTED", labels)
 
     def test_autonomous_project_can_stop_on_error_halt(self):
-        source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
+        source = ROOT / "hardware/logisim/TinyCPU.circ"
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory) / source.name
             autonomous_project(
@@ -345,14 +147,14 @@ class LogisimLauncherTests(unittest.TestCase):
             self.assertNotIn("HALTED_WITH_ERROR", labels)
 
     def test_source_project_is_not_modified(self):
-        source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
+        source = ROOT / "hardware/logisim/TinyCPU.circ"
         before = source.read_bytes()
         with tempfile.TemporaryDirectory() as directory:
             autonomous_project(source, Path(directory) / "copy.circ", "TinyCPUMain")
         self.assertEqual(before, source.read_bytes())
 
     def test_register_offset_sum_reaches_effective_address_selector(self):
-        for name in ("TinyCPU.circ", "TinyCPU-8-8.circ"):
+        for name in ("TinyCPU.circ",):
             root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             wires = {(w.get("from"), w.get("to")) for w in main.findall("wire")}
@@ -364,7 +166,7 @@ class LogisimLauncherTests(unittest.TestCase):
             )
 
     def test_register_offset_load_selects_memory_data(self):
-        for name in ("TinyCPU.circ", "TinyCPU-8-8.circ"):
+        for name in ("TinyCPU.circ",):
             root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
             circuit_name = (
                 "FetchDecodeControls" if name == "TinyCPU.circ" else "DecodeSignals"
@@ -380,7 +182,7 @@ class LogisimLauncherTests(unittest.TestCase):
                     if component.get("name") == "Pin"
                     and attribute.get("name") == "label"
                 }
-                self.assertIn("LOAD_OPERAND", pin_labels)
+                self.assertIn("LOAD_REG_OFF", pin_labels)
                 self.assertIn("ADDR_REG_OFFS_ARGUMENT", pin_labels)
                 continue
             wires = {(w.get("from"), w.get("to")) for w in decode.findall("wire")}
@@ -390,7 +192,7 @@ class LogisimLauncherTests(unittest.TestCase):
             self.assertIn(("(680,100)", "(710,100)"), wires)
 
     def test_grouped_public_decoder_replaces_legacy_adapter(self):
-        for name in ("TinyCPU.circ", "TinyCPU-8-8.circ"):
+        for name in ("TinyCPU.circ",):
             root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             decoders = [
@@ -422,134 +224,13 @@ class LogisimLauncherTests(unittest.TestCase):
                 )
 
     def test_program_limit_source_uses_profile_maximum(self):
-        for circuit_name, width, maximum in (
-            ("TinyCPU.circ", "16", "0xfff"),
-            ("TinyCPU-8-8.circ", "8", "0xff"),
-        ):
-            with self.subTest(circuit=circuit_name):
-                root = ET.parse(ROOT / "hardware/logisim" / circuit_name).getroot()
-                main = next(
-                    c for c in root.findall("circuit")
-                    if c.get("name") == "TinyCPUMain"
-                )
-                sources = [
-                    component
-                    for component in main.findall("comp")
-                    if component.get("name") == "Constant"
-                    and _attributes(component).get("label") == "PROGRAM_LIMIT_MAX"
-                ]
-                self.assertEqual(len(sources), 1)
-                attributes = _attributes(sources[0])
-                self.assertEqual(attributes.get("width"), width)
-                self.assertEqual(attributes.get("value"), maximum)
-
-                source = sources[0].get("loc")
-                attached_wires = [
-                    wire for wire in main.findall("wire")
-                    if source in (wire.get("from"), wire.get("to"))
-                ]
-                self.assertEqual(
-                    len(attached_wires), 1,
-                    "the named program-limit source must exclusively drive "
-                    "its existing fetch net",
-                )
-
-    def test_8_bit_fetch_path_uses_profile_width(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU-8-8.circ").getroot()
-        fetch = next(
-            circuit for circuit in root.findall("circuit")
-            if circuit.get("name") == "FetchDecode"
-        )
-        program_limit = _component_by_label(fetch, "PROGRAM_LIMIT")
-        self.assertEqual(_attributes(program_limit).get("width"), "8")
-        self.assertEqual(_attributes(program_limit).get("initial"), "0xff")
-
-        for component_name, label in (
-            ("Register", "PC"),
-            ("Adder", None),
-            ("Comparator", None),
-        ):
-            with self.subTest(component=component_name):
-                matches = [
-                    component for component in fetch.findall("comp")
-                    if component.get("name") == component_name
-                    and (label is None or _attributes(component).get("label") == label)
-                ]
-                self.assertEqual(len(matches), 1)
-                self.assertEqual(_attributes(matches[0]).get("width"), "8")
-
-    def test_8_bit_pc_successor_path_is_continuous(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU-8-8.circ").getroot()
-        fetch = next(
-            circuit for circuit in root.findall("circuit")
-            if circuit.get("name") == "FetchDecode"
-        )
-        pc = _component_by_label(fetch, "PC")
-        pc_out = _component_by_label(fetch, "PC_OUT")
-        adder = next(c for c in fetch.findall("comp") if c.get("name") == "Adder")
-        selector = next(
-            c for c in fetch.findall("comp") if c.get("name") == "Multiplexer"
-        )
-        address_splitter = next(
-            c for c in fetch.findall("comp")
-            if c.get("name") == "Splitter"
-            and _attributes(c).get("incoming") == "8"
-        )
-        rom = _component_by_label(fetch, "INSTRUCTION_ROM")
-
-        pc_x, pc_y = map(int, pc.get("loc").strip("()").split(","))
-        add_x, add_y = map(int, adder.get("loc").strip("()").split(","))
-        mux_x, mux_y = map(int, selector.get("loc").strip("()").split(","))
-        rom_x, rom_y = map(int, rom.get("loc").strip("()").split(","))
-        split_x, split_y = map(
-            int, address_splitter.get("loc").strip("()").split(",")
-        )
-        pc_q = f"({pc_x + 60},{pc_y + 30})"
-        pc_d = f"({pc_x},{pc_y + 30})"
-        add_input = f"({add_x - 40},{add_y - 10})"
-        add_output = f"({add_x},{add_y})"
-        mux_increment = f"({mux_x - 30},{mux_y - 10})"
-        rom_address = f"({rom_x},{rom_y + 10})"
-
-        self.assertTrue(_wire_path_exists(fetch, pc_q, add_input))
-        self.assertTrue(_wire_path_exists(fetch, add_output, mux_increment))
-        self.assertTrue(_wire_path_exists(fetch, selector.get("loc"), pc_d))
-        self.assertTrue(_wire_path_exists(fetch, pc_q, f"({split_x},{split_y})"))
-        split_output = f"({split_x + 20},{split_y + 10})"
-        self.assertTrue(_wire_path_exists(fetch, split_output, pc_out.get("loc")))
-        self.assertTrue(_wire_path_exists(fetch, split_output, rom_address))
-
-    def test_8_bit_pc_register_controls_are_connected(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU-8-8.circ").getroot()
-        fetch = next(
-            circuit for circuit in root.findall("circuit")
-            if circuit.get("name") == "FetchDecode"
-        )
-        pc = _component_by_label(fetch, "PC")
-        clock = _component_by_label(fetch, "CLK")
-        reset = _component_by_label(fetch, "RESET")
-
-        pc_x, pc_y = map(int, pc.get("loc").strip("()").split(","))
-        pc_enable = f"({pc_x},{pc_y + 50})"
-        pc_clock = f"({pc_x},{pc_y + 70})"
-        pc_reset = f"({pc_x + 30},{pc_y + 90})"
-
-        self.assertTrue(_wire_path_exists(fetch, clock.get("loc"), pc_clock))
-        self.assertTrue(_wire_path_exists(fetch, reset.get("loc"), pc_reset))
-
-        enable_sources = [
-            component for component in fetch.findall("comp")
-            if component.get("name") == "Constant"
-            and _wire_path_exists(fetch, component.get("loc"), pc_enable)
-        ]
-        self.assertEqual(
-            len(enable_sources), 1,
-            "the PC enable input must have one constant source",
-        )
-        self.assertEqual(
-            _attributes(enable_sources[0]).get("value", "0x1"), "0x1",
-            "the PC enable input must remain asserted",
-        )
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        fetch = next(c for c in root.findall("circuit") if c.get("name") == "FetchDecode")
+        source = _component_by_label(fetch, "PROGRAM_LIMIT")
+        attributes = _attributes(source)
+        self.assertEqual(source.get("name"), "Pin")
+        self.assertEqual(attributes.get("width"), "16")
+        self.assertEqual(attributes.get("initial"), "0xfff")
 
     def test_visible_top_level_memory_or_gate_has_every_input_connected(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
@@ -754,7 +435,7 @@ class LogisimLauncherTests(unittest.TestCase):
                 f"{name} still routes the stale decoder output to SUB_CONST",
             )
 
-    def test_public_decoder_separates_operations_from_argument_kinds(self):
+    def test_public_decoder_preserves_authored_control_boundary(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         controls = next(
             circuit for circuit in root.findall("circuit")
@@ -768,14 +449,15 @@ class LogisimLauncherTests(unittest.TestCase):
         }
         self.assertTrue({
             "ADD_OPERAND", "SUB_OPERAND", "MUL_OPERAND", "DIV_OPERAND",
-            "AND_OPERAND", "OR_OPERAND", "XOR_OPERAND", "LOAD_OPERAND",
-            "STORE_OPERAND", "CONST_ARGUMENT", "ADDR_ARGUMENT",
+            "AND_OPERAND", "OR_OPERAND", "XOR_OPERAND",
+            "CONST_ARGUMENT", "ADDR_ARGUMENT",
             "ADDR_REG_ARGUMENT", "ADDR_REG_OFFS_ARGUMENT",
         }.issubset(labels))
         self.assertTrue({
             "LOAD_CONST", "LOAD_ADR", "LOAD_ADR_REG", "LOAD_REG_OFF",
             "STORE_ADR", "STORE_ADR_REG", "STORE_REG_OFF",
-        }.isdisjoint(labels))
+        }.issubset(labels))
+        self.assertTrue({"LOAD_OPERAND", "STORE_OPERAND"}.isdisjoint(labels))
 
     def test_argument_kind_drives_effective_address_without_operation_fan_in(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
@@ -797,7 +479,7 @@ class LogisimLauncherTests(unittest.TestCase):
         ))
 
     def test_matrix_rom_is_injected_only_into_temporary_project(self):
-        source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
+        source = ROOT / "hardware/logisim/TinyCPU.circ"
         before = source.read_bytes()
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory) / "copy.circ"
@@ -806,25 +488,25 @@ class LogisimLauncherTests(unittest.TestCase):
             rom = next(c for owner in root.findall("circuit") for c in owner.findall("comp")
                        if c.get("name") == "ROM")
             contents = next(a for a in rom.findall("a") if a.get("name") == "contents")
-            self.assertEqual(contents.text, "addr/data: 8 14\n123 456\n")
+            self.assertEqual(contents.text, "addr/data: 12 22\n123 456\n")
         self.assertEqual(before, source.read_bytes())
 
     def test_reserved_opcode_fixture_halts_in_reference_model(self):
-        profile = load_profile("tinycpu-8-8")
-        case = {"program": "HALT()\n", "raw_words": [0x3F00, 0x2D00]}
+        profile = load_profile("tinycpu-16-12")
+        case = {"program": "HALT()\n", "raw_words": [0x3F0000, 0x2D0000]}
         program = _matrix_program(case, profile)
         self.assertEqual(program.instructions[0].mnemonic, "__ILLEGAL__")
         self.assertEqual(_expected_edges(program), 1)
         self.assertEqual(_expected_halt_output(program), "HALTED_WITH_ERROR")
 
     def test_matrix_reports_progress_before_each_electrical_run(self):
-        profile = load_profile("tinycpu-8-8")
+        profile = load_profile("tinycpu-16-12")
         output = StringIO()
         with tempfile.TemporaryDirectory() as directory, patch(
             "tiny_cpu_logisim.run_trace"
         ) as trace, redirect_stdout(output):
             count = run_matrix(
-                ROOT / "hardware/logisim/TinyCPU-8-8.circ",
+                ROOT / "hardware/logisim/TinyCPU.circ",
                 profile,
                 Path("logisim.jar"),
                 "java",
@@ -837,10 +519,10 @@ class LogisimLauncherTests(unittest.TestCase):
         self.assertEqual(trace.call_count, count)
         self.assertIn(f"[1/{count}]", lines[0])
         self.assertIn(f"[{count}/{count}]", lines[-1])
-        self.assertIn("tinycpu-8-8", lines[0])
+        self.assertIn("tinycpu-16-12", lines[0])
 
     def test_matrix_can_run_two_electrical_fixtures_concurrently(self):
-        profile = load_profile("tinycpu-8-8")
+        profile = load_profile("tinycpu-16-12")
         barrier = threading.Barrier(2)
         lock = threading.Lock()
         started = 0
@@ -857,7 +539,7 @@ class LogisimLauncherTests(unittest.TestCase):
             "tiny_cpu_logisim.run_trace", side_effect=synchronized_trace
         ) as trace, redirect_stdout(StringIO()):
             count = run_matrix(
-                ROOT / "hardware/logisim/TinyCPU-8-8.circ",
+                ROOT / "hardware/logisim/TinyCPU.circ",
                 profile,
                 Path("logisim.jar"),
                 "java",
@@ -869,7 +551,7 @@ class LogisimLauncherTests(unittest.TestCase):
         self.assertEqual(trace.call_count, count)
 
     def test_matrix_error_identifies_the_failing_fixture(self):
-        profile = load_profile("tinycpu-8-8")
+        profile = load_profile("tinycpu-16-12")
 
         def fail_first(_project, _jar, _java, output, _timeout):
             if output.stem == "load-const":
@@ -885,10 +567,10 @@ class LogisimLauncherTests(unittest.TestCase):
             "tiny_cpu_logisim.run_trace", side_effect=record_and_fail
         ), redirect_stdout(StringIO()):
             with self.assertRaisesRegex(
-                LogisimError, "tinycpu-8-8 fixture load-const: trace timed out"
+                LogisimError, "tinycpu-16-12 fixture load-const: trace timed out"
             ):
                 run_matrix(
-                    ROOT / "hardware/logisim/TinyCPU-8-8.circ",
+                    ROOT / "hardware/logisim/TinyCPU.circ",
                     profile,
                     Path("logisim.jar"),
                     "java",

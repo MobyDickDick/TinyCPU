@@ -14,7 +14,7 @@ python3 src/tiny_cpu_debugger.py hardware/logisim/ap5_countdown.tcpu \
   --breakpoint loop
 python3 src/tiny_cpu_debugger.py hardware/logisim/ap5_countdown.tcpu --step
 python3 src/tiny_cpu_debugger.py hardware/logisim/ap5_countdown.tcpu --json
-python3 src/tiny_cpu_debugger.py program.tcpu --profile tinycpu-8-8 --json
+python3 src/tiny_cpu_debugger.py program.tcpu --profile tinycpu-16-12 --json
 ```
 
 Ein erster Lauf mit dem Breakpoint `loop` liefert beispielsweise:
@@ -45,7 +45,7 @@ Weitere wichtige Optionen:
 - `--step-limit N` begrenzt die insgesamt ausgeführten Instruktionen (Standard:
   `10000`), damit beispielsweise eine Endlosschleife deterministisch endet;
 - `--json` ersetzt die Textausgabe durch das unten beschriebene JSON-Objekt.
-- `--profile tinycpu-16-12|tinycpu-8-8` wählt Daten-/Adressbreite und
+- `--profile tinycpu-16-12` wählt das unterstützte Daten-/Adressformat und
   Maschinenformat; ohne diese Option bleibt `tinycpu-16-12` der Standard.
 
 Ein normaler Halt und ein Breakpoint liefern Exit-Code `0`. `halt_error` und

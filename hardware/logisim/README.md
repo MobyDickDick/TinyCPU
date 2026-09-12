@@ -22,7 +22,7 @@ upstream JAR is not duplicated as a Git blob. The launcher first checks
 `vendor/logisim-evolution-4.1.0-all.jar`, then `~/.cache/tinycpu/`, and downloads
 the pinned JAR only when neither exists. CI caches that download. It then
 runs the 17-edge countdown and the complete opcode/error matrix for both
-`tinycpu-16-12` and `tinycpu-8-8` against the real simulator. Each matrix owns
+`tinycpu-16-12` against the real simulator. The matrix owns
 at least one isolated positive program per opcode and six sticky-error programs; the
 offline verifier rejects missing, additional, or duplicate opcode coverage.
 Java security-patch and newer-feature releases are accepted; requiring one
@@ -391,9 +391,9 @@ PYTHONPATH=src python src/tiny_cpu_circuit.py \
 
 ## What is implemented
 
-### AP 17: eigenständige 8/8-Schaltung
+### Stillgelegtes AP 17: ehemalige 8/8-Schaltung
 
-`TinyCPU-8-8.circ` ist die fest verdrahtete Variante für das Profil
+Die nachfolgende Beschreibung ist historisch; Schaltung und Artefakte wurden entfernt. `TinyCPU-8-8.circ` war die fest verdrahtete Variante für das Profil
 `tinycpu-8-8`. Daten- und Adresspfade sind 8 Bit breit, das Instruktions-ROM
 verwendet 8 Adressbits und 14 Datenbits. Die Datei ist bewusst ein eigenes
 Logisim-Projekt und keine zur Laufzeit umgeschaltete Parametrisierung von

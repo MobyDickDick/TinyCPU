@@ -152,63 +152,6 @@ def _rom_words(text: str, *, source: Path, address_bits: int, word_bits: int) ->
     return words
 
 
-def verify_small_profile_circuit(profile: dict[str, object], machine: dict[str, object]) -> None:
-    """Check that the checked-in 8/8 circuit really is width-specialized.
-
-    This remains a structural gate, not a substitute for the electrical AP-17
-    trace.  It nevertheless prevents the new profile from silently pointing at
-    a renamed 16/12 circuit or embedding a ROM for the wrong machine format.
-    """
-    path = LOGISIM / str(profile.get("circuit", ""))
-    if not path.is_file():
-        raise VerificationError(f"{display_path(path)}: profile circuit is missing")
-    project = ET.parse(path).getroot()
-    if project.find("main") is None or project.find("main").get("name") != profile.get("top_circuit"):
-        raise VerificationError(f"{display_path(path)}: top circuit differs from profile")
-
-    width_attributes = {"width", "incoming", "dataWidth", "addrWidth"}
-    forbidden = {"16", "12", "22"}
-    for circuit in project.findall("circuit"):
-        for component in circuit.findall("comp"):
-            attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
-            legacy_attribute = next((
-                name for name in width_attributes if attributes.get(name) in forbidden
-            ), None)
-            if legacy_attribute is None:
-                continue
-            identity = attributes.get("label") or component.get("name", "component")
-            raise VerificationError(
-                f"{display_path(path)}:{circuit.get('name')}:{identity}: "
-                f"legacy 16/12 width remains in {legacy_attribute}="
-                f"{attributes[legacy_attribute]} (expected {profile['data_bits']}/"
-                f"{profile['address_bits']} profile widths)"
-            )
-
-    rom = next((component for component in project.findall(".//comp")
-                if component.get("name") == "ROM" and any(
-                    item.get("name") == "label" and item.get("val") == "INSTRUCTION_ROM"
-                    for item in component.findall("a"))), None)
-    if rom is None:
-        raise VerificationError(f"{display_path(path)}: INSTRUCTION_ROM is missing")
-    attributes = {item.get("name"): item for item in rom.findall("a")}
-    address_bits = int(profile["address_bits"])
-    word_bits = int(machine["word_bits"])
-    if (attributes.get("addrWidth") is None or attributes["addrWidth"].get("val") != str(address_bits)
-            or attributes.get("dataWidth") is None or attributes["dataWidth"].get("val") != str(word_bits)
-            or attributes.get("contents") is None):
-        raise VerificationError(f"{display_path(path)}: ROM widths differ from profile")
-    embedded = _rom_words(attributes["contents"].text or "", source=path,
-                          address_bits=address_bits, word_bits=word_bits)
-    fixture_path = LOGISIM / "ap17_countdown_8_8.rom"
-    fixture_tokens = fixture_path.read_text(encoding="utf-8").split()
-    if fixture_tokens[:2] != ["v2.0", "raw"]:
-        raise VerificationError(f"{display_path(fixture_path)}: invalid raw ROM header")
-    try:
-        fixture = [int(token, 16) for token in fixture_tokens[2:]]
-    except ValueError as exc:
-        raise VerificationError(f"{display_path(fixture_path)}: invalid ROM word") from exc
-    if embedded != fixture:
-        raise VerificationError(f"{display_path(path)}: embedded ROM differs from AP-17 fixture")
 
 
 def verify_system_circuit() -> None:
@@ -602,13 +545,7 @@ def verify_contracts() -> tuple[int, int]:
     profile = load_json(profile_path)
     if not isinstance(machine, dict) or not isinstance(matrix, dict) or not isinstance(profile, dict):
         raise VerificationError("machine, matrix, and profile roots must be JSON objects")
-    small_machine_path = LOGISIM / "tinycpu-machine-8-v1.json"
-    small_profile_path = LOGISIM / "tinycpu-8-8.json"
-    small_machine, small_profile = load_json(small_machine_path), load_json(small_profile_path)
-    if not isinstance(small_machine, dict) or not isinstance(small_profile, dict):
-        raise VerificationError("8/8 machine and profile roots must be JSON objects")
-    expected_profiles = ((profile, machine, 16, 4096, 22),
-                         (small_profile, small_machine, 8, 256, 14))
+    expected_profiles = ((profile, machine, 16, 4096, 22),)
     for current_profile, current_machine, bits, size, word_bits in expected_profiles:
         if (current_profile.get("data_bits"), current_profile.get("memory_size"),
                 current_profile.get("machine_format_id"), current_machine.get("word_bits")) != (
@@ -616,7 +553,6 @@ def verify_contracts() -> tuple[int, int]:
             raise VerificationError(f"profile {current_profile.get('name')!r} is inconsistent")
         if current_profile.get("machine_format") != current_machine_path_name(current_machine):
             raise VerificationError(f"profile {current_profile.get('name')!r} selects the wrong format file")
-    verify_small_profile_circuit(small_profile, small_machine)
     verify_system_circuit()
 
     opcodes = machine.get("opcodes")
@@ -636,9 +572,6 @@ def verify_contracts() -> tuple[int, int]:
         mnemonics.append(mnemonic)
     if len(set(codes)) != len(codes) or len(set(mnemonics)) != len(mnemonics):
         raise VerificationError(f"{machine_path.relative_to(ROOT)}: duplicate opcode code or mnemonic")
-    small_opcodes = small_machine.get("opcodes")
-    if small_opcodes != opcodes:
-        raise VerificationError(f"{small_machine_path.relative_to(ROOT)}: opcode table differs from v1")
 
     isa_controls = profile.get("isa_controls", {})
     signals = isa_controls.get("instruction_signals") if isinstance(isa_controls, dict) else None
@@ -665,15 +598,6 @@ def verify_contracts() -> tuple[int, int]:
     # as the frozen 1.0 contract while requiring it on every new profile.
     matrix.setdefault("profile", "tinycpu-16-12")
     fixture_count = verify_electrical_matrix(matrix, machine, "tinycpu-16-12", matrix_path)
-    small_matrix_path = LOGISIM / "tinycpu-electrical-matrix-8-v1.json"
-    small_matrix = load_json(small_matrix_path)
-    if not isinstance(small_matrix, dict):
-        raise VerificationError(f"{small_matrix_path.relative_to(ROOT)}: matrix root must be an object")
-    small_fixture_count = verify_electrical_matrix(
-        small_matrix, small_machine, "tinycpu-8-8", small_matrix_path
-    )
-    if small_fixture_count != fixture_count:
-        raise VerificationError("electrical matrices have different sticky-error coverage")
     debug_path = LOGISIM / "tinycpu-debug-v1.json"
     debug = load_json(debug_path)
     if not isinstance(debug, dict) or debug.get("schema_version") != 1:
@@ -687,7 +611,7 @@ def verify_contracts() -> tuple[int, int]:
 
 
 def current_machine_path_name(machine: dict[str, object]) -> str:
-    return "tinycpu-machine-8-v1.json" if machine.get("format") == "tinycpu-machine-8-v1" else "tinycpu-machine-v1.json"
+    return "tinycpu-machine-v1.json"
 
 
 def verify(root: Path = ROOT) -> list[str]:

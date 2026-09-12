@@ -11,24 +11,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class CircuitCheckTests(unittest.TestCase):
     def test_profile_projects_have_no_static_gate_wiring_faults(self):
-        for project in ("TinyCPU.circ", "TinyCPU-8-8.circ"):
+        for project in ("TinyCPU.circ",):
             with self.subTest(project=project):
                 self.assertEqual(
                     inspect_project(ROOT / "hardware/logisim" / project), []
                 )
 
-    def test_8_bit_top_level_uses_visible_wires_instead_of_tunnels(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU-8-8.circ").getroot()
-        main = next(
-            circuit for circuit in root.findall("circuit")
-            if circuit.get("name") == "TinyCPUMain"
-        )
-        tunnels = [
-            component for component in main.findall("comp")
-            if component.get("name") == "Tunnel"
-        ]
-
-        self.assertEqual(tunnels, [])
 
     def test_main_fetch_decoder_uses_one_shared_decoder_net(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
@@ -69,7 +57,6 @@ class CircuitCheckTests(unittest.TestCase):
     def test_fetch_decoder_outputs_have_short_explanations(self):
         projects = (
             ROOT / "hardware/logisim/TinyCPU.circ",
-            ROOT / "hardware/logisim/TinyCPU-8-8.circ",
             ROOT / "hardware/logisim/diagnostics/TinyCPU-FetchDecodeControls.circ",
         )
         for project in projects:

@@ -50,12 +50,6 @@ class CircuitVerificationTests(unittest.TestCase):
         with self.assertRaisesRegex(VERIFY.VerificationError, "duplicate Pin labels"):
             VERIFY.verify_circuit(path)
 
-    def test_8_8_circuit_matches_profile_and_embedded_fixture(self) -> None:
-        root = MODULE_PATH.parents[1]
-        logisim = root / "hardware" / "logisim"
-        profile = json.loads((logisim / "tinycpu-8-8.json").read_text())
-        machine = json.loads((logisim / "tinycpu-machine-8-v1.json").read_text())
-        VERIFY.verify_small_profile_circuit(profile, machine)
 
     def test_ap18_circuit_matches_public_pin_contract(self) -> None:
         VERIFY.verify_system_circuit()
@@ -206,52 +200,8 @@ class CircuitVerificationTests(unittest.TestCase):
                                         "InterruptController wiring"):
                 VERIFY.verify_system_circuit()
 
-    def test_8_8_circuit_rejects_a_legacy_width(self) -> None:
-        root = MODULE_PATH.parents[1]
-        source = root / "hardware" / "logisim"
-        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
-        shutil.copy(source / "TinyCPU-8-8.circ", temporary)
-        shutil.copy(source / "ap17_countdown_8_8.rom", temporary)
-        circuit = temporary / "TinyCPU-8-8.circ"
-        circuit.write_text(circuit.read_text().replace(
-            '<a name="label" val="RESULT_VALUE"/>\n      <a name="type" val="output"/>\n'
-            '      <a name="width" val="8"/>',
-            '<a name="label" val="RESULT_VALUE"/>\n      <a name="type" val="output"/>\n'
-            '      <a name="width" val="16"/>',
-            1,
-        ))
-        profile = json.loads((source / "tinycpu-8-8.json").read_text())
-        machine = json.loads((source / "tinycpu-machine-8-v1.json").read_text())
-        original = VERIFY.LOGISIM
-        VERIFY.LOGISIM = temporary
-        self.addCleanup(setattr, VERIFY, "LOGISIM", original)
-        with self.assertRaisesRegex(
-            VERIFY.VerificationError,
-            r"Operations:RESULT_VALUE: legacy 16/12 width remains in width=16",
-        ):
-            VERIFY.verify_small_profile_circuit(profile, machine)
 
-    def test_8_8_electrical_matrix_is_complete_and_profile_valid(self) -> None:
-        root = MODULE_PATH.parents[1]
-        logisim = root / "hardware" / "logisim"
-        matrix = json.loads((logisim / "tinycpu-electrical-matrix-8-v1.json").read_text())
-        machine = json.loads((logisim / "tinycpu-machine-8-v1.json").read_text())
-        self.assertEqual(
-            VERIFY.verify_electrical_matrix(
-                matrix, machine, "tinycpu-8-8",
-                logisim / "tinycpu-electrical-matrix-8-v1.json",
-            ),
-            6,
-        )
 
-    def test_8_8_electrical_matrix_rejects_16_bit_operand(self) -> None:
-        root = MODULE_PATH.parents[1]
-        logisim = root / "hardware" / "logisim"
-        matrix = json.loads((logisim / "tinycpu-electrical-matrix-8-v1.json").read_text())
-        machine = json.loads((logisim / "tinycpu-machine-8-v1.json").read_text())
-        matrix["fixtures"][0]["program"] = "LOAD_CONST(32767)\nHALT_ERROR()\n"
-        with self.assertRaisesRegex(VERIFY.VerificationError, "invalid for tinycpu-8-8"):
-            VERIFY.verify_electrical_matrix(matrix, machine, "tinycpu-8-8", Path("matrix.json"))
 
 
 if __name__ == "__main__":

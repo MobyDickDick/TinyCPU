@@ -141,7 +141,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--json", action="store_true", help="emit stable machine-readable JSON")
     parser.add_argument("--input", action="append", type=int, default=[])
     parser.add_argument("--step-limit", type=int, default=10000)
-    parser.add_argument("--profile", choices=("tinycpu-16-12", "tinycpu-8-8"),
+    parser.add_argument("--profile", choices=("tinycpu-16-12",),
                         default="tinycpu-16-12")
     parser.add_argument("--system", choices=("tinycpu-peripherals-16-12-v1",),
                         help="select an optional peripheral/interrupt system")

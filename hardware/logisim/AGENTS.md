@@ -3,7 +3,7 @@
 `FetchDecodeControls` ist eine bewusst von Hand gestaltete Schaltung. **Ihre
 Darstellung darf nicht erneut umgezeichnet, automatisch angeordnet,
 „aufgeräumt“ oder durch eine vermeintlich übersichtlichere Darstellung ersetzt
-werden.** Das gilt für `TinyCPU.circ`, `TinyCPU-8-8.circ` und die eigenständige
+werden.** Das gilt für `TinyCPU.circ` und die eigenständige
 Diagnoseschaltung unter `diagnostics/`.
 
 Insbesondere dürfen Bauteile, Pins und Leitungswege nicht einzeln verschoben,
