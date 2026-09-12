@@ -33,6 +33,12 @@ Folgende Stop-Regeln gelten:
    Beweis für einen bestimmten Decoder-, Takt- oder Datenpfadfehler.
 5. AP 18 (Peripherie und Interrupts) bleibt pausiert, bis beide CPU-Profile
    wieder ihre bestehenden Gates bestehen.
+6. `FetchDecodeControls` wird nicht erneut umgezeichnet, automatisch
+   angeordnet oder optisch „aufgeräumt“. Falls seine Darstellung vergrößert
+   werden muss, darf ausschließlich das gesamte vorhandene Bild in beiden
+   Achsen mit demselben Faktor skaliert werden; relative Bauteilpositionen und
+   Leitungsverläufe bleiben unverändert. Die verbindlichen Bearbeitungsregeln
+   stehen zusätzlich in `hardware/logisim/AGENTS.md`.
 
 ## Arbeitspakete
 
