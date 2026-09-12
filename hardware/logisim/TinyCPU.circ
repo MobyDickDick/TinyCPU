@@ -276,7 +276,6 @@
       <a name="labelloc" val="east"/>
     </comp>
     <comp lib="0" loc="(790,550)" name="Constant">
-      <a name="label" val="PROGRAM_LIMIT_MAX"/>
       <a name="value" val="0xfff"/>
       <a name="width" val="16"/>
     </comp>
@@ -522,7 +521,7 @@
     <wire from="(2870,550)" to="(3320,550)"/>
     <wire from="(2870,960)" to="(2900,960)"/>
     <wire from="(2870,980)" to="(2920,980)"/>
-    <wire from="(2880,1380)" to="(3480,1380)"/>
+    <wire from="(2880,1380)" to="(2910,1380)"/>
     <wire from="(2880,1400)" to="(2930,1400)"/>
     <wire from="(2880,1420)" to="(3040,1420)"/>
     <wire from="(2880,1440)" to="(2910,1440)"/>
@@ -531,6 +530,8 @@
     <wire from="(2890,1460)" to="(2890,1510)"/>
     <wire from="(2890,1510)" to="(3060,1510)"/>
     <wire from="(2900,350)" to="(2900,960)"/>
+    <wire from="(2910,1320)" to="(2910,1380)"/>
+    <wire from="(2910,1380)" to="(3480,1380)"/>
     <wire from="(2910,1440)" to="(2910,1490)"/>
     <wire from="(2910,1490)" to="(3060,1490)"/>
     <wire from="(2920,330)" to="(2920,980)"/>
