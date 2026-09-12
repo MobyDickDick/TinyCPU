@@ -41,6 +41,7 @@ Tests mit historischen Canvas-Koordinaten verändert.
 | 20.1 Reproduktionsstand einfrieren | abgeschlossen | Der unveränderte Ausgangsstand reproduziert zuerst den 16/12-Breitenrest im 8/8-Profil; beide elektrischen Profilläufe erreichen anschließend innerhalb von 90 Sekunden keinen normalen Halt. |
 | 20.2 Breitenfehler im 8/8-Profil isolieren | abgeschlossen | Sieben 16-Bit-Attribute im Datenpfad von `Operations` sind auf 8 Bit spezialisiert; der ROM adressiert nun ausdrücklich mit 8 Bit. Die drei fokussierten statischen Abnahmen bestehen. |
 | 20.3 Offline-Baseline vollständig grün stellen | abgeschlossen | Die verlorene 16/12-Profilgrenze und die gruppierte, tunnel-freie Decodergrenze sind wiederhergestellt; das Offline-Gate besteht zweimal nacheinander ohne erzeugte Arbeitsbaumänderungen. |
+| 20.4 Reset, Takt und Fetch für 16/12 wiederherstellen | in Bearbeitung | Der erste Lauf auf `2974dc6` endet weiterhin ohne Halt. Vor einer elektrischen Fetch-Reparatur meldet die bestehende Abnahme jedoch zuerst die geänderte öffentliche Decodergrenze. `FetchDecodeControls` wurde bewusst nicht erneut umgezeichnet; lediglich der beim manuellen Layoutwechsel verlorene Name der unveränderten Programmlimitquelle wurde wieder ergänzt. |
 
 ### 20.1 Reproduktionsstand einfrieren
 
@@ -247,6 +248,48 @@ weiterhin nicht innerhalb von 90 Sekunden den Halt und liefert bereits früh
 undefinierte beziehungsweise Fehlerwerte. Gemäß Stop-Regel gilt dies nur als
 offener Halt-Nachweis; 20.4 bleibt deshalb in Bearbeitung und es wurde kein
 weiterer Signalweg auf Verdacht verändert.
+
+### 20.4 Reset, Takt und Fetch für 16/12 wiederherstellen
+
+#### Nachprüfung nach der erneuten manuellen Invertierung
+
+- **Ausgangs-Commit:** `2974dc6a45d84d095388215b061000bdce528feb`.
+- **Arbeitsbaum vor der Untersuchung:** sauber (`git status --porcelain=v1`
+  lieferte keine Ausgabe).
+- Ein auf zehn Sekunden begrenzter autonomer 16/12-Kernlauf schrieb 19.245
+  Zustandsänderungen, erreichte aber keinen normalen Halt. Dieser Timeout wird
+  weiterhin nur als fehlender Halt-Nachweis behandelt.
+- Die statische Abnahme lokalisiert den zeitlich früheren Unterschied an der
+  öffentlichen Grenze von `FetchDecodeControls`: `LOAD_OPERAND` und
+  `STORE_OPERAND` fehlen; stattdessen sind erneut die einzelnen alten
+  Load-/Store-Ausgänge vorhanden. Die elektrische Decoderabnahme stoppt
+  entsprechend bereits beim abweichenden Tabellenkopf.
+- Unabhängig davon fehlte an der weiterhin unveränderten Konstante `0xfff` nur
+  noch der stabile Name `PROGRAM_LIMIT_MAX`. Ausschließlich dieses Attribut
+  wurde wieder ergänzt. Position, Wert, Breite und Leitung der Konstante sowie
+  sämtliche Bauteile, Positionen und Leitungen von `FetchDecodeControls`
+  bleiben gegenüber dem Ausgangs-Commit unverändert.
+
+Ausgeführt wurde:
+
+```bash
+scripts/test-offline.sh
+python3 scripts/test-logisim-decode.py
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 \
+  --jar "$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  --trace-output /tmp/ap20-4.tsv --timeout 10
+```
+
+Nach Wiederherstellung des Namens besteht der fokussierte
+`test_program_limit_source_uses_profile_maximum`. Das Offline-Gate bleibt an
+den zwei bereits vorhandenen semantischen Decodergrenztests rot; die
+elektrische Decoderabnahme nennt dieselbe Schnittstellenabweichung. Gemäß der
+Stop-Regel wurde deshalb weder der Decoder neu aufgebaut noch ein historisches
+Blatt eingespielt oder die vom Autor gewählte Anordnung verändert. Der nächste
+zulässige Schritt in 20.4 ist eine Reparatur der **bestehenden** Zeichnung an
+dieser benannten Schnittstelle; erst danach darf der Trace zur ersten
+abweichenden Flanke von Reset, Takt, PC und ROM fortgesetzt werden.
 
 ## AP 19: Ursprüngliche Diagnose
 
