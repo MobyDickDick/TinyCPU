@@ -612,6 +612,51 @@ nächstes muss dieselbe kontrollierte Resetquelle an der bestehenden
 `FetchDecode`-Subcircuit gemeinsam beobachtet werden. Erst ein dort benannter
 Unterschied rechtfertigt eine Schaltungsänderung.
 
+#### Kontrollierte Resetfreigabe an der TinyCPUMain-Grenze
+
+Der nächste Lauf auf `6a9172b` überträgt die kontrollierte Resetquelle auf das
+vollständige 8/8-Top-Level. Das neue Diagnosewerkzeug
+`scripts/probe-logisim-top-reset-release.py` arbeitet wiederum ausschließlich
+auf einer temporären Kopie. Es ersetzt `CLK` durch einen normalen Takt und
+`RESET` durch den invertierten langsamen Takt, reduziert die Tabellenansicht
+auf die vier benötigten Ausgänge und beobachtet den Reset sowohl unmittelbar
+an seiner Quelle als auch am Eingang der vorhandenen `FetchDecode`-Instanz.
+Die eingecheckte Schaltung bleibt unverändert.
+
+Ausgeführt wurde:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_top_level_reset_release_probe_is_temporary_and_observable -v
+python3 scripts/probe-logisim-top-reset-release.py \
+  /tmp/ap20-top-reset-release.circ
+timeout 12s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table,halt /tmp/ap20-top-reset-release.circ \
+  > /tmp/ap20-top-reset-release.tsv
+head -n 16 /tmp/ap20-top-reset-release.tsv
+```
+
+Der fokussierte Test besteht und weist zusätzlich nach, dass der Generator die
+Quelldatei nicht verändert. Der elektrische Lauf endet wie für die zeitlich
+begrenzte Diagnose vorgesehen mit Exitcode 124 und erzeugt 150.154
+Zustandsänderungen. Beide Resetspalten beginnen gemeinsam auf eins, wechseln
+gemeinsam auf null und stimmen in allen beobachteten Zeilen überein. Damit
+erreicht die kontrollierte Freigabe die öffentliche `FetchDecode`-Grenze ohne
+Unterbrechung oder Pegelabweichung. `PC_OUT_PROBE` bleibt während des aktiven
+Resets auf `0x00`, übernimmt nach der Freigabe `0x01` und zählt anschließend
+definiert weiter. Damit arbeitet der zuvor isoliert geprüfte PC-Pfad auch in
+der vollständigen Top-Level-Einbindung korrekt, sobald der Reset zeitlich
+kontrolliert freigegeben wird. Eine Schaltungsänderung am Resetnetz ist durch
+diesen Befund nicht gerechtfertigt und wurde nicht vorgenommen.
+
+Der erste Unterschied ist damit weiter eingegrenzt: Er entsteht nicht durch
+die vollständige Top-Level-Einbindung von `FetchDecode`, sondern nur im
+bisherigen autonomen Lauf mit der `POR`-Quelle. Als nächstes müssen deren
+tatsächliche Freigabeflanke und die erste CPU-Taktflanke in derselben
+temporären Top-Level-Kopie gemeinsam beobachtet und mit dem kontrollierten
+Resetimpuls verglichen werden. Erst eine dort benannte Abweichung darf eine
+Reparatur am autonomen Generator auslösen.
+
 ## AP 19: Ursprüngliche Diagnose
 
 ## Status
