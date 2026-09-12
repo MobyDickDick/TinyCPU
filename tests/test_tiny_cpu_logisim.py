@@ -135,7 +135,8 @@ class LogisimLauncherTests(unittest.TestCase):
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             parts = {(c.get("name"), c.get("loc")) for c in main.findall("comp")}
             self.assertIn(("Clock", "(330,390)"), parts)
-            self.assertIn(("PowerOnReset", "(330,440)"), parts)
+            self.assertIn(("POR", "(330,440)"), parts)
+            self.assertNotIn(("PowerOnReset", "(330,440)"), parts)
             labels = [a.get("val") for a in main.findall("comp/a") if a.get("name") == "label"]
             self.assertIn("halt", labels)
             self.assertIn("HALTED_WITH_ERROR", labels)
