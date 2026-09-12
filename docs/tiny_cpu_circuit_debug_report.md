@@ -200,6 +200,27 @@ Maschinenformatfehler mehr die elektrische Diagnose. Der weiterhin aus 20.1
 bekannte fehlende Halt-Nachweis wird nicht als Offline-Fehler umgedeutet;
 als nächstes beginnt 20.4 mit Reset, Takt und Fetch des 16/12-Profils.
 
+#### Korrektur nach der nachfolgenden manuellen Anpassung
+
+Die danach eingecheckte manuelle Anpassung hatte die in 20.3 wiederhergestellte
+Profilgrenze und gruppierte Decodergrenze erneut unterbrochen: Die Beschriftung
+`PROGRAM_LIMIT_MAX`, eine sichtbare Leitung im Hauptblatt sowie die
+öffentlichen Gruppenausgänge `LOAD_OPERAND` und `STORE_OPERAND` fehlten. Der
+unveränderte Offline-Lauf belegte diese drei Unterschiede mit den bereits
+vorhandenen semantischen Regressionen, bevor die Schaltung geändert wurde.
+
+`FetchDecodeControls` ist nun erneut als sichtbare, rechtwinklige Verdrahtung
+von genau einem 6-zu-64-Decoder zu den vorhandenen Sammelgattern aufgebaut.
+Weder Decoder oder sonstige Funktionsbauteile wurden vervielfältigt noch Tunnel
+eingefügt. Die Profilgrenzenquelle trägt wieder ihren stabilen Namen und ist
+über die einzelne fehlende Leitung mit dem vorhandenen Fetch-Netz verbunden.
+Das Offline-Gate und die elektrische 64-Code-Decoderabnahme bestehen. Der
+anschließende 16/12-Kernlauf erreicht unter der verfügbaren Java-25-Umgebung
+weiterhin nicht innerhalb von 90 Sekunden den Halt und liefert bereits früh
+undefinierte beziehungsweise Fehlerwerte. Gemäß Stop-Regel gilt dies nur als
+offener Halt-Nachweis; 20.4 bleibt deshalb in Bearbeitung und es wurde kein
+weiterer Signalweg auf Verdacht verändert.
+
 ## AP 19: Ursprüngliche Diagnose
 
 ## Status
