@@ -5,12 +5,10 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 OUTPUT="${LOGISIM_OUTPUT:-artifacts/tinycpu-profile-acceptance}"
-profiles=(tinycpu-16-12 tinycpu-8-8)
+profiles=(tinycpu-16-12)
 failed=()
 mkdir -p "$OUTPUT"
 
-# Do not stop after the first profile fails. The independent result trees make
-# it impossible for a regression in one profile to hide the other gate.
 for profile in "${profiles[@]}"; do
   args=(--profile "$profile" --trace-output "$OUTPUT/$profile/core-trace.tsv"
         --matrix-output "$OUTPUT/$profile/isa-matrix"

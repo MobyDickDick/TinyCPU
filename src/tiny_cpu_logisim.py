@@ -225,10 +225,7 @@ def run_matrix(
     source: Path, profile, jar: Path, java: str, output: Path, timeout: int,
     jobs: int = 1,
 ) -> int:
-    matrix_path = ROOT / "hardware" / "logisim" / (
-        "tinycpu-electrical-matrix-8-v1.json"
-        if profile.name == "tinycpu-8-8" else "tinycpu-electrical-matrix-v1.json"
-    )
+    matrix_path = ROOT / "hardware" / "logisim" / "tinycpu-electrical-matrix-v1.json"
     matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
     cases = [*matrix["opcode_cases"], *matrix["fixtures"]]
     ids = [str(case["id"]) for case in cases]

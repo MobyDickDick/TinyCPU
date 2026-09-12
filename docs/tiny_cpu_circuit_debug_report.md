@@ -49,7 +49,7 @@ Tests mit historischen Canvas-Koordinaten verändert.
 | 20.2 Breitenfehler im 8/8-Profil isolieren | abgeschlossen | Sieben 16-Bit-Attribute im Datenpfad von `Operations` sind auf 8 Bit spezialisiert; der ROM adressiert nun ausdrücklich mit 8 Bit. Die drei fokussierten statischen Abnahmen bestehen. |
 | 20.3 Offline-Baseline vollständig grün stellen | abgeschlossen | Die verlorene 16/12-Profilgrenze und die gruppierte, tunnel-freie Decodergrenze sind wiederhergestellt; das Offline-Gate besteht zweimal nacheinander ohne erzeugte Arbeitsbaumänderungen. |
 | 20.4 Reset, Takt und Fetch für 16/12 wiederherstellen | in Bearbeitung | Nach dem manuellen Reset von `TinyCPU.circ` ist die vom Autor gewünschte Darstellung von `FetchDecodeControls` wieder maßgeblich. Der Offline-Lauf belegt drei nicht mehr passende Regressionserwartungen; daraus folgt ausdrücklich kein Auftrag zum erneuten Decoder-Redraw. |
-| 20.5 Reset, Takt und Fetch für 8/8 wiederherstellen | in Bearbeitung | Der profilabhängige Programmhöchstwert und drei zuvor implizit einbittige Fetch-Bauteile sind auf 8 Bit festgeschrieben. Zwei identische Minimalprogrammläufe belegen danach weiterhin den ersten elektrischen Unterschied am PC nach der ersten Zustandsänderung. Folgewert-, Takt-, Reset- und Enable-Netz des PC-Registers sind geschlossen; eine direkte temporäre Messung belegt zusätzlich den aktiven Resetpegel am Register und den dabei stabilen PC-Nullwert. `FetchDecodeControls` blieb vollständig unverändert. |
+| 20.5 Reset, Takt und Fetch für 8/8 wiederherstellen | entfallen | Der profilabhängige Programmhöchstwert und drei zuvor implizit einbittige Fetch-Bauteile sind auf 8 Bit festgeschrieben. Zwei identische Minimalprogrammläufe belegen danach weiterhin den ersten elektrischen Unterschied am PC nach der ersten Zustandsänderung. Folgewert-, Takt-, Reset- und Enable-Netz des PC-Registers sind geschlossen; eine direkte temporäre Messung belegt zusätzlich den aktiven Resetpegel am Register und den dabei stabilen PC-Nullwert. `FetchDecodeControls` blieb vollständig unverändert. |
 
 ### Folgeprüfung nach dem manuellen Decoder-Reset
 
@@ -2363,3 +2363,34 @@ Zuordnung in `tinycpu-machine-v1.json`. Für beide Varianten werden alle 50
 gültigen Befehle und alle 14 reservierten Codes geprüft. Damit kann die
 Diagnose künftig weder bei der Befehlsnummernzuordnung noch bei der sichtbaren
 Schaltungslogik unbemerkt vom tatsächlich eingebauten Decoder abweichen.
+
+### AP-20-Neuabgrenzung nach Stilllegung des 8/8-Experiments
+
+Das experimentelle Profil `tinycpu-8-8` ist nicht länger ein Produkt- oder
+Abnahmeziel. Die separate Schaltung, Verträge, Fixtures, Matrix und vier nur
+für ihre Reset-/PC-Diagnose vorhandene Probe-Skripte wurden entfernt. Die sechs
+Opcode-Bits des 16/12-Profils bieten bereits 64 Codes und reichen damit für die
+vorgesehene Befehlsmenge.
+
+Das nächste weiterhin einschlägige Paket ist 20.4. Als erster Schritt wurden
+die drei überholten Offline-Erwartungen an die vom Autor wiederhergestellte
+Schnittstelle angepasst, ohne `FetchDecodeControls` oder eine Leitung der
+Schaltung zu verändern: `PROGRAM_LIMIT` wird am bestehenden Pin in
+`FetchDecode` geprüft; Lade-/Speicheroperationen behalten ihre einzeln
+benannten Steuersignale; Argumentarten bleiben davon getrennt. Das vollständige
+Offline-Gate besteht anschließend.
+
+Ausgeführt wurde:
+
+```bash
+scripts/test-offline.sh
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 \
+  --jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  --trace-output /tmp/ap20.4-core.tsv --timeout 20
+```
+
+Der elektrische Kernlauf erreicht weiterhin nicht innerhalb von 20 Sekunden
+den Halt. Nach der Stop-Regel ist das nur ein fehlender Halt-Nachweis und kein
+Beleg für einen bestimmten Verdrahtungsfehler. Deshalb wurde in diesem Schritt
+keine Schaltungsleitung geändert; 20.4 bleibt in Bearbeitung.
