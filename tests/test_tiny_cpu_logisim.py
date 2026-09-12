@@ -104,6 +104,29 @@ class LogisimLauncherTests(unittest.TestCase):
                 _wire_path_exists(main, "(1160,480)", "(1260,480)"),
                 "ROM word probe must branch from FetchDecode's real output",
             )
+            fetch = next(
+                circuit for circuit in root.findall("circuit")
+                if circuit.get("name") == "FetchDecode"
+            )
+            pc_out = _component_by_label(fetch, "PC_OUT")
+            rom = _component_by_label(fetch, "INSTRUCTION_ROM")
+            opcode = _component_by_label(fetch, "OPCODE")
+            rom_x, rom_y = map(int, rom.get("loc").strip("()").split(","))
+            rom_address = f"({rom_x},{rom_y + 10})"
+            rom_data = f"({rom_x + 240},{rom_y + 60})"
+            self.assertTrue(
+                _wire_path_exists(fetch, pc_out.get("loc"), rom_address),
+                "the observed PC net must also drive the ROM address port",
+            )
+            self.assertTrue(
+                _wire_path_exists(fetch, rom_data, opcode.get("loc")),
+                "the observed word must originate at the ROM data port",
+            )
+            contents = next(
+                item.text for item in rom.findall("a")
+                if item.get("name") == "contents"
+            )
+            self.assertTrue(contents.startswith("addr/data: 8 14\nff "))
             outputs = {
                 _attributes(component).get("label")
                 for component in main.findall("comp")
