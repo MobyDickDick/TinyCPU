@@ -14,6 +14,7 @@ Dieses Verzeichnis enthält ausschließlich Dokumentation zur TinyCPU:
 - [`tiny_cpu_profiles_plan.md`](tiny_cpu_profiles_plan.md): abgegrenzter Vorschlag für AP 17 (zweites Hardwareprofil)
 - [`tiny_cpu_peripherals_plan.md`](tiny_cpu_peripherals_plan.md): abgegrenzter Vorschlag für AP 18 (Peripherie und Integration)
 - [`tiny_cpu_circuit_debug_plan.md`](tiny_cpu_circuit_debug_plan.md): zehnstufiger Arbeitsplan für die reproduzierbare Fehlersuche in `TinyCPU.circ`
+- [`tiny_cpu_recovery_work_packages.md`](tiny_cpu_recovery_work_packages.md): priorisierte Arbeitspakete zur Wiederherstellung beider elektrischer CPU-Profile
 - [`tiny_cpu_compatibility.md`](tiny_cpu_compatibility.md): Kompatibilitätsregeln
 - [`tiny_cpu_1_0_release_plan.md`](tiny_cpu_1_0_release_plan.md): Releaseplan für TinyCPU 1.0
 - [`tiny_cpu_1_0_release_notes.md`](tiny_cpu_1_0_release_notes.md): Release Notes für TinyCPU 1.0
@@ -67,3 +68,10 @@ zehn einzeln abnehmbare Aufgaben ab. Das Paket dient der reproduzierbaren
 Fehlersuche an der aktuellen `TinyCPU.circ`, ohne einen manuellen Redraw durch
 eine historische Zeichnung zu ersetzen oder die abgeschlossenen ISA-Verträge
 neu zu öffnen.
+
+Die inzwischen erneut fehlgeschlagenen Offline- und elektrischen Profilgates
+werden in
+[`tiny_cpu_recovery_work_packages.md`](tiny_cpu_recovery_work_packages.md) als
+AP 20 behandelt. Der Plan priorisiert den konkreten 8/8-Breitenbefund und die
+beiden ausbleibenden Kernhalte, bevor die vollständige ISA-Matrix wieder
+freigegeben wird.
