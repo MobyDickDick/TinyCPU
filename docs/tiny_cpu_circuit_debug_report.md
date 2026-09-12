@@ -12,7 +12,8 @@ Tests mit historischen Canvas-Koordinaten verändert.
 | Paket | Status | Ergebnis |
 |---|---|---|
 | 20.1 Reproduktionsstand einfrieren | abgeschlossen | Der unveränderte Ausgangsstand reproduziert zuerst den 16/12-Breitenrest im 8/8-Profil; beide elektrischen Profilläufe erreichen anschließend innerhalb von 90 Sekunden keinen normalen Halt. |
-| 20.2 Breitenfehler im 8/8-Profil isolieren | offen | Beginnt mit dem vom Verifier gemeldeten Attribut `width`. |
+| 20.2 Breitenfehler im 8/8-Profil isolieren | abgeschlossen | Sieben 16-Bit-Attribute im Datenpfad von `Operations` sind auf 8 Bit spezialisiert; der ROM adressiert nun ausdrücklich mit 8 Bit. Die drei fokussierten statischen Abnahmen bestehen. |
+| 20.3 Offline-Baseline vollständig grün stellen | offen | Der erste vollständige Lauf nach 20.2 erreicht nun die Unit-Tests und weist vier bereits vorhandene Topologieabweichungen in `TinyCPU.circ` nach. |
 
 ### 20.1 Reproduktionsstand einfrieren
 
@@ -91,6 +92,63 @@ SHA-256-Digests sind
 (16/12) und
 `1e432f81c223f180e1eadf54651de89a8958aa4fd42e0caa52db88bf1bb375fd`
 (8/8).
+
+### 20.2 Breitenfehler im 8/8-Profil isolieren
+
+#### Ausgangslage und erster Befund
+
+- **Ausgangs-Commit:** `b1084757443f230426a2921791dd171a776a079b`.
+- **Arbeitsbaum vor der Untersuchung:** sauber (`git status --porcelain=v1`
+  lieferte keine Ausgabe).
+- Der unveränderte Verifier brach mit Exitcode 1 bei
+  `TinyCPU-8-8.circ: legacy 16/12 width remains in width` ab.
+- Eine XML-Auswertung lokalisierte alle **sieben** Treffer im Unterblatt
+  `Operations`: die Pins `ACC_VALUE`, `MEMORY_VALUE`, `IMMEDIATE_VALUE` und
+  `RESULT_VALUE`, das mit `RESULT` beschriftete OR-Gatter sowie die beiden
+  Multiplexer für Operanden- und Ergebniswahl. Jeweils war ausschließlich das
+  Bauteilattribut `width="16"` falsch; die 8/8-Profilregel verlangt dort
+  `width="8"`.
+
+Vor der Reparatur bestand bereits ein Negativtest gegen zurückkehrende
+16/12-Attribute. Er wurde auf den benannten Port
+`Operations:RESULT_VALUE` fokussiert; zugleich nennt die Fehlermeldung nun
+Unterblatt, Bauteil, Attribut, Istwert und erwartetes Profil. Danach wurden nur
+die sieben belegten Datenbreiten auf 8 geändert. Außerdem wurde am vorhandenen
+14-Bit-Instruktions-ROM die bislang nur implizite Standard-Adressbreite als
+`addrWidth="8"` festgeschrieben. Leitungen und Canvas-Koordinaten blieben
+unverändert.
+
+#### Befehle und Ergebnisse
+
+```bash
+PYTHONPATH=src python3 -m unittest \
+  tests.test_tiny_cpu_verify.CircuitVerificationTests.test_8_8_circuit_rejects_a_legacy_width \
+  tests.test_tiny_cpu_verify.CircuitVerificationTests.test_8_8_circuit_matches_profile_and_embedded_fixture
+python3 src/tiny_cpu_verify.py
+python3 scripts/check-logisim-circuit.py
+scripts/test-offline.sh
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-8-8 \
+  --jar "$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  --trace-output "$PWD/artifacts/ap20.2-width-fix/electrical/tinycpu-8-8/core-trace.tsv"
+```
+
+| Lauf | Exitcode | Ergebnis |
+|---|---:|---|
+| Zwei fokussierte Profiltests | 0 | Beide Tests bestehen; die gezielt wieder eingeführte 16-Bit-Breite wird als `Operations:RESULT_VALUE` gemeldet. |
+| `tiny_cpu_verify.py` | 0 | 14 JSON-Dateien, 30 Logisim-Dateien mit 81 Schaltungen und 4.643 Leitungen sowie alle ISA-/Fehlerverträge sind gültig. |
+| `check-logisim-circuit.py` | 0 | Keine statischen Gate-Verdrahtungsfehler. |
+| Vollständiges Offline-Gate | 1 | Der Breiten- und Strukturteil besteht; 74 von 78 Unit-Tests bestehen. Vier Topologietests der unveränderten 16/12-Schaltung schlagen fehl und bilden den Eingang für 20.3. |
+| Kleinster elektrischer 8/8-Kernlauf | 1 | Nach 91,421 s kein Halt innerhalb des unveränderten 90-s-Limits; damit bleibt nur der bereits aus 20.1 bekannte fehlende Halt-Nachweis bestehen. |
+
+Der elektrische Lauf ist unter
+`artifacts/ap20.2-width-fix/electrical.log` samt Exitcode und Laufzeit in
+`electrical.meta` abgelegt. Weil Logisim vor dem Timeout keine Tabelle
+abschloss, entstand keine Trace-Datei. Gemäß Stop-Regel wird daraus in 20.2
+keine weitere Signalwegdiagnose abgeleitet. Das Paket ist abgeschlossen, weil
+seine drei vorgeschriebenen statischen Abnahmen bestehen und der Diff keine
+Neuverdrahtung enthält; die vier erstmals erreichbaren Offline-Befunde werden
+einzeln in 20.3 bearbeitet.
 
 ## AP 19: Ursprüngliche Diagnose
 

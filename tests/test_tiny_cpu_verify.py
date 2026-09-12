@@ -213,14 +213,22 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copy(source / "TinyCPU-8-8.circ", temporary)
         shutil.copy(source / "ap17_countdown_8_8.rom", temporary)
         circuit = temporary / "TinyCPU-8-8.circ"
-        circuit.write_text(circuit.read_text().replace('name="width" val="8"',
-                                                        'name="width" val="16"', 1))
+        circuit.write_text(circuit.read_text().replace(
+            '<a name="label" val="RESULT_VALUE"/>\n      <a name="type" val="output"/>\n'
+            '      <a name="width" val="8"/>',
+            '<a name="label" val="RESULT_VALUE"/>\n      <a name="type" val="output"/>\n'
+            '      <a name="width" val="16"/>',
+            1,
+        ))
         profile = json.loads((source / "tinycpu-8-8.json").read_text())
         machine = json.loads((source / "tinycpu-machine-8-v1.json").read_text())
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary
         self.addCleanup(setattr, VERIFY, "LOGISIM", original)
-        with self.assertRaisesRegex(VERIFY.VerificationError, "legacy 16/12 width"):
+        with self.assertRaisesRegex(
+            VERIFY.VerificationError,
+            r"Operations:RESULT_VALUE: legacy 16/12 width remains in width=16",
+        ):
             VERIFY.verify_small_profile_circuit(profile, machine)
 
     def test_8_8_electrical_matrix_is_complete_and_profile_valid(self) -> None:
