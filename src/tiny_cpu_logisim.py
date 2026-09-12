@@ -76,16 +76,30 @@ def autonomous_project(
             for item in list(component):
                 component.remove(item)
             ET.SubElement(component, "a", {"name": "label", "val": "TRACE_CLK"})
+            ET.SubElement(component, "a", {"name": "highDuration", "val": "2"})
+            ET.SubElement(component, "a", {"name": "lowDuration", "val": "2"})
         elif name == "RESET":
-            component.set("lib", "0")
-            # Logisim serializes components by their factory ID, not by the
-            # Java implementation class name.  The wiring-library power-on
-            # reset factory is named ``POR`` in 4.1.0; using
-            # ``PowerOnReset`` silently loads as an unknown component and
-            # leaves RESET undefined in a headless trace.
-            component.set("name", "POR")
+            # POR reflects Logisim's simulator-reset state; it does not emit a
+            # startup pulse in a headless table run.  Generate a deterministic
+            # pulse instead: the inverted slow clock starts high, falls before
+            # the first active CPU edge and stays low for the fixture.
+            component.set("lib", "1")
+            component.set("name", "NOT Gate")
             for item in list(component):
                 component.remove(item)
+            x, y = (int(value) for value in component.get("loc", "")[1:-1].split(","))
+            reset_clock = ET.SubElement(
+                circuit,
+                "comp",
+                {"lib": "0", "loc": f"({x - 40},{y})", "name": "Clock"},
+            )
+            ET.SubElement(reset_clock, "a", {"name": "highDuration", "val": "100"})
+            ET.SubElement(reset_clock, "a", {"name": "lowDuration", "val": "2"})
+            ET.SubElement(
+                circuit,
+                "wire",
+                {"from": f"({x - 40},{y})", "to": f"({x - 20},{y})"},
+            )
         elif name == halt_output:
             # Logisim's table,halt mode stops on an asserted output named halt.
             label.set("val", "halt")

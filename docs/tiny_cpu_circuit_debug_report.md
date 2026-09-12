@@ -657,6 +657,56 @@ temporären Top-Level-Kopie gemeinsam beobachtet und mit dem kontrollierten
 Resetimpuls verglichen werden. Erst eine dort benannte Abweichung darf eine
 Reparatur am autonomen Generator auslösen.
 
+#### POR-Freigabe und autonome Resetquelle
+
+Der auf `347f84d` geforderte direkte Vergleich verwendet mit
+`scripts/probe-logisim-top-por-release.py` erneut nur eine temporäre Kopie des
+8/8-Top-Levels. Das Werkzeug ersetzt die beiden öffentlichen Eingänge exakt
+wie der bisherige autonome Launcher durch `Clock` und `POR`, macht beide
+Quellpegel zusammen mit `PC_OUT` sichtbar und reduziert alle übrigen
+Top-Level-Ausgänge auf reine Beobachtungspunkte. Ein Regressionstest prüft die
+Instrumentierung und die unveränderte Quelldatei.
+
+Ausgeführt wurde:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_top_level_por_release_probe_is_temporary_and_observable \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_autonomous_project_uses_profile_specific_circuit -v
+python3 scripts/probe-logisim-top-por-release.py \
+  /tmp/ap20-top-por-release.circ
+timeout 3s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table,halt /tmp/ap20-top-por-release.circ \
+  > /tmp/ap20-top-por-release.tsv
+```
+
+Der elektrische Lauf endet mit dem erwarteten Timeout-Exitcode 124, gibt aber
+anders als die kontrollierte Resetquelle nur eine einzige Zustandszeile aus.
+`CLK_SOURCE_PROBE` und `POR_SOURCE_PROBE` stehen darin beide auf null; der
+`POR`-Ausgang wird während des gesamten Laufs nie aktiv und besitzt folglich
+weder eine Freigabeflanke noch einen Abstand zur ersten CPU-Taktflanke. Das ist
+der erste benannte Unterschied zum vorherigen kontrollierten Lauf, dessen
+Reset mit eins beginnt, definiert auf null wechselt und danach einen zählenden
+PC liefert. `POR` bildet in Logisim den Simulator-Resetzustand ab und erzeugt
+im Headless-Tabellenlauf keinen autonomen Einschaltimpuls.
+
+Die minimale Reparatur betrifft deshalb ausschließlich den Generator der
+temporären Abnahmekopie, nicht `TinyCPU-8-8.circ`: `autonomous_project`
+verwendet nun dieselbe bereits elektrisch qualifizierte invertierte langsame
+Taktquelle. Der CPU-Takt erhält explizite Zwei-Tick-Phasen, sodass Reset vor
+seiner ersten aktiven Flanke stabil anliegt. Der fokussierte Test friert
+Bauteiltypen, Phasenlängen und die einzelne Leitung der Resetquelle ein und
+verbietet sowohl `POR` als auch den früheren ungültigen Namen
+`PowerOnReset` im erzeugten Projekt.
+
+Der anschließende reguläre 8/8-Kernlauf erreicht weiterhin nicht den Halt und
+zeigt damit nach der korrigierten Resetquelle den nächsten noch zu
+isolierenden Unterschied; er rechtfertigt keine weitere Änderung in diesem
+Schritt. Als nächstes sind im autonom erzeugten Projekt Reset, Takt und PC mit
+denselben Beobachtungspunkten gemeinsam zu protokollieren. Erst wenn der PC
+dort definiert fortschaltet, darf die Diagnose zu ROM-Wort und Decodergrenze
+weitergehen.
+
 ## AP 19: Ursprüngliche Diagnose
 
 ## Status

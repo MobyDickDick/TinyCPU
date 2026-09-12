@@ -62,6 +62,54 @@ def _wire_path_exists(circuit, start, end):
 
 
 class LogisimLauncherTests(unittest.TestCase):
+    def test_top_level_por_release_probe_is_temporary_and_observable(self):
+        source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
+        before = source.read_bytes()
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "probe.circ"
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts/probe-logisim-top-por-release.py"),
+                    str(target),
+                ],
+                cwd=ROOT,
+                check=True,
+            )
+            root = ET.parse(target).getroot()
+            main = next(
+                circuit for circuit in root.findall("circuit")
+                if circuit.get("name") == "TinyCPUMain"
+            )
+            labelled = {
+                _attributes(component).get("label"): component
+                for component in main.findall("comp")
+                if _attributes(component).get("label")
+            }
+
+            self.assertEqual(labelled["CLK_SOURCE_PROBE"].get("name"), "Pin")
+            self.assertEqual(labelled["POR_SOURCE_PROBE"].get("name"), "Pin")
+            self.assertEqual(labelled["PC_OUT_PROBE"].get("name"), "Pin")
+            self.assertEqual(labelled["halt"].get("name"), "Pin")
+            self.assertEqual(labelled["CLK_SOURCE_PROBE"].get("loc"), "(350,400)")
+            self.assertEqual(labelled["POR_SOURCE_PROBE"].get("loc"), "(350,450)")
+            self.assertIn(
+                ("POR", "(330,440)"),
+                {(component.get("name"), component.get("loc"))
+                 for component in main.findall("comp")},
+            )
+            outputs = {
+                _attributes(component).get("label")
+                for component in main.findall("comp")
+                if component.get("name") == "Pin"
+                and _attributes(component).get("type") == "output"
+            }
+            self.assertEqual(
+                outputs,
+                {"halt", "PC_OUT_PROBE", "CLK_SOURCE_PROBE", "POR_SOURCE_PROBE"},
+            )
+            self.assertEqual(source.read_bytes(), before)
+
     def test_top_level_reset_release_probe_is_temporary_and_observable(self):
         source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
         before = source.read_bytes()
@@ -178,8 +226,24 @@ class LogisimLauncherTests(unittest.TestCase):
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             parts = {(c.get("name"), c.get("loc")) for c in main.findall("comp")}
             self.assertIn(("Clock", "(330,390)"), parts)
-            self.assertIn(("POR", "(330,440)"), parts)
+            self.assertIn(("NOT Gate", "(330,440)"), parts)
+            self.assertIn(("Clock", "(290,440)"), parts)
+            self.assertNotIn(("POR", "(330,440)"), parts)
             self.assertNotIn(("PowerOnReset", "(330,440)"), parts)
+            clocks = {
+                component.get("loc"): _attributes(component)
+                for component in main.findall("comp")
+                if component.get("name") == "Clock"
+            }
+            self.assertEqual(clocks["(330,390)"]["highDuration"], "2")
+            self.assertEqual(clocks["(330,390)"]["lowDuration"], "2")
+            self.assertEqual(clocks["(290,440)"]["highDuration"], "100")
+            self.assertEqual(clocks["(290,440)"]["lowDuration"], "2")
+            wires = {
+                (wire.get("from"), wire.get("to"))
+                for wire in main.findall("wire")
+            }
+            self.assertIn(("(290,440)", "(310,440)"), wires)
             labels = [a.get("val") for a in main.findall("comp/a") if a.get("name") == "label"]
             self.assertIn("halt", labels)
             self.assertIn("HALTED_WITH_ERROR", labels)
