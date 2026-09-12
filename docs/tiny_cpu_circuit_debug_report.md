@@ -7,9 +7,16 @@ geänderte Opcode-Tabelle mit einem gemeinsam verwendeten Decoder abbilden. Es
 war jedoch der falsche Reparaturansatz: Es hat die vom Schaltungsautor bewusst
 gewählte Darstellung und Bauteilanordnung verändert, obwohl sich elektrische
 Fehler zunächst durch Neuverdrahtung in der vorhandenen Zeichnung bearbeiten
-lassen. Künftige Reparaturen behalten deshalb Bauteile und Positionen bei,
-verwenden keine Tunnel und vergrößern bei Platzmangel nur die Zeichenfläche
-proportional.
+lassen. Künftige Reparaturen behalten deshalb Bauteile, relative Positionen
+und Leitungsverläufe bei und verwenden keine Tunnel. `FetchDecodeControls`
+darf nicht erneut umgezeichnet, automatisch angeordnet oder optisch
+aufgeräumt werden. Falls eine größere Darstellung tatsächlich erforderlich
+ist, darf nur das gesamte vorhandene Bild einschließlich aller Bauteile, Pins,
+Knickpunkte und Leitungsenden in x- und y-Richtung mit demselben Faktor
+skaliert werden. Eine größere Zeichenfläche mit anschließender
+Einzelverschiebung ist ausdrücklich keine proportionale Vergrößerung. Die
+dauerhaft für Arbeiten an den Logisim-Dateien geltende Anweisung steht in
+`hardware/logisim/AGENTS.md`.
 
 `SET_DIV0` ist dabei kein eigener Maschinenbefehl und besitzt folglich kein
 zugehöriges Opcode-Decodersignal. Das Flag entsteht bei einer ausgeführten
@@ -41,8 +48,44 @@ Tests mit historischen Canvas-Koordinaten verändert.
 | 20.1 Reproduktionsstand einfrieren | abgeschlossen | Der unveränderte Ausgangsstand reproduziert zuerst den 16/12-Breitenrest im 8/8-Profil; beide elektrischen Profilläufe erreichen anschließend innerhalb von 90 Sekunden keinen normalen Halt. |
 | 20.2 Breitenfehler im 8/8-Profil isolieren | abgeschlossen | Sieben 16-Bit-Attribute im Datenpfad von `Operations` sind auf 8 Bit spezialisiert; der ROM adressiert nun ausdrücklich mit 8 Bit. Die drei fokussierten statischen Abnahmen bestehen. |
 | 20.3 Offline-Baseline vollständig grün stellen | abgeschlossen | Die verlorene 16/12-Profilgrenze und die gruppierte, tunnel-freie Decodergrenze sind wiederhergestellt; das Offline-Gate besteht zweimal nacheinander ohne erzeugte Arbeitsbaumänderungen. |
-| 20.4 Reset, Takt und Fetch für 16/12 wiederherstellen | in Bearbeitung | Die gruppierte, tunnel-freie Decodergrenze ist wiederhergestellt und besteht statische sowie elektrische Abnahme. Der anschließende Kernlauf erreicht weiterhin keinen Halt; sein erster Zustand ist korrekt null, die nächste Zustandsänderung wird jedoch undefiniert. |
+| 20.4 Reset, Takt und Fetch für 16/12 wiederherstellen | in Bearbeitung | Nach dem manuellen Reset von `TinyCPU.circ` ist die vom Autor gewünschte Darstellung von `FetchDecodeControls` wieder maßgeblich. Der Offline-Lauf belegt drei nicht mehr passende Regressionserwartungen; daraus folgt ausdrücklich kein Auftrag zum erneuten Decoder-Redraw. |
 | 20.5 Reset, Takt und Fetch für 8/8 wiederherstellen | in Bearbeitung | Der profilabhängige Programmhöchstwert und drei zuvor implizit einbittige Fetch-Bauteile sind auf 8 Bit festgeschrieben. Zwei identische Minimalprogrammläufe belegen danach weiterhin den ersten elektrischen Unterschied am PC nach der ersten Zustandsänderung. Folgewert-, Takt-, Reset- und Enable-Netz des PC-Registers sind geschlossen; eine direkte temporäre Messung belegt zusätzlich den aktiven Resetpegel am Register und den dabei stabilen PC-Nullwert. `FetchDecodeControls` blieb vollständig unverändert. |
+
+### Folgeprüfung nach dem manuellen Decoder-Reset
+
+Der Commit `f737aed` setzt `TinyCPU.circ` bewusst auf die vom Schaltungsautor
+gewünschte Zeichnung zurück. Dieser Stand wird als neue optische Referenz
+akzeptiert und nicht wieder an die zuvor von Tests erwartete Darstellung
+angepasst. Die dauerhafte Bearbeitungsanweisung liegt im Verzeichnis der
+Logisim-Projekte in `hardware/logisim/AGENTS.md` und gilt damit auch für die
+Diagnoseschaltung.
+
+Als nächster begrenzter Arbeitsschritt wurde ausschließlich das Offline-Gate
+gegen diesen zurückgesetzten Stand ausgeführt. Verifier, statische
+Schaltungsprüfung und 80 der 83 Unit-Tests bestehen. Drei Regressionen
+schlagen fehl, weil sie noch die verworfene Gruppierung beziehungsweise eine
+später hinzugefügte Beschriftung voraussetzen:
+
+- `test_program_limit_source_uses_profile_maximum` findet in `TinyCPU.circ`
+  kein mit `PROGRAM_LIMIT_MAX` beschriftetes Bauteil;
+- `test_public_decoder_separates_operations_from_argument_kinds` erwartet die
+  verworfene öffentliche Gruppierung;
+- `test_register_offset_load_selects_memory_data` erwartet dort den ebenfalls
+  nicht vorhandenen Ausgang `LOAD_OPERAND`.
+
+Diese Befunde wurden absichtlich **nicht** durch Änderungen an
+`FetchDecodeControls` grün gestellt. Bevor weitere 16/12-Reparaturen zulässig
+sind, müssen die fachlichen Erwartungen gegen die bestehende, vom Autor
+gewählte Pinbelegung neu abgegrenzt werden. Ein elektrischer Fehler ist dabei
+zuerst außerhalb einer optischen Neugestaltung nachzuweisen. AP 20.5 bleibt
+davon unabhängig bei seinem bereits dokumentierten nächsten temporären
+Resetimpuls-Diagnoseschritt.
+
+Ausgeführt wurde:
+
+```bash
+scripts/test-offline.sh
+```
 
 ### 20.1 Reproduktionsstand einfrieren
 
