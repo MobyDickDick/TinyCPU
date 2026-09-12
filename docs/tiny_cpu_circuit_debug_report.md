@@ -41,7 +41,7 @@ Tests mit historischen Canvas-Koordinaten verändert.
 | 20.1 Reproduktionsstand einfrieren | abgeschlossen | Der unveränderte Ausgangsstand reproduziert zuerst den 16/12-Breitenrest im 8/8-Profil; beide elektrischen Profilläufe erreichen anschließend innerhalb von 90 Sekunden keinen normalen Halt. |
 | 20.2 Breitenfehler im 8/8-Profil isolieren | abgeschlossen | Sieben 16-Bit-Attribute im Datenpfad von `Operations` sind auf 8 Bit spezialisiert; der ROM adressiert nun ausdrücklich mit 8 Bit. Die drei fokussierten statischen Abnahmen bestehen. |
 | 20.3 Offline-Baseline vollständig grün stellen | abgeschlossen | Die verlorene 16/12-Profilgrenze und die gruppierte, tunnel-freie Decodergrenze sind wiederhergestellt; das Offline-Gate besteht zweimal nacheinander ohne erzeugte Arbeitsbaumänderungen. |
-| 20.4 Reset, Takt und Fetch für 16/12 wiederherstellen | in Bearbeitung | Der erste Lauf auf `2974dc6` endet weiterhin ohne Halt. Vor einer elektrischen Fetch-Reparatur meldet die bestehende Abnahme jedoch zuerst die geänderte öffentliche Decodergrenze. `FetchDecodeControls` wurde bewusst nicht erneut umgezeichnet; lediglich der beim manuellen Layoutwechsel verlorene Name der unveränderten Programmlimitquelle wurde wieder ergänzt. |
+| 20.4 Reset, Takt und Fetch für 16/12 wiederherstellen | in Bearbeitung | Die gruppierte, tunnel-freie Decodergrenze ist wiederhergestellt und besteht statische sowie elektrische Abnahme. Der anschließende Kernlauf erreicht weiterhin keinen Halt; sein erster Zustand ist korrekt null, die nächste Zustandsänderung wird jedoch undefiniert. |
 | 20.5 Reset, Takt und Fetch für 8/8 wiederherstellen | in Bearbeitung | Der profilabhängige Programmhöchstwert und drei zuvor implizit einbittige Fetch-Bauteile sind auf 8 Bit festgeschrieben. Zwei identische Minimalprogrammläufe belegen danach weiterhin den ersten elektrischen Unterschied am PC nach der ersten Zustandsänderung. Folgewert-, Takt-, Reset- und Enable-Netz des PC-Registers sind geschlossen; eine direkte temporäre Messung belegt zusätzlich den aktiven Resetpegel am Register und den dabei stabilen PC-Nullwert. `FetchDecodeControls` blieb vollständig unverändert. |
 
 ### 20.1 Reproduktionsstand einfrieren
@@ -291,6 +291,44 @@ Blatt eingespielt oder die vom Autor gewählte Anordnung verändert. Der nächst
 zulässige Schritt in 20.4 ist eine Reparatur der **bestehenden** Zeichnung an
 dieser benannten Schnittstelle; erst danach darf der Trace zur ersten
 abweichenden Flanke von Reset, Takt, PC und ROM fortgesetzt werden.
+
+#### Reparatur der öffentlichen Decodergrenze
+
+- **Ausgangs-Commit:** `753f47d`.
+- **Arbeitsbaum vor der Untersuchung:** sauber (`git status --short --branch`
+  zeigte ausschließlich `## work`).
+- Der unveränderte Offline-Lauf bestand Verifier und Circuit-Check, scheiterte
+  aber an genau den zwei bereits benannten Regressionen für die fehlenden
+  Gruppenausgänge und den davon abhängigen Register-Offset-Load-Pfad.
+
+Die sichtbare Verdrahtung von `FetchDecodeControls` fasst die Opcodezeilen nun
+wieder mit je einem beschrifteten ODER-Gatter zu `LOAD_OPERAND`,
+`STORE_OPERAND`, den sechs Rechenoperationen und den vier Argumentarten
+zusammen. Genau ein 6-zu-64-Decoder bleibt die gemeinsame Quelle; Tunnel und
+einzelne Load-/Store-Ausgänge an der öffentlichen Grenze werden nicht
+verwendet. Die zugehörigen Top-Level-Verbindungen folgen den Gruppensignalen.
+Andere Unterblätter wurden nicht verändert.
+
+Ausgeführt wurde:
+
+```bash
+scripts/test-offline.sh
+python3 scripts/test-logisim-decode.py
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 \
+  --jar "$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  --trace-output /tmp/ap20-4-repaired.tsv --timeout 20
+```
+
+Das Offline-Gate besteht mit allen 83 Unit-Tests. Beide elektrischen
+Decoderabnahmen bestehen für 50 belegte und 14 reservierte Opcodes. Der
+anschließende autonome Kernlauf endet nach 20 Sekunden weiterhin ohne Halt und
+liefert neun Zustandsänderungen: PC und Akkumulator beginnen mit null; bereits
+die zweite Zeile enthält einen undefinierten PC. Damit ist die vorgelagerte
+Decodergrenze nicht mehr der erste Fehler. Gemäß Stop-Regel wurde aus dem
+Timeout keine weitere Schaltungsänderung abgeleitet. 20.4 bleibt offen; als
+nächstes sind Reset, PC-Dateneingang und PC-Ausgang unmittelbar um die erste
+steigende Flanke in einer temporären 16/12-Diagnosekopie gemeinsam zu messen.
 
 ### 20.5 Reset, Takt und Fetch für 8/8 wiederherstellen
 
