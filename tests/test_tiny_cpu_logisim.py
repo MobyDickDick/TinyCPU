@@ -90,9 +90,20 @@ class LogisimLauncherTests(unittest.TestCase):
             self.assertEqual(labelled["CLK_SOURCE_PROBE"].get("name"), "Pin")
             self.assertEqual(labelled["RESET_SOURCE_PROBE"].get("name"), "Pin")
             self.assertEqual(labelled["PC_OUT_PROBE"].get("name"), "Pin")
+            self.assertEqual(labelled["ROM_WORD_PROBE"].get("name"), "Pin")
+            self.assertEqual(
+                labelled["DECODE_LOAD_CONST_PROBE"].get("name"), "Pin"
+            )
+            self.assertEqual(
+                _attributes(labelled["ROM_WORD_PROBE"])["width"], "14"
+            )
             self.assertEqual(labelled["halt"].get("name"), "Pin")
             self.assertEqual(labelled["CLK_SOURCE_PROBE"].get("loc"), "(350,400)")
             self.assertEqual(labelled["RESET_SOURCE_PROBE"].get("loc"), "(350,450)")
+            self.assertTrue(
+                _wire_path_exists(main, "(1160,480)", "(1260,480)"),
+                "ROM word probe must branch from FetchDecode's real output",
+            )
             outputs = {
                 _attributes(component).get("label")
                 for component in main.findall("comp")
@@ -101,7 +112,11 @@ class LogisimLauncherTests(unittest.TestCase):
             }
             self.assertEqual(
                 outputs,
-                {"halt", "PC_OUT_PROBE", "CLK_SOURCE_PROBE", "RESET_SOURCE_PROBE"},
+                {
+                    "halt", "PC_OUT_PROBE", "ROM_WORD_PROBE",
+                    "DECODE_LOAD_CONST_PROBE", "CLK_SOURCE_PROBE",
+                    "RESET_SOURCE_PROBE",
+                },
             )
             self.assertEqual(source.read_bytes(), before)
 
