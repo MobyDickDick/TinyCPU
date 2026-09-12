@@ -42,14 +42,11 @@ class CircuitCheckTests(unittest.TestCase):
             sum(component.get("name") == "Decoder" for component in components),
             1,
         )
-        tunnel_labels = {
-            attribute.get("val")
-            for component in components
-            if component.get("name") == "Tunnel"
-            for attribute in component.findall("a")
-            if attribute.get("name") == "label"
-        }
-        self.assertEqual(tunnel_labels, {f"DECODE_{code:02d}" for code in range(64)})
+        self.assertFalse(any(
+            component.get("name") == "Tunnel"
+            for circuit in root.findall("circuit")
+            for component in circuit.findall("comp")
+        ))
         self.assertGreater(len(decoder.findall("wire")), 0)
 
     def test_standalone_fetch_decoder_uses_visible_wires(self):
