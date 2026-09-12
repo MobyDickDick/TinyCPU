@@ -75,6 +75,15 @@ als sichtbare Leitungen ausgeführt; versteckte Tunnel kommen auf diesem Blatt
 nicht vor. Dadurch lässt sich jeder Signalweg vom `OPCODE`-Eingang bis zum
 benannten Steuerausgang direkt im Schaltbild verfolgen.
 
+Die ähnlich benannten Ausgänge `LD_REG_CONST` und `LD_REG_ADR` sind keine
+Duplikate: Sie dekodieren `LOAD_ADDRESS_REGISTER_CONST` beziehungsweise
+`LOAD_ADDRESS_REGISTER_ADDRESS`. Der erste Befehl übernimmt den unmittelbaren
+Operanden in das Adressregister, der zweite liest dessen neuen Wert aus der im
+Operanden genannten Speicheradresse. Beide Steuersignale werden deshalb für
+die zwei verschiedenen Quellen des Adressregisters benötigt und bleiben
+getrennt erhalten. Kurze Kommentare rechts neben allen Ausgängen von
+`FetchDecodeControls` erläutern nun unmittelbar im Schaltbild deren Wirkung.
+
 `FetchDecodeControls` führt die Operation und die Art des zweiten Operanden als
 zwei unabhängige Signalgruppen heraus. `ADD_OPERAND` bedeutet beispielsweise nur
 „ADD ist aktiv“, während `CONST_ARGUMENT`, `ADDR_ARGUMENT`,

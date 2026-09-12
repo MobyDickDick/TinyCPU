@@ -274,6 +274,126 @@
       <a name="label" val="OPCODE"/>
       <a name="width" val="6"/>
     </comp>
+    <comp lib="9" loc="(1650,1010)" name="Text">
+      <a name="text" val="LD_REG_ADR: lädt das Adressregister aus der Speicheradresse"/>
+    </comp>
+    <comp lib="9" loc="(1650,1030)" name="Text">
+      <a name="text" val="STORE_ADR: speichert den Akkumulator an der Adresse"/>
+    </comp>
+    <comp lib="9" loc="(1650,1050)" name="Text">
+      <a name="text" val="STORE_ADR_REG: speichert den Akkumulator am Adressregister"/>
+    </comp>
+    <comp lib="9" loc="(1650,1070)" name="Text">
+      <a name="text" val="STORE_REG_OFF: speichert den Akkumulator bei Adressregister plus Offset"/>
+    </comp>
+    <comp lib="9" loc="(1650,1090)" name="Text">
+      <a name="text" val="SET_OVF: setzt den Überlauffehler"/>
+    </comp>
+    <comp lib="9" loc="(1650,1110)" name="Text">
+      <a name="text" val="SET_DIV0: setzt den Fehler Division durch null"/>
+    </comp>
+    <comp lib="9" loc="(1650,1130)" name="Text">
+      <a name="text" val="SET_ADDR: setzt den Adressfehler"/>
+    </comp>
+    <comp lib="9" loc="(1650,1150)" name="Text">
+      <a name="text" val="SET_INV: setzt den Ungültigkeitsfehler"/>
+    </comp>
+    <comp lib="9" loc="(1650,1170)" name="Text">
+      <a name="text" val="SET_ILL: setzt den Fehler für unbekannte Befehle"/>
+    </comp>
+    <comp lib="9" loc="(1650,1190)" name="Text">
+      <a name="text" val="SET_INPUT: setzt den Eingabefehler"/>
+    </comp>
+    <comp lib="9" loc="(1650,1210)" name="Text">
+      <a name="text" val="CLEAR_ERROR: löscht alle Fehlermerker"/>
+    </comp>
+    <comp lib="9" loc="(1650,1230)" name="Text">
+      <a name="text" val="INPUT: liest einen Wert in den Akkumulator"/>
+    </comp>
+    <comp lib="9" loc="(1650,1250)" name="Text">
+      <a name="text" val="PRINT: gibt den Akkumulator aus"/>
+    </comp>
+    <comp lib="9" loc="(1650,1270)" name="Text">
+      <a name="text" val="PRINT_ADR: gibt den Speicherwert an der Adresse aus"/>
+    </comp>
+    <comp lib="9" loc="(1650,1290)" name="Text">
+      <a name="text" val="HALT: hält die CPU regulär an"/>
+    </comp>
+    <comp lib="9" loc="(1650,1310)" name="Text">
+      <a name="text" val="HALT_ERROR: hält die CPU mit Fehler an"/>
+    </comp>
+    <comp lib="9" loc="(1650,1370)" name="Text">
+      <a name="text" val="INVALID_OPERAND: meldet einen reservierten Opcode als ungültig"/>
+    </comp>
+    <comp lib="9" loc="(1650,150)" name="Text">
+      <a name="text" val="MUL_OPERAND: multipliziert mit dem gewählten Operanden"/>
+    </comp>
+    <comp lib="9" loc="(1650,210)" name="Text">
+      <a name="text" val="DIV_OPERAND: dividiert durch den gewählten Operanden"/>
+    </comp>
+    <comp lib="9" loc="(1650,270)" name="Text">
+      <a name="text" val="AND_OPERAND: bitweises UND mit dem gewählten Operanden"/>
+    </comp>
+    <comp lib="9" loc="(1650,30)" name="Text">
+      <a name="text" val="ADD_OPERAND: addiert den gewählten Operanden"/>
+    </comp>
+    <comp lib="9" loc="(1650,330)" name="Text">
+      <a name="text" val="OR_OPERAND: bitweises ODER mit dem gewählten Operanden"/>
+    </comp>
+    <comp lib="9" loc="(1650,390)" name="Text">
+      <a name="text" val="XOR_OPERAND: bitweises XOR mit dem gewählten Operanden"/>
+    </comp>
+    <comp lib="9" loc="(1650,460)" name="Text">
+      <a name="text" val="CONST_ARGUMENT: verwendet die Konstante als Argument"/>
+    </comp>
+    <comp lib="9" loc="(1650,540)" name="Text">
+      <a name="text" val="ADDR_ARGUMENT: verwendet den Speicherwert an der Adresse"/>
+    </comp>
+    <comp lib="9" loc="(1650,620)" name="Text">
+      <a name="text" val="ADDR_REG_ARGUMENT: verwendet den Speicherwert am Adressregister"/>
+    </comp>
+    <comp lib="9" loc="(1650,710)" name="Text">
+      <a name="text" val="ADDR_REG_OFFS_ARGUMENT: verwendet den Speicherwert bei Adressregister plus Offset"/>
+    </comp>
+    <comp lib="9" loc="(1650,770)" name="Text">
+      <a name="text" val="NOT: invertiert den Akkumulator bitweise"/>
+    </comp>
+    <comp lib="9" loc="(1650,790)" name="Text">
+      <a name="text" val="JUMP_ADR: springt unbedingt zur Adresse"/>
+    </comp>
+    <comp lib="9" loc="(1650,810)" name="Text">
+      <a name="text" val="JUMP_ZERO: springt, wenn der Akkumulator null ist"/>
+    </comp>
+    <comp lib="9" loc="(1650,830)" name="Text">
+      <a name="text" val="JUMP_NOT_ZERO: springt, wenn der Akkumulator nicht null ist"/>
+    </comp>
+    <comp lib="9" loc="(1650,850)" name="Text">
+      <a name="text" val="JUMP_NEGATIVE: springt, wenn der Akkumulator negativ ist"/>
+    </comp>
+    <comp lib="9" loc="(1650,870)" name="Text">
+      <a name="text" val="JUMP_ERROR: springt, wenn ein Fehler gesetzt ist"/>
+    </comp>
+    <comp lib="9" loc="(1650,890)" name="Text">
+      <a name="text" val="JUMP_NOT_ERROR: springt, wenn kein Fehler gesetzt ist"/>
+    </comp>
+    <comp lib="9" loc="(1650,90)" name="Text">
+      <a name="text" val="SUB_OPERAND: subtrahiert den gewählten Operanden"/>
+    </comp>
+    <comp lib="9" loc="(1650,910)" name="Text">
+      <a name="text" val="LOAD_CONST: lädt die Konstante in den Akkumulator"/>
+    </comp>
+    <comp lib="9" loc="(1650,930)" name="Text">
+      <a name="text" val="LOAD_ADR: lädt den Speicherwert an der Adresse"/>
+    </comp>
+    <comp lib="9" loc="(1650,950)" name="Text">
+      <a name="text" val="LOAD_ADR_REG: lädt den Speicherwert am Adressregister"/>
+    </comp>
+    <comp lib="9" loc="(1650,970)" name="Text">
+      <a name="text" val="LOAD_REG_OFF: lädt den Speicherwert bei Adressregister plus Offset"/>
+    </comp>
+    <comp lib="9" loc="(1650,990)" name="Text">
+      <a name="text" val="LD_REG_CONST: lädt die Konstante in das Adressregister"/>
+    </comp>
     <comp lib="1" loc="(1460,150)" name="OR Gate">
       <a name="inputs" val="4"/>
       <a name="label" val="MUL_OPERAND_SELECT"/>

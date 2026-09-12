@@ -60,6 +60,40 @@ class CircuitCheckTests(unittest.TestCase):
         ))
         self.assertGreater(len(decoder.findall("wire")), 0)
 
+    def test_fetch_decoder_outputs_have_short_explanations(self):
+        projects = (
+            ROOT / "hardware/logisim/TinyCPU.circ",
+            ROOT / "hardware/logisim/TinyCPU-8-8.circ",
+            ROOT / "hardware/logisim/diagnostics/TinyCPU-FetchDecodeControls.circ",
+        )
+        for project in projects:
+            with self.subTest(project=project.name):
+                root = ET.parse(project).getroot()
+                decoder = next(
+                    circuit for circuit in root.findall("circuit")
+                    if circuit.get("name") == "FetchDecodeControls"
+                )
+                output_labels = {
+                    attribute.get("val")
+                    for component in decoder.findall("comp")
+                    if component.get("name") == "Pin"
+                    and any(
+                        attribute.get("name") == "type"
+                        and attribute.get("val") == "output"
+                        for attribute in component.findall("a")
+                    )
+                    for attribute in component.findall("a")
+                    if attribute.get("name") == "label"
+                }
+                explained_labels = {
+                    attribute.get("val").split(":", 1)[0]
+                    for component in decoder.findall("comp")
+                    if component.get("name") == "Text"
+                    for attribute in component.findall("a")
+                    if attribute.get("name") == "text" and ":" in attribute.get("val", "")
+                }
+                self.assertEqual(output_labels, explained_labels)
+
     def test_detects_outputs_joined_through_endpoint_on_segment(self):
         circuit = ET.fromstring("""
           <circuit name="Broken">
