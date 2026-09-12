@@ -66,39 +66,48 @@ def expected_row(code: int, opcodes: dict[str, dict[str, object]]) -> dict[str, 
 
 
 def main() -> int:
-    source = ROOT / "hardware/logisim/TinyCPU.circ"
     explicit = Path(os.environ["LOGISIM_JAR"]) if os.environ.get("LOGISIM_JAR") else None
     if explicit is None:
         local = ROOT / ".venv/Include/logisim-evolution-4.1.0-all.jar"
         explicit = local if local.is_file() else None
     jar = resolve_jar(explicit)
-    with tempfile.TemporaryDirectory(prefix="tinycpu-decode-") as directory:
-        target = Path(directory) / "decode.circ"
-        tree = ET.parse(source)
-        tree.getroot().find("main").set("name", "FetchDecodeControls")
-        tree.write(target, encoding="utf-8", xml_declaration=True)
-        result = subprocess.run(
-            [os.environ.get("JAVA", "java"), "-jar", str(jar), "-tty", "table", str(target)],
-            capture_output=True, text=True, timeout=30, check=False,
-        )
-    if result.returncode:
-        raise LogisimError(f"decode table failed: {result.stderr.strip()}")
-    lines = [line.split() for line in result.stdout.splitlines() if line.strip()]
-    expected_header = ["OPCODE", *OUTPUTS]
-    if not lines or lines[0] != expected_header:
-        raise LogisimError(f"unexpected decode-table header: {lines[0] if lines else 'empty'}")
-    if len(lines) != 65:
-        raise LogisimError(f"expected 64 decode rows, got {len(lines) - 1}")
     opcodes = opcode_table(load_profile("tinycpu-16-12"))
-    for code, cells in enumerate(lines[1:]):
-        if len(cells) != len(expected_header) or int(cells[0], 2) != code:
-            raise LogisimError(f"malformed decode row {code}: {' '.join(cells)}")
-        expected = expected_row(code, opcodes)
-        actual = dict(zip(OUTPUTS, cells[1:]))
-        differences = [name for name in OUTPUTS if actual[name] != str(expected[name])]
-        if differences:
-            raise LogisimError(f"opcode {code}: mismatched outputs {', '.join(differences)}")
-    print("electrical decode acceptance passed: 50 opcodes and 14 reserved codes")
+    expected_header = ["OPCODE", *OUTPUTS]
+    sources = (
+        ROOT / "hardware/logisim/TinyCPU.circ",
+        ROOT / "hardware/logisim/diagnostics/TinyCPU-FetchDecodeControls.circ",
+    )
+    for source in sources:
+        with tempfile.TemporaryDirectory(prefix="tinycpu-decode-") as directory:
+            target = Path(directory) / "decode.circ"
+            tree = ET.parse(source)
+            tree.getroot().find("main").set("name", "FetchDecodeControls")
+            tree.write(target, encoding="utf-8", xml_declaration=True)
+            result = subprocess.run(
+                [os.environ.get("JAVA", "java"), "-jar", str(jar), "-tty", "table", str(target)],
+                capture_output=True, text=True, timeout=30, check=False,
+            )
+        if result.returncode:
+            raise LogisimError(f"{source.name}: decode table failed: {result.stderr.strip()}")
+        lines = [line.split() for line in result.stdout.splitlines() if line.strip()]
+        if not lines or lines[0] != expected_header:
+            raise LogisimError(
+                f"{source.name}: unexpected decode-table header: {lines[0] if lines else 'empty'}"
+            )
+        if len(lines) != 65:
+            raise LogisimError(f"{source.name}: expected 64 decode rows, got {len(lines) - 1}")
+        for code, cells in enumerate(lines[1:]):
+            if len(cells) != len(expected_header) or int(cells[0], 2) != code:
+                raise LogisimError(f"{source.name}: malformed decode row {code}: {' '.join(cells)}")
+            expected = expected_row(code, opcodes)
+            actual = dict(zip(OUTPUTS, cells[1:]))
+            differences = [name for name in OUTPUTS if actual[name] != str(expected[name])]
+            if differences:
+                raise LogisimError(
+                    f"{source.name}: opcode {code}: mismatched outputs {', '.join(differences)}"
+                )
+        print(f"{source.name}: electrical decode acceptance passed: "
+              "50 opcodes and 14 reserved codes")
     return 0
 
 
