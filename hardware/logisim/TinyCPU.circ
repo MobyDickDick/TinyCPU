@@ -622,6 +622,7 @@
     <wire from="(750,740)" to="(800,740)"/>
     <wire from="(790,550)" to="(800,550)"/>
     <wire from="(790,570)" to="(800,570)"/>
+    <wire from="(300,530)" to="(670,530)"/>
   </circuit>
   <circuit name="EffectiveAddress">
     <a name="appearance" val="logisim_evolution"/>
