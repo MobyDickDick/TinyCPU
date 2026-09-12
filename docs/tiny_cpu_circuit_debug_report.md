@@ -42,7 +42,7 @@ Tests mit historischen Canvas-Koordinaten verändert.
 | 20.2 Breitenfehler im 8/8-Profil isolieren | abgeschlossen | Sieben 16-Bit-Attribute im Datenpfad von `Operations` sind auf 8 Bit spezialisiert; der ROM adressiert nun ausdrücklich mit 8 Bit. Die drei fokussierten statischen Abnahmen bestehen. |
 | 20.3 Offline-Baseline vollständig grün stellen | abgeschlossen | Die verlorene 16/12-Profilgrenze und die gruppierte, tunnel-freie Decodergrenze sind wiederhergestellt; das Offline-Gate besteht zweimal nacheinander ohne erzeugte Arbeitsbaumänderungen. |
 | 20.4 Reset, Takt und Fetch für 16/12 wiederherstellen | in Bearbeitung | Der erste Lauf auf `2974dc6` endet weiterhin ohne Halt. Vor einer elektrischen Fetch-Reparatur meldet die bestehende Abnahme jedoch zuerst die geänderte öffentliche Decodergrenze. `FetchDecodeControls` wurde bewusst nicht erneut umgezeichnet; lediglich der beim manuellen Layoutwechsel verlorene Name der unveränderten Programmlimitquelle wurde wieder ergänzt. |
-| 20.5 Reset, Takt und Fetch für 8/8 wiederherstellen | in Bearbeitung | Der profilabhängige Programmhöchstwert und drei zuvor implizit einbittige Fetch-Bauteile sind auf 8 Bit festgeschrieben. Zwei identische Minimalprogrammläufe belegen danach weiterhin den ersten elektrischen Unterschied am PC nach der ersten Zustandsänderung. Folgewert-, Takt-, Reset- und Enable-Netz des PC-Registers sind geschlossen; `FetchDecodeControls` blieb vollständig unverändert. |
+| 20.5 Reset, Takt und Fetch für 8/8 wiederherstellen | in Bearbeitung | Der profilabhängige Programmhöchstwert und drei zuvor implizit einbittige Fetch-Bauteile sind auf 8 Bit festgeschrieben. Zwei identische Minimalprogrammläufe belegen danach weiterhin den ersten elektrischen Unterschied am PC nach der ersten Zustandsänderung. Folgewert-, Takt-, Reset- und Enable-Netz des PC-Registers sind geschlossen; eine direkte temporäre Messung belegt zusätzlich den aktiven Resetpegel am Register und den dabei stabilen PC-Nullwert. `FetchDecodeControls` blieb vollständig unverändert. |
 
 ### 20.1 Reproduktionsstand einfrieren
 
@@ -454,6 +454,43 @@ reguläre Lauf bewahrt den bekannten Zwei-Zeilen-Befund. Gemäß Stop-Regel wird
 deshalb kein CPU-Netz verändert. Als nächstes muss der Resetpegel direkt am
 Resetanschluss des PC-Registers sichtbar gemacht werden; erst danach darf die
 Registerflanke oder der Datenpfad als Ursache repariert werden.
+
+#### Direkte Messung am Resetanschluss des PC-Registers
+
+Der nächste Lauf auf `460a790` machte `FetchDecode` ausschließlich in einer
+temporären Kopie zum Startblatt. `CLK` und `RESET` wurden dort wie im regulären
+autonomen Projekt durch `Clock` und die Logisim-4.1.0-Factory `POR` ersetzt. Ein
+temporärer Ausgangspin wurde über eine einzelne kurze Leitung direkt an den
+bereits vorhandenen Resetanschluss des PC-Registers gelegt. Die eingecheckte
+Schaltung und ihre Subcircuit-Schnittstelle blieben unverändert.
+
+Ausgeführt wurde:
+
+```bash
+python3 /tmp/build-ap20-pc-reset-probe.py
+timeout 5s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table /tmp/ap20-pc-reset-probe.circ \
+  > /tmp/ap20-pc-reset-probe.tsv
+PYTHONPATH=src python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_8_bit_pc_register_controls_are_connected -v
+```
+
+Der Tabellenlauf endet regulär mit Exitcode 0 und 2.048 Datenzeilen. Logisim
+variiert dabei die noch freien Fetch-Eingänge vollständig; in jeder Zeile ist
+`PC_RESET_PROBE` eins und `PC_OUT` bleibt `0x00`. Damit erreicht der am
+öffentlichen Fetch-Eingang beobachtete Resetpegel nachweislich auch den
+Resetanschluss des PC-Registers, und das Register hält während des aktiven
+Resets seinen dokumentierten Nullzustand. Der fokussierte Strukturtest besteht
+weiterhin. Es ist weder eine Unterbrechung noch ein falscher Register-Reset in
+diesem Signalweg belegt, daher wurde gemäß Stop-Regel kein CPU-Netz verändert.
+
+Der erste Unterschied des vollständigen autonomen Top-Level-Laufs bleibt
+damit vorerst offen. Als nächstes muss ein zeitlich begrenzter Resetimpuls in
+einer temporären `FetchDecode`-Diagnosekopie den Reset kontrolliert freigeben;
+dann sind PC-Dateneingang und PC-Ausgang unmittelbar vor und nach der ersten
+steigenden Taktflanke gemeinsam zu beobachten. Erst dieser Vergleich kann
+zwischen einem undefinierten Folgewert und einer falschen Registerflanke
+unterscheiden.
 
 ## AP 19: Ursprüngliche Diagnose
 
