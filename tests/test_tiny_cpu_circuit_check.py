@@ -30,17 +30,26 @@ class CircuitCheckTests(unittest.TestCase):
 
         self.assertEqual(tunnels, [])
 
-    def test_main_fetch_decoder_uses_visible_wires(self):
+    def test_main_fetch_decoder_uses_one_shared_decoder_net(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         decoder = next(
             circuit for circuit in root.findall("circuit")
             if circuit.get("name") == "FetchDecodeControls"
         )
 
-        self.assertFalse(any(
-            component.get("name") == "Tunnel"
-            for component in decoder.findall("comp")
-        ))
+        components = decoder.findall("comp")
+        self.assertEqual(
+            sum(component.get("name") == "Decoder" for component in components),
+            1,
+        )
+        tunnel_labels = {
+            attribute.get("val")
+            for component in components
+            if component.get("name") == "Tunnel"
+            for attribute in component.findall("a")
+            if attribute.get("name") == "label"
+        }
+        self.assertEqual(tunnel_labels, {f"DECODE_{code:02d}" for code in range(64)})
         self.assertGreater(len(decoder.findall("wire")), 0)
 
     def test_standalone_fetch_decoder_uses_visible_wires(self):

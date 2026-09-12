@@ -169,8 +169,11 @@ Zuerst wurde die vorhandene 16-Bit-Konstante `0xfff` wieder ausschließlich mit
 dem Fetch-Netz verbunden und als `PROGRAM_LIMIT_MAX` benannt. Anschließend
 wurde die öffentliche Decodergrenze auf die bereits vertraglich geprüften
 Gruppensignale `LOAD_OPERAND`, `STORE_OPERAND` und die vier Argumentarten
-zurückgeführt. Jeder Ausgang wird sichtbar ohne Tunnel aus den zugehörigen
-Opcode-Leitungen gebildet und besitzt eine kurze Erklärung. Der
+zurückgeführt. Dabei versorgt genau **ein** vorhandener 6-zu-64-Decoder alle
+Steuersignale; nur die fachlich erforderlichen ODER-Gatter fassen seine
+Ausgänge zu Operationen und Argumentarten zusammen. Eindeutig benannte
+`DECODE_00`- bis `DECODE_63`-Netze verteilen die Ausgänge kompakt, und ein
+Regressionstest verhindert eine erneute Vervielfachung des Decoders. Der
 `SUB_OPERAND`-Regressionstest folgt nun dem Netz vom benannten
 `SUB_OPERAND_SELECT` zum gleichnamigen Ausgang und bleibt dadurch bei einem
 reinen Redraw stabil. Der zwischenzeitlich sichtbar gewordene Null-Längen-Draht

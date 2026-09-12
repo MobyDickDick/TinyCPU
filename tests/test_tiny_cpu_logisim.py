@@ -218,6 +218,19 @@ class LogisimLauncherTests(unittest.TestCase):
                 circuit.get("name") == "ControlAdapterBlock"
                 for circuit in root.findall("circuit")
             ))
+            if name == "TinyCPU.circ":
+                controls = next(
+                    circuit for circuit in root.findall("circuit")
+                    if circuit.get("name") == "FetchDecodeControls"
+                )
+                self.assertEqual(
+                    sum(
+                        component.get("name") == "Decoder"
+                        for component in controls.findall("comp")
+                    ),
+                    1,
+                    "FetchDecodeControls must fan out one shared opcode decoder",
+                )
 
     def test_program_limit_source_uses_profile_maximum(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
