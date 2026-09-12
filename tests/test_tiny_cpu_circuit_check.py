@@ -143,6 +143,40 @@ class CircuitCheckTests(unittest.TestCase):
             wires = {(w.get("from"), w.get("to")) for w in top.findall("wire")}
             self.assertNotIn((("(200,100)"), ("(300,100)")), wires)
 
+    def test_prunes_only_verified_and_explicitly_marked_dangling_branch(self):
+        project = """<?xml version='1.0'?>
+          <project><circuit name="Top">
+            <wire from="(100,100)" to="(200,100)"/>
+            <wire from="(200,100)" to="(300,100)"/>
+            <wire from="(200,100)" to="(200,160)" tinycpu-dangling="true"/>
+          </circuit></project>"""
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "stub.circ"
+            path.write_text(project)
+            self.assertEqual(repair_project(path, prune_dangling=True), [])
+            wires = ET.parse(path).getroot().findall("circuit/wire")
+            self.assertEqual(
+                {(wire.get("from"), wire.get("to")) for wire in wires},
+                {(("(100,100)"), ("(200,100)")),
+                 (("(200,100)"), ("(300,100)"))},
+            )
+
+    def test_does_not_prune_unverified_marked_wire(self):
+        project = """<?xml version='1.0'?>
+          <project><circuit name="Top">
+            <wire from="(100,100)" to="(200,100)"/>
+            <wire from="(200,100)" to="(200,160)" tinycpu-dangling="true"/>
+          </circuit></project>"""
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "not-a-proven-stub.circ"
+            path.write_text(project)
+            repair_project(path, prune_dangling=True)
+            self.assertEqual(
+                len(ET.parse(path).getroot().findall("circuit/wire")), 2
+            )
+
 
 
 

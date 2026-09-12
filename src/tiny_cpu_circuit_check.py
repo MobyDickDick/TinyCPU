@@ -172,6 +172,34 @@ def _repair_circuit(circuit: ET.Element, definitions: dict[str, ET.Element]) -> 
     return changed
 
 
+def _prune_marked_dangling_wires(circuit: ET.Element) -> bool:
+    """Remove explicitly marked visual stubs after verifying their topology.
+
+    Connectivity alone cannot distinguish a drawing remnant from a wire ending
+    at a component input because ``loc`` is not every component's input
+    terminal.  The checker therefore never guesses: a confirmed stub must be
+    marked ``tinycpu-dangling=\"true\"``.  Even then, it is deleted only when
+    one end is loose and the other touches at least two remaining wires.
+    """
+    wires = circuit.findall("wire")
+    changed = False
+    for wire in list(wires):
+        if wire.get("tinycpu-dangling") != "true":
+            continue
+        others = [candidate for candidate in wires if candidate is not wire]
+        ends = (_point(wire.get("from", "")), _point(wire.get("to", "")))
+        connections = [
+            sum(_on_segment(end, (_point(other.get("from", "")),
+                                  _point(other.get("to", ""))))
+                for other in others)
+            for end in ends
+        ]
+        if sorted(connections) == [0, 2]:
+            circuit.remove(wire)
+            changed = True
+    return changed
+
+
 def inspect_project(path: Path) -> list[CircuitIssue]:
     root = ET.parse(path).getroot()
     definitions = {c.get("name", ""): c for c in root.findall("circuit")}
@@ -179,7 +207,7 @@ def inspect_project(path: Path) -> list[CircuitIssue]:
             for issue in inspect_circuit(circuit, definitions)]
 
 
-def repair_project(path: Path) -> list[CircuitIssue]:
+def repair_project(path: Path, *, prune_dangling: bool = False) -> list[CircuitIssue]:
     """Repair uniquely identifiable bridges in *path* and return remaining issues."""
     tree = ET.parse(path)
     root = tree.getroot()
@@ -187,6 +215,8 @@ def repair_project(path: Path) -> list[CircuitIssue]:
     changed = False
     for circuit in root.findall("circuit"):
         changed = _repair_circuit(circuit, definitions) or changed
+        if prune_dangling:
+            changed = _prune_marked_dangling_wires(circuit) or changed
     if changed:
         ET.indent(tree, space="  ")
         tree.write(path, encoding="unicode", xml_declaration=True)
@@ -198,11 +228,16 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="check and repair Logisim output collisions")
     parser.add_argument("--fix", action="store_true",
                         help="remove only uniquely identifiable accidental bridge wires")
+    parser.add_argument("--prune-dangling", action="store_true",
+                        help="with --fix, remove verified wires marked tinycpu-dangling=true")
     parser.add_argument("projects", nargs="+", type=Path)
     args = parser.parse_args(argv)
     issues = []
     for project in args.projects:
-        issues.extend(repair_project(project) if args.fix else inspect_project(project))
+        issues.extend(
+            repair_project(project, prune_dangling=args.prune_dangling)
+            if args.fix else inspect_project(project)
+        )
     for issue in issues:
         print(issue)
     return int(bool(issues))

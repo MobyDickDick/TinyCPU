@@ -1179,3 +1179,10 @@ only when testing every candidate proves that exactly one wire separates all
 colliding drivers into singly-driven nets; ambiguous nets remain reported and
 are never guessed away.  The maintained top-level routes have been separated
 into independent corridors so the checker now exits successfully.
+
+Confirmed visual stubs can additionally be annotated in the XML with
+`tinycpu-dangling="true"` and removed with `--fix --prune-dangling`.  Before
+deleting such a wire, the checker still requires one loose end and a real
+three-way junction at the other end.  This explicit annotation is intentional:
+Logisim's `loc` is not the input-terminal coordinate for every component, so a
+purely geometric guess could silently delete a functional input connection.
