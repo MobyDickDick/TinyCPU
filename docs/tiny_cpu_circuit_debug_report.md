@@ -1,5 +1,32 @@
 # Diagnosebericht zu `TinyCPU.circ`
 
+## Klarstellung nach dem manuellen Reset von `FetchDecodeControls`
+
+Das wiederholte Umzeichnen von `FetchDecodeControls` sollte die inzwischen
+geänderte Opcode-Tabelle mit einem gemeinsam verwendeten Decoder abbilden. Es
+war jedoch der falsche Reparaturansatz: Es hat die vom Schaltungsautor bewusst
+gewählte Darstellung und Bauteilanordnung verändert, obwohl sich elektrische
+Fehler zunächst durch Neuverdrahtung in der vorhandenen Zeichnung bearbeiten
+lassen. Künftige Reparaturen behalten deshalb Bauteile und Positionen bei,
+verwenden keine Tunnel und vergrößern bei Platzmangel nur die Zeichenfläche
+proportional.
+
+`SET_DIV0` ist dabei kein eigener Maschinenbefehl und besitzt folglich kein
+zugehöriges Opcode-Decodersignal. Das Flag entsteht bei einer ausgeführten
+Division mit Operand null im Rechenpfad; am Top-Level muss deshalb
+`Operations.DIVIDE_BY_ZERO` mit `ErrorFlags.SET_DIV0` verbunden sein. Ein
+gleichnamiger Ausgang von `FetchDecodeControls` darf nicht willkürlich an eine
+Decoderzeile angeschlossen werden, weil dadurch ein regulärer Opcode fälschlich
+den Divisionsfehler setzen würde. Dass der Pin in der zurückgesetzten
+Darstellung wie ein Decoder-Ausgang beschriftet ist, ist damit irreführend und
+kein Beleg für eine fehlende Decoderverbindung.
+
+Als nächster nachweisbarer Funktionsfehler wurde ausschließlich die fehlende
+Leitung von `FetchDecode.PROGRAM_LIMIT` zum bereits vorhandenen
+Programmgrenzenvergleich behoben. Die Bauteile und ihre Positionen bleiben
+unverändert; ergänzt wurde nur die gerade Leitung zwischen den vorhandenen
+Anschlusspunkten `(300,530)` und `(670,530)`.
+
 Dieser Bericht wurde zunächst entlang der zehn Aufgaben aus
 `tiny_cpu_circuit_debug_plan.md` fortgeschrieben und führt nun die Nachweise
 der Wiederherstellungspakete aus `tiny_cpu_recovery_work_packages.md` weiter.
