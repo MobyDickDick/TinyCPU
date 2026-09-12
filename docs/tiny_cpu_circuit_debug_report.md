@@ -803,6 +803,48 @@ undefiniertem `OPCODE`-Ausgang eingegrenzt. Als nächstes müssen innerhalb von
 werden. Erst wenn dort der erste offene, mehrfach getriebene oder undefinierte
 Netzübergang benannt ist, ist eine minimale Reparatur zulässig.
 
+#### ROM-Adress- und Datengrenze in `FetchDecode`
+
+Der nächste Diagnoselauf begann auf Commit `c96f77d` mit sauberem Arbeitsbaum,
+OpenJDK 25.0.2 und Logisim-evolution 4.1.0. Der vorhandene temporäre
+`ROM_WORD_PROBE` wurde unverändert weiterverwendet. Seine Regression verfolgt
+nun zusätzlich innerhalb von `FetchDecode` die tatsächlich angeschlossenen
+Ports: Das elektrisch beobachtete `PC_OUT`-Netz erreicht den 8-Bit-Adresseingang
+von `INSTRUCTION_ROM`; dessen einzelner 14-Bit-Datenausgang erreicht über den
+vorhandenen Splitter den `OPCODE`-Port und damit den Probe. Außerdem sichert der
+Test den Anfang des eingelegten ROM-Inhalts (`0x00ff`) und erneut die
+Bytegleichheit der 8/8-Quelldatei. Damit beruht die Diagnose nicht auf einer
+vermuteten Canvas-Koordinate oder einer kopierten ROM-Fixture.
+
+Ausgeführt wurde:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_autonomous_control_probe_is_temporary_and_observable -v
+python3 scripts/probe-logisim-autonomous-controls.py \
+  /tmp/ap20-fetch-internal-boundary.circ
+timeout 5s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table,halt /tmp/ap20-fetch-internal-boundary.circ \
+  > /tmp/ap20-fetch-internal-boundary.tsv
+```
+
+Der fokussierte Test besteht. Der elektrische Lauf endet nach fünf Sekunden
+erwartungsgemäß mit Exitcode 124 und 1.444 Tabellenzeilen. `PC_OUT_PROBE`
+durchläuft weiterhin definiert `0x00` bis `0x19`. Weil exakt dasselbe Netz den
+ROM-Adresseingang treibt, ist damit auch die Adresse am Bauteil definiert. Der
+direkt vom angeschlossenen ROM-Datenausgang abgenommene `ROM_WORD_PROBE` bleibt
+dagegen in jeder Zeile undefiniert (`UU UUUU UUUU UUUU`); der nachgelagerte
+`DECODE_LOAD_CONST_PROBE` bleibt folgerichtig ebenfalls undefiniert. Der erste
+abweichende benannte Übergang liegt somit **im Bauteil `INSTRUCTION_ROM`
+zwischen definiertem Adresseingang und undefiniertem Datenausgang**, nicht im
+nachgelagerten Decoder oder in einer offenen Leitung hinter dem ROM.
+
+Gemäß Stop-Regel wurde keine Schaltungsdatei geändert. Als nächstes müssen die
+elektrisch wirksamen ROM-Attribute und der geladene Inhalt in einer isolierten
+temporären `FetchDecode`-Kopie gegen ein minimales 8/14-ROM geprüft werden. Erst
+wenn dabei das erste falsche Attribut oder Bauteilverhalten belegt ist, darf
+`TinyCPU-8-8.circ` minimal angepasst werden.
+
 ## AP 19: Ursprüngliche Diagnose
 
 ## Status
