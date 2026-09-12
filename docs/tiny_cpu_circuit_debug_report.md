@@ -573,6 +573,45 @@ steigenden Taktflanke gemeinsam zu beobachten. Erst dieser Vergleich kann
 zwischen einem undefinierten Folgewert und einer falschen Registerflanke
 unterscheiden.
 
+#### Kontrollierte Resetfreigabe am PC-Register
+
+Der nächste Lauf auf `8d5ff9c` setzt genau diese Messung um. Das neue
+Diagnosewerkzeug `scripts/probe-logisim-pc-release.py` erzeugt ausschließlich
+eine temporäre Kopie: Es wählt `FetchDecode` als Startblatt, ersetzt dessen
+freien Eingänge durch feste Werte und erzeugt den Resetimpuls durch einen
+invertierten, langsamen Takt. Ein dauerhaft nullwertiger `halt`-Ausgang sorgt
+dabei lediglich dafür, dass Logisim im Modus `table,halt` die Takte ausführt.
+Die eingecheckte Schaltung wird weder verändert noch umgezeichnet.
+
+Die erste Tabellenzeile zeigt bei aktivem Reset gemeinsam `PC_D_PROBE=0x01`
+und `PC_OUT=0x00`. Bei der Resetfreigabe bleibt der Ausgang definiert auf null;
+an der ersten steigenden PC-Flanke nach der vollständig eingeschwungenen
+Freigabe übernimmt das Register den bereits sichtbaren Folgewert und liefert
+`PC_OUT=0x01`. Danach zählen Dateneingang und Ausgang entsprechend versetzt
+weiter. Damit sind weder ein undefinierter PC-Folgewert noch eine falsche
+Registerflanke innerhalb des isolierten `FetchDecode` belegt. Gemäß Stop-Regel
+wurde deshalb kein CPU-Netz geändert.
+
+Ausgeführt wurde:
+
+```bash
+python3 scripts/probe-logisim-pc-release.py /tmp/ap20-pc-release.circ
+timeout 2s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table,halt /tmp/ap20-pc-release.circ \
+  > /tmp/ap20-pc-release.tsv
+head -n 8 /tmp/ap20-pc-release.tsv
+```
+
+Der zeitlich begrenzte Tabellenlauf endet erwartungsgemäß mit Exitcode 124;
+seine ersten acht Zustandsänderungen enthalten ausschließlich definierte
+PC-Werte und belegen die Übernahme von `0x01` nach der Resetfreigabe. Der
+erste Unterschied des vollständigen autonomen `TinyCPUMain`-Laufs liegt damit
+außerhalb des nun geprüften isolierten Register- und Folgewertverhaltens. Als
+nächstes muss dieselbe kontrollierte Resetquelle an der bestehenden
+`TinyCPUMain`-Grenze eingesetzt und der Resetpegel vor und hinter dem
+`FetchDecode`-Subcircuit gemeinsam beobachtet werden. Erst ein dort benannter
+Unterschied rechtfertigt eine Schaltungsänderung.
+
 ## AP 19: Ursprüngliche Diagnose
 
 ## Status
