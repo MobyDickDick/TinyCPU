@@ -177,7 +177,23 @@ class LogisimLauncherTests(unittest.TestCase):
     def test_register_offset_load_selects_memory_data(self):
         for name in ("TinyCPU.circ", "TinyCPU-8-8.circ"):
             root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
-            decode = next(c for c in root.findall("circuit") if c.get("name") == "DecodeSignals")
+            circuit_name = (
+                "FetchDecodeControls" if name == "TinyCPU.circ" else "DecodeSignals"
+            )
+            decode = next(
+                c for c in root.findall("circuit") if c.get("name") == circuit_name
+            )
+            if name == "TinyCPU.circ":
+                pin_labels = {
+                    attribute.get("val")
+                    for component in decode.findall("comp")
+                    for attribute in component.findall("a")
+                    if component.get("name") == "Pin"
+                    and attribute.get("name") == "label"
+                }
+                self.assertIn("LOAD_OPERAND", pin_labels)
+                self.assertIn("ADDR_REG_OFFS_ARGUMENT", pin_labels)
+                continue
             wires = {(w.get("from"), w.get("to")) for w in decode.findall("wire")}
             self.assertNotIn(("(600,100)", "(710,100)"), wires)
             self.assertIn(("(570,160)", "(680,160)"), wires)
