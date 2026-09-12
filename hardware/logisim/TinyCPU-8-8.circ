@@ -30,6 +30,107 @@
     <a name="circuitnamedboxfixedsize" val="true"/>
     <a name="clabelup" val="west"/>
     <a name="simulationFrequency" val="1.0"/>
+    <comp lib="0" loc="(1040,530)" name="Splitter">
+      <a name="bit1" val="0"/>
+      <a name="bit10" val="0"/>
+      <a name="bit11" val="0"/>
+      <a name="bit12" val="0"/>
+      <a name="bit13" val="0"/>
+      <a name="bit2" val="0"/>
+      <a name="bit3" val="0"/>
+      <a name="bit4" val="0"/>
+      <a name="bit5" val="0"/>
+      <a name="bit6" val="0"/>
+      <a name="bit7" val="0"/>
+      <a name="bit8" val="0"/>
+      <a name="bit9" val="0"/>
+      <a name="facing" val="south"/>
+      <a name="incoming" val="14"/>
+      <a name="spacing" val="2"/>
+    </comp>
+    <comp lib="0" loc="(1140,350)" name="Probe">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="MONITOR_JUMP_NOT_ZERO"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(1140,370)" name="Probe">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="MONITOR_HALT_ERROR"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(1140,400)" name="Probe">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="MONITOR_PC_OUT"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(1150,470)" name="Constant">
+      <a name="width" val="16"/>
+    </comp>
+    <comp lib="0" loc="(1150,510)" name="Constant">
+      <a name="width" val="16"/>
+    </comp>
+    <comp lib="0" loc="(1150,530)" name="Constant"/>
+    <comp lib="0" loc="(1150,570)" name="Constant"/>
+    <comp lib="0" loc="(1680,1940)" name="Probe">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="MONITOR_JUMP_ADR"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(1680,1960)" name="Probe">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="MONITOR_JUMP_ZERO"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(1680,1980)" name="Probe">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="MONITOR_JUMP_NEGATIVE"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(1680,2000)" name="Probe">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="MONITOR_JUMP_ERROR"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(1680,2020)" name="Probe">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="MONITOR_JUMP_NOT_ERROR"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(1680,2040)" name="Probe">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="MONITOR_SET_DIV0"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(1680,2060)" name="Probe">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="MONITOR_SET_ADDR"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(1680,2080)" name="Probe">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="MONITOR_SET_INV"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(1680,2100)" name="Probe">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="MONITOR_INPUT"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(1850,490)" name="Constant">
+      <a name="value" val="0x0"/>
+    </comp>
     <comp lib="0" loc="(330,430)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="CLK"/>
@@ -43,7 +144,7 @@
       <a name="facing" val="west"/>
       <a name="label" val="PRINT_VALUE"/>
       <a name="type" val="output"/>
-      <a name="width" val="8"/>
+      <a name="width" val="16"/>
     </comp>
     <comp lib="0" loc="(3460,1640)" name="Pin">
       <a name="appearance" val="classic"/>
@@ -68,6 +169,12 @@
       <a name="facing" val="west"/>
       <a name="label" val="HALTED_WITH_ERROR"/>
       <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(3470,1000)" name="Probe">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="MONITOR_OVERFLOW"/>
+      <a name="labelloc" val="east"/>
     </comp>
     <comp lib="0" loc="(3470,1030)" name="Pin">
       <a name="appearance" val="classic"/>
@@ -105,6 +212,18 @@
       <a name="label" val="ERROR_INPUT"/>
       <a name="type" val="output"/>
     </comp>
+    <comp lib="0" loc="(3480,1380)" name="Probe">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="MONITOR_EFFECTIVE_REGISTER_SELECTED_OUT"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(3480,1420)" name="Probe">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="MONITOR_EFFECTIVE_MEMORY_ADDRESS"/>
+      <a name="labelloc" val="east"/>
+    </comp>
     <comp lib="0" loc="(3480,700)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
@@ -116,13 +235,79 @@
       <a name="facing" val="west"/>
       <a name="label" val="PRINT_ADDRESS_VALUE"/>
       <a name="type" val="output"/>
-      <a name="width" val="8"/>
+      <a name="width" val="6"/>
     </comp>
     <comp lib="0" loc="(3480,780)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="PRINT_VALID"/>
       <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(3480,800)" name="Probe">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="MONITOR_ADDRESS_VALID"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(3480,820)" name="Probe">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="MONITOR_ACC_MEMORY_REQUEST"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(3480,880)" name="Probe">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="MONITOR_NEGATIVE"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(3480,920)" name="Probe">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="MONITOR_LOAD_CONST"/>
+      <a name="labelloc" val="east"/>
+    </comp>
+    <comp lib="0" loc="(790,550)" name="Constant">
+      <a name="value" val="0xff"/>
+      <a name="width" val="8"/>
+    </comp>
+    <comp lib="0" loc="(790,570)" name="Constant"/>
+    <comp lib="1" loc="(580,720)" name="OR Gate">
+      <a name="inputs" val="3"/>
+      <a name="label" val="MEMORY_WRITE_REQUEST"/>
+    </comp>
+    <comp lib="2" loc="(2530,930)" name="Multiplexer">
+      <a name="width" val="16"/>
+    </comp>
+    <comp loc="(1020,470)" name="FetchDecode">
+      <a name="label" val="FETCH_DECODE"/>
+    </comp>
+    <comp loc="(1020,700)" name="Memory">
+      <a name="label" val="MEMORY_INSTANCE"/>
+    </comp>
+    <comp loc="(1380,470)" name="AddressPath">
+      <a name="label" val="ADDRESS_PATH"/>
+    </comp>
+    <comp loc="(1400,1080)" name="FetchDecodeControls">
+      <a name="label" val="FETCH_DECODE_CONTROLS"/>
+    </comp>
+    <comp loc="(2080,470)" name="Datapath">
+      <a name="label" val="DATAPATH_INSTANCE"/>
+    </comp>
+    <comp loc="(2870,450)" name="ErrorFlags">
+      <a name="label" val="ERROR_FLAGS"/>
+    </comp>
+    <comp loc="(2870,960)" name="Operations">
+      <a name="label" val="OPERATIONS_INSTANCE"/>
+    </comp>
+    <comp loc="(2880,1380)" name="EffectiveAddress">
+      <a name="label" val="EFFECTIVE_ADDRESS_FBOX"/>
+    </comp>
+    <comp loc="(3280,1450)" name="AddressRangeFBox">
+      <a name="label" val="ADDRESS_RANGE_FBOX"/>
+    </comp>
+    <comp loc="(4360,450)" name="JumpBox">
+      <a name="label" val="JUMP_BOX"/>
     </comp>
     <wire from="(1020,350)" to="(1020,470)"/>
     <wire from="(1020,350)" to="(1140,350)"/>
@@ -180,7 +365,7 @@
     <wire from="(1400,1640)" to="(1670,1640)"/>
     <wire from="(1400,1660)" to="(1690,1660)"/>
     <wire from="(1400,1680)" to="(1710,1680)"/>
-    <wire from="(1400,1700)" to="(3460,1700)"/>
+    <wire from="(1400,1700)" to="(2660,1700)"/>
     <wire from="(1400,1880)" to="(1730,1880)"/>
     <wire from="(1400,1900)" to="(1750,1900)"/>
     <wire from="(1410,510)" to="(1410,780)"/>
@@ -212,11 +397,11 @@
     <wire from="(1580,1360)" to="(1580,1940)"/>
     <wire from="(1580,1360)" to="(2330,1360)"/>
     <wire from="(1580,1940)" to="(1680,1940)"/>
-    <wire from="(1670,1640)" to="(3460,1640)"/>
+    <wire from="(1670,1640)" to="(2660,1640)"/>
     <wire from="(1670,230)" to="(1670,1640)"/>
-    <wire from="(1690,1660)" to="(3460,1660)"/>
+    <wire from="(1690,1660)" to="(2660,1660)"/>
     <wire from="(1690,190)" to="(1690,1660)"/>
-    <wire from="(1710,1680)" to="(3460,1680)"/>
+    <wire from="(1710,1680)" to="(2660,1680)"/>
     <wire from="(1710,170)" to="(1710,1680)"/>
     <wire from="(1730,820)" to="(1730,1880)"/>
     <wire from="(1730,820)" to="(2390,820)"/>
@@ -317,6 +502,10 @@
     <wire from="(2610,410)" to="(2880,410)"/>
     <wire from="(2610,510)" to="(2650,510)"/>
     <wire from="(2660,1140)" to="(2660,1150)"/>
+    <wire from="(2660,1640)" to="(3460,1640)"/>
+    <wire from="(2660,1660)" to="(3460,1660)"/>
+    <wire from="(2660,1680)" to="(3460,1680)"/>
+    <wire from="(2660,1700)" to="(3460,1700)"/>
     <wire from="(2870,1000)" to="(3470,1000)"/>
     <wire from="(2870,1020)" to="(2940,1020)"/>
     <wire from="(2870,1040)" to="(2880,1040)"/>
