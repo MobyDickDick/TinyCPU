@@ -341,6 +341,41 @@ abgeleitet: Als nächstes ist der bereits eingegrenzte PC-Folgewertpfad zwischen
 Register, Addierer und Multiplexer elektrisch zu prüfen, ohne
 `FetchDecodeControls` umzustellen.
 
+#### Nachprüfung des PC-Folgewertpfads
+
+Der nächste Lauf auf `e751570` reproduziert den offenen Halt-Nachweis mit dem
+unveränderten 8/8-Profil nach 20 Sekunden. Die Tabelle enthält erneut genau
+zwei Zustandsänderungen: `PC_OUT` beginnt bei null und wird anschließend
+undefiniert. Eine anschließende semantische Netzanalyse verfolgt die
+Anschlüsse relativ zu den Bauteilankern statt über absolute Canvaspositionen.
+Sie belegt, dass der PC-Ausgang den Addierereingang, den öffentlichen
+`PC_OUT`-Pin und die ROM-Adresse erreicht, der Addiererausgang am normalen
+Multiplexereingang liegt und der Multiplexerausgang geschlossen zum
+PC-Dateneingang zurückgeführt wird.
+
+Damit ist in diesem Schritt kein unterbrochenes Netz zwischen Register,
+Addierer und Multiplexer nachgewiesen; die Schaltung wurde folglich nicht auf
+Verdacht neu verdrahtet. Die neue Regression bewahrt diesen eingegrenzten
+Signalweg redraw-sicher. Der nächste zulässige Diagnoseschritt muss die
+benannten Register-Steuereingänge `CLK`, `RESET` und Enable ab der ersten
+Zustandsänderung beobachten. Erst ein dort benannter Unterschied rechtfertigt
+eine weitere Schaltungsänderung. Die bereits aus 20.4 bekannte abweichende
+öffentliche 16/12-Decodergrenze bleibt davon unabhängig und lässt das gesamte
+Offline-Gate weiterhin an zwei vorhandenen Tests scheitern.
+
+Ausgeführt wurde:
+
+```bash
+PYTHONPATH=src python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_8_bit_pc_successor_path_is_continuous \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_8_bit_fetch_path_uses_profile_width -v
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-8-8 \
+  --jar "$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  --trace-output /tmp/ap20-next/core.tsv --timeout 20
+scripts/test-offline.sh
+```
+
 ## AP 19: Ursprüngliche Diagnose
 
 ## Status
