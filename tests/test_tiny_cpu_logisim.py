@@ -330,6 +330,38 @@ class LogisimLauncherTests(unittest.TestCase):
         self.assertTrue(_wire_path_exists(fetch, split_output, pc_out.get("loc")))
         self.assertTrue(_wire_path_exists(fetch, split_output, rom_address))
 
+    def test_8_bit_pc_register_controls_are_connected(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU-8-8.circ").getroot()
+        fetch = next(
+            circuit for circuit in root.findall("circuit")
+            if circuit.get("name") == "FetchDecode"
+        )
+        pc = _component_by_label(fetch, "PC")
+        clock = _component_by_label(fetch, "CLK")
+        reset = _component_by_label(fetch, "RESET")
+
+        pc_x, pc_y = map(int, pc.get("loc").strip("()").split(","))
+        pc_enable = f"({pc_x},{pc_y + 50})"
+        pc_clock = f"({pc_x},{pc_y + 70})"
+        pc_reset = f"({pc_x + 30},{pc_y + 90})"
+
+        self.assertTrue(_wire_path_exists(fetch, clock.get("loc"), pc_clock))
+        self.assertTrue(_wire_path_exists(fetch, reset.get("loc"), pc_reset))
+
+        enable_sources = [
+            component for component in fetch.findall("comp")
+            if component.get("name") == "Constant"
+            and _wire_path_exists(fetch, component.get("loc"), pc_enable)
+        ]
+        self.assertEqual(
+            len(enable_sources), 1,
+            "the PC enable input must have one constant source",
+        )
+        self.assertEqual(
+            _attributes(enable_sources[0]).get("value", "0x1"), "0x1",
+            "the PC enable input must remain asserted",
+        )
+
     def test_visible_top_level_memory_or_gate_has_every_input_connected(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")

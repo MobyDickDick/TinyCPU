@@ -42,7 +42,7 @@ Tests mit historischen Canvas-Koordinaten verändert.
 | 20.2 Breitenfehler im 8/8-Profil isolieren | abgeschlossen | Sieben 16-Bit-Attribute im Datenpfad von `Operations` sind auf 8 Bit spezialisiert; der ROM adressiert nun ausdrücklich mit 8 Bit. Die drei fokussierten statischen Abnahmen bestehen. |
 | 20.3 Offline-Baseline vollständig grün stellen | abgeschlossen | Die verlorene 16/12-Profilgrenze und die gruppierte, tunnel-freie Decodergrenze sind wiederhergestellt; das Offline-Gate besteht zweimal nacheinander ohne erzeugte Arbeitsbaumänderungen. |
 | 20.4 Reset, Takt und Fetch für 16/12 wiederherstellen | in Bearbeitung | Der erste Lauf auf `2974dc6` endet weiterhin ohne Halt. Vor einer elektrischen Fetch-Reparatur meldet die bestehende Abnahme jedoch zuerst die geänderte öffentliche Decodergrenze. `FetchDecodeControls` wurde bewusst nicht erneut umgezeichnet; lediglich der beim manuellen Layoutwechsel verlorene Name der unveränderten Programmlimitquelle wurde wieder ergänzt. |
-| 20.5 Reset, Takt und Fetch für 8/8 wiederherstellen | in Bearbeitung | Der profilabhängige Programmhöchstwert und drei zuvor implizit einbittige Fetch-Bauteile sind auf 8 Bit festgeschrieben. Zwei identische Minimalprogrammläufe belegen danach weiterhin den ersten elektrischen Unterschied am PC nach der ersten Zustandsänderung. `FetchDecodeControls` blieb vollständig unverändert. |
+| 20.5 Reset, Takt und Fetch für 8/8 wiederherstellen | in Bearbeitung | Der profilabhängige Programmhöchstwert und drei zuvor implizit einbittige Fetch-Bauteile sind auf 8 Bit festgeschrieben. Zwei identische Minimalprogrammläufe belegen danach weiterhin den ersten elektrischen Unterschied am PC nach der ersten Zustandsänderung. Folgewert-, Takt-, Reset- und Enable-Netz des PC-Registers sind geschlossen; `FetchDecodeControls` blieb vollständig unverändert. |
 
 ### 20.1 Reproduktionsstand einfrieren
 
@@ -375,6 +375,43 @@ PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
   --trace-output /tmp/ap20-next/core.tsv --timeout 20
 scripts/test-offline.sh
 ```
+
+#### Nachprüfung der PC-Registersteuerung
+
+Der auf `e770298` wiederholte autonome 8/8-Kernlauf endet nach 20 Sekunden
+erneut ohne Halt und erzeugt unverändert genau zwei Zustandsänderungen mit der
+Prüfsumme
+`1e432f81c223f180e1eadf54651de89a8958aa4fd42e0caa52db88bf1bb375fd`.
+Damit liegt weiterhin derselbe erste elektrische Unterschied vor: `PC_OUT`
+beginnt bei null und wird mit der ersten Zustandsänderung undefiniert.
+
+Die anschließend geforderte semantische Netzanalyse prüft die drei benannten
+Steuereingänge relativ zum Anker des PC-Registers. Der öffentliche `CLK`-Pin
+erreicht dessen Takteingang, der öffentliche `RESET`-Pin dessen Reset-Eingang,
+und genau eine auf eins gesetzte Konstante treibt den Enable-Eingang. Die neue
+Regression folgt jeweils dem vollständigen Netz und hängt deshalb nicht von
+der gezeichneten Route ab. Da weder ein offener noch ein mehrfach getriebener
+Steuerpfad nachgewiesen ist, wurde die Schaltung gemäß Stop-Regel nicht
+verändert.
+
+Ausgeführt wurde:
+
+```bash
+PYTHONPATH=src python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_8_bit_pc_register_controls_are_connected -v
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-8-8 \
+  --jar "$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  --trace-output /tmp/ap20-register-controls/core.tsv --timeout 20
+sha256sum /tmp/ap20-register-controls/core.tsv
+```
+
+Der fokussierte Strukturtest besteht. Der elektrische Diagnosebefehl liefert
+wie erwartet Exitcode 1, weil sein internes 20-Sekunden-Limit vor einem Halt
+abläuft; dies ist kein neuer Fehlerbefund. Der nächste zulässige Schritt muss
+deshalb Reset- und Taktpegel während der beiden beobachteten Zustandsänderungen
+direkt sichtbar machen und mit der steigenden Registerflanke abgleichen. Erst
+eine dort belegte Abweichung rechtfertigt eine Schaltungsänderung.
 
 ## AP 19: Ursprüngliche Diagnose
 
