@@ -1702,3 +1702,19 @@ Die Strukturregression verlangt deshalb nun gleichzeitig genau eine
 Decoderinstanz, mindestens eine reale Leitung und null Tunnel in diesem
 Teilkreis. Damit kann eine spätere Änderung weder wieder Decoderkopien noch
 eine unsichtbare Tunnelverteilung als vermeintliche Reparatur einführen.
+
+## Abgleich der eigenständigen Fetch/Decode-Control-Diagnose
+
+Die eigenständige Diagnosedatei war nach dem Redraw noch auf der früheren
+Befehlsreihenfolge stehen geblieben: Opcode 0 aktivierte dort beispielsweise
+`ADD_OPERAND` statt `LOAD_OPERAND`. Ihr `FetchDecodeControls`-Blatt wurde daher
+auf exakt dieselbe sichtbare Verdrahtung wie das geprüfte Blatt im
+Gesamtprojekt gebracht. Dabei sank die Komponentenanzahl von 94 auf 90; der
+Teilkreis enthält weiterhin genau einen 6-zu-64-Decoder und keine Tunnel.
+
+`scripts/test-logisim-decode.py` prüft nun sowohl das Blatt in `TinyCPU.circ`
+als auch die eigenständige Diagnosedatei elektrisch gegen die eingefrorene
+Zuordnung in `tinycpu-machine-v1.json`. Für beide Varianten werden alle 50
+gültigen Befehle und alle 14 reservierten Codes geprüft. Damit kann die
+Diagnose künftig weder bei der Befehlsnummernzuordnung noch bei der sichtbaren
+Schaltungslogik unbemerkt vom tatsächlich eingebauten Decoder abweichen.
