@@ -62,6 +62,49 @@ def _wire_path_exists(circuit, start, end):
 
 
 class LogisimLauncherTests(unittest.TestCase):
+    def test_autonomous_control_probe_is_temporary_and_observable(self):
+        source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
+        before = source.read_bytes()
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "probe.circ"
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts/probe-logisim-autonomous-controls.py"),
+                    str(target),
+                ],
+                cwd=ROOT,
+                check=True,
+            )
+            root = ET.parse(target).getroot()
+            main = next(
+                circuit for circuit in root.findall("circuit")
+                if circuit.get("name") == "TinyCPUMain"
+            )
+            labelled = {
+                _attributes(component).get("label"): component
+                for component in main.findall("comp")
+                if _attributes(component).get("label")
+            }
+
+            self.assertEqual(labelled["CLK_SOURCE_PROBE"].get("name"), "Pin")
+            self.assertEqual(labelled["RESET_SOURCE_PROBE"].get("name"), "Pin")
+            self.assertEqual(labelled["PC_OUT_PROBE"].get("name"), "Pin")
+            self.assertEqual(labelled["halt"].get("name"), "Pin")
+            self.assertEqual(labelled["CLK_SOURCE_PROBE"].get("loc"), "(350,400)")
+            self.assertEqual(labelled["RESET_SOURCE_PROBE"].get("loc"), "(350,450)")
+            outputs = {
+                _attributes(component).get("label")
+                for component in main.findall("comp")
+                if component.get("name") == "Pin"
+                and _attributes(component).get("type") == "output"
+            }
+            self.assertEqual(
+                outputs,
+                {"halt", "PC_OUT_PROBE", "CLK_SOURCE_PROBE", "RESET_SOURCE_PROBE"},
+            )
+            self.assertEqual(source.read_bytes(), before)
+
     def test_top_level_por_release_probe_is_temporary_and_observable(self):
         source = ROOT / "hardware/logisim/TinyCPU-8-8.circ"
         before = source.read_bytes()

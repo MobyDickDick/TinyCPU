@@ -707,6 +707,60 @@ denselben Beobachtungspunkten gemeinsam zu protokollieren. Erst wenn der PC
 dort definiert fortschaltet, darf die Diagnose zu ROM-Wort und Decodergrenze
 weitergehen.
 
+#### Gemeinsamer autonomer Reset-, Takt- und PC-Nachweis
+
+Der nächste Lauf begann auf Commit `3dde99e` mit unverändert sauberem
+Arbeitsbaum, OpenJDK 25.0.2 und der gepinnten
+Logisim-evolution-Version 4.1.0. Das neue Werkzeug
+`scripts/probe-logisim-autonomous-controls.py` ruft unmittelbar den regulären
+`autonomous_project`-Generator auf und ergänzt erst in dessen temporärer
+Ausgabedatei die drei Beobachtungspunkte `RESET_SOURCE_PROBE`,
+`CLK_SOURCE_PROBE` und `PC_OUT_PROBE`. Alle fachlich unbeteiligten Ausgänge
+werden wieder zu reinen Probes. Der Regressionstest sichert die vier kleinen
+Tabellenausgänge einschließlich `halt` sowie die unveränderte 8/8-Quelldatei.
+
+Ausgeführt wurde:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_autonomous_control_probe_is_temporary_and_observable \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_autonomous_project_uses_profile_specific_circuit -v
+python3 scripts/probe-logisim-autonomous-controls.py \
+  /tmp/ap20-autonomous-controls.circ
+timeout 5s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table,halt /tmp/ap20-autonomous-controls.circ \
+  > /tmp/ap20-autonomous-controls.tsv
+```
+
+Beide fokussierten Tests bestehen. Der elektrische Lauf endet erwartungsgemäß
+nach 5 Sekunden mit Exitcode 124 und schreibt 21.020 Zustandszeilen. Der von
+`table,halt` nicht als Datenspalte ausgegebene Haltkanal wird bis zum Timeout
+nicht aktiv. Die beiden sichtbaren
+Steuerquellen werden in jeder stabil ausgegebenen Tabellenzeile mit null
+abgetastet; zugleich zählt `PC_OUT_PROBE` definiert von `0x00` bis `0x19`,
+beginnt danach erneut bei `0x00` und durchläuft diesen Bereich wiederholt.
+Damit ist für exakt die vom Abnahmelauf erzeugte Kopie belegt, dass der
+Reset nicht dauerhaft aktiv bleibt und der CPU-Takt den PC fortschaltet. Der
+weiterhin fehlende Halt ist folglich nicht mehr als Reset- oder
+PC-Stillstandsfehler einzugrenzen.
+
+Der anschließende Lauf von `scripts/test-offline.sh` bestätigt erneut die
+bereits auf dem Ausgangscommit vorhandenen drei, ausschließlich das
+zurückgesetzte 16/12-Projekt betreffenden Fehler:
+`test_program_limit_source_uses_profile_maximum`,
+`test_public_decoder_separates_operations_from_argument_kinds` und
+`test_register_offset_load_selects_memory_data`. Alle 83 übrigen Unit-Tests
+einschließlich der neuen Regression bestehen; Verifier und statischer
+Schaltungscheck akzeptieren weiterhin alle Artefakte. Diese bekannten
+16/12-Befunde sind von der hier untersuchten unveränderten 8/8-Schaltung
+unabhängig und werden deshalb nicht in denselben Reparaturschritt gezogen.
+
+Gemäß Stop-Regel wurde keine Schaltungsdatei geändert. Der nächste zulässige
+Diagnoseschritt muss nun am selben autonomen Projekt `PC_OUT`, das zugehörige
+ROM-Wort und die Decodergrenze gemeinsam beobachten und den ersten Unterschied
+zum 8/8-VM-Trace benennen; erst dieser Nachweis darf eine fachliche Reparatur
+auslösen.
+
 ## AP 19: Ursprüngliche Diagnose
 
 ## Status
