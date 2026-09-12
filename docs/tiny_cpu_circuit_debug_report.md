@@ -761,6 +761,48 @@ ROM-Wort und die Decodergrenze gemeinsam beobachten und den ersten Unterschied
 zum 8/8-VM-Trace benennen; erst dieser Nachweis darf eine fachliche Reparatur
 auslösen.
 
+#### Gemeinsamer PC-, ROM-Wort- und Decodergrenznachweis
+
+Der Folgelauf begann auf Commit `61bda5a` mit sauberem Arbeitsbaum, OpenJDK
+25.0.2 und Logisim-evolution 4.1.0. Das vorhandene temporäre Diagnosewerkzeug
+exportiert nun zusätzlich das 14-Bit-Netz unmittelbar am `OPCODE`-Ausgang von
+`FetchDecode` als `ROM_WORD_PROBE`. Außerdem wird der bereits angeschlossene
+Monitor `MONITOR_LOAD_CONST` an der Decodergrenze für die temporäre Tabelle in
+`DECODE_LOAD_CONST_PROBE` umgewandelt. Die Quelldatei
+`TinyCPU-8-8.circ` bleibt unverändert. Der Regressionstest verlangt die beiden
+zusätzlichen Ausgänge, ihre Breite beziehungsweise vorhandene Netzverbindung
+und erneut Bytegleichheit der Quelldatei.
+
+Ausgeführt wurde:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_autonomous_control_probe_is_temporary_and_observable -v
+python3 scripts/probe-logisim-autonomous-controls.py \
+  /tmp/ap20-fetch-boundary.circ
+timeout 5s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table,halt /tmp/ap20-fetch-boundary.circ \
+  > /tmp/ap20-fetch-boundary.tsv
+```
+
+Der fokussierte Test besteht. Der elektrische Lauf endet nach fünf Sekunden
+erwartungsgemäß mit Exitcode 124 und 9.310 Tabellenzeilen. Wie im vorherigen
+Nachweis zählt `PC_OUT_PROBE` definiert und zyklisch von `0x00` bis `0x19`.
+Das zu jedem dieser PC-Werte gleichzeitig beobachtete `ROM_WORD_PROBE` bleibt
+jedoch in sämtlichen Zeilen vollständig undefiniert (`UU UUUU UUUU UUUU`).
+Entsprechend bleibt auch `DECODE_LOAD_CONST_PROBE` undefiniert. Bereits für
+PC `0x00` weicht die Schaltung damit erstmals vom VM-Trace und vom eingelegten
+ROM-Image ab: Erwartet ist das Wort `0x00ff` für `LOAD_CONST(-1)`, nicht ein
+undefinierter Decoder-Eingang. Die Decodergrenze ist in diesem Lauf nur eine
+Folgeabweichung; eine Decoderreparatur ist daraus nicht abzuleiten.
+
+Gemäß Stop-Regel wurde wiederum keine Schaltungsdatei geändert. Der erste
+Unterschied ist jetzt auf den Fetch-Pfad zwischen definiertem `PC_OUT` und
+undefiniertem `OPCODE`-Ausgang eingegrenzt. Als nächstes müssen innerhalb von
+`FetchDecode` ROM-Adresse und ROM-Datenausgang gemeinsam mit `PC_OUT` beobachtet
+werden. Erst wenn dort der erste offene, mehrfach getriebene oder undefinierte
+Netzübergang benannt ist, ist eine minimale Reparatur zulässig.
+
 ## AP 19: Ursprüngliche Diagnose
 
 ## Status

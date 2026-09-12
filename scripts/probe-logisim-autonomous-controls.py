@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Expose reset, clock and PC in the autonomous 8/8 acceptance project."""
+"""Expose the 8/8 autonomous fetch path without changing its source project."""
 
 import argparse
 import sys
@@ -35,6 +35,31 @@ def add_probe(circuit: ET.Element, location: str, label: str, source: str) -> No
     ET.SubElement(circuit, "wire", {"from": source, "to": location})
 
 
+def expose_monitor(
+    circuit: ET.Element, monitor_label: str, probe_label: str, width: str | None = None
+) -> None:
+    """Turn an existing, already connected monitor into a table output."""
+    monitor = next(
+        (
+            component
+            for component in circuit.findall("comp")
+            if attributes(component).get("label") == monitor_label
+        ),
+        None,
+    )
+    if monitor is None or monitor.get("name") != "Probe":
+        raise ValueError(f"{monitor_label} is not a probe")
+    monitor.set("name", "Pin")
+    for item in list(monitor):
+        monitor.remove(item)
+    add_attribute(monitor, "appearance", "classic")
+    add_attribute(monitor, "facing", "west")
+    add_attribute(monitor, "label", probe_label)
+    add_attribute(monitor, "type", "output")
+    if width is not None:
+        add_attribute(monitor, "width", width)
+
+
 def build_probe(source: Path, destination: Path) -> None:
     autonomous_project(source, destination, "TinyCPUMain")
     tree = ET.parse(destination)
@@ -44,27 +69,27 @@ def build_probe(source: Path, destination: Path) -> None:
         if item.get("name") == "TinyCPUMain"
     )
 
-    pc = next(
-        (component for component in circuit.findall("comp")
-         if attributes(component).get("label") == "MONITOR_PC_OUT"),
-        None,
+    expose_monitor(circuit, "MONITOR_PC_OUT", "PC_OUT_PROBE", "8")
+    expose_monitor(circuit, "MONITOR_LOAD_CONST", "DECODE_LOAD_CONST_PROBE")
+
+    # FetchDecode's 14-bit OPCODE output is connected to both decoder
+    # boundaries at this existing junction.  The temporary branch therefore
+    # observes the actual ROM word rather than a copied ROM fixture.
+    add_probe(circuit, "(1260,480)", "ROM_WORD_PROBE", "(1160,480)")
+    rom_probe = next(
+        component for component in circuit.findall("comp")
+        if attributes(component).get("label") == "ROM_WORD_PROBE"
     )
-    if pc is None or pc.get("name") != "Probe":
-        raise ValueError(f"{source}: MONITOR_PC_OUT is not a probe")
-    pc.set("name", "Pin")
-    for item in list(pc):
-        pc.remove(item)
-    add_attribute(pc, "appearance", "classic")
-    add_attribute(pc, "facing", "west")
-    add_attribute(pc, "label", "PC_OUT_PROBE")
-    add_attribute(pc, "type", "output")
-    add_attribute(pc, "width", "8")
+    add_attribute(rom_probe, "width", "14")
 
     for component in circuit.findall("comp"):
         values = attributes(component)
         if (component.get("name") == "Pin"
                 and values.get("type") == "output"
-                and values.get("label") not in {"halt", "PC_OUT_PROBE"}):
+                and values.get("label") not in {
+                    "halt", "PC_OUT_PROBE", "ROM_WORD_PROBE",
+                    "DECODE_LOAD_CONST_PROBE",
+                }):
             component.set("name", "Probe")
             for item in component.findall("a"):
                 if item.get("name") == "type":
