@@ -401,7 +401,6 @@ class LogisimLauncherTests(unittest.TestCase):
 
     def test_sub_operand_reaches_operations_input(self):
         expected = ("(1400,1100)", "(2650,1100)")
-        decoder_route = ("(1460,90)", "(1610,90)")
         stale_sub_monitor_route = {
             ("(1270,950)", "(1740,950)"),
             ("(1740,950)", "(1740,2500)"),
@@ -430,12 +429,16 @@ class LogisimLauncherTests(unittest.TestCase):
                 c for c in root.findall("circuit")
                 if c.get("name") == "FetchDecodeControls"
             )
-            control_wires = {
-                (wire.get("from"), wire.get("to"))
-                for wire in controls.findall("wire")
-            }
-            self.assertIn(
-                decoder_route, control_wires,
+            public_sub_operand = _component_by_label(controls, "SUB_OPERAND")
+            sub_operand_select = _component_by_label(
+                controls, "SUB_OPERAND_SELECT"
+            )
+            self.assertTrue(
+                _wire_path_exists(
+                    controls,
+                    sub_operand_select.get("loc"),
+                    public_sub_operand.get("loc"),
+                ),
                 f"{name} does not drive the public SUB_OPERAND output",
             )
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")

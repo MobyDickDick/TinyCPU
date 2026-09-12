@@ -13,7 +13,7 @@ Tests mit historischen Canvas-Koordinaten verändert.
 |---|---|---|
 | 20.1 Reproduktionsstand einfrieren | abgeschlossen | Der unveränderte Ausgangsstand reproduziert zuerst den 16/12-Breitenrest im 8/8-Profil; beide elektrischen Profilläufe erreichen anschließend innerhalb von 90 Sekunden keinen normalen Halt. |
 | 20.2 Breitenfehler im 8/8-Profil isolieren | abgeschlossen | Sieben 16-Bit-Attribute im Datenpfad von `Operations` sind auf 8 Bit spezialisiert; der ROM adressiert nun ausdrücklich mit 8 Bit. Die drei fokussierten statischen Abnahmen bestehen. |
-| 20.3 Offline-Baseline vollständig grün stellen | offen | Der erste vollständige Lauf nach 20.2 erreicht nun die Unit-Tests und weist vier bereits vorhandene Topologieabweichungen in `TinyCPU.circ` nach. |
+| 20.3 Offline-Baseline vollständig grün stellen | abgeschlossen | Die verlorene 16/12-Profilgrenze und die gruppierte, tunnel-freie Decodergrenze sind wiederhergestellt; das Offline-Gate besteht zweimal nacheinander ohne erzeugte Arbeitsbaumänderungen. |
 
 ### 20.1 Reproduktionsstand einfrieren
 
@@ -149,6 +149,53 @@ keine weitere Signalwegdiagnose abgeleitet. Das Paket ist abgeschlossen, weil
 seine drei vorgeschriebenen statischen Abnahmen bestehen und der Diff keine
 Neuverdrahtung enthält; die vier erstmals erreichbaren Offline-Befunde werden
 einzeln in 20.3 bearbeitet.
+
+### 20.3 Offline-Baseline vollständig grün stellen
+
+#### Ausgangslage und isolierte Befunde
+
+- **Ausgangs-Commit:** `e473d0926466f8de4728b5162393266f412c978c`.
+- **Arbeitsbaum vor der Untersuchung:** sauber (`git status --porcelain=v1`
+  lieferte keine Ausgabe).
+- Der erste unveränderte Lauf bestand Verifier und statischen Circuit-Check,
+  scheiterte aber mit vier von 78 Unit-Tests. Alle vier Befunde betrafen die
+  16/12-Schaltung: Die benannte Quelle `PROGRAM_LIMIT_MAX` fehlte, und
+  `FetchDecodeControls` stellte statt der gruppierten Operations- und
+  Argumentausgänge wieder einzelne Load-/Store-Opcode-Ausgänge bereit. Der
+  `SUB_OPERAND`-Test erwartete außerdem ein absolutes Leitungssegment statt
+  die Verbindung zwischen zwei benannten Komponenten.
+
+Zuerst wurde die vorhandene 16-Bit-Konstante `0xfff` wieder ausschließlich mit
+dem Fetch-Netz verbunden und als `PROGRAM_LIMIT_MAX` benannt. Anschließend
+wurde die öffentliche Decodergrenze auf die bereits vertraglich geprüften
+Gruppensignale `LOAD_OPERAND`, `STORE_OPERAND` und die vier Argumentarten
+zurückgeführt. Jeder Ausgang wird sichtbar ohne Tunnel aus den zugehörigen
+Opcode-Leitungen gebildet und besitzt eine kurze Erklärung. Der
+`SUB_OPERAND`-Regressionstest folgt nun dem Netz vom benannten
+`SUB_OPERAND_SELECT` zum gleichnamigen Ausgang und bleibt dadurch bei einem
+reinen Redraw stabil. Der zwischenzeitlich sichtbar gewordene Null-Längen-Draht
+am Ausgang `JUMP_ADR` wurde entfernt; er verband einen Punkt nur mit sich
+selbst und transportierte kein Signal.
+
+#### Befehle und Ergebnisse
+
+```bash
+scripts/test-offline.sh
+scripts/test-offline.sh
+git status --porcelain=v1
+```
+
+| Lauf | Exitcode | Ergebnis |
+|---|---:|---|
+| Eingangslauf | 1 | Verifier und Circuit-Check bestehen; vier der 78 Unit-Tests melden die oben benannten Abweichungen. |
+| Fokussierte Regressionen | 0 | Profilgrenze, gruppierte Decodergrenze, Load-Auswahl und semantischer `SUB_OPERAND`-Pfad bestehen. |
+| Offline-Gate, Wiederholung 1 | 0 | 14 JSON-Dateien, 30 Logisim-Dateien mit 81 Schaltungen, alle Verträge und alle 78 Unit-Tests bestehen. |
+| Offline-Gate, Wiederholung 2 | 0 | Identisches Ergebnis; der Lauf erzeugt keine Arbeitsbaumänderung. |
+
+Damit blockieren keine bekannten statischen Topologie-, Profil- oder
+Maschinenformatfehler mehr die elektrische Diagnose. Der weiterhin aus 20.1
+bekannte fehlende Halt-Nachweis wird nicht als Offline-Fehler umgedeutet;
+als nächstes beginnt 20.4 mit Reset, Takt und Fetch des 16/12-Profils.
 
 ## AP 19: Ursprüngliche Diagnose
 
