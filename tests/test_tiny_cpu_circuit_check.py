@@ -30,6 +30,23 @@ class CircuitCheckTests(unittest.TestCase):
 
         self.assertEqual(tunnels, [])
 
+    def test_standalone_fetch_decoder_uses_visible_wires(self):
+        path = (
+            ROOT / "hardware/logisim/diagnostics"
+            / "TinyCPU-FetchDecodeControls.circ"
+        )
+        root = ET.parse(path).getroot()
+        decoder = next(
+            circuit for circuit in root.findall("circuit")
+            if circuit.get("name") == "FetchDecodeControls"
+        )
+
+        self.assertFalse(any(
+            component.get("name") == "Tunnel"
+            for component in decoder.findall("comp")
+        ))
+        self.assertGreater(len(decoder.findall("wire")), 0)
+
     def test_detects_outputs_joined_through_endpoint_on_segment(self):
         circuit = ET.fromstring("""
           <circuit name="Broken">

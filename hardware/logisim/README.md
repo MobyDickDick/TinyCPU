@@ -68,6 +68,13 @@ abgedeckt.
 
 `FetchDecodeControls` bildet die eingefrorenen Maschinenopcodes 0 bis 49 nun elektrisch direkt auf die benannten Steuerausgänge ab; die reservierten Codes 50 bis 63 setzen ausschließlich `INVALID_OPERAND`. Die benannten `DECODE_00` bis `DECODE_63`-Tunnel halten diese Zuordnung unabhängig von Canvas-Koordinaten prüfbar. Mehr als acht Quellen werden über zwei begrenzte OR-Bänke zusammengeführt, sodass kein vom Simulator begrenzter Gate-Fan-in einen Opcode stillschweigend verliert.
 
+Für das Lesen und Nachverfolgen der Decoderschaltung ist die eigenständige
+Diagnoseschaltung `diagnostics/TinyCPU-FetchDecodeControls.circ` maßgeblich. Dort
+sind die Decoder-Ausgänge und sämtliche ODER-Zusammenführungen ausschließlich
+als sichtbare Leitungen ausgeführt; versteckte Tunnel kommen auf diesem Blatt
+nicht vor. Dadurch lässt sich jeder Signalweg vom `OPCODE`-Eingang bis zum
+benannten Steuerausgang direkt im Schaltbild verfolgen.
+
 `FetchDecodeControls` führt die Operation und die Art des zweiten Operanden als
 zwei unabhängige Signalgruppen heraus. `ADD_OPERAND` bedeutet beispielsweise nur
 „ADD ist aktiv“, während `CONST_ARGUMENT`, `ADDR_ARGUMENT`,
