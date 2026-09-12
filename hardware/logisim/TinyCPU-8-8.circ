@@ -273,6 +273,8 @@
       <a name="labelloc" val="east"/>
     </comp>
     <comp lib="0" loc="(840,480)" name="Constant">
+      <a name="label" val="PROGRAM_LIMIT_MAX"/>
+      <a name="value" val="0xff"/>
       <a name="width" val="8"/>
     </comp>
     <comp lib="0" loc="(840,500)" name="Constant"/>
@@ -1525,7 +1527,7 @@
     </comp>
     <comp lib="0" loc="(500,430)" name="Pin">
       <a name="appearance" val="classic"/>
-      <a name="initial" val="0xfff"/>
+      <a name="initial" val="0xff"/>
       <a name="label" val="PROGRAM_LIMIT"/>
       <a name="width" val="8"/>
     </comp>
@@ -1564,11 +1566,16 @@
     <comp lib="2" loc="(870,240)" name="Multiplexer">
       <a name="width" val="8"/>
     </comp>
-    <comp lib="3" loc="(740,420)" name="Comparator"/>
-    <comp lib="3" loc="(770,230)" name="Adder"/>
+    <comp lib="3" loc="(740,420)" name="Comparator">
+      <a name="width" val="8"/>
+    </comp>
+    <comp lib="3" loc="(770,230)" name="Adder">
+      <a name="width" val="8"/>
+    </comp>
     <comp lib="5" loc="(550,190)" name="Register">
       <a name="appearance" val="logisim_evolution"/>
       <a name="label" val="PC"/>
+      <a name="width" val="8"/>
     </comp>
     <comp lib="5" loc="(790,640)" name="ROM">
       <a name="appearance" val="logisim_evolution"/>

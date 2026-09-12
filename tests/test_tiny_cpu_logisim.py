@@ -233,35 +233,61 @@ class LogisimLauncherTests(unittest.TestCase):
                 )
 
     def test_program_limit_source_uses_profile_maximum(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
-        main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
-        sources = [
-            component
-            for component in main.findall("comp")
-            if component.get("name") == "Constant"
-            and any(
-                attribute.get("name") == "label"
-                and attribute.get("val") == "PROGRAM_LIMIT_MAX"
-                for attribute in component.findall("a")
-            )
-        ]
-        self.assertEqual(len(sources), 1)
-        attributes = {
-            attribute.get("name"): attribute.get("val")
-            for attribute in sources[0].findall("a")
-        }
-        self.assertEqual(attributes.get("width"), "16")
-        self.assertEqual(attributes.get("value"), "0xfff")
+        for circuit_name, width, maximum in (
+            ("TinyCPU.circ", "16", "0xfff"),
+            ("TinyCPU-8-8.circ", "8", "0xff"),
+        ):
+            with self.subTest(circuit=circuit_name):
+                root = ET.parse(ROOT / "hardware/logisim" / circuit_name).getroot()
+                main = next(
+                    c for c in root.findall("circuit")
+                    if c.get("name") == "TinyCPUMain"
+                )
+                sources = [
+                    component
+                    for component in main.findall("comp")
+                    if component.get("name") == "Constant"
+                    and _attributes(component).get("label") == "PROGRAM_LIMIT_MAX"
+                ]
+                self.assertEqual(len(sources), 1)
+                attributes = _attributes(sources[0])
+                self.assertEqual(attributes.get("width"), width)
+                self.assertEqual(attributes.get("value"), maximum)
 
-        source = sources[0].get("loc")
-        attached_wires = [
-            wire for wire in main.findall("wire")
-            if source in (wire.get("from"), wire.get("to"))
-        ]
-        self.assertEqual(
-            len(attached_wires), 1,
-            "the named program-limit source must exclusively drive its existing fetch net",
+                source = sources[0].get("loc")
+                attached_wires = [
+                    wire for wire in main.findall("wire")
+                    if source in (wire.get("from"), wire.get("to"))
+                ]
+                self.assertEqual(
+                    len(attached_wires), 1,
+                    "the named program-limit source must exclusively drive "
+                    "its existing fetch net",
+                )
+
+    def test_8_bit_fetch_path_uses_profile_width(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU-8-8.circ").getroot()
+        fetch = next(
+            circuit for circuit in root.findall("circuit")
+            if circuit.get("name") == "FetchDecode"
         )
+        program_limit = _component_by_label(fetch, "PROGRAM_LIMIT")
+        self.assertEqual(_attributes(program_limit).get("width"), "8")
+        self.assertEqual(_attributes(program_limit).get("initial"), "0xff")
+
+        for component_name, label in (
+            ("Register", "PC"),
+            ("Adder", None),
+            ("Comparator", None),
+        ):
+            with self.subTest(component=component_name):
+                matches = [
+                    component for component in fetch.findall("comp")
+                    if component.get("name") == component_name
+                    and (label is None or _attributes(component).get("label") == label)
+                ]
+                self.assertEqual(len(matches), 1)
+                self.assertEqual(_attributes(matches[0]).get("width"), "8")
 
     def test_visible_top_level_memory_or_gate_has_every_input_connected(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
