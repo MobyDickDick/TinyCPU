@@ -289,6 +289,47 @@ class LogisimLauncherTests(unittest.TestCase):
                 self.assertEqual(len(matches), 1)
                 self.assertEqual(_attributes(matches[0]).get("width"), "8")
 
+    def test_8_bit_pc_successor_path_is_continuous(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU-8-8.circ").getroot()
+        fetch = next(
+            circuit for circuit in root.findall("circuit")
+            if circuit.get("name") == "FetchDecode"
+        )
+        pc = _component_by_label(fetch, "PC")
+        pc_out = _component_by_label(fetch, "PC_OUT")
+        adder = next(c for c in fetch.findall("comp") if c.get("name") == "Adder")
+        selector = next(
+            c for c in fetch.findall("comp") if c.get("name") == "Multiplexer"
+        )
+        address_splitter = next(
+            c for c in fetch.findall("comp")
+            if c.get("name") == "Splitter"
+            and _attributes(c).get("incoming") == "8"
+        )
+        rom = _component_by_label(fetch, "INSTRUCTION_ROM")
+
+        pc_x, pc_y = map(int, pc.get("loc").strip("()").split(","))
+        add_x, add_y = map(int, adder.get("loc").strip("()").split(","))
+        mux_x, mux_y = map(int, selector.get("loc").strip("()").split(","))
+        rom_x, rom_y = map(int, rom.get("loc").strip("()").split(","))
+        split_x, split_y = map(
+            int, address_splitter.get("loc").strip("()").split(",")
+        )
+        pc_q = f"({pc_x + 60},{pc_y + 30})"
+        pc_d = f"({pc_x},{pc_y + 30})"
+        add_input = f"({add_x - 40},{add_y - 10})"
+        add_output = f"({add_x},{add_y})"
+        mux_increment = f"({mux_x - 30},{mux_y - 10})"
+        rom_address = f"({rom_x},{rom_y + 10})"
+
+        self.assertTrue(_wire_path_exists(fetch, pc_q, add_input))
+        self.assertTrue(_wire_path_exists(fetch, add_output, mux_increment))
+        self.assertTrue(_wire_path_exists(fetch, selector.get("loc"), pc_d))
+        self.assertTrue(_wire_path_exists(fetch, pc_q, f"({split_x},{split_y})"))
+        split_output = f"({split_x + 20},{split_y + 10})"
+        self.assertTrue(_wire_path_exists(fetch, split_output, pc_out.get("loc")))
+        self.assertTrue(_wire_path_exists(fetch, split_output, rom_address))
+
     def test_visible_top_level_memory_or_gate_has_every_input_connected(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
