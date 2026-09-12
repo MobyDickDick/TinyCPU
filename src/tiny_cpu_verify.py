@@ -168,10 +168,20 @@ def verify_small_profile_circuit(profile: dict[str, object], machine: dict[str, 
 
     width_attributes = {"width", "incoming", "dataWidth", "addrWidth"}
     forbidden = {"16", "12", "22"}
-    for attribute in project.findall(".//a"):
-        if attribute.get("name") in width_attributes and attribute.get("val") in forbidden:
+    for circuit in project.findall("circuit"):
+        for component in circuit.findall("comp"):
+            attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
+            legacy_attribute = next((
+                name for name in width_attributes if attributes.get(name) in forbidden
+            ), None)
+            if legacy_attribute is None:
+                continue
+            identity = attributes.get("label") or component.get("name", "component")
             raise VerificationError(
-                f"{display_path(path)}: legacy 16/12 width remains in {attribute.get('name')}"
+                f"{display_path(path)}:{circuit.get('name')}:{identity}: "
+                f"legacy 16/12 width remains in {legacy_attribute}="
+                f"{attributes[legacy_attribute]} (expected {profile['data_bits']}/"
+                f"{profile['address_bits']} profile widths)"
             )
 
     rom = next((component for component in project.findall(".//comp")

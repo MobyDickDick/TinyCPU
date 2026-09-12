@@ -1576,6 +1576,7 @@
 ff 1c65 3 1c64 2a00 4ff 1c64 2404
 2c00
 </a>
+      <a name="addrWidth" val="8"/>
       <a name="dataWidth" val="14"/>
       <a name="label" val="INSTRUCTION_ROM"/>
     </comp>
@@ -2600,7 +2601,7 @@ ff 1c65 3 1c64 2a00 4ff 1c64 2404
       <a name="facing" val="west"/>
       <a name="label" val="RESULT_VALUE"/>
       <a name="type" val="output"/>
-      <a name="width" val="16"/>
+      <a name="width" val="8"/>
     </comp>
     <comp lib="0" loc="(2090,870)" name="Pin">
       <a name="appearance" val="classic"/>
@@ -2662,22 +2663,22 @@ ff 1c65 3 1c64 2a00 4ff 1c64 2404
     <comp lib="0" loc="(460,140)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="MEMORY_VALUE"/>
-      <a name="width" val="16"/>
+      <a name="width" val="8"/>
     </comp>
     <comp lib="0" loc="(460,190)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="IMMEDIATE_VALUE"/>
-      <a name="width" val="16"/>
+      <a name="width" val="8"/>
     </comp>
     <comp lib="0" loc="(460,90)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="ACC_VALUE"/>
-      <a name="width" val="16"/>
+      <a name="width" val="8"/>
     </comp>
     <comp lib="1" loc="(1620,790)" name="OR Gate">
       <a name="inputs" val="8"/>
       <a name="label" val="RESULT"/>
-      <a name="width" val="16"/>
+      <a name="width" val="8"/>
     </comp>
     <comp lib="1" loc="(1620,870)" name="OR Gate">
       <a name="inputs" val="3"/>
@@ -2699,12 +2700,12 @@ ff 1c65 3 1c64 2a00 4ff 1c64 2404
       <a name="label" val="ACC_ADD_VALID"/>
     </comp>
     <comp lib="2" loc="(1830,780)" name="Multiplexer">
-      <a name="width" val="16"/>
+      <a name="width" val="8"/>
     </comp>
     <comp lib="2" loc="(1920,950)" name="Multiplexer"/>
     <comp lib="2" loc="(370,270)" name="Multiplexer"/>
     <comp lib="2" loc="(570,160)" name="Multiplexer">
-      <a name="width" val="16"/>
+      <a name="width" val="8"/>
     </comp>
     <comp loc="(940,1010)" name="DivArithmeticCircuit">
       <a name="label" val="DIV_OPERATION"/>
