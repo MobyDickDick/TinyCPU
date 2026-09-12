@@ -1671,3 +1671,34 @@ nicht sinnvoll ausführbar und bleibt ebenfalls offen. Aufgabe 19.10 darf
 deshalb noch nicht als vollständig abgenommener Kandidat markiert werden; ein manueller Lauf muss
 Reset, Takten, Ausgabe, Normalhalt und Fehlerhalt noch anhand der in
 `hardware/logisim/README.md` dokumentierten Beobachtungspunkte bestätigen.
+
+## Korrektur nach dem Decoder-Redraw: sichtbare Leitungen statt Tunnel
+
+### Ursache der drastischen Zwischenlösung
+
+Die zuvor verwendeten 164 Tunnelanschlüsse waren kein funktionales Erfordernis
+von Logisim. Sie waren als Routing-Abkürzung eingeführt worden, um die 64
+Ausgänge des einzigen 6-zu-64-Decoders nach der Gruppierung der öffentlichen
+Steuersignale zu verteilen. Das vervielfältigte zwar nicht den Decoder selbst,
+machte den Signalweg im Schaltbild aber unnötig schwer nachvollziehbar und
+vergrößerte die Simulationsarbeit. An der fachlichen Gruppierung war dagegen
+festzuhalten: Die alte Schnittstelle mischte einzelne Opcodes (`LOAD_ADR`,
+`LOAD_ADR_REG`, `STORE_ADR` und weitere) mit Operations- und Argumentklassen.
+Dadurch waren insbesondere `LOAD ... REGISTER + OFFSET` und die gemeinsame
+Operandenwahl nicht über einen eindeutigen öffentlichen Steuerpfad angebunden.
+
+### Vollständiger Neuaufbau des Pfads
+
+`FetchDecodeControls` verwendet weiterhin genau **einen** Decoder. Der komplette
+Pfad von dessen 64 Ausgängen zu den vorhandenen Sammelgattern und
+Ausgangspins wurde ohne Übernahme der Tunnelstrecken neu gezeichnet. Jeder
+Opcode-Ausgang besitzt nun eine sichtbare, rechtwinklige Leitung. Es wurden
+weder Ersatzdecoder noch Tunnel eingefügt. Die öffentlichen Ausgänge bleiben
+auf Operationsklassen (`*_OPERAND`) und davon getrennte Argumentklassen
+(`CONST_ARGUMENT`, `ADDR_ARGUMENT`, `ADDR_REG_ARGUMENT` und
+`ADDR_REG_OFFS_ARGUMENT`) reduziert.
+
+Die Strukturregression verlangt deshalb nun gleichzeitig genau eine
+Decoderinstanz, mindestens eine reale Leitung und null Tunnel in diesem
+Teilkreis. Damit kann eine spätere Änderung weder wieder Decoderkopien noch
+eine unsichtbare Tunnelverteilung als vermeintliche Reparatur einführen.
