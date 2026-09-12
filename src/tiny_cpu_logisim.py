@@ -78,7 +78,12 @@ def autonomous_project(
             ET.SubElement(component, "a", {"name": "label", "val": "TRACE_CLK"})
         elif name == "RESET":
             component.set("lib", "0")
-            component.set("name", "PowerOnReset")
+            # Logisim serializes components by their factory ID, not by the
+            # Java implementation class name.  The wiring-library power-on
+            # reset factory is named ``POR`` in 4.1.0; using
+            # ``PowerOnReset`` silently loads as an unknown component and
+            # leaves RESET undefined in a headless trace.
+            component.set("name", "POR")
             for item in list(component):
                 component.remove(item)
         elif name == halt_output:

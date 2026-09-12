@@ -413,6 +413,48 @@ deshalb Reset- und Taktpegel während der beiden beobachteten Zustandsänderunge
 direkt sichtbar machen und mit der steigenden Registerflanke abgleichen. Erst
 eine dort belegte Abweichung rechtfertigt eine Schaltungsänderung.
 
+#### Sichtprüfung von Reset und Takt am Fetch-Eingang
+
+Der nächste Diagnoselauf auf `550f30b` ergänzte ausschließlich in einer
+temporären Projektkopie zwei Ausgangspins an den aufgetrennten, vorhandenen
+Top-Level-Netzen für `CLK` und `RESET`. Damit wurden die Pegel in derselben
+change-driven Tabelle wie `PC_OUT` sichtbar, ohne die eingecheckte Schaltung
+umzuverdrahten. Der Takt wechselte reproduzierbar zwischen null und eins und
+der Resetpegel lag während des beobachteten Anfangsfensters auf eins. Trotzdem
+wurde der anfangs noch nullwertige PC mit der ersten steigenden Taktflanke
+undefiniert. Damit liegt der erste Unterschied hinter den öffentlichen
+Top-Level-Eingängen; ein Fehler der autonomen Taktquelle ist nicht belegt.
+
+Bei der Instrumentierung wurde außerdem ein unabhängiger Fehler im
+temporären Testprojekt nachgewiesen: Der Generator serialisierte den Java-
+Klassennamen `PowerOnReset`, Logisim-evolution 4.1.0 identifiziert das
+Bauteil in Projektdateien jedoch mit seiner Factory-ID `POR`. Der falsche Name
+wurde ohne Ladefehler als unbekannte Quelle akzeptiert und lieferte ein
+undefiniertes Signal. Der Generator verwendet nun die gültige ID; eine
+Regression prüft, dass der ungültige Klassenname nicht wieder ausgegeben wird.
+Die Quelldatei `TinyCPU-8-8.circ` blieb unverändert.
+
+Ausgeführt wurde:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_autonomous_project_uses_profile_specific_circuit -v
+timeout 5s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table,halt /tmp/ap20-clock-reset2.circ
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-8-8 \
+  --jar "$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  --trace-output /tmp/ap20-por-fix/core.tsv --timeout 30
+```
+
+Der fokussierte Test besteht. Beide elektrischen Befehle enden erwartungsgemäß
+ohne Halt; der instrumentierte Fünf-Sekunden-Lauf schreibt 33.294 Zeilen und
+zeigt die alternierenden Taktpegel bei konstant aktivem Reset direkt. Der
+reguläre Lauf bewahrt den bekannten Zwei-Zeilen-Befund. Gemäß Stop-Regel wird
+deshalb kein CPU-Netz verändert. Als nächstes muss der Resetpegel direkt am
+Resetanschluss des PC-Registers sichtbar gemacht werden; erst danach darf die
+Registerflanke oder der Datenpfad als Ursache repariert werden.
+
 ## AP 19: Ursprüngliche Diagnose
 
 ## Status
