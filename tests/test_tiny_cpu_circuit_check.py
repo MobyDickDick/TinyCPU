@@ -44,8 +44,8 @@ class CircuitCheckTests(unittest.TestCase):
         wires = {(wire.get("from"), wire.get("to"))
                  for wire in main.findall("wire")}
         self.assertIn((("(1400,1600)"), ("(1710,1600)")), wires)
-        self.assertIn((("(1710,170)"), ("(1710,1600)")), wires)
-        self.assertNotIn((("(1710,170)"), ("(1710,1680)")), wires)
+        self.assertIn((("(1710,190)"), ("(1710,1600)")), wires)
+        self.assertNotIn((("(1710,190)"), ("(1710,1680)")), wires)
 
     def test_standalone_fetch_decoder_uses_visible_wires(self):
         path = (

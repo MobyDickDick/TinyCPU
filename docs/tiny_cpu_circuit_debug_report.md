@@ -2396,3 +2396,24 @@ scripts/test-offline.sh
 AP 20.4 ist damit abgeschlossen. Das nächste aktive Paket ist 20.6; dort wird
 die elektrische Matrix familienweise geöffnet und beim ersten abweichenden
 Opcode beziehungsweise Fehlerfall gestoppt.
+
+### Diagnose nach der manuellen Anpassung `ed3c3c9`
+
+Der aktuelle Stand führt entgegen der pauschalen Fehlerbeobachtung bereits den
+Minimalfall `LOAD_CONST(3); HALT()` zweimal deterministisch bis zum normalen
+Halt aus. Der erste isolierte Mehrbefehlsfehler ist reproduzierbar bei
+`LOAD_ADDRESS`: Das Matrixprogramm beginnt mit `LOAD_CONST(7)` und springt
+anschließend mit dem PC unmittelbar von `0` auf `7`, statt den bei Adresse `1`
+liegenden `STORE_ADDRESS(20)` auszuführen. Nach weiteren Schritten und dem
+nächsten Reset wiederholt sich dieser Ablauf; der normale Halt bei Adresse `5`
+wird daher nicht erreicht.
+
+Die elektrische Einzelmessung zeigt zugleich, dass der Ausgang
+`JUMP_NOT_ZERO` von `FetchDecode` während dieses falschen Sprungs aktiv ist.
+Damit ist der nächste Reparaturbereich auf die Verbindung zwischen `JumpBox`
+und den beiden Eingängen `DEC_JUMP_NOT_ZERO`/`NOT_ZERO` von `FetchDecode`
+eingegrenzt. `FetchDecodeControls` wurde für diese Diagnose nicht verändert.
+Insbesondere wird die handgezeichnete Decoderansicht nicht aufgrund einer
+Vermutung umgebaut; vor einer Reparatur müssen die beiden ähnlich benannten
+JumpBox-Ausgänge in einer isolierten elektrischen Abnahme eindeutig zugeordnet
+werden.

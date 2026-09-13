@@ -518,8 +518,8 @@ class LogisimLauncherTests(unittest.TestCase):
                 _wire_path_exists(main, source, f"(4140,{y})"),
                 f"{source} does not reach its JumpBox input",
             )
-        self.assertTrue(_wire_path_exists(main, "(4360,450)", "(650,510)"))
-        self.assertTrue(_wire_path_exists(main, "(4360,470)", "(670,530)"))
+        self.assertTrue(_wire_path_exists(main, "(4360,450)", "(670,510)"))
+        self.assertTrue(_wire_path_exists(main, "(4360,470)", "(650,530)"))
 
     def test_sub_operand_reaches_operations_input(self):
         expected = ("(1400,1100)", "(2650,1100)")
