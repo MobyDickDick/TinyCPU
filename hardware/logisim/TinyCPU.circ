@@ -1359,7 +1359,7 @@
       <a name="appearance" val="classic"/>
       <a name="initial" val="0xfff"/>
       <a name="label" val="PROGRAM_LIMIT"/>
-      <a name="width" val="16"/>
+      <a name="width" val="12"/>
     </comp>
     <comp lib="0" loc="(500,430)" name="Pin">
       <a name="appearance" val="classic"/>
@@ -1367,7 +1367,7 @@
     </comp>
     <comp lib="0" loc="(540,240)" name="Constant"/>
     <comp lib="0" loc="(710,240)" name="Constant">
-      <a name="width" val="16"/>
+      <a name="width" val="12"/>
     </comp>
     <comp lib="0" loc="(710,470)" name="Splitter">
       <a name="appear" val="right"/>
@@ -1386,7 +1386,7 @@
       <a name="bit7" val="0"/>
       <a name="bit8" val="0"/>
       <a name="bit9" val="0"/>
-      <a name="incoming" val="16"/>
+      <a name="incoming" val="12"/>
     </comp>
     <comp lib="1" loc="(610,340)" name="AND Gate">
       <a name="label" val="JNZ_TAKEN"/>
@@ -1395,18 +1395,18 @@
       <a name="label" val="ERROR_HALT"/>
     </comp>
     <comp lib="2" loc="(870,240)" name="Multiplexer">
-      <a name="width" val="16"/>
+      <a name="width" val="12"/>
     </comp>
     <comp lib="3" loc="(740,390)" name="Comparator">
-      <a name="width" val="16"/>
+      <a name="width" val="12"/>
     </comp>
     <comp lib="3" loc="(770,230)" name="Adder">
-      <a name="width" val="16"/>
+      <a name="width" val="12"/>
     </comp>
     <comp lib="5" loc="(550,190)" name="Register">
       <a name="appearance" val="logisim_evolution"/>
       <a name="label" val="PC"/>
-      <a name="width" val="16"/>
+      <a name="width" val="12"/>
     </comp>
     <comp lib="5" loc="(800,560)" name="ROM">
       <a name="addrWidth" val="12"/>
@@ -2059,7 +2059,8 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(310,380)" to="(790,380)"/>
     <wire from="(310,390)" to="(780,390)"/>
     <wire from="(310,400)" to="(770,400)"/>
-    <wire from="(310,410)" to="(760,410)"/>
+    <wire from="(310,60)" to="(760,60)"/>
+    <wire from="(760,60)" to="(760,410)"/>
     <wire from="(310,420)" to="(750,420)"/>
     <wire from="(310,430)" to="(740,430)"/>
     <wire from="(310,440)" to="(730,440)"/>
@@ -2079,7 +2080,8 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(310,580)" to="(590,580)"/>
     <wire from="(310,590)" to="(580,590)"/>
     <wire from="(310,60)" to="(1110,60)"/>
-    <wire from="(310,600)" to="(570,600)"/>
+    <wire from="(310,500)" to="(570,500)"/>
+    <wire from="(570,500)" to="(570,600)"/>
     <wire from="(310,610)" to="(560,610)"/>
     <wire from="(310,620)" to="(550,620)"/>
     <wire from="(310,630)" to="(540,630)"/>

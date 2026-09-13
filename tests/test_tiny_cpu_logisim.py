@@ -223,14 +223,65 @@ class LogisimLauncherTests(unittest.TestCase):
                     "FetchDecodeControls must fan out one shared opcode decoder",
                 )
 
-    def test_program_limit_source_uses_profile_maximum(self):
+    def test_fetch_path_uses_profile_address_width(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         fetch = next(c for c in root.findall("circuit") if c.get("name") == "FetchDecode")
         source = _component_by_label(fetch, "PROGRAM_LIMIT")
         attributes = _attributes(source)
         self.assertEqual(source.get("name"), "Pin")
-        self.assertEqual(attributes.get("width"), "16")
+        self.assertEqual(attributes.get("width"), "12")
         self.assertEqual(attributes.get("initial"), "0xfff")
+
+        expected = {
+            ("Constant", "(710,240)"),
+            ("Register", "(550,190)"),
+            ("Adder", "(770,230)"),
+            ("Multiplexer", "(870,240)"),
+            ("Comparator", "(740,390)"),
+        }
+        for kind, location in expected:
+            matches = [
+                component for component in fetch.findall("comp")
+                if component.get("name") == kind
+                and component.get("loc") == location
+            ]
+            self.assertEqual(len(matches), 1, f"expected one fetch {kind}")
+            self.assertEqual(
+                _attributes(matches[0]).get("width"), "12",
+                f"FetchDecode {kind} must use the 12-bit address profile",
+            )
+        pc_splitter = next(
+            component for component in fetch.findall("comp")
+            if component.get("name") == "Splitter"
+            and component.get("loc") == "(710,470)"
+        )
+        self.assertEqual(_attributes(pc_splitter).get("incoming"), "12")
+
+    def test_minimal_fetch_controls_match_machine_opcodes(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        controls = next(
+            circuit for circuit in root.findall("circuit")
+            if circuit.get("name") == "FetchDecodeControls"
+        )
+        decoder = next(
+            component for component in controls.findall("comp")
+            if component.get("name") == "Decoder"
+        )
+        decoder_x, decoder_y = map(
+            int, decoder.get("loc").strip("()").split(",")
+        )
+
+        # A north-facing 6-to-64 decoder exposes code zero 640 pixels above
+        # its anchor and subsequent codes at ten-pixel intervals.  Resolve the
+        # destinations by their public labels so the authored output layout
+        # can move without weakening this semantic regression.
+        for code, label in ((0x00, "LOAD_CONST"), (0x2C, "HALT")):
+            source = f"({decoder_x + 20},{decoder_y - 640 + code * 10})"
+            destination = _component_by_label(controls, label).get("loc")
+            self.assertTrue(
+                _wire_path_exists(controls, source, destination),
+                f"opcode 0x{code:02x} does not reach {label}",
+            )
 
     def test_visible_top_level_memory_or_gate_has_every_input_connected(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
