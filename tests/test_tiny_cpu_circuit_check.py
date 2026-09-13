@@ -1,0 +1,171 @@
+import sys
+import unittest
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+from tiny_cpu_circuit_check import inspect_circuit, inspect_project, repair_project
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+class CircuitCheckTests(unittest.TestCase):
+    def test_all_projects_have_no_static_gate_wiring_faults(self):
+        projects = sorted((ROOT / "hardware/logisim").rglob("*.circ"))
+        self.assertGreater(len(projects), 1)
+        for project in projects:
+            with self.subTest(project=project.relative_to(ROOT)):
+                self.assertEqual(inspect_project(project), [])
+
+
+    def test_main_fetch_decoder_uses_one_shared_decoder_net(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        decoder = next(
+            circuit for circuit in root.findall("circuit")
+            if circuit.get("name") == "FetchDecodeControls"
+        )
+
+        components = decoder.findall("comp")
+        self.assertEqual(
+            sum(component.get("name") == "Decoder" for component in components),
+            1,
+        )
+        self.assertFalse(any(
+            component.get("name") == "Tunnel"
+            for circuit in root.findall("circuit")
+            for component in circuit.findall("comp")
+        ))
+        self.assertGreater(len(decoder.findall("wire")), 0)
+
+    def test_standalone_fetch_decoder_uses_visible_wires(self):
+        path = (
+            ROOT / "hardware/logisim/diagnostics"
+            / "TinyCPU-FetchDecodeControls.circ"
+        )
+        root = ET.parse(path).getroot()
+        decoder = next(
+            circuit for circuit in root.findall("circuit")
+            if circuit.get("name") == "FetchDecodeControls"
+        )
+
+        self.assertFalse(any(
+            component.get("name") == "Tunnel"
+            for component in decoder.findall("comp")
+        ))
+        self.assertGreater(len(decoder.findall("wire")), 0)
+
+    def test_fetch_decoder_outputs_have_short_explanations(self):
+        projects = (
+            ROOT / "hardware/logisim/TinyCPU.circ",
+            ROOT / "hardware/logisim/diagnostics/TinyCPU-FetchDecodeControls.circ",
+        )
+        for project in projects:
+            with self.subTest(project=project.name):
+                root = ET.parse(project).getroot()
+                decoder = next(
+                    circuit for circuit in root.findall("circuit")
+                    if circuit.get("name") == "FetchDecodeControls"
+                )
+                output_labels = {
+                    attribute.get("val")
+                    for component in decoder.findall("comp")
+                    if component.get("name") == "Pin"
+                    and any(
+                        attribute.get("name") == "type"
+                        and attribute.get("val") == "output"
+                        for attribute in component.findall("a")
+                    )
+                    for attribute in component.findall("a")
+                    if attribute.get("name") == "label"
+                }
+                explained_labels = {
+                    attribute.get("val").split(":", 1)[0]
+                    for component in decoder.findall("comp")
+                    if component.get("name") == "Text"
+                    for attribute in component.findall("a")
+                    if attribute.get("name") == "text" and ":" in attribute.get("val", "")
+                }
+                self.assertEqual(output_labels, explained_labels)
+
+    def test_detects_outputs_joined_through_endpoint_on_segment(self):
+        circuit = ET.fromstring("""
+          <circuit name="Broken">
+            <comp lib="1" loc="(100,100)" name="OR Gate"><a name="label" val="FIRST"/></comp>
+            <comp lib="1" loc="(200,100)" name="OR Gate"><a name="label" val="SECOND"/></comp>
+            <wire from="(50,90)" to="(100,90)"/><wire from="(50,110)" to="(100,110)"/>
+            <wire from="(150,90)" to="(200,90)"/><wire from="(150,110)" to="(200,110)"/>
+            <wire from="(100,100)" to="(250,100)"/><wire from="(200,100)" to="(200,120)"/>
+          </circuit>
+        """)
+        messages = [issue.message for issue in inspect_circuit(circuit)]
+        self.assertIn("outputs share one net: FIRST, SECOND", messages)
+
+    def test_detects_and_repairs_subcircuit_output_bridge(self):
+        project = """<?xml version='1.0'?>
+          <project>
+            <circuit name="Producer">
+              <comp lib="0" loc="(100,100)" name="Pin">
+                <a name="label" val="VALUE"/><a name="type" val="output"/>
+              </comp>
+            </circuit>
+            <circuit name="Top">
+              <comp loc="(100,100)" name="Producer"><a name="label" val="LEFT"/></comp>
+              <comp loc="(300,100)" name="Producer"><a name="label" val="RIGHT"/></comp>
+              <wire from="(100,100)" to="(200,100)"/>
+              <wire from="(300,100)" to="(300,140)"/>
+              <wire from="(200,100)" to="(300,100)"/>
+            </circuit>
+          </project>"""
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "broken.circ"
+            path.write_text(project)
+            messages = [str(issue) for issue in inspect_project(path)]
+            self.assertEqual(messages, [
+                "Top: outputs share one net: VALUE of LEFT, VALUE of RIGHT"
+            ])
+            self.assertEqual(repair_project(path), [])
+            top = next(c for c in ET.parse(path).getroot().findall("circuit")
+                       if c.get("name") == "Top")
+            wires = {(w.get("from"), w.get("to")) for w in top.findall("wire")}
+            self.assertNotIn((("(200,100)"), ("(300,100)")), wires)
+
+    def test_prunes_only_verified_and_explicitly_marked_dangling_branch(self):
+        project = """<?xml version='1.0'?>
+          <project><circuit name="Top">
+            <wire from="(100,100)" to="(200,100)"/>
+            <wire from="(200,100)" to="(300,100)"/>
+            <wire from="(200,100)" to="(200,160)" tinycpu-dangling="true"/>
+          </circuit></project>"""
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "stub.circ"
+            path.write_text(project)
+            self.assertEqual(repair_project(path, prune_dangling=True), [])
+            wires = ET.parse(path).getroot().findall("circuit/wire")
+            self.assertEqual(
+                {(wire.get("from"), wire.get("to")) for wire in wires},
+                {(("(100,100)"), ("(200,100)")),
+                 (("(200,100)"), ("(300,100)"))},
+            )
+
+    def test_does_not_prune_unverified_marked_wire(self):
+        project = """<?xml version='1.0'?>
+          <project><circuit name="Top">
+            <wire from="(100,100)" to="(200,100)"/>
+            <wire from="(200,100)" to="(200,160)" tinycpu-dangling="true"/>
+          </circuit></project>"""
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "not-a-proven-stub.circ"
+            path.write_text(project)
+            repair_project(path, prune_dangling=True)
+            self.assertEqual(
+                len(ET.parse(path).getroot().findall("circuit/wire")), 2
+            )
+
+
+
+
+if __name__ == "__main__":
+    unittest.main()

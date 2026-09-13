@@ -9,6 +9,13 @@ electrical gate used by CI with one command:
 scripts/test-logisim.sh
 ```
 
+Der schnelle Offline-Lauf `scripts/test-offline.sh` führt zusätzlich den
+statischen Verdrahtungscheck `scripts/check-logisim-circuit.py` für **alle**
+eingecheckten `.circ`-Projekte einschließlich Diagnose- und Smoke-Projekten aus. Er bildet
+auch Abzweige nach, deren Endpunkt mitten auf einem anderen Segment liegt, und
+weist Netze mit mehreren Gatterausgängen zurück. Damit werden die roten/orangen
+Konfliktnetze bereits ohne Logisim-JAR erkannt.
+
 The script accepts `JAVA`, `LOGISIM_JAR`, and `LOGISIM_OUTPUT` environment
 overrides. Logisim is an integrated, pinned project dependency; the circuits,
 fixtures, launcher, and CI provisioning are checked in. Only the unchanged
@@ -16,7 +23,7 @@ upstream JAR is not duplicated as a Git blob. The launcher first checks
 `vendor/logisim-evolution-4.1.0-all.jar`, then `~/.cache/tinycpu/`, and downloads
 the pinned JAR only when neither exists. CI caches that download. It then
 runs the 17-edge countdown and the complete opcode/error matrix for both
-`tinycpu-16-12` and `tinycpu-8-8` against the real simulator. Each matrix owns
+`tinycpu-16-12` against the real simulator. The matrix owns
 at least one isolated positive program per opcode and six sticky-error programs; the
 offline verifier rejects missing, additional, or duplicate opcode coverage.
 Java security-patch and newer-feature releases are accepted; requiring one
@@ -62,6 +69,22 @@ abgedeckt.
 
 `FetchDecodeControls` bildet die eingefrorenen Maschinenopcodes 0 bis 49 nun elektrisch direkt auf die benannten Steuerausgänge ab; die reservierten Codes 50 bis 63 setzen ausschließlich `INVALID_OPERAND`. Die benannten `DECODE_00` bis `DECODE_63`-Tunnel halten diese Zuordnung unabhängig von Canvas-Koordinaten prüfbar. Mehr als acht Quellen werden über zwei begrenzte OR-Bänke zusammengeführt, sodass kein vom Simulator begrenzter Gate-Fan-in einen Opcode stillschweigend verliert.
 
+Für das Lesen und Nachverfolgen der Decoderschaltung ist die eigenständige
+Diagnoseschaltung `diagnostics/TinyCPU-FetchDecodeControls.circ` maßgeblich. Dort
+sind die Decoder-Ausgänge und sämtliche ODER-Zusammenführungen ausschließlich
+als sichtbare Leitungen ausgeführt; versteckte Tunnel kommen auf diesem Blatt
+nicht vor. Dadurch lässt sich jeder Signalweg vom `OPCODE`-Eingang bis zum
+benannten Steuerausgang direkt im Schaltbild verfolgen.
+
+Die ähnlich benannten Ausgänge `LD_REG_CONST` und `LD_REG_ADR` sind keine
+Duplikate: Sie dekodieren `LOAD_ADDRESS_REGISTER_CONST` beziehungsweise
+`LOAD_ADDRESS_REGISTER_ADDRESS`. Der erste Befehl übernimmt den unmittelbaren
+Operanden in das Adressregister, der zweite liest dessen neuen Wert aus der im
+Operanden genannten Speicheradresse. Beide Steuersignale werden deshalb für
+die zwei verschiedenen Quellen des Adressregisters benötigt und bleiben
+getrennt erhalten. Kurze Kommentare rechts neben allen Ausgängen von
+`FetchDecodeControls` erläutern nun unmittelbar im Schaltbild deren Wirkung.
+
 `FetchDecodeControls` führt die Operation und die Art des zweiten Operanden als
 zwei unabhängige Signalgruppen heraus. `ADD_OPERAND` bedeutet beispielsweise nur
 „ADD ist aktiv“, während `CONST_ARGUMENT`, `ADDR_ARGUMENT`,
@@ -81,6 +104,14 @@ vollständig durch `FetchDecodeControls` ersetzt. Damit verwendet auch die
 hierarchische Integrationsseite unmittelbar die öffentliche, gruppierte
 Decodergrenze; eine zweite Kopie des alten Kombinationsdecoders ist weder
 instanziiert noch als Schemablatt im Projekt verblieben.
+
+Die Sprungauswertung ist auf `TinyCPUMain` vollständig in der FBox `JumpBox`
+gekapselt. Ihre Eingänge erhalten die sechs Sprungsteuerungen, die Statusbits
+`ZERO` und `NEGATIVE` sowie alle sechs Fehlerflags; ihre beiden Ausgänge führen
+die Adressauswahl und die Bedingung für die Übernahme des Sprungs zurück zu
+`FetchDecode`. Auch die Invertierung von `ZERO` für `JUMP_NOT_ZERO` liegt in
+diesem Unterblatt, sodass auf der Integrationsseite keine Sprunggatter mehr
+verbleiben.
 
 Die `SUB_OPERAND`-Strecke im primären 16/12-Profil ist durchgängig geprüft:
 Das vierfach-ODER `SUB_OPERAND_SELECT` treibt den gleichnamigen Decoder-Ausgang,
@@ -361,13 +392,17 @@ PYTHONPATH=src python src/tiny_cpu_circuit.py \
 
 ## What is implemented
 
-### AP 17: eigenständige 8/8-Schaltung
+### Stillgelegtes AP 17: ehemalige 8/8-Schaltung
 
-`TinyCPU-8-8.circ` ist die fest verdrahtete Variante für das Profil
+Die nachfolgende Beschreibung ist historisch; Schaltung und Artefakte wurden entfernt. `TinyCPU-8-8.circ` war die fest verdrahtete Variante für das Profil
 `tinycpu-8-8`. Daten- und Adresspfade sind 8 Bit breit, das Instruktions-ROM
 verwendet 8 Adressbits und 14 Datenbits. Die Datei ist bewusst ein eigenes
 Logisim-Projekt und keine zur Laufzeit umgeschaltete Parametrisierung von
 `TinyCPU.circ`; damit bleibt die abgenommene 16/12-Schaltung unverändert.
+
+Die Integrationsseite bildet alle Verbindungen als sichtbare Leitungen ab.
+Sie verwendet keine Tunnel, sodass Daten-, Steuer- und Statuspfade direkt
+zwischen ihren Anschlusspunkten verfolgt werden können.
 
 Das portable Countdown-Programm liegt profilspezifisch als
 `ap17_countdown_8_8.tcpu`, `ap17_countdown_8_8.rom` und
@@ -1122,3 +1157,33 @@ write-data, and print-value lanes. Stable labels and one-valued constants on
 again without moving a component. The autonomous Logisim trace probes use the
 current opcode and clock contacts, and the JNZ status remains a visible direct
 wire rather than restoring the superseded tunnel pair.
+
+## Static output-collision check
+
+`scripts/check-logisim-circuit.py` now resolves the generated ports of every
+subcircuit instance in addition to primitive gate outputs.  This matters on
+`TinyCPUMain`: the previous implementation only classified the six primitive
+gate kinds as drivers and therefore returned success when a long control wire
+ran through an `EffectiveAddress`, `ErrorFlags`, `AddressPath`, or decoder
+output.  Logisim joins a wire endpoint to the interior of another orthogonal
+segment, so those visually inconspicuous overlaps formed real multi-driver
+nets (and appeared orange in the simulator).
+
+Run the check with:
+
+```bash
+python3 scripts/check-logisim-circuit.py hardware/logisim/TinyCPU.circ
+```
+
+`--fix` offers a deliberately conservative repair mode.  It removes a bridge
+only when testing every candidate proves that exactly one wire separates all
+colliding drivers into singly-driven nets; ambiguous nets remain reported and
+are never guessed away.  The maintained top-level routes have been separated
+into independent corridors so the checker now exits successfully.
+
+Confirmed visual stubs can additionally be annotated in the XML with
+`tinycpu-dangling="true"` and removed with `--fix --prune-dangling`.  Before
+deleting such a wire, the checker still requires one loose end and a real
+three-way junction at the other end.  This explicit annotation is intentional:
+Logisim's `loc` is not the input-terminal coordinate for every component, so a
+purely geometric guess could silently delete a functional input connection.

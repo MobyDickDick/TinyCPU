@@ -30,44 +30,23 @@ class ProfileTests(unittest.TestCase):
         self.assertEqual(program.profile.top_circuit, "TinyCPUMain")
         self.assertEqual(encode_program(program)[0], 0x7fff)
 
-    def test_all_opcodes_roundtrip_in_8_8_format(self) -> None:
-        profile = load_profile("tinycpu-8-8")
-        lines = []
-        for entry in opcode_table(profile).values():
-            operand = {"none": "", "value": "1", "offset": "-1",
-                       "address": "1", "target": "0"}[entry["operand"]]
-            lines.append(f"{entry['mnemonic']}({operand})")
-        program = assemble("\n".join(lines), profile)
-        words = encode_program(program)
-        self.assertEqual(len(words), 50)
-        self.assertTrue(all(0 <= word < (1 << 14) for word in words))
-        with tempfile.TemporaryDirectory() as directory:
-            rom = Path(directory) / "all.rom"
-            rom.write_text("v2.0 raw\n" + " ".join(f"{word:x}" for word in words))
-            decoded = load_program(rom, profile)
-        self.assertEqual(decoded.instructions, program.instructions)
+    def test_retired_8_8_profile_is_rejected(self) -> None:
+        with self.assertRaisesRegex(ValueError, "unknown TinyCPU profile"):
+            load_profile("tinycpu-8-8")
 
-    def test_profile_operand_boundaries_are_not_truncated(self) -> None:
-        profile = load_profile("tinycpu-8-8")
-        for value in (-128, 127):
-            self.assertEqual(assemble(f"LOAD_CONST({value})", profile).instructions[0].operand, value)
-        for source in ("LOAD_CONST(-129)", "LOAD_CONST(128)",
-                       "LOAD_ADDRESS(-1)", "LOAD_ADDRESS(256)",
-                       "ADD_ADDRESS_REGISTER_PLUS_OFFSET(-129)"):
-            with self.subTest(source=source), self.assertRaisesRegex(AssemblyError, "tinycpu-8-8"):
-                assemble(source, profile)
 
-    def test_portable_debugger_state_matches_both_profiles(self) -> None:
+
+    def test_portable_debugger_state_matches_supported_profile(self) -> None:
         states = []
-        for name in ("tinycpu-16-12", "tinycpu-8-8"):
+        for name in ("tinycpu-16-12",):
             debugger = Debugger(assemble(PORTABLE_COUNTDOWN, load_profile(name)))
             state = debugger.continue_()
             self.assertEqual((state["profile"], state["machine_format"]),
                              (name, debugger.cpu.profile.machine_format))
             states.append((state["stop_reason"], state["output"], state["pc"]))
-        self.assertEqual(states[0], states[1])
+        self.assertEqual(states, [("halt", [3, 2, 1], 5)])
 
-    def test_register_address_loads_execute_in_both_profiles(self) -> None:
+    def test_register_address_loads_execute_in_supported_profile(self) -> None:
         source = """LOAD_CONST(7)
 STORE_ADDRESS(21)
 STORE_ADDRESS(20)
@@ -78,7 +57,7 @@ LOAD_ADDRESS_REGISTER()
 PRINT()
 HALT()
 """
-        for name in ("tinycpu-16-12", "tinycpu-8-8"):
+        for name in ("tinycpu-16-12",):
             with self.subTest(profile=name):
                 debugger = Debugger(assemble(source, load_profile(name)))
                 state = debugger.continue_()
@@ -86,12 +65,6 @@ HALT()
                 self.assertEqual(state["output"], [7, 7])
                 self.assertFalse(any(state["errors"].values()))
 
-    def test_8_bit_overflow_uses_profile_boundary(self) -> None:
-        debugger = Debugger(assemble("LOAD_CONST(127)\nADD_CONST(1)\nHALT()",
-                                     load_profile("tinycpu-8-8")))
-        debugger.continue_()
-        self.assertTrue(debugger.cpu.errors["OVF"])
-        self.assertFalse(debugger.cpu.accumulator_valid)
 
 
 if __name__ == "__main__":

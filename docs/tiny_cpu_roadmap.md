@@ -40,6 +40,7 @@ abdeckt und Ausgabe, Haltzustand, Register, Speicher-Validität und Fehlerflags
 | **17. Zweites Hardwareprofil** | Ein abgegrenztes 8-Datenbit-/8-Adressbit-Profil in Tooling und Logisim ergänzen, ohne den 16/12-Standard zu verändern. | Beide Profile bestehen profilbezogene Roundtrip-, Debugger-, Kerntrace- und vollständige elektrische ISA-/Fehlerprüfungen. |
 | **18. Peripherie und Integration** | Eine optionale 16/12-Systemvariante mit speicherabgebildetem Ausgabeport und einer maskierbaren Interruptquelle ergänzen. | Versionierte System-, Maschinenformat- und Trace-Verträge bestehen taktgenaue VM-/Logisim-Abnahmen, ohne die bisherigen Profile oder Gates zu verändern. |
 | **19. Systematische Schaltungsdiagnose** | Die aktuelle `TinyCPU.circ` in zehn reproduzierbaren Aufgaben von Umgebung und Fetch bis zur vollständigen elektrischen Regression untersuchen und nur belegte Netzfehler minimal reparieren. | Ein frischer Checkout besteht Offline-, 16/12-Matrix- und GUI-Kurzabnahme; jeder behobene Fehler ist auf die erste abweichende Flanke und benannte Ports zurückgeführt. |
+| **20. Wiederherstellung der CPU-Profile** | Den aktuellen 8/8-Breitenfehler und die ausbleibenden Kernhalte beider Profile isolieren, minimal reparieren und gegen Redraw-Regressionen absichern. | Offline-Gate, Kerntraces und vollständige elektrische ISA-/Fehlermatrizen bestehen für 16/12 und 8/8; ein GUI-Kurztest bestätigt den Kandidaten. |
 
 ## Abhängigkeiten und Reihenfolge
 
@@ -65,6 +66,11 @@ AP 19 ist davon unabhängig: Es ändert keine Produktsemantik, sondern legt für
 konkret beobachtete Fehler der bestehenden 16/12-Schaltung eine reproduzierbare
 Diagnose- und Reparaturfolge fest. Die zehn Aufgaben und ihre Stop-Regeln sind
 im [Schaltungs-Debugplan](tiny_cpu_circuit_debug_plan.md) beschrieben.
+AP 20 reagiert auf die danach erneut fehlgeschlagenen verpflichtenden Gates.
+Es beginnt beim nachgewiesenen 8/8-Breitenrest, stellt anschließend die
+Kerntraces beider Profile wieder her und öffnet erst dann die vollständigen
+elektrischen Matrizen. Die acht Pakete und ihre Abnahmebedingungen stehen im
+[Wiederherstellungsplan](tiny_cpu_recovery_work_packages.md).
 
 ## Stand
 

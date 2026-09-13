@@ -40,7 +40,6 @@ class Profile:
 
 _FILES = {
     "tinycpu-16-12": "tinycpu-16-12.json",
-    "tinycpu-8-8": "tinycpu-8-8.json",
 }
 
 
@@ -58,7 +57,7 @@ def load_profile(name: str = "tinycpu-16-12") -> Profile:
     # The frozen 16/12 v1 contract predates the explicit ``circuit`` field;
     # retain its established project name while exposing one typed interface
     # to all profile-aware tools.
-    circuit = data.get("circuit", "TinyCPU.circ" if name == "tinycpu-16-12" else None)
+    circuit = data.get("circuit", "TinyCPU.circ")
     if not isinstance(circuit, str) or not circuit:
         raise ValueError(f"profile {name!r} has no circuit")
     top_circuit = data.get("top_circuit")

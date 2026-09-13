@@ -1,10 +1,851 @@
-# AP 19: Diagnosebericht zu `TinyCPU.circ`
+# Diagnosebericht zu `TinyCPU.circ`
 
-Dieser Bericht wird entlang der zehn Aufgaben aus
-`tiny_cpu_circuit_debug_plan.md` fortgeschrieben. Er trennt nachgewiesene
-Fehler von noch nicht reproduzierten Beobachtungen. Die manuell gepflegte
-Schaltung wird insbesondere nicht allein aufgrund eines Tests mit historischen
-Canvas-Koordinaten verändert.
+## Klarstellung nach dem manuellen Reset von `FetchDecodeControls`
+
+Das wiederholte Umzeichnen von `FetchDecodeControls` sollte die inzwischen
+geänderte Opcode-Tabelle mit einem gemeinsam verwendeten Decoder abbilden. Es
+war jedoch der falsche Reparaturansatz: Es hat die vom Schaltungsautor bewusst
+gewählte Darstellung und Bauteilanordnung verändert, obwohl sich elektrische
+Fehler zunächst durch Neuverdrahtung in der vorhandenen Zeichnung bearbeiten
+lassen. Künftige Reparaturen behalten deshalb Bauteile, relative Positionen
+und Leitungsverläufe bei und verwenden keine Tunnel. `FetchDecodeControls`
+darf nicht erneut umgezeichnet, automatisch angeordnet oder optisch
+aufgeräumt werden. Falls eine größere Darstellung tatsächlich erforderlich
+ist, darf nur das gesamte vorhandene Bild einschließlich aller Bauteile, Pins,
+Knickpunkte und Leitungsenden in x- und y-Richtung mit demselben Faktor
+skaliert werden. Eine größere Zeichenfläche mit anschließender
+Einzelverschiebung ist ausdrücklich keine proportionale Vergrößerung. Die
+dauerhaft für Arbeiten an den Logisim-Dateien geltende Anweisung steht in
+`hardware/logisim/AGENTS.md`.
+
+`SET_DIV0` ist dabei kein eigener Maschinenbefehl und besitzt folglich kein
+zugehöriges Opcode-Decodersignal. Das Flag entsteht bei einer ausgeführten
+Division mit Operand null im Rechenpfad; am Top-Level muss deshalb
+`Operations.DIVIDE_BY_ZERO` mit `ErrorFlags.SET_DIV0` verbunden sein. Ein
+gleichnamiger Ausgang von `FetchDecodeControls` darf nicht willkürlich an eine
+Decoderzeile angeschlossen werden, weil dadurch ein regulärer Opcode fälschlich
+den Divisionsfehler setzen würde. Dass der Pin in der zurückgesetzten
+Darstellung wie ein Decoder-Ausgang beschriftet ist, ist damit irreführend und
+kein Beleg für eine fehlende Decoderverbindung.
+
+Als nächster nachweisbarer Funktionsfehler wurde ausschließlich die fehlende
+Leitung von `FetchDecode.PROGRAM_LIMIT` zum bereits vorhandenen
+Programmgrenzenvergleich behoben. Die Bauteile und ihre Positionen bleiben
+unverändert; ergänzt wurde nur die gerade Leitung zwischen den vorhandenen
+Anschlusspunkten `(300,530)` und `(670,530)`.
+
+Dieser Bericht wurde zunächst entlang der zehn Aufgaben aus
+`tiny_cpu_circuit_debug_plan.md` fortgeschrieben und führt nun die Nachweise
+der Wiederherstellungspakete aus `tiny_cpu_recovery_work_packages.md` weiter.
+Er trennt nachgewiesene Fehler von noch nicht reproduzierten Beobachtungen. Die
+manuell gepflegte Schaltung wird insbesondere nicht allein aufgrund eines
+Tests mit historischen Canvas-Koordinaten verändert.
+
+## AP 20: Wiederherstellung
+
+| Paket | Status | Ergebnis |
+|---|---|---|
+| 20.1 Reproduktionsstand einfrieren | abgeschlossen | Der unveränderte Ausgangsstand reproduziert zuerst den 16/12-Breitenrest im 8/8-Profil; beide elektrischen Profilläufe erreichen anschließend innerhalb von 90 Sekunden keinen normalen Halt. |
+| 20.2 Breitenfehler im 8/8-Profil isolieren | abgeschlossen | Sieben 16-Bit-Attribute im Datenpfad von `Operations` sind auf 8 Bit spezialisiert; der ROM adressiert nun ausdrücklich mit 8 Bit. Die drei fokussierten statischen Abnahmen bestehen. |
+| 20.3 Offline-Baseline vollständig grün stellen | abgeschlossen | Die verlorene 16/12-Profilgrenze und die gruppierte, tunnel-freie Decodergrenze sind wiederhergestellt; das Offline-Gate besteht zweimal nacheinander ohne erzeugte Arbeitsbaumänderungen. |
+| 20.4 Reset, Takt und Fetch für 16/12 wiederherstellen | in Bearbeitung | Nach dem manuellen Reset von `TinyCPU.circ` ist die vom Autor gewünschte Darstellung von `FetchDecodeControls` wieder maßgeblich. Der Offline-Lauf belegt drei nicht mehr passende Regressionserwartungen; daraus folgt ausdrücklich kein Auftrag zum erneuten Decoder-Redraw. |
+| 20.5 Reset, Takt und Fetch für 8/8 wiederherstellen | entfallen | Der profilabhängige Programmhöchstwert und drei zuvor implizit einbittige Fetch-Bauteile sind auf 8 Bit festgeschrieben. Zwei identische Minimalprogrammläufe belegen danach weiterhin den ersten elektrischen Unterschied am PC nach der ersten Zustandsänderung. Folgewert-, Takt-, Reset- und Enable-Netz des PC-Registers sind geschlossen; eine direkte temporäre Messung belegt zusätzlich den aktiven Resetpegel am Register und den dabei stabilen PC-Nullwert. `FetchDecodeControls` blieb vollständig unverändert. |
+
+### Folgeprüfung nach dem manuellen Decoder-Reset
+
+Der Commit `f737aed` setzt `TinyCPU.circ` bewusst auf die vom Schaltungsautor
+gewünschte Zeichnung zurück. Dieser Stand wird als neue optische Referenz
+akzeptiert und nicht wieder an die zuvor von Tests erwartete Darstellung
+angepasst. Die dauerhafte Bearbeitungsanweisung liegt im Verzeichnis der
+Logisim-Projekte in `hardware/logisim/AGENTS.md` und gilt damit auch für die
+Diagnoseschaltung.
+
+Als nächster begrenzter Arbeitsschritt wurde ausschließlich das Offline-Gate
+gegen diesen zurückgesetzten Stand ausgeführt. Verifier, statische
+Schaltungsprüfung und 80 der 83 Unit-Tests bestehen. Drei Regressionen
+schlagen fehl, weil sie noch die verworfene Gruppierung beziehungsweise eine
+später hinzugefügte Beschriftung voraussetzen:
+
+- `test_program_limit_source_uses_profile_maximum` findet in `TinyCPU.circ`
+  kein mit `PROGRAM_LIMIT_MAX` beschriftetes Bauteil;
+- `test_public_decoder_separates_operations_from_argument_kinds` erwartet die
+  verworfene öffentliche Gruppierung;
+- `test_register_offset_load_selects_memory_data` erwartet dort den ebenfalls
+  nicht vorhandenen Ausgang `LOAD_OPERAND`.
+
+Diese Befunde wurden absichtlich **nicht** durch Änderungen an
+`FetchDecodeControls` grün gestellt. Bevor weitere 16/12-Reparaturen zulässig
+sind, müssen die fachlichen Erwartungen gegen die bestehende, vom Autor
+gewählte Pinbelegung neu abgegrenzt werden. Ein elektrischer Fehler ist dabei
+zuerst außerhalb einer optischen Neugestaltung nachzuweisen. AP 20.5 bleibt
+davon unabhängig bei seinem bereits dokumentierten nächsten temporären
+Resetimpuls-Diagnoseschritt.
+
+Ausgeführt wurde:
+
+```bash
+scripts/test-offline.sh
+```
+
+### 20.1 Reproduktionsstand einfrieren
+
+#### Ausgangslage und Umgebung
+
+- **Zeitpunkt:** 2026-09-12T12:17:34Z
+- **Ausgangs-Commit:**
+  `6cef154eaf3a486ce4a8d2bc36110e4473f6fb3d`
+- **Arbeitsbaum vor der Untersuchung:** sauber (`git status --porcelain=v1`
+  lieferte keine Ausgabe).
+- **Java:** OpenJDK 25.0.2, Build `25.0.2+10-69`.
+- **Python:** 3.14.4.
+- **Logisim-evolution:** 4.1.0, lokale unveränderte JAR unter
+  `.venv/Include/logisim-evolution-4.1.0-all.jar`, SHA-256
+  `fe6386a3217a591bcc311a4eda49e1f43a389b499dd3d0f6f40f344fc85f2577`.
+
+Die vollständigen Rohdaten liegen unter `artifacts/ap20.1-baseline/` und
+bleiben gemäß `.gitignore` außerhalb von Git. Es wurde keine Schaltungsdatei
+verändert. `environment.txt` enthält Commit, anfänglichen Arbeitsbaumstatus
+und Werkzeugversionen. `test-offline.log` und `test-offline.meta` enthalten
+Ausgabe, Laufzeit und Exitcode des Offline-Gates. Die elektrische Ausgabe ist
+in `test-logisim.log` und `test-logisim.meta` zusammengefasst; die unveränderten
+Simulatorausgaben liegen getrennt unter
+`electrical/tinycpu-16-12/core-trace.tsv` und
+`electrical/tinycpu-8-8/core-trace.tsv`.
+
+#### Befehle
+
+Die Baseline wurde mit den unveränderten Projektbefehlen aufgenommen; die
+Laufzeiten wurden jeweils aus der Differenz der Nanosekundenwerte
+von `date +%s%N` ermittelt:
+
+```bash
+git rev-parse HEAD
+git status --porcelain=v1
+java -version
+python3 --version
+java -jar .venv/Include/logisim-evolution-4.1.0-all.jar --version
+sha256sum .venv/Include/logisim-evolution-4.1.0-all.jar
+scripts/test-offline.sh
+LOGISIM_JAR="$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  LOGISIM_OUTPUT="$PWD/artifacts/ap20.1-baseline/electrical" \
+  scripts/test-logisim.sh
+```
+
+#### Ergebnisse
+
+| Lauf | Exitcode | Laufzeit | Erstes Ergebnis | Artefakt |
+|---|---:|---:|---|---|
+| Offline-Gate | 1 | 1,124 s | `TinyCPU-8-8.circ: legacy 16/12 width remains in width` | `test-offline.log` |
+| Elektrisches Gesamt-Gate | 1 | 183,087 s | 16/12 erreicht innerhalb von 90 s keinen Halt; danach erreicht auch 8/8 innerhalb von 90 s keinen Halt | `test-logisim.log` |
+| Elektrischer 16/12-Trace | im Gesamt-Gate enthalten | 90-s-Timeout | 264.171 Tabellenzeilen, kein normaler Halt | `electrical/tinycpu-16-12/core-trace.tsv` |
+| Elektrischer 8/8-Trace | im Gesamt-Gate enthalten | 90-s-Timeout | zwei Tabellenzeilen mit undefinierten Signalen, kein normaler Halt | `electrical/tinycpu-8-8/core-trace.tsv` |
+
+Der Offline-Lauf stoppt vertragsgemäß beim ersten Verifier-Befund. Deshalb
+werden `scripts/check-logisim-circuit.py` und die Unit-Tests in diesem Lauf
+nicht mehr gestartet. Der elektrische Wrapper prüft dagegen beide Profile
+unabhängig und meldet beide als fehlgeschlagen. Ein Timeout wird hier nur als
+fehlender Halt-Nachweis festgehalten; er belegt noch keinen bestimmten
+Decoder-, Takt- oder Datenpfadfehler. Das nächste Paket 20.2 darf daher
+ausschließlich den zuvor statisch belegten Breitenrest isolieren.
+
+Die Digests der kleinen Baseline-Metadaten sind:
+
+```text
+676ed0d3dd6a9444792230429a03de11fdcfaf7d1092a26289d848e0b2e3e931  environment.txt
+bc182203d2890b5342e9320bb0706ccf5f2961fd58f2cf91cecc027c81bb3d3e  test-offline.log
+2249e43b63f5076909cbdfec72b20b1fe4cc4e0c4f98fb0243112813ad52ec9a  test-offline.meta
+165bd3c34947bf5a9f0ed5b99d2f4c9038d9fd65ec11706afcafb2ed0975405b  test-logisim.log
+bbf5e124e2ce70da00d57f245b522d66c2ad12a76e5c15e78d49de0c25be9224  test-logisim.meta
+```
+
+Die großen Rohtraces bleiben absichtlich nur im Artefaktverzeichnis. Ihre
+SHA-256-Digests sind
+`2f000686bbea5aac4d7fb280c8823553f1a26f667dd3f14203d776aaee84d2e6`
+(16/12) und
+`1e432f81c223f180e1eadf54651de89a8958aa4fd42e0caa52db88bf1bb375fd`
+(8/8).
+
+### 20.2 Breitenfehler im 8/8-Profil isolieren
+
+#### Ausgangslage und erster Befund
+
+- **Ausgangs-Commit:** `b1084757443f230426a2921791dd171a776a079b`.
+- **Arbeitsbaum vor der Untersuchung:** sauber (`git status --porcelain=v1`
+  lieferte keine Ausgabe).
+- Der unveränderte Verifier brach mit Exitcode 1 bei
+  `TinyCPU-8-8.circ: legacy 16/12 width remains in width` ab.
+- Eine XML-Auswertung lokalisierte alle **sieben** Treffer im Unterblatt
+  `Operations`: die Pins `ACC_VALUE`, `MEMORY_VALUE`, `IMMEDIATE_VALUE` und
+  `RESULT_VALUE`, das mit `RESULT` beschriftete OR-Gatter sowie die beiden
+  Multiplexer für Operanden- und Ergebniswahl. Jeweils war ausschließlich das
+  Bauteilattribut `width="16"` falsch; die 8/8-Profilregel verlangt dort
+  `width="8"`.
+
+Vor der Reparatur bestand bereits ein Negativtest gegen zurückkehrende
+16/12-Attribute. Er wurde auf den benannten Port
+`Operations:RESULT_VALUE` fokussiert; zugleich nennt die Fehlermeldung nun
+Unterblatt, Bauteil, Attribut, Istwert und erwartetes Profil. Danach wurden nur
+die sieben belegten Datenbreiten auf 8 geändert. Außerdem wurde am vorhandenen
+14-Bit-Instruktions-ROM die bislang nur implizite Standard-Adressbreite als
+`addrWidth="8"` festgeschrieben. Leitungen und Canvas-Koordinaten blieben
+unverändert.
+
+#### Befehle und Ergebnisse
+
+```bash
+PYTHONPATH=src python3 -m unittest \
+  tests.test_tiny_cpu_verify.CircuitVerificationTests.test_8_8_circuit_rejects_a_legacy_width \
+  tests.test_tiny_cpu_verify.CircuitVerificationTests.test_8_8_circuit_matches_profile_and_embedded_fixture
+python3 src/tiny_cpu_verify.py
+python3 scripts/check-logisim-circuit.py
+scripts/test-offline.sh
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-8-8 \
+  --jar "$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  --trace-output "$PWD/artifacts/ap20.2-width-fix/electrical/tinycpu-8-8/core-trace.tsv"
+```
+
+| Lauf | Exitcode | Ergebnis |
+|---|---:|---|
+| Zwei fokussierte Profiltests | 0 | Beide Tests bestehen; die gezielt wieder eingeführte 16-Bit-Breite wird als `Operations:RESULT_VALUE` gemeldet. |
+| `tiny_cpu_verify.py` | 0 | 14 JSON-Dateien, 30 Logisim-Dateien mit 81 Schaltungen und 4.643 Leitungen sowie alle ISA-/Fehlerverträge sind gültig. |
+| `check-logisim-circuit.py` | 0 | Keine statischen Gate-Verdrahtungsfehler. |
+| Vollständiges Offline-Gate | 1 | Der Breiten- und Strukturteil besteht; 74 von 78 Unit-Tests bestehen. Vier Topologietests der unveränderten 16/12-Schaltung schlagen fehl und bilden den Eingang für 20.3. |
+| Kleinster elektrischer 8/8-Kernlauf | 1 | Nach 91,421 s kein Halt innerhalb des unveränderten 90-s-Limits; damit bleibt nur der bereits aus 20.1 bekannte fehlende Halt-Nachweis bestehen. |
+
+Der elektrische Lauf ist unter
+`artifacts/ap20.2-width-fix/electrical.log` samt Exitcode und Laufzeit in
+`electrical.meta` abgelegt. Weil Logisim vor dem Timeout keine Tabelle
+abschloss, entstand keine Trace-Datei. Gemäß Stop-Regel wird daraus in 20.2
+keine weitere Signalwegdiagnose abgeleitet. Das Paket ist abgeschlossen, weil
+seine drei vorgeschriebenen statischen Abnahmen bestehen und der Diff keine
+Neuverdrahtung enthält; die vier erstmals erreichbaren Offline-Befunde werden
+einzeln in 20.3 bearbeitet.
+
+### 20.3 Offline-Baseline vollständig grün stellen
+
+#### Ausgangslage und isolierte Befunde
+
+- **Ausgangs-Commit:** `e473d0926466f8de4728b5162393266f412c978c`.
+- **Arbeitsbaum vor der Untersuchung:** sauber (`git status --porcelain=v1`
+  lieferte keine Ausgabe).
+- Der erste unveränderte Lauf bestand Verifier und statischen Circuit-Check,
+  scheiterte aber mit vier von 78 Unit-Tests. Alle vier Befunde betrafen die
+  16/12-Schaltung: Die benannte Quelle `PROGRAM_LIMIT_MAX` fehlte, und
+  `FetchDecodeControls` stellte statt der gruppierten Operations- und
+  Argumentausgänge wieder einzelne Load-/Store-Opcode-Ausgänge bereit. Der
+  `SUB_OPERAND`-Test erwartete außerdem ein absolutes Leitungssegment statt
+  die Verbindung zwischen zwei benannten Komponenten.
+
+Zuerst wurde die vorhandene 16-Bit-Konstante `0xfff` wieder ausschließlich mit
+dem Fetch-Netz verbunden und als `PROGRAM_LIMIT_MAX` benannt. Anschließend
+wurde die öffentliche Decodergrenze auf die bereits vertraglich geprüften
+Gruppensignale `LOAD_OPERAND`, `STORE_OPERAND` und die vier Argumentarten
+zurückgeführt. Dabei versorgt genau **ein** vorhandener 6-zu-64-Decoder alle
+Steuersignale; nur die fachlich erforderlichen ODER-Gatter fassen seine
+Ausgänge zu Operationen und Argumentarten zusammen. Eindeutig benannte
+`DECODE_00`- bis `DECODE_63`-Netze verteilen die Ausgänge kompakt, und ein
+Regressionstest verhindert eine erneute Vervielfachung des Decoders. Der
+`SUB_OPERAND`-Regressionstest folgt nun dem Netz vom benannten
+`SUB_OPERAND_SELECT` zum gleichnamigen Ausgang und bleibt dadurch bei einem
+reinen Redraw stabil. Der zwischenzeitlich sichtbar gewordene Null-Längen-Draht
+am Ausgang `JUMP_ADR` wurde entfernt; er verband einen Punkt nur mit sich
+selbst und transportierte kein Signal.
+
+#### Befehle und Ergebnisse
+
+```bash
+scripts/test-offline.sh
+scripts/test-offline.sh
+git status --porcelain=v1
+```
+
+| Lauf | Exitcode | Ergebnis |
+|---|---:|---|
+| Eingangslauf | 1 | Verifier und Circuit-Check bestehen; vier der 78 Unit-Tests melden die oben benannten Abweichungen. |
+| Fokussierte Regressionen | 0 | Profilgrenze, gruppierte Decodergrenze, Load-Auswahl und semantischer `SUB_OPERAND`-Pfad bestehen. |
+| Offline-Gate, Wiederholung 1 | 0 | 14 JSON-Dateien, 30 Logisim-Dateien mit 81 Schaltungen, alle Verträge und alle 78 Unit-Tests bestehen. |
+| Offline-Gate, Wiederholung 2 | 0 | Identisches Ergebnis; der Lauf erzeugt keine Arbeitsbaumänderung. |
+
+Damit blockieren keine bekannten statischen Topologie-, Profil- oder
+Maschinenformatfehler mehr die elektrische Diagnose. Der weiterhin aus 20.1
+bekannte fehlende Halt-Nachweis wird nicht als Offline-Fehler umgedeutet;
+als nächstes beginnt 20.4 mit Reset, Takt und Fetch des 16/12-Profils.
+
+#### Korrektur nach der nachfolgenden manuellen Anpassung
+
+Die danach eingecheckte manuelle Anpassung hatte die in 20.3 wiederhergestellte
+Profilgrenze und gruppierte Decodergrenze erneut unterbrochen: Die Beschriftung
+`PROGRAM_LIMIT_MAX`, eine sichtbare Leitung im Hauptblatt sowie die
+öffentlichen Gruppenausgänge `LOAD_OPERAND` und `STORE_OPERAND` fehlten. Der
+unveränderte Offline-Lauf belegte diese drei Unterschiede mit den bereits
+vorhandenen semantischen Regressionen, bevor die Schaltung geändert wurde.
+
+`FetchDecodeControls` ist nun erneut als sichtbare, rechtwinklige Verdrahtung
+von genau einem 6-zu-64-Decoder zu den vorhandenen Sammelgattern aufgebaut.
+Weder Decoder oder sonstige Funktionsbauteile wurden vervielfältigt noch Tunnel
+eingefügt. Die Profilgrenzenquelle trägt wieder ihren stabilen Namen und ist
+über die einzelne fehlende Leitung mit dem vorhandenen Fetch-Netz verbunden.
+Das Offline-Gate und die elektrische 64-Code-Decoderabnahme bestehen. Der
+anschließende 16/12-Kernlauf erreicht unter der verfügbaren Java-25-Umgebung
+weiterhin nicht innerhalb von 90 Sekunden den Halt und liefert bereits früh
+undefinierte beziehungsweise Fehlerwerte. Gemäß Stop-Regel gilt dies nur als
+offener Halt-Nachweis; 20.4 bleibt deshalb in Bearbeitung und es wurde kein
+weiterer Signalweg auf Verdacht verändert.
+
+### 20.4 Reset, Takt und Fetch für 16/12 wiederherstellen
+
+#### Nachprüfung nach der erneuten manuellen Invertierung
+
+- **Ausgangs-Commit:** `2974dc6a45d84d095388215b061000bdce528feb`.
+- **Arbeitsbaum vor der Untersuchung:** sauber (`git status --porcelain=v1`
+  lieferte keine Ausgabe).
+- Ein auf zehn Sekunden begrenzter autonomer 16/12-Kernlauf schrieb 19.245
+  Zustandsänderungen, erreichte aber keinen normalen Halt. Dieser Timeout wird
+  weiterhin nur als fehlender Halt-Nachweis behandelt.
+- Die statische Abnahme lokalisiert den zeitlich früheren Unterschied an der
+  öffentlichen Grenze von `FetchDecodeControls`: `LOAD_OPERAND` und
+  `STORE_OPERAND` fehlen; stattdessen sind erneut die einzelnen alten
+  Load-/Store-Ausgänge vorhanden. Die elektrische Decoderabnahme stoppt
+  entsprechend bereits beim abweichenden Tabellenkopf.
+- Unabhängig davon fehlte an der weiterhin unveränderten Konstante `0xfff` nur
+  noch der stabile Name `PROGRAM_LIMIT_MAX`. Ausschließlich dieses Attribut
+  wurde wieder ergänzt. Position, Wert, Breite und Leitung der Konstante sowie
+  sämtliche Bauteile, Positionen und Leitungen von `FetchDecodeControls`
+  bleiben gegenüber dem Ausgangs-Commit unverändert.
+
+Ausgeführt wurde:
+
+```bash
+scripts/test-offline.sh
+python3 scripts/test-logisim-decode.py
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 \
+  --jar "$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  --trace-output /tmp/ap20-4.tsv --timeout 10
+```
+
+Nach Wiederherstellung des Namens besteht der fokussierte
+`test_program_limit_source_uses_profile_maximum`. Das Offline-Gate bleibt an
+den zwei bereits vorhandenen semantischen Decodergrenztests rot; die
+elektrische Decoderabnahme nennt dieselbe Schnittstellenabweichung. Gemäß der
+Stop-Regel wurde deshalb weder der Decoder neu aufgebaut noch ein historisches
+Blatt eingespielt oder die vom Autor gewählte Anordnung verändert. Der nächste
+zulässige Schritt in 20.4 ist eine Reparatur der **bestehenden** Zeichnung an
+dieser benannten Schnittstelle; erst danach darf der Trace zur ersten
+abweichenden Flanke von Reset, Takt, PC und ROM fortgesetzt werden.
+
+#### Reparatur der öffentlichen Decodergrenze
+
+- **Ausgangs-Commit:** `753f47d`.
+- **Arbeitsbaum vor der Untersuchung:** sauber (`git status --short --branch`
+  zeigte ausschließlich `## work`).
+- Der unveränderte Offline-Lauf bestand Verifier und Circuit-Check, scheiterte
+  aber an genau den zwei bereits benannten Regressionen für die fehlenden
+  Gruppenausgänge und den davon abhängigen Register-Offset-Load-Pfad.
+
+Die sichtbare Verdrahtung von `FetchDecodeControls` fasst die Opcodezeilen nun
+wieder mit je einem beschrifteten ODER-Gatter zu `LOAD_OPERAND`,
+`STORE_OPERAND`, den sechs Rechenoperationen und den vier Argumentarten
+zusammen. Genau ein 6-zu-64-Decoder bleibt die gemeinsame Quelle; Tunnel und
+einzelne Load-/Store-Ausgänge an der öffentlichen Grenze werden nicht
+verwendet. Die zugehörigen Top-Level-Verbindungen folgen den Gruppensignalen.
+Andere Unterblätter wurden nicht verändert.
+
+Ausgeführt wurde:
+
+```bash
+scripts/test-offline.sh
+python3 scripts/test-logisim-decode.py
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 \
+  --jar "$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  --trace-output /tmp/ap20-4-repaired.tsv --timeout 20
+```
+
+Das Offline-Gate besteht mit allen 83 Unit-Tests. Beide elektrischen
+Decoderabnahmen bestehen für 50 belegte und 14 reservierte Opcodes. Der
+anschließende autonome Kernlauf endet nach 20 Sekunden weiterhin ohne Halt und
+liefert neun Zustandsänderungen: PC und Akkumulator beginnen mit null; bereits
+die zweite Zeile enthält einen undefinierten PC. Damit ist die vorgelagerte
+Decodergrenze nicht mehr der erste Fehler. Gemäß Stop-Regel wurde aus dem
+Timeout keine weitere Schaltungsänderung abgeleitet. 20.4 bleibt offen; als
+nächstes sind Reset, PC-Dateneingang und PC-Ausgang unmittelbar um die erste
+steigende Flanke in einer temporären 16/12-Diagnosekopie gemeinsam zu messen.
+
+### 20.5 Reset, Takt und Fetch für 8/8 wiederherstellen
+
+#### Erster profilbezogener Fetch-Befund
+
+- **Ausgangs-Commit:** `46e336a`.
+- **Arbeitsbaum vor der Untersuchung:** sauber (`git status --porcelain=v1`
+  lieferte keine Ausgabe).
+- Ein aus `LOAD_CONST 42` und `HALT` bestehendes 8/8-ROM wurde ausschließlich
+  in zwei temporäre Projektkopien injiziert. Beide Läufe endeten nach zehn
+  Sekunden ohne normalen Halt und lieferten dieselben zwei Tabellenzeilen.
+- Vor einer Neuverdrahtung zeigte der statische Vergleich mit dem 8/8-Profil
+  vier konkrete Attributfehler im Fetch-Pfad: Die angeschlossene
+  Programmlimitkonstante hatte den impliziten Wert null, während PC-Register,
+  PC-Inkrementierer und Programmlimitvergleicher ohne `width` jeweils auf der
+  einbittigen Bauteilvorgabe standen. Auch der Vorgabewert des öffentlichen
+  `PROGRAM_LIMIT`-Pins war noch als 16/12-Wert `0xfff` geschrieben.
+
+Nur diese profilabhängigen Attribute wurden korrigiert: Die benannte Quelle
+`PROGRAM_LIMIT_MAX` liefert nun den 8-Bit-Wert `0xff`, und Register, Addierer
+sowie Vergleicher besitzen ausdrücklich Breite 8. Die zugehörige Regression
+prüft beide Profilgrenzen und die drei benannten beziehungsweise eindeutig
+bestimmten Fetch-Bauteile. Es wurden keine Komponenten verschoben, keine
+Leitungen geändert und insbesondere weder Bauteile noch Anschlüsse oder
+Attribute von `FetchDecodeControls` angefasst.
+
+Ausgeführt wurde:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_program_limit_source_uses_profile_maximum \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_8_bit_fetch_path_uses_profile_width -v
+timeout 10s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table,halt /tmp/ap20-5-minimal-1.circ
+timeout 10s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table,halt /tmp/ap20-5-minimal-2.circ
+sha256sum /tmp/ap20-5-minimal-{1,2}.tsv
+```
+
+Die zwei fokussierten Tests bestehen. Beide elektrischen Läufe reproduzieren
+danach weiterhin denselben offenen Halt-Nachweis (Exitcode 124) und dieselbe
+Rohtrace-Prüfsumme
+`1e432f81c223f180e1eadf54651de89a8958aa4fd42e0caa52db88bf1bb375fd`.
+In der ersten Tabellenzeile ist `PC_OUT` noch null; bereits in der zweiten
+Zustandsänderung wird der PC undefiniert. Das Paket bleibt deshalb in
+Bearbeitung. Gemäß Stop-Regel wird aus dem Timeout kein Decoderfehler
+abgeleitet: Als nächstes ist der bereits eingegrenzte PC-Folgewertpfad zwischen
+Register, Addierer und Multiplexer elektrisch zu prüfen, ohne
+`FetchDecodeControls` umzustellen.
+
+#### Nachprüfung des PC-Folgewertpfads
+
+Der nächste Lauf auf `e751570` reproduziert den offenen Halt-Nachweis mit dem
+unveränderten 8/8-Profil nach 20 Sekunden. Die Tabelle enthält erneut genau
+zwei Zustandsänderungen: `PC_OUT` beginnt bei null und wird anschließend
+undefiniert. Eine anschließende semantische Netzanalyse verfolgt die
+Anschlüsse relativ zu den Bauteilankern statt über absolute Canvaspositionen.
+Sie belegt, dass der PC-Ausgang den Addierereingang, den öffentlichen
+`PC_OUT`-Pin und die ROM-Adresse erreicht, der Addiererausgang am normalen
+Multiplexereingang liegt und der Multiplexerausgang geschlossen zum
+PC-Dateneingang zurückgeführt wird.
+
+Damit ist in diesem Schritt kein unterbrochenes Netz zwischen Register,
+Addierer und Multiplexer nachgewiesen; die Schaltung wurde folglich nicht auf
+Verdacht neu verdrahtet. Die neue Regression bewahrt diesen eingegrenzten
+Signalweg redraw-sicher. Der nächste zulässige Diagnoseschritt muss die
+benannten Register-Steuereingänge `CLK`, `RESET` und Enable ab der ersten
+Zustandsänderung beobachten. Erst ein dort benannter Unterschied rechtfertigt
+eine weitere Schaltungsänderung. Die bereits aus 20.4 bekannte abweichende
+öffentliche 16/12-Decodergrenze bleibt davon unabhängig und lässt das gesamte
+Offline-Gate weiterhin an zwei vorhandenen Tests scheitern.
+
+Ausgeführt wurde:
+
+```bash
+PYTHONPATH=src python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_8_bit_pc_successor_path_is_continuous \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_8_bit_fetch_path_uses_profile_width -v
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-8-8 \
+  --jar "$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  --trace-output /tmp/ap20-next/core.tsv --timeout 20
+scripts/test-offline.sh
+```
+
+#### Nachprüfung der PC-Registersteuerung
+
+Der auf `e770298` wiederholte autonome 8/8-Kernlauf endet nach 20 Sekunden
+erneut ohne Halt und erzeugt unverändert genau zwei Zustandsänderungen mit der
+Prüfsumme
+`1e432f81c223f180e1eadf54651de89a8958aa4fd42e0caa52db88bf1bb375fd`.
+Damit liegt weiterhin derselbe erste elektrische Unterschied vor: `PC_OUT`
+beginnt bei null und wird mit der ersten Zustandsänderung undefiniert.
+
+Die anschließend geforderte semantische Netzanalyse prüft die drei benannten
+Steuereingänge relativ zum Anker des PC-Registers. Der öffentliche `CLK`-Pin
+erreicht dessen Takteingang, der öffentliche `RESET`-Pin dessen Reset-Eingang,
+und genau eine auf eins gesetzte Konstante treibt den Enable-Eingang. Die neue
+Regression folgt jeweils dem vollständigen Netz und hängt deshalb nicht von
+der gezeichneten Route ab. Da weder ein offener noch ein mehrfach getriebener
+Steuerpfad nachgewiesen ist, wurde die Schaltung gemäß Stop-Regel nicht
+verändert.
+
+Ausgeführt wurde:
+
+```bash
+PYTHONPATH=src python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_8_bit_pc_register_controls_are_connected -v
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-8-8 \
+  --jar "$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  --trace-output /tmp/ap20-register-controls/core.tsv --timeout 20
+sha256sum /tmp/ap20-register-controls/core.tsv
+```
+
+Der fokussierte Strukturtest besteht. Der elektrische Diagnosebefehl liefert
+wie erwartet Exitcode 1, weil sein internes 20-Sekunden-Limit vor einem Halt
+abläuft; dies ist kein neuer Fehlerbefund. Der nächste zulässige Schritt muss
+deshalb Reset- und Taktpegel während der beiden beobachteten Zustandsänderungen
+direkt sichtbar machen und mit der steigenden Registerflanke abgleichen. Erst
+eine dort belegte Abweichung rechtfertigt eine Schaltungsänderung.
+
+#### Sichtprüfung von Reset und Takt am Fetch-Eingang
+
+Der nächste Diagnoselauf auf `550f30b` ergänzte ausschließlich in einer
+temporären Projektkopie zwei Ausgangspins an den aufgetrennten, vorhandenen
+Top-Level-Netzen für `CLK` und `RESET`. Damit wurden die Pegel in derselben
+change-driven Tabelle wie `PC_OUT` sichtbar, ohne die eingecheckte Schaltung
+umzuverdrahten. Der Takt wechselte reproduzierbar zwischen null und eins und
+der Resetpegel lag während des beobachteten Anfangsfensters auf eins. Trotzdem
+wurde der anfangs noch nullwertige PC mit der ersten steigenden Taktflanke
+undefiniert. Damit liegt der erste Unterschied hinter den öffentlichen
+Top-Level-Eingängen; ein Fehler der autonomen Taktquelle ist nicht belegt.
+
+Bei der Instrumentierung wurde außerdem ein unabhängiger Fehler im
+temporären Testprojekt nachgewiesen: Der Generator serialisierte den Java-
+Klassennamen `PowerOnReset`, Logisim-evolution 4.1.0 identifiziert das
+Bauteil in Projektdateien jedoch mit seiner Factory-ID `POR`. Der falsche Name
+wurde ohne Ladefehler als unbekannte Quelle akzeptiert und lieferte ein
+undefiniertes Signal. Der Generator verwendet nun die gültige ID; eine
+Regression prüft, dass der ungültige Klassenname nicht wieder ausgegeben wird.
+Die Quelldatei `TinyCPU-8-8.circ` blieb unverändert.
+
+Ausgeführt wurde:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_autonomous_project_uses_profile_specific_circuit -v
+timeout 5s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table,halt /tmp/ap20-clock-reset2.circ
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-8-8 \
+  --jar "$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  --trace-output /tmp/ap20-por-fix/core.tsv --timeout 30
+```
+
+Der fokussierte Test besteht. Beide elektrischen Befehle enden erwartungsgemäß
+ohne Halt; der instrumentierte Fünf-Sekunden-Lauf schreibt 33.294 Zeilen und
+zeigt die alternierenden Taktpegel bei konstant aktivem Reset direkt. Der
+reguläre Lauf bewahrt den bekannten Zwei-Zeilen-Befund. Gemäß Stop-Regel wird
+deshalb kein CPU-Netz verändert. Als nächstes muss der Resetpegel direkt am
+Resetanschluss des PC-Registers sichtbar gemacht werden; erst danach darf die
+Registerflanke oder der Datenpfad als Ursache repariert werden.
+
+#### Direkte Messung am Resetanschluss des PC-Registers
+
+Der nächste Lauf auf `460a790` machte `FetchDecode` ausschließlich in einer
+temporären Kopie zum Startblatt. `CLK` und `RESET` wurden dort wie im regulären
+autonomen Projekt durch `Clock` und die Logisim-4.1.0-Factory `POR` ersetzt. Ein
+temporärer Ausgangspin wurde über eine einzelne kurze Leitung direkt an den
+bereits vorhandenen Resetanschluss des PC-Registers gelegt. Die eingecheckte
+Schaltung und ihre Subcircuit-Schnittstelle blieben unverändert.
+
+Ausgeführt wurde:
+
+```bash
+python3 /tmp/build-ap20-pc-reset-probe.py
+timeout 5s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table /tmp/ap20-pc-reset-probe.circ \
+  > /tmp/ap20-pc-reset-probe.tsv
+PYTHONPATH=src python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_8_bit_pc_register_controls_are_connected -v
+```
+
+Der Tabellenlauf endet regulär mit Exitcode 0 und 2.048 Datenzeilen. Logisim
+variiert dabei die noch freien Fetch-Eingänge vollständig; in jeder Zeile ist
+`PC_RESET_PROBE` eins und `PC_OUT` bleibt `0x00`. Damit erreicht der am
+öffentlichen Fetch-Eingang beobachtete Resetpegel nachweislich auch den
+Resetanschluss des PC-Registers, und das Register hält während des aktiven
+Resets seinen dokumentierten Nullzustand. Der fokussierte Strukturtest besteht
+weiterhin. Es ist weder eine Unterbrechung noch ein falscher Register-Reset in
+diesem Signalweg belegt, daher wurde gemäß Stop-Regel kein CPU-Netz verändert.
+
+Der erste Unterschied des vollständigen autonomen Top-Level-Laufs bleibt
+damit vorerst offen. Als nächstes muss ein zeitlich begrenzter Resetimpuls in
+einer temporären `FetchDecode`-Diagnosekopie den Reset kontrolliert freigeben;
+dann sind PC-Dateneingang und PC-Ausgang unmittelbar vor und nach der ersten
+steigenden Taktflanke gemeinsam zu beobachten. Erst dieser Vergleich kann
+zwischen einem undefinierten Folgewert und einer falschen Registerflanke
+unterscheiden.
+
+#### Kontrollierte Resetfreigabe am PC-Register
+
+Der nächste Lauf auf `8d5ff9c` setzt genau diese Messung um. Das neue
+Diagnosewerkzeug `scripts/probe-logisim-pc-release.py` erzeugt ausschließlich
+eine temporäre Kopie: Es wählt `FetchDecode` als Startblatt, ersetzt dessen
+freien Eingänge durch feste Werte und erzeugt den Resetimpuls durch einen
+invertierten, langsamen Takt. Ein dauerhaft nullwertiger `halt`-Ausgang sorgt
+dabei lediglich dafür, dass Logisim im Modus `table,halt` die Takte ausführt.
+Die eingecheckte Schaltung wird weder verändert noch umgezeichnet.
+
+Die erste Tabellenzeile zeigt bei aktivem Reset gemeinsam `PC_D_PROBE=0x01`
+und `PC_OUT=0x00`. Bei der Resetfreigabe bleibt der Ausgang definiert auf null;
+an der ersten steigenden PC-Flanke nach der vollständig eingeschwungenen
+Freigabe übernimmt das Register den bereits sichtbaren Folgewert und liefert
+`PC_OUT=0x01`. Danach zählen Dateneingang und Ausgang entsprechend versetzt
+weiter. Damit sind weder ein undefinierter PC-Folgewert noch eine falsche
+Registerflanke innerhalb des isolierten `FetchDecode` belegt. Gemäß Stop-Regel
+wurde deshalb kein CPU-Netz geändert.
+
+Ausgeführt wurde:
+
+```bash
+python3 scripts/probe-logisim-pc-release.py /tmp/ap20-pc-release.circ
+timeout 2s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table,halt /tmp/ap20-pc-release.circ \
+  > /tmp/ap20-pc-release.tsv
+head -n 8 /tmp/ap20-pc-release.tsv
+```
+
+Der zeitlich begrenzte Tabellenlauf endet erwartungsgemäß mit Exitcode 124;
+seine ersten acht Zustandsänderungen enthalten ausschließlich definierte
+PC-Werte und belegen die Übernahme von `0x01` nach der Resetfreigabe. Der
+erste Unterschied des vollständigen autonomen `TinyCPUMain`-Laufs liegt damit
+außerhalb des nun geprüften isolierten Register- und Folgewertverhaltens. Als
+nächstes muss dieselbe kontrollierte Resetquelle an der bestehenden
+`TinyCPUMain`-Grenze eingesetzt und der Resetpegel vor und hinter dem
+`FetchDecode`-Subcircuit gemeinsam beobachtet werden. Erst ein dort benannter
+Unterschied rechtfertigt eine Schaltungsänderung.
+
+#### Kontrollierte Resetfreigabe an der TinyCPUMain-Grenze
+
+Der nächste Lauf auf `6a9172b` überträgt die kontrollierte Resetquelle auf das
+vollständige 8/8-Top-Level. Das neue Diagnosewerkzeug
+`scripts/probe-logisim-top-reset-release.py` arbeitet wiederum ausschließlich
+auf einer temporären Kopie. Es ersetzt `CLK` durch einen normalen Takt und
+`RESET` durch den invertierten langsamen Takt, reduziert die Tabellenansicht
+auf die vier benötigten Ausgänge und beobachtet den Reset sowohl unmittelbar
+an seiner Quelle als auch am Eingang der vorhandenen `FetchDecode`-Instanz.
+Die eingecheckte Schaltung bleibt unverändert.
+
+Ausgeführt wurde:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_top_level_reset_release_probe_is_temporary_and_observable -v
+python3 scripts/probe-logisim-top-reset-release.py \
+  /tmp/ap20-top-reset-release.circ
+timeout 12s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table,halt /tmp/ap20-top-reset-release.circ \
+  > /tmp/ap20-top-reset-release.tsv
+head -n 16 /tmp/ap20-top-reset-release.tsv
+```
+
+Der fokussierte Test besteht und weist zusätzlich nach, dass der Generator die
+Quelldatei nicht verändert. Der elektrische Lauf endet wie für die zeitlich
+begrenzte Diagnose vorgesehen mit Exitcode 124 und erzeugt 150.154
+Zustandsänderungen. Beide Resetspalten beginnen gemeinsam auf eins, wechseln
+gemeinsam auf null und stimmen in allen beobachteten Zeilen überein. Damit
+erreicht die kontrollierte Freigabe die öffentliche `FetchDecode`-Grenze ohne
+Unterbrechung oder Pegelabweichung. `PC_OUT_PROBE` bleibt während des aktiven
+Resets auf `0x00`, übernimmt nach der Freigabe `0x01` und zählt anschließend
+definiert weiter. Damit arbeitet der zuvor isoliert geprüfte PC-Pfad auch in
+der vollständigen Top-Level-Einbindung korrekt, sobald der Reset zeitlich
+kontrolliert freigegeben wird. Eine Schaltungsänderung am Resetnetz ist durch
+diesen Befund nicht gerechtfertigt und wurde nicht vorgenommen.
+
+Der erste Unterschied ist damit weiter eingegrenzt: Er entsteht nicht durch
+die vollständige Top-Level-Einbindung von `FetchDecode`, sondern nur im
+bisherigen autonomen Lauf mit der `POR`-Quelle. Als nächstes müssen deren
+tatsächliche Freigabeflanke und die erste CPU-Taktflanke in derselben
+temporären Top-Level-Kopie gemeinsam beobachtet und mit dem kontrollierten
+Resetimpuls verglichen werden. Erst eine dort benannte Abweichung darf eine
+Reparatur am autonomen Generator auslösen.
+
+#### POR-Freigabe und autonome Resetquelle
+
+Der auf `347f84d` geforderte direkte Vergleich verwendet mit
+`scripts/probe-logisim-top-por-release.py` erneut nur eine temporäre Kopie des
+8/8-Top-Levels. Das Werkzeug ersetzt die beiden öffentlichen Eingänge exakt
+wie der bisherige autonome Launcher durch `Clock` und `POR`, macht beide
+Quellpegel zusammen mit `PC_OUT` sichtbar und reduziert alle übrigen
+Top-Level-Ausgänge auf reine Beobachtungspunkte. Ein Regressionstest prüft die
+Instrumentierung und die unveränderte Quelldatei.
+
+Ausgeführt wurde:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_top_level_por_release_probe_is_temporary_and_observable \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_autonomous_project_uses_profile_specific_circuit -v
+python3 scripts/probe-logisim-top-por-release.py \
+  /tmp/ap20-top-por-release.circ
+timeout 3s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table,halt /tmp/ap20-top-por-release.circ \
+  > /tmp/ap20-top-por-release.tsv
+```
+
+Der elektrische Lauf endet mit dem erwarteten Timeout-Exitcode 124, gibt aber
+anders als die kontrollierte Resetquelle nur eine einzige Zustandszeile aus.
+`CLK_SOURCE_PROBE` und `POR_SOURCE_PROBE` stehen darin beide auf null; der
+`POR`-Ausgang wird während des gesamten Laufs nie aktiv und besitzt folglich
+weder eine Freigabeflanke noch einen Abstand zur ersten CPU-Taktflanke. Das ist
+der erste benannte Unterschied zum vorherigen kontrollierten Lauf, dessen
+Reset mit eins beginnt, definiert auf null wechselt und danach einen zählenden
+PC liefert. `POR` bildet in Logisim den Simulator-Resetzustand ab und erzeugt
+im Headless-Tabellenlauf keinen autonomen Einschaltimpuls.
+
+Die minimale Reparatur betrifft deshalb ausschließlich den Generator der
+temporären Abnahmekopie, nicht `TinyCPU-8-8.circ`: `autonomous_project`
+verwendet nun dieselbe bereits elektrisch qualifizierte invertierte langsame
+Taktquelle. Der CPU-Takt erhält explizite Zwei-Tick-Phasen, sodass Reset vor
+seiner ersten aktiven Flanke stabil anliegt. Der fokussierte Test friert
+Bauteiltypen, Phasenlängen und die einzelne Leitung der Resetquelle ein und
+verbietet sowohl `POR` als auch den früheren ungültigen Namen
+`PowerOnReset` im erzeugten Projekt.
+
+Der anschließende reguläre 8/8-Kernlauf erreicht weiterhin nicht den Halt und
+zeigt damit nach der korrigierten Resetquelle den nächsten noch zu
+isolierenden Unterschied; er rechtfertigt keine weitere Änderung in diesem
+Schritt. Als nächstes sind im autonom erzeugten Projekt Reset, Takt und PC mit
+denselben Beobachtungspunkten gemeinsam zu protokollieren. Erst wenn der PC
+dort definiert fortschaltet, darf die Diagnose zu ROM-Wort und Decodergrenze
+weitergehen.
+
+#### Gemeinsamer autonomer Reset-, Takt- und PC-Nachweis
+
+Der nächste Lauf begann auf Commit `3dde99e` mit unverändert sauberem
+Arbeitsbaum, OpenJDK 25.0.2 und der gepinnten
+Logisim-evolution-Version 4.1.0. Das neue Werkzeug
+`scripts/probe-logisim-autonomous-controls.py` ruft unmittelbar den regulären
+`autonomous_project`-Generator auf und ergänzt erst in dessen temporärer
+Ausgabedatei die drei Beobachtungspunkte `RESET_SOURCE_PROBE`,
+`CLK_SOURCE_PROBE` und `PC_OUT_PROBE`. Alle fachlich unbeteiligten Ausgänge
+werden wieder zu reinen Probes. Der Regressionstest sichert die vier kleinen
+Tabellenausgänge einschließlich `halt` sowie die unveränderte 8/8-Quelldatei.
+
+Ausgeführt wurde:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_autonomous_control_probe_is_temporary_and_observable \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_autonomous_project_uses_profile_specific_circuit -v
+python3 scripts/probe-logisim-autonomous-controls.py \
+  /tmp/ap20-autonomous-controls.circ
+timeout 5s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table,halt /tmp/ap20-autonomous-controls.circ \
+  > /tmp/ap20-autonomous-controls.tsv
+```
+
+Beide fokussierten Tests bestehen. Der elektrische Lauf endet erwartungsgemäß
+nach 5 Sekunden mit Exitcode 124 und schreibt 21.020 Zustandszeilen. Der von
+`table,halt` nicht als Datenspalte ausgegebene Haltkanal wird bis zum Timeout
+nicht aktiv. Die beiden sichtbaren
+Steuerquellen werden in jeder stabil ausgegebenen Tabellenzeile mit null
+abgetastet; zugleich zählt `PC_OUT_PROBE` definiert von `0x00` bis `0x19`,
+beginnt danach erneut bei `0x00` und durchläuft diesen Bereich wiederholt.
+Damit ist für exakt die vom Abnahmelauf erzeugte Kopie belegt, dass der
+Reset nicht dauerhaft aktiv bleibt und der CPU-Takt den PC fortschaltet. Der
+weiterhin fehlende Halt ist folglich nicht mehr als Reset- oder
+PC-Stillstandsfehler einzugrenzen.
+
+Der anschließende Lauf von `scripts/test-offline.sh` bestätigt erneut die
+bereits auf dem Ausgangscommit vorhandenen drei, ausschließlich das
+zurückgesetzte 16/12-Projekt betreffenden Fehler:
+`test_program_limit_source_uses_profile_maximum`,
+`test_public_decoder_separates_operations_from_argument_kinds` und
+`test_register_offset_load_selects_memory_data`. Alle 83 übrigen Unit-Tests
+einschließlich der neuen Regression bestehen; Verifier und statischer
+Schaltungscheck akzeptieren weiterhin alle Artefakte. Diese bekannten
+16/12-Befunde sind von der hier untersuchten unveränderten 8/8-Schaltung
+unabhängig und werden deshalb nicht in denselben Reparaturschritt gezogen.
+
+Gemäß Stop-Regel wurde keine Schaltungsdatei geändert. Der nächste zulässige
+Diagnoseschritt muss nun am selben autonomen Projekt `PC_OUT`, das zugehörige
+ROM-Wort und die Decodergrenze gemeinsam beobachten und den ersten Unterschied
+zum 8/8-VM-Trace benennen; erst dieser Nachweis darf eine fachliche Reparatur
+auslösen.
+
+#### Gemeinsamer PC-, ROM-Wort- und Decodergrenznachweis
+
+Der Folgelauf begann auf Commit `61bda5a` mit sauberem Arbeitsbaum, OpenJDK
+25.0.2 und Logisim-evolution 4.1.0. Das vorhandene temporäre Diagnosewerkzeug
+exportiert nun zusätzlich das 14-Bit-Netz unmittelbar am `OPCODE`-Ausgang von
+`FetchDecode` als `ROM_WORD_PROBE`. Außerdem wird der bereits angeschlossene
+Monitor `MONITOR_LOAD_CONST` an der Decodergrenze für die temporäre Tabelle in
+`DECODE_LOAD_CONST_PROBE` umgewandelt. Die Quelldatei
+`TinyCPU-8-8.circ` bleibt unverändert. Der Regressionstest verlangt die beiden
+zusätzlichen Ausgänge, ihre Breite beziehungsweise vorhandene Netzverbindung
+und erneut Bytegleichheit der Quelldatei.
+
+Ausgeführt wurde:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_autonomous_control_probe_is_temporary_and_observable -v
+python3 scripts/probe-logisim-autonomous-controls.py \
+  /tmp/ap20-fetch-boundary.circ
+timeout 5s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table,halt /tmp/ap20-fetch-boundary.circ \
+  > /tmp/ap20-fetch-boundary.tsv
+```
+
+Der fokussierte Test besteht. Der elektrische Lauf endet nach fünf Sekunden
+erwartungsgemäß mit Exitcode 124 und 9.310 Tabellenzeilen. Wie im vorherigen
+Nachweis zählt `PC_OUT_PROBE` definiert und zyklisch von `0x00` bis `0x19`.
+Das zu jedem dieser PC-Werte gleichzeitig beobachtete `ROM_WORD_PROBE` bleibt
+jedoch in sämtlichen Zeilen vollständig undefiniert (`UU UUUU UUUU UUUU`).
+Entsprechend bleibt auch `DECODE_LOAD_CONST_PROBE` undefiniert. Bereits für
+PC `0x00` weicht die Schaltung damit erstmals vom VM-Trace und vom eingelegten
+ROM-Image ab: Erwartet ist das Wort `0x00ff` für `LOAD_CONST(-1)`, nicht ein
+undefinierter Decoder-Eingang. Die Decodergrenze ist in diesem Lauf nur eine
+Folgeabweichung; eine Decoderreparatur ist daraus nicht abzuleiten.
+
+Gemäß Stop-Regel wurde wiederum keine Schaltungsdatei geändert. Der erste
+Unterschied ist jetzt auf den Fetch-Pfad zwischen definiertem `PC_OUT` und
+undefiniertem `OPCODE`-Ausgang eingegrenzt. Als nächstes müssen innerhalb von
+`FetchDecode` ROM-Adresse und ROM-Datenausgang gemeinsam mit `PC_OUT` beobachtet
+werden. Erst wenn dort der erste offene, mehrfach getriebene oder undefinierte
+Netzübergang benannt ist, ist eine minimale Reparatur zulässig.
+
+#### ROM-Adress- und Datengrenze in `FetchDecode`
+
+Der nächste Diagnoselauf begann auf Commit `c96f77d` mit sauberem Arbeitsbaum,
+OpenJDK 25.0.2 und Logisim-evolution 4.1.0. Der vorhandene temporäre
+`ROM_WORD_PROBE` wurde unverändert weiterverwendet. Seine Regression verfolgt
+nun zusätzlich innerhalb von `FetchDecode` die tatsächlich angeschlossenen
+Ports: Das elektrisch beobachtete `PC_OUT`-Netz erreicht den 8-Bit-Adresseingang
+von `INSTRUCTION_ROM`; dessen einzelner 14-Bit-Datenausgang erreicht über den
+vorhandenen Splitter den `OPCODE`-Port und damit den Probe. Außerdem sichert der
+Test den Anfang des eingelegten ROM-Inhalts (`0x00ff`) und erneut die
+Bytegleichheit der 8/8-Quelldatei. Damit beruht die Diagnose nicht auf einer
+vermuteten Canvas-Koordinate oder einer kopierten ROM-Fixture.
+
+Ausgeführt wurde:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_autonomous_control_probe_is_temporary_and_observable -v
+python3 scripts/probe-logisim-autonomous-controls.py \
+  /tmp/ap20-fetch-internal-boundary.circ
+timeout 5s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
+  -tty table,halt /tmp/ap20-fetch-internal-boundary.circ \
+  > /tmp/ap20-fetch-internal-boundary.tsv
+```
+
+Der fokussierte Test besteht. Der elektrische Lauf endet nach fünf Sekunden
+erwartungsgemäß mit Exitcode 124 und 1.444 Tabellenzeilen. `PC_OUT_PROBE`
+durchläuft weiterhin definiert `0x00` bis `0x19`. Weil exakt dasselbe Netz den
+ROM-Adresseingang treibt, ist damit auch die Adresse am Bauteil definiert. Der
+direkt vom angeschlossenen ROM-Datenausgang abgenommene `ROM_WORD_PROBE` bleibt
+dagegen in jeder Zeile undefiniert (`UU UUUU UUUU UUUU`); der nachgelagerte
+`DECODE_LOAD_CONST_PROBE` bleibt folgerichtig ebenfalls undefiniert. Der erste
+abweichende benannte Übergang liegt somit **im Bauteil `INSTRUCTION_ROM`
+zwischen definiertem Adresseingang und undefiniertem Datenausgang**, nicht im
+nachgelagerten Decoder oder in einer offenen Leitung hinter dem ROM.
+
+Gemäß Stop-Regel wurde keine Schaltungsdatei geändert. Als nächstes müssen die
+elektrisch wirksamen ROM-Attribute und der geladene Inhalt in einer isolierten
+temporären `FetchDecode`-Kopie gegen ein minimales 8/14-ROM geprüft werden. Erst
+wenn dabei das erste falsche Attribut oder Bauteilverhalten belegt ist, darf
+`TinyCPU-8-8.circ` minimal angepasst werden.
+
+## AP 19: Ursprüngliche Diagnose
 
 ## Status
 
