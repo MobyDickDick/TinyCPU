@@ -34,6 +34,7 @@ JAR_URL = (
     "https://github.com/logisim-evolution/logisim-evolution/releases/download/"
     f"v{LOGISIM_VERSION}/{JAR_NAME}"
 )
+CORE_ACCEPTANCE_SOURCE = "LOAD_CONST(3)\nHALT()\n"
 VENDORED_JAR = ROOT / "vendor" / JAR_NAME
 LOCAL_ENV_JAR = ROOT / ".venv" / "Include" / JAR_NAME
 
@@ -196,6 +197,28 @@ def run_trace(project: Path, jar: Path, java: str, output: Path, timeout: int) -
             if row.strip()]
     if not rows:
         raise LogisimError("electrical table has no data rows")
+
+
+def run_core_acceptance(
+    source: Path, profile, jar: Path, java: str, output: Path, timeout: int,
+) -> None:
+    """Run AP 20.4's minimal fetch fixture twice and require determinism."""
+    program = assemble(CORE_ACCEPTANCE_SOURCE, profile)
+    words = encode_program(program)
+    if _expected_halt_output(program) != "HALTED":
+        raise LogisimError("core acceptance fixture does not normally halt in the VM")
+
+    with tempfile.TemporaryDirectory(prefix="tinycpu-core-") as directory:
+        directory_path = Path(directory)
+        traces = []
+        for run in (1, 2):
+            project = directory_path / f"run-{run}-{source.name}"
+            trace = output if run == 1 else directory_path / "repeat.tsv"
+            autonomous_project(source, project, profile.top_circuit, words)
+            run_trace(project, jar, java, trace, timeout)
+            traces.append(trace.read_bytes())
+        if traces[0] != traces[1]:
+            raise LogisimError("independent core traces are not deterministic")
 
 
 def _unexpected_halt_reached(
@@ -368,11 +391,10 @@ def main(argv: list[str] | None = None) -> int:
             raise LogisimError("Java 21 or newer is required")
         jar = resolve_jar(args.jar)
         source = ROOT / "hardware" / "logisim" / profile.circuit
-        with tempfile.TemporaryDirectory(prefix="tinycpu-logisim-") as directory:
-            project = Path(directory) / source.name
-            autonomous_project(source, project, profile.top_circuit)
-            print(f"electrical trace: {profile.name} core", flush=True)
-            run_trace(project, jar, args.java, args.trace_output, args.timeout)
+        print(f"electrical trace: {profile.name} core (2 runs)", flush=True)
+        run_core_acceptance(
+            source, profile, jar, args.java, args.trace_output, args.timeout
+        )
         if args.matrix_output is not None:
             count = run_matrix(
                 source, profile, jar, args.java, args.matrix_output, args.timeout, args.jobs

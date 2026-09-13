@@ -2361,3 +2361,38 @@ AP 20.4 bleibt bis zum flankenweisen VM-Vergleich des Kerntraces in
 Bearbeitung. Der nächste integrierte Lauf muss den ersten Unterschied nach dem
 nun wieder beobachtbaren Normalhalt bestimmen; insbesondere werden die
 weiteren öffentlichen Decoderports nicht auf Verdacht gemeinsam umverdrahtet.
+
+### AP 20.4: deterministischer Minimalkerntrace
+
+Der abschließende Lauf grenzt den Kerntrace nun ausdrücklich auf das für 20.4
+festgelegte ROM `LOAD_CONST(3); HALT()` ein. Der Launcher erzeugt dafür bei
+jedem Aufruf zwei voneinander unabhängige temporäre Projekte, injiziert die vom
+16/12-Profil assemblierten Wörter `0x230003` und `0x360000` und verlangt zwei
+byteidentische elektrische Tabellen. Vor dem Logisim-Lauf prüft dasselbe
+Programm im Referenzmodell den normalen Halt. Damit werden weder das dauerhaft
+eingebettete AP-5-Demoprogramm noch ein zufälliger Simulatorzustand als
+Fetch-Abnahme verwendet.
+
+Beide elektrischen Läufe endeten auf dem normalen Halt-Ausgang und lieferten
+denselben beobachtbaren Endzustand mit Akkumulatorwert 3. Logisims Tabelle ist
+änderungsgetrieben und darf deshalb weiterhin nicht anhand ihrer Zeilenzahl als
+synthetischer Flankenzähler interpretiert werden. Die bereits vorgenommene
+temporäre PC-/Opcode-Messung und der eigenständige Decodertest belegen die
+Fetchfolge; der neue dauerhafte Regressionstest sichert ROM-Inhalt, normalen
+VM-Halt, doppelte Ausführung und die Bytegleichheit der elektrischen Traces.
+
+Ausgeführt wurden:
+
+```bash
+PYTHONPATH=src python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_core_acceptance_injects_minimal_rom_twice \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_core_acceptance_rejects_nondeterministic_runs
+LOGISIM_JAR="$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 --trace-output /tmp/ap20-core/core.tsv --timeout 20
+scripts/test-offline.sh
+```
+
+AP 20.4 ist damit abgeschlossen. Das nächste aktive Paket ist 20.6; dort wird
+die elektrische Matrix familienweise geöffnet und beim ersten abweichenden
+Opcode beziehungsweise Fehlerfall gestoppt.

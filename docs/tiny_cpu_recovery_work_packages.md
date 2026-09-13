@@ -8,8 +8,9 @@ zweite, schlecht wartbare Schaltung ist dafür nicht erforderlich. Historische
 8/8-Diagnosen in Bericht und Git-Historie bleiben nachvollziehbar, sind aber
 keine aktuellen Abnahmeziele.
 
-AP 20 konzentriert sich damit ausschließlich auf `TinyCPU.circ`. Das nächste
-aktive Paket ist 20.4: Reset, Takt und Fetch des 16/12-Profils. ISA und
+AP 20 konzentriert sich damit ausschließlich auf `TinyCPU.circ`. Paket 20.4
+für Reset, Takt und Fetch des 16/12-Profils ist abgeschlossen. Das nächste
+aktive Paket ist 20.6: die schrittweise ISA- und Fehlerregression. ISA und
 Opcode-Belegung bleiben unverändert.
 
 ## Gemeinsame Regeln
@@ -51,7 +52,9 @@ Folgende Stop-Regeln gelten:
 
 ## Reihenfolge und Parallelität
 
-20.1 bis 20.3 sind historisch abgeschlossen. 20.4 läuft als nächstes aktives Paket; 20.5 entfällt mit der Stilllegung des 8/8-Profils. 20.6 beginnt erst mit einem grünen 16/12-Kerntrace.
+20.1 bis 20.4 sind abgeschlossen; 20.5 entfällt mit der Stilllegung des
+8/8-Profils. 20.6 ist nach dem grünen, reproduzierten 16/12-Minimalkerntrace
+das nächste aktive Paket.
 20.7 wird während jeder Reparatur mitgeführt, seine Abnahme erfolgt aber erst
 nach der vollständigen Matrix. 20.8 ist das einzige Paket, das den
 Funktionsstatus auf „funktionsfähig“ setzen darf.

@@ -71,4 +71,7 @@ neu zu öffnen.
 Die inzwischen erneut fehlgeschlagenen Offline- und elektrischen Profilgates
 werden in
 [`tiny_cpu_recovery_work_packages.md`](tiny_cpu_recovery_work_packages.md) als
-AP 20 behandelt. Nach der Stilllegung des 8/8-Experiments ist 20.4 für Reset, Takt und Fetch der 16/12-Schaltung das nächste aktive Paket.
+AP 20 behandelt. Reset, Takt und Fetch des 16/12-Profils sind mit dem
+zweifach ausgeführten Minimalprogramm aus `LOAD_CONST(3)` und `HALT()` wieder
+abgenommen. Als nächstes aktives Paket öffnet 20.6 die ISA- und
+Fehlerregression beim jeweils ersten elektrischen Unterschied.

@@ -21,6 +21,7 @@ from tiny_cpu_logisim import (
     autonomous_project,
     parse_args,
     resolve_jar,
+    run_core_acceptance,
     run_matrix,
     run_trace,
 )
@@ -62,6 +63,44 @@ def _wire_path_exists(circuit, start, end):
 
 
 class LogisimLauncherTests(unittest.TestCase):
+
+    def test_core_acceptance_injects_minimal_rom_twice(self):
+        profile = load_profile("tinycpu-16-12")
+        source = ROOT / "hardware/logisim/TinyCPU.circ"
+        seen_words = []
+
+        def record_project(source, destination, top, rom_words=None, halt_output="HALTED"):
+            seen_words.append(rom_words)
+            destination.write_text("temporary project", encoding="utf-8")
+
+        def deterministic_trace(project, jar, java, output, timeout):
+            output.write_bytes(b"0\t0\n3\t1\n")
+
+        with tempfile.TemporaryDirectory() as directory, patch(
+            "tiny_cpu_logisim.autonomous_project", side_effect=record_project
+        ), patch("tiny_cpu_logisim.run_trace", side_effect=deterministic_trace):
+            run_core_acceptance(
+                source, profile, Path("logisim.jar"), "java",
+                Path(directory) / "core.tsv", 20,
+            )
+
+        self.assertEqual(seen_words, [(0x230003, 0x360000)] * 2)
+
+    def test_core_acceptance_rejects_nondeterministic_runs(self):
+        profile = load_profile("tinycpu-16-12")
+        traces = iter((b"first\n", b"second\n"))
+
+        def differing_trace(project, jar, java, output, timeout):
+            output.write_bytes(next(traces))
+
+        with tempfile.TemporaryDirectory() as directory, patch(
+            "tiny_cpu_logisim.autonomous_project"
+        ), patch("tiny_cpu_logisim.run_trace", side_effect=differing_trace):
+            with self.assertRaisesRegex(LogisimError, "not deterministic"):
+                run_core_acceptance(
+                    ROOT / "hardware/logisim/TinyCPU.circ", profile,
+                    Path("logisim.jar"), "java", Path(directory) / "core.tsv", 20,
+                )
 
 
 
