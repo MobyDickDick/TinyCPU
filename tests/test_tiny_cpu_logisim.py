@@ -654,15 +654,28 @@ class LogisimLauncherTests(unittest.TestCase):
             vendored.write_bytes(b"test jar")
             self.assertEqual(resolve_jar(None, vendored=vendored), vendored)
 
+    def test_repository_virtual_environment_jar_is_used_offline(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            vendored = root / "vendor" / "missing.jar"
+            local_env = root / ".venv" / "Include" / "logisim.jar"
+            local_env.parent.mkdir(parents=True)
+            local_env.write_bytes(b"test jar")
+            self.assertEqual(
+                resolve_jar(None, vendored=vendored, local_env=local_env),
+                local_env,
+            )
+
     def test_missing_vendored_jar_is_named_when_download_fails(self):
         with tempfile.TemporaryDirectory() as directory, patch(
             "tiny_cpu_logisim.urllib.request.urlretrieve",
             side_effect=OSError("network unavailable"),
         ):
             vendored = Path(directory) / "vendor" / "missing.jar"
+            local_env = Path(directory) / ".venv" / "Include" / "missing.jar"
             with patch("tiny_cpu_logisim.Path.home", return_value=Path(directory)):
                 with self.assertRaisesRegex(LogisimError, str(vendored)):
-                    resolve_jar(None, vendored=vendored)
+                    resolve_jar(None, vendored=vendored, local_env=local_env)
 
 
 if __name__ == "__main__":
