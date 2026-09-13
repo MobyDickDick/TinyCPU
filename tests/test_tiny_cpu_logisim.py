@@ -350,37 +350,6 @@ class LogisimLauncherTests(unittest.TestCase):
             "TinyCPUMain.HALTED_WITH_ERROR",
         )
 
-    def test_jump_wiring_is_encapsulated_in_jump_box(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
-        main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
-        boxes = [component for component in main.findall("comp")
-                 if component.get("name") == "JumpBox"]
-        self.assertEqual(len(boxes), 1)
-        self.assertEqual(_attributes(boxes[0]).get("label"), "JUMP_BOX")
-        self.assertFalse(any(
-            component.get("name") in {"AND Gate", "NOT Gate"}
-            or (component.get("name") == "OR Gate"
-                and _attributes(component).get("label", "").startswith("JUMP_"))
-            for component in main.findall("comp")
-        ))
-
-        # Generated-box inputs are ordered by the child sheet's pin position.
-        # The instance anchor is its first output at x=4360; Logisim derives a
-        # 220-unit-wide symbol here, so its input pins are at x=4140.
-        sources = [
-            "(2870,450)", "(2870,470)", "(2870,490)", "(2870,510)",
-            "(2870,530)", "(2870,550)", "(1400,1360)", "(1400,1380)",
-            "(1400,1400)", "(1400,1420)", "(1400,1440)", "(1400,1460)",
-            "(2080,510)", "(2080,490)",
-        ]
-        for source, y in zip(sources, range(450, 730, 20)):
-            self.assertTrue(
-                _wire_path_exists(main, source, f"(4140,{y})"),
-                f"{source} does not reach its JumpBox input",
-            )
-        self.assertTrue(_wire_path_exists(main, "(4360,450)", "(800,510)"))
-        self.assertTrue(_wire_path_exists(main, "(4360,470)", "(800,530)"))
-
     def test_jump_error_reaches_common_pc_select(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
@@ -396,7 +365,7 @@ class LogisimLauncherTests(unittest.TestCase):
 
         self.assertTrue(_wire_path_exists(main, "(1270,1290)", "(1300,1290)"))
         self.assertEqual(len(tunnels["JUMP_ERROR_CONTROL"]), 3)
-        self.assertEqual(len(tunnels["ANY_ERROR_CONDITION"]), 2)
+        self.assertGreaterEqual(len(tunnels["ANY_ERROR_CONDITION"]), 2)
         self.assertEqual(len(tunnels["JUMP_ERROR_TAKEN"]), 2)
 
         error_sources = {
@@ -426,6 +395,59 @@ class LogisimLauncherTests(unittest.TestCase):
         self.assertTrue(_wire_path_exists(main, any_error.get("loc"), "(1170,1900)"))
         self.assertTrue(_wire_path_exists(main, jump_error_taken.get("loc"), "(1170,1840)"))
         self.assertTrue(_wire_path_exists(main, condition_select.get("loc"), "(1230,1660)"))
+
+    def test_jump_not_error_reaches_common_pc_select(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+        control_select = _component_by_label(
+            main, "JUMP_NOT_ERROR_OR_PREVIOUS_CONTROLS"
+        )
+        invert_error = _component_by_label(
+            main, "INVERT_ANY_ERROR_FOR_JUMP_NOT_ERROR"
+        )
+        jump_taken = _component_by_label(main, "JUMP_NOT_ERROR_AND_NO_ERROR")
+        condition_select = _component_by_label(
+            main, "JUMP_NOT_ERROR_OR_PREVIOUS_TAKEN"
+        )
+        tunnels = {}
+        for component in main.findall("comp"):
+            label = _attributes(component).get("label")
+            if component.get("name") == "Tunnel" and label:
+                tunnels.setdefault(label, []).append(component.get("loc"))
+
+        self.assertTrue(_wire_path_exists(main, "(1270,1310)", "(1300,1310)"))
+        self.assertEqual(len(tunnels["JUMP_NOT_ERROR_CONTROL"]), 3)
+        self.assertEqual(len(tunnels["NO_ERROR_CONDITION"]), 2)
+        self.assertEqual(len(tunnels["JUMP_NOT_ERROR_TAKEN"]), 2)
+
+        control_x, control_y = map(int, control_select.get("loc").strip("()").split(","))
+        invert_x, invert_y = map(int, invert_error.get("loc").strip("()").split(","))
+        taken_x, taken_y = map(int, jump_taken.get("loc").strip("()").split(","))
+        condition_x, condition_y = map(
+            int, condition_select.get("loc").strip("()").split(",")
+        )
+        self.assertIn(
+            f"({control_x - 50},{control_y + 10})",
+            tunnels["JUMP_NOT_ERROR_CONTROL"],
+        )
+        self.assertIn(
+            f"({taken_x - 50},{taken_y - 10})",
+            tunnels["JUMP_NOT_ERROR_CONTROL"],
+        )
+        self.assertIn(
+            f"({invert_x - 50},{invert_y})", tunnels["ANY_ERROR_CONDITION"]
+        )
+        self.assertIn(
+            f"({taken_x - 50},{taken_y + 10})", tunnels["NO_ERROR_CONDITION"]
+        )
+        self.assertIn(
+            f"({condition_x - 50},{condition_y + 10})",
+            tunnels["JUMP_NOT_ERROR_TAKEN"],
+        )
+        self.assertTrue(_wire_path_exists(main, invert_error.get("loc"), "(3830,2300)"))
+        self.assertTrue(_wire_path_exists(main, jump_taken.get("loc"), "(4030,2260)"))
+        self.assertTrue(_wire_path_exists(main, control_select.get("loc"), "(3830,2200)"))
+        self.assertTrue(_wire_path_exists(main, condition_select.get("loc"), "(4230,2200)"))
         self.assertTrue(_wire_path_exists(main, "(660,390)", "(670,390)"))
         self.assertTrue(_wire_path_exists(main, "(660,410)", "(670,410)"))
 

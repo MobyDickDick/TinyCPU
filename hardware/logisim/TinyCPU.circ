@@ -437,7 +437,7 @@
     </comp>
     <comp lib="0" loc="(1230,1600)" name="Tunnel">
       <a name="facing" val="east"/>
-      <a name="label" val="ANY_JUMP_CONTROL"/>
+      <a name="label" val="JUMP_ERROR_OR_PREVIOUS_CONTROLS_RESULT"/>
     </comp>
     <comp lib="1" loc="(1200,1600)" name="OR Gate">
       <a name="label" val="JUMP_ERROR_OR_PREVIOUS_CONTROLS"/>
@@ -460,13 +460,29 @@
     <comp lib="0" loc="(1150,1650)" name="Tunnel"><a name="label" val="JUMP_NEGATIVE_OR_PREVIOUS_TAKEN_RESULT"/></comp>
     <comp lib="0" loc="(1150,1670)" name="Tunnel"><a name="label" val="JUMP_ERROR_TAKEN"/></comp>
     <comp lib="1" loc="(1200,1660)" name="OR Gate"><a name="label" val="JUMP_ERROR_OR_PREVIOUS_TAKEN"/></comp>
-    <comp lib="0" loc="(1230,1660)" name="Tunnel"><a name="facing" val="east"/><a name="label" val="ANY_JUMP_CONDITION"/></comp>
+    <comp lib="0" loc="(1230,1660)" name="Tunnel"><a name="facing" val="east"/><a name="label" val="JUMP_ERROR_OR_PREVIOUS_TAKEN_RESULT"/></comp>
     <comp lib="0" loc="(3290,330)" name="Tunnel"><a name="facing" val="east"/><a name="label" val="ERROR_OVF_CONDITION"/></comp>
     <comp lib="0" loc="(3270,350)" name="Tunnel"><a name="facing" val="east"/><a name="label" val="ERROR_DIV0_CONDITION"/></comp>
     <comp lib="0" loc="(3250,370)" name="Tunnel"><a name="facing" val="east"/><a name="label" val="ERROR_ADDR_CONDITION"/></comp>
     <comp lib="0" loc="(3230,390)" name="Tunnel"><a name="facing" val="east"/><a name="label" val="ERROR_INV_CONDITION"/></comp>
     <comp lib="0" loc="(3210,410)" name="Tunnel"><a name="facing" val="east"/><a name="label" val="ERROR_ILL_CONDITION"/></comp>
     <comp lib="0" loc="(3190,430)" name="Tunnel"><a name="facing" val="east"/><a name="label" val="ERROR_INPUT_CONDITION"/></comp>
+    <comp lib="0" loc="(1300,1310)" name="Tunnel"><a name="label" val="JUMP_NOT_ERROR_CONTROL"/></comp>
+    <comp lib="0" loc="(3750,2190)" name="Tunnel"><a name="label" val="JUMP_ERROR_OR_PREVIOUS_CONTROLS_RESULT"/></comp>
+    <comp lib="0" loc="(3750,2210)" name="Tunnel"><a name="label" val="JUMP_NOT_ERROR_CONTROL"/></comp>
+    <comp lib="1" loc="(3800,2200)" name="OR Gate"><a name="label" val="JUMP_NOT_ERROR_OR_PREVIOUS_CONTROLS"/></comp>
+    <comp lib="0" loc="(3830,2200)" name="Tunnel"><a name="facing" val="east"/><a name="label" val="ANY_JUMP_CONTROL"/></comp>
+    <comp lib="0" loc="(3750,2300)" name="Tunnel"><a name="label" val="ANY_ERROR_CONDITION"/></comp>
+    <comp lib="1" loc="(3800,2300)" name="NOT Gate"><a name="label" val="INVERT_ANY_ERROR_FOR_JUMP_NOT_ERROR"/></comp>
+    <comp lib="0" loc="(3830,2300)" name="Tunnel"><a name="facing" val="east"/><a name="label" val="NO_ERROR_CONDITION"/></comp>
+    <comp lib="0" loc="(3950,2250)" name="Tunnel"><a name="label" val="JUMP_NOT_ERROR_CONTROL"/></comp>
+    <comp lib="0" loc="(3950,2270)" name="Tunnel"><a name="label" val="NO_ERROR_CONDITION"/></comp>
+    <comp lib="1" loc="(4000,2260)" name="AND Gate"><a name="label" val="JUMP_NOT_ERROR_AND_NO_ERROR"/></comp>
+    <comp lib="0" loc="(4030,2260)" name="Tunnel"><a name="facing" val="east"/><a name="label" val="JUMP_NOT_ERROR_TAKEN"/></comp>
+    <comp lib="0" loc="(4150,2190)" name="Tunnel"><a name="label" val="JUMP_ERROR_OR_PREVIOUS_TAKEN_RESULT"/></comp>
+    <comp lib="0" loc="(4150,2210)" name="Tunnel"><a name="label" val="JUMP_NOT_ERROR_TAKEN"/></comp>
+    <comp lib="1" loc="(4200,2200)" name="OR Gate"><a name="label" val="JUMP_NOT_ERROR_OR_PREVIOUS_TAKEN"/></comp>
+    <comp lib="0" loc="(4230,2200)" name="Tunnel"><a name="facing" val="east"/><a name="label" val="ANY_JUMP_CONDITION"/></comp>
     <comp lib="2" loc="(2400,780)" name="Multiplexer">
       <a name="width" val="16"/>
     </comp>
@@ -532,6 +548,7 @@
     <wire from="(1270,1290)" to="(1280,1290)"/>
     <wire from="(1270,1290)" to="(1300,1290)"/>
     <wire from="(1270,1310)" to="(1280,1310)"/>
+    <wire from="(1270,1310)" to="(1300,1310)"/>
     <wire from="(1270,1350)" to="(1280,1350)"/>
     <wire from="(1270,1370)" to="(1280,1370)"/>
     <wire from="(1270,1390)" to="(1280,1390)"/>
@@ -745,6 +762,10 @@
     <wire from="(1140,1900)" to="(1170,1900)"/>
     <wire from="(1200,1600)" to="(1230,1600)"/>
     <wire from="(1200,1660)" to="(1230,1660)"/>
+    <wire from="(4000,2260)" to="(4030,2260)"/>
+    <wire from="(3800,2300)" to="(3830,2300)"/>
+    <wire from="(3800,2200)" to="(3830,2200)"/>
+    <wire from="(4200,2200)" to="(4230,2200)"/>
     <wire from="(660,390)" to="(670,390)"/>
     <wire from="(660,410)" to="(670,410)"/>
     <wire from="(660,430)" to="(670,430)"/>
