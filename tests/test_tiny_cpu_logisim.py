@@ -504,13 +504,16 @@ class LogisimLauncherTests(unittest.TestCase):
         ))
 
         # The generated JumpBox symbol orders inputs by the child sheet's pin
-        # position: errors, controls, then NEGATIVE and ZERO.  Keep the box in
+        # position: errors, controls, then NEGATIVE and ZERO.  The six control
+        # taps start at (1400,1320); (1400,1440) and (1400,1460) are LOAD_CONST
+        # and LOAD_ADDRESS and must never feed the jump-control inputs.
+        # Keep the box in
         # its established upper-right position: moving it below the main
         # circuit makes every signal take a long, hard-to-read detour.
         sources = [
             "(2870,450)", "(2870,470)", "(2870,490)", "(2870,510)",
-            "(2870,530)", "(2870,550)", "(1400,1360)", "(1400,1380)",
-            "(1400,1400)", "(1400,1420)", "(1400,1440)", "(1400,1460)",
+            "(2870,530)", "(2870,550)", "(1400,1320)", "(1400,1340)",
+            "(1400,1360)", "(1400,1380)", "(1400,1400)", "(1400,1420)",
             "(2080,510)", "(2080,490)",
         ]
         for source, y in zip(sources, range(450, 730, 20)):
