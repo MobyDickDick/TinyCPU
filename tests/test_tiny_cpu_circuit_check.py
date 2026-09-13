@@ -10,12 +10,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class CircuitCheckTests(unittest.TestCase):
-    def test_profile_projects_have_no_static_gate_wiring_faults(self):
-        for project in ("TinyCPU.circ",):
-            with self.subTest(project=project):
-                self.assertEqual(
-                    inspect_project(ROOT / "hardware/logisim" / project), []
-                )
+    def test_all_projects_have_no_static_gate_wiring_faults(self):
+        projects = sorted((ROOT / "hardware/logisim").rglob("*.circ"))
+        self.assertGreater(len(projects), 1)
+        for project in projects:
+            with self.subTest(project=project.relative_to(ROOT)):
+                self.assertEqual(inspect_project(project), [])
 
 
     def test_main_fetch_decoder_uses_one_shared_decoder_net(self):
