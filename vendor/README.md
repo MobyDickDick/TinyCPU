@@ -11,10 +11,17 @@ vendor/logisim-evolution-4.1.0-all.jar
 ```
 
 Liegt das exakte Upstream-JAR dort, laufen die elektrischen Tests vollständig
-ohne Netzwerkzugriff. Andernfalls prüft `src/tiny_cpu_logisim.py` als Nächstes
-`~/.cache/tinycpu/` und lädt dieselbe festgelegte Version nur als letzte
-Möglichkeit herunter. GitHub Actions cached diese Projektabhängigkeit zwischen
-den Läufen.
+ohne Netzwerkzugriff. In der bereitgestellten Entwicklungsumgebung kann
+dasselbe JAR außerdem hier liegen:
+
+```text
+.venv/Include/logisim-evolution-4.1.0-all.jar
+```
+
+Der Launcher prüft diesen lokalen, von Git ignorierten Pfad automatisch nach
+`vendor/`. Erst danach prüft er `~/.cache/tinycpu/` und lädt dieselbe
+festgelegte Version als letzte Möglichkeit herunter. GitHub Actions cached
+diese Projektabhängigkeit zwischen den Läufen.
 
 Das JAR wird absichtlich nicht durch einen leeren Platzhalter dargestellt: Ist
 die Datei vorhanden, muss sie immer ein echtes Java-Archiv für die elektrische

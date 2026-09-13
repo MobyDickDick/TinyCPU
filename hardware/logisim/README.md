@@ -435,6 +435,32 @@ lokale Kopie gewählt werden.
 The project fixes the initial hardware profile at 16 data bits and 12 address
 bits and splits the design into the same blocks as the hardware contract:
 
+### Verbindliches Ziel für skalierbare Busbreiten
+
+`TinyCPU.circ` ist die konkrete Referenzinstanz mit `DATA_WIDTH = 16` und
+`PC_WIDTH = 12`; die 12 Leitungen gehören zum Adresspfad des Programmzählers
+und erlauben 4.096 Programmadressen. Sie ersetzen **nicht** den 16-Bit-Datenbus.
+Für alle späteren Instanzen gelten 16 Datenbits und 12 PC-/Adressbits als
+Mindestbreiten, nicht als fest verdrahtete Obergrenzen.
+
+Jede ganzzahlige Breite oberhalb dieser Grenzen muss ohne neue Sonderfälle
+verwendbar sein, also beispielsweise auch 24, 36, 48 oder 64 Bit. Alle
+Register, Rechenwerke, Konstanten, Splitter, Vergleicher sowie ROM-/RAM-Ports
+müssen ihre Breite ausschließlich aus `DATA_WIDTH` beziehungsweise `PC_WIDTH`
+beziehen. Übergänge zwischen Daten- und Adresspfad sind ausdrücklich zu
+erweitern oder zu kürzen und auf Wertebereichsfehler zu prüfen. Der Opcode
+bleibt sechs Bit breit; das Operandenfeld und damit das Befehlswort wachsen mit
+dem gewählten Profil.
+
+Eine breitere Variante darf nicht durch zusätzliche Parallelbauteile oder
+Tunnel nachgebildet werden. Stattdessen werden die Breitenattribute der
+vorhandenen hierarchischen Bausteine konsistent geändert; sichtbare Leitungen
+und die bestehenden Funktionsgrenzen bleiben erhalten. Jede Variante muss vor
+Freigabe dieselben Strukturprüfungen und die vollständige elektrische
+Opcode-Matrix wie das 16/12-Profil bestehen. Die heutige Logisim-Datei ist
+nicht automatisch generisch: Diese Regeln sind der verbindliche
+Abnahmevertrag für die abschließende, skalenfreie Ausführung.
+
 ## Korrektur-Arbeitspakete: Datenquellen und indirekte Adressierung
 
 Bei der weiteren Verdrahtung darf der 16-Bit-Operandenanteil des Befehlsworts

@@ -35,6 +35,7 @@ JAR_URL = (
     f"v{LOGISIM_VERSION}/{JAR_NAME}"
 )
 VENDORED_JAR = ROOT / "vendor" / JAR_NAME
+LOCAL_ENV_JAR = ROOT / ".venv" / "Include" / JAR_NAME
 
 
 class LogisimError(RuntimeError):
@@ -134,14 +135,21 @@ def java_major(java: str) -> int:
     return int(match.group(1))
 
 
-def resolve_jar(explicit: Path | None, *, vendored: Path = VENDORED_JAR) -> Path:
-    """Resolve explicit, repository-vendored, cached, then downloadable JAR."""
+def resolve_jar(
+    explicit: Path | None,
+    *,
+    vendored: Path = VENDORED_JAR,
+    local_env: Path = LOCAL_ENV_JAR,
+) -> Path:
+    """Resolve explicit, vendored, local-environment, cached, then remote JAR."""
     if explicit is not None:
         if not explicit.is_file():
             raise LogisimError(f"Logisim JAR does not exist: {explicit}")
         return explicit
     if vendored.is_file():
         return vendored
+    if local_env.is_file():
+        return local_env
     cached = Path.home() / ".cache" / "tinycpu" / JAR_NAME
     if not cached.exists():
         cached.parent.mkdir(parents=True, exist_ok=True)
@@ -152,7 +160,8 @@ def resolve_jar(explicit: Path | None, *, vendored: Path = VENDORED_JAR) -> Path
         except OSError as exc:
             partial.unlink(missing_ok=True)
             raise LogisimError(
-                f"pinned Logisim JAR was not found at {vendored} or {cached}, "
+                f"pinned Logisim JAR was not found at {vendored}, {local_env}, "
+                f"or {cached}, "
                 f"and version {LOGISIM_VERSION} could not be downloaded: {exc}"
             ) from exc
     return cached

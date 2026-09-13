@@ -141,12 +141,30 @@ again.
 
 ## Scale-invariant widths
 
-The ISA and assembly language deliberately contain no hard-coded operand
-width: numbers, addresses, offsets, and jump targets are represented
-symbolically as integers. Only a concrete `TinyCPU` instance defines the
-hardware limits through `data_bits` and `address_bits`. The same assembly
-program can therefore run on an 8/8, 16/12, or 32/20 machine, for example,
-provided that its values and addresses fit the selected ranges.
+The long-term architecture requirement is **width-independent, not limited to
+a list of preferred sizes**.  There are two independent parameters:
+
+* `DATA_WIDTH` is at least 16 bits and covers the accumulator, ALU, data RAM,
+  input/output and the operand field;
+* `PC_WIDTH` is at least 12 bits and covers the program counter, jump targets,
+  address register, effective-address arithmetic and the address inputs of ROM
+  and RAM.  A 12-bit PC addresses 4,096 instruction locations; it is an
+  address bus, not a reduction of the CPU's data bus.
+
+Every positive integral width at or above these minima is a valid design
+target.  In particular, no special case may be required for 12, 16, 24, 32,
+36, 48 or 64 bits.  Register widths, constants, splitters, sign extension,
+overflow/range checks, masks and memory-address ports must all be derived from
+`DATA_WIDTH` or `PC_WIDTH`; truncation between the two domains must be explicit
+and range-checked.  The program counter wraps or reports an address error
+according to the architectural address rules, never according to a hidden
+16-bit intermediate.
+
+The ISA and assembly language represent numbers, addresses, offsets, and jump
+targets symbolically as integers.  A width-independent machine format retains
+the six-bit opcode and derives its operand field and complete instruction width
+from the selected profile.  An assembled program is portable when all of its
+values and addresses fit the destination profile.
 
 The data bus uses two’s complement and determines the accumulator, memory
 cells, input/output values, and arithmetic overflow. The address bus is
@@ -155,14 +173,13 @@ addresses, program counter, and maximum addressable memory size. `memory_size`
 may be smaller than the address space (partially populated memory), but never
 larger.
 
-```python
-TinyCPU(data_bits=8, address_bits=8, memory_size=256)
-TinyCPU(data_bits=32, address_bits=20, memory_size=65536)
-```
-
-This parameterization is semantically scale-invariant; a future binary
-instruction format must likewise derive its encoding width from the target
-profile and must not hard-code it in opcodes.
+The checked-in `TinyCPU.circ` and `tinycpu-machine-v1` remain the concrete,
+accepted 16-data/12-PC profile.  Logisim-evolution does not parameterize a
+subcircuit automatically, so a wider physical realization must consistently
+apply the two parameters to every affected component and must pass the same
+structural and electrical matrices.  This distinction prevents the current
+fixed artifact from being mistaken for proof that arbitrary widths have
+already been electrically accepted.
 
 Error flags are **sticky**. `CLEAR_ERROR()` clears them but does not repair
 invalid values. For example, only `LOAD_CONST(5)` makes the accumulator valid
