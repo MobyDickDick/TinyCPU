@@ -2320,3 +2320,44 @@ scripts/test-offline.sh
   ist gemäß Stop-Regel vor jeder weiteren Schaltungsänderung zu bestimmen.
 - Die vollständige elektrische Matrix und die GUI-Kurzabnahme bleiben Aufgabe
   19.9 vorbehalten.
+
+### AP 20.4: Normalhalt am tatsächlichen Decoderport wiederhergestellt
+
+Nach der rein visuellen Anpassung von `FetchDecodeControls` blieb das
+Offline-Gate grün. Zwei unabhängig erzeugte Minimalprojekte aus
+`LOAD_CONST(3)` und `HALT()` liefen vor der Reparatur jedoch jeweils in den
+Timeout. Eine temporäre Messung zeigte dabei die Opcodefolge `0x23`, `0x36`
+und anschließend `0x00`, während `HALTED` auch während `0x36` niedrig blieb.
+Der eigenständige elektrische Decodertest bestätigte gleichzeitig, dass die
+Decoderzeile `0x36` innerhalb von `FetchDecodeControls` korrekt `HALT` setzt.
+Damit war der erste abweichende Übergang auf die Top-Level-Verbindung zwischen
+dem tatsächlichen `HALT`-Port der Decoderinstanz und `HALTED` eingegrenzt.
+
+Die bisherige Leitung begann am Instanzport `(1400,1680)`. Dieser Port gehört
+in der handgezeichneten, nach ihrer vertikalen Pinreihenfolge dargestellten
+Schnittstelle zu `SET_INV`; `HALT` liegt bei `(1400,1820)`. Die Reparatur
+entfernt ausschließlich die falsche Abzweigung und führt den vorhandenen
+`HALT`-Port mit drei sichtbaren orthogonalen Leitungssegmenten zum bestehenden
+Ausgang `HALTED`. Es wurden keine Bauteile ergänzt, keine Tunnel angelegt und
+`FetchDecodeControls` selbst weder verschoben noch verändert.
+
+Die Regression verfolgt nun das vollständige Netz vom tatsächlichen
+`HALT`-Port zum benannten Top-Level-Ausgang. Eine temporäre Kopie ohne diese
+Verbindung reproduziert den Timeout; die reparierte Schaltung beendet zwei
+unabhängig erzeugte Minimalprogrammläufe jeweils über den normalen Halt.
+Ausgeführt wurden:
+
+```bash
+PYTHONPATH=src python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_halt_control_reaches_public_halted_pin
+LOGISIM_JAR="$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  python3 scripts/test-logisim-decode.py
+# Zweimal: autonome temporäre Kopie mit LOAD_CONST(3), HALT() erzeugen und
+# anschließend mit `java -jar ... -tty table,halt` ausführen.
+scripts/test-offline.sh
+```
+
+AP 20.4 bleibt bis zum flankenweisen VM-Vergleich des Kerntraces in
+Bearbeitung. Der nächste integrierte Lauf muss den ersten Unterschied nach dem
+nun wieder beobachtbaren Normalhalt bestimmen; insbesondere werden die
+weiteren öffentlichen Decoderports nicht auf Verdacht gemeinsam umverdrahtet.
