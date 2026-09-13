@@ -8,6 +8,18 @@ CLI names and documented options are stable interfaces. Additions must remain
 backward compatible; removing or reinterpreting one of these interfaces
 requires a new major release contract.
 
+## Korrektur der Opcode-Tabelle während der Schaltungswiederherstellung
+
+Der im Repository vorgefundene `tinycpu-machine-v1`-Stand widersprach der vom
+Schaltungsautor festgelegten Decoderansicht. Während AP 20 wurde deshalb die
+Tabelle an die gezeichnete, fachlich gruppierte Reihenfolge angeglichen. Diese
+Korrektur ist bewusst **nicht binärkompatibel** zu ROM-Dateien aus dem
+fehlerhaften Zwischenstand: Solche Programme müssen aus ihrer symbolischen
+`.tcpu`-Quelle neu assembliert werden. Die Mnemoniken, Operandenarten,
+Wortbreite und Laufzeitsemantik bleiben unverändert. Ein Release darf erst
+wieder als kompatibel qualifiziert werden, nachdem die elektrische Abnahme
+mit dieser einen normativen Tabelle erfolgreich war.
+
 Patch releases may fix implementations without changing observable machine
 behaviour. Minor releases may add opcodes or CLI options only where the v1
 format has reserved capacity and existing programs and commands retain their

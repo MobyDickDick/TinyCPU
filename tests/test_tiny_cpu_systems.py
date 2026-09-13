@@ -59,7 +59,7 @@ class SystemProfileTests(unittest.TestCase):
         self.assertEqual([item.mnemonic for item in program.instructions], [
             "ENABLE_INTERRUPTS", "DISABLE_INTERRUPTS", "RETURN_FROM_INTERRUPT"
         ])
-        self.assertEqual([word >> 16 for word in encode_program(program)], [50, 51, 52])
+        self.assertEqual([word >> 16 for word in encode_program(program)], [56, 57, 58])
 
     def test_output_port_is_not_written_to_ram(self):
         system = load_system_profile("tinycpu-peripherals-16-12-v1")

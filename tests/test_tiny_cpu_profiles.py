@@ -28,7 +28,7 @@ class ProfileTests(unittest.TestCase):
         self.assertEqual(program.profile.name, "tinycpu-16-12")
         self.assertEqual(program.profile.circuit, "TinyCPU.circ")
         self.assertEqual(program.profile.top_circuit, "TinyCPUMain")
-        self.assertEqual(encode_program(program)[0], 0x7fff)
+        self.assertEqual(encode_program(program)[0], 0x237fff)
 
     def test_retired_8_8_profile_is_rejected(self) -> None:
         with self.assertRaisesRegex(ValueError, "unknown TinyCPU profile"):

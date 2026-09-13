@@ -257,7 +257,7 @@ class LogisimLauncherTests(unittest.TestCase):
         )
         self.assertEqual(_attributes(pc_splitter).get("incoming"), "12")
 
-    def test_minimal_fetch_controls_match_machine_opcodes(self):
+    def test_authored_fetch_controls_keep_decoder_rows(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         controls = next(
             circuit for circuit in root.findall("circuit")
@@ -271,17 +271,34 @@ class LogisimLauncherTests(unittest.TestCase):
             int, decoder.get("loc").strip("()").split(",")
         )
 
-        # A north-facing 6-to-64 decoder exposes code zero 640 pixels above
-        # its anchor and subsequent codes at ten-pixel intervals.  Resolve the
-        # destinations by their public labels so the authored output layout
+        # The canonical machine table follows this hand-authored control sheet:
+        # decoder row 0 selects the ADD operation family and row 54 selects
+        # HALT.  Do not reinterpret row 0 as the former LOAD_CONST opcode.
+        # Resolve destinations by their public labels so the authored layout
         # can move without weakening this semantic regression.
-        for code, label in ((0x00, "LOAD_CONST"), (0x2C, "HALT")):
+        add_select = _component_by_label(controls, "ADD_OPERAND_SELECT")
+        add_x, add_y = map(
+            int, add_select.get("loc").strip("()").split(",")
+        )
+        authored_rows = (
+            (0x00, f"({add_x - 50},{add_y - 20})", "ADD_OPERAND"),
+            (0x36, _component_by_label(controls, "HALT").get("loc"), "HALT"),
+        )
+        for code, destination, label in authored_rows:
             source = f"({decoder_x + 20},{decoder_y - 640 + code * 10})"
-            destination = _component_by_label(controls, label).get("loc")
             self.assertTrue(
                 _wire_path_exists(controls, source, destination),
-                f"opcode 0x{code:02x} does not reach {label}",
+                f"decoder row 0x{code:02x} does not reach {label}",
             )
+
+        self.assertTrue(
+            _wire_path_exists(
+                controls,
+                add_select.get("loc"),
+                _component_by_label(controls, "ADD_OPERAND").get("loc"),
+            ),
+            "ADD_OPERAND_SELECT does not reach ADD_OPERAND",
+        )
 
     def test_visible_top_level_memory_or_gate_has_every_input_connected(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
