@@ -486,6 +486,17 @@ class LogisimLauncherTests(unittest.TestCase):
             "TinyCPUMain.HALTED_WITH_ERROR",
         )
 
+    def test_input_error_control_reaches_input_error_flag(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+
+        # INPUT with no value asserts SET_INPUT at the controls instance. The
+        # matching ErrorFlags input is the last input on its generated symbol.
+        self.assertTrue(
+            _wire_path_exists(main, "(1400,1760)", "(2650,590)"),
+            "FetchDecodeControls.SET_INPUT does not reach ErrorFlags.SET_INPUT",
+        )
+
     def test_jump_wiring_is_encapsulated_without_tunnels(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
