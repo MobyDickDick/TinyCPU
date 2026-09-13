@@ -2217,18 +2217,22 @@ nicht Teil der gemeinsamen PC-Auswahl. Ein Sprung bei vollständig gelöschten
 Sticky-Fehlerflags konnte sein Ziel deshalb nicht übernehmen.
 
 Die Reparatur verwendet ausschließlich die bereits vorhandene FBox `JumpBox`.
-Auf `TinyCPUMain` ist sie genau einmal instanziiert und über sichtbare Leitungen
-unmittelbar mit den sechs Fehlerflags, den sechs Sprungsteuerungen sowie
-`NEGATIVE` und `ZERO` verbunden. Ihre beiden Ausgänge führen ebenfalls über
-durchgehende Leitungen zu den vorhandenen `FetchDecode`-Eingängen. Es wurden
-weder Tunnel ergänzt noch die Sprunglogik auf der Hauptschaltung durch weitere
-Gatterkopien nachgebaut; die kombinatorischen Bauteile verbleiben allein im
-vorhandenen Unterblatt.
+Sie bleibt an ihrer kompakten Position rechts oben auf `TinyCPUMain` und ist
+dort genau einmal instanziiert. Sichtbare Leitungen verbinden sie mit den sechs
+Fehlerflags, den sechs Sprungsteuerungen sowie `NEGATIVE` und `ZERO`; die
+bereits vorhandenen Signalwege werden dabei nahe an der Box abgegriffen, statt
+alle 14 Netze in einen neuen Bereich unterhalb der Hauptschaltung umzuleiten.
+Ihre beiden Ausgänge führen ebenfalls über durchgehende Leitungen zu den
+vorhandenen `FetchDecode`-Eingängen. Es wurden weder Tunnel ergänzt noch die
+Sprunglogik auf der Hauptschaltung durch weitere Gatterkopien nachgebaut; die
+kombinatorischen Bauteile verbleiben allein im vorhandenen Unterblatt.
 
-Die topologische Regression prüft die einzelne `JumpBox`-Instanz, sämtliche 14
-Direktverbindungen, beide Rückwege zur PC-Auswahl und das Fehlen von
-Sprungtunneln beziehungsweise duplizierter Sprunglogik auf `TinyCPUMain`. Ohne
-die neue Verbindung schlägt sie fehl. Die fokussierte Abnahme lautet:
+Die topologische Regression prüft die einzelne `JumpBox`-Instanz an ihrer
+kompakten bestehenden Position, sämtliche 14 Direktverbindungen, beide
+Rückwege zur PC-Auswahl und das Fehlen von Sprungtunneln beziehungsweise
+duplizierter Sprunglogik auf `TinyCPUMain`. Damit verhindert sie zugleich eine
+erneute weiträumige Umleitung unter die Hauptschaltung. Ohne die neue
+Verbindung schlägt sie fehl. Die fokussierte Abnahme lautet:
 
 ```bash
 python3 -m unittest \
