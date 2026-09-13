@@ -2209,40 +2209,39 @@ scripts/test-offline.sh
 - Die vollständige elektrische Matrix und die GUI-Kurzabnahme bleiben Aufgabe
   19.9 vorbehalten.
 
-### Achtzehnte Reparatur: Kein-Fehler-Sprung zum gemeinsamen PC-Auswahlpfad
+### Achtzehnte Reparatur: Sprungauswertung wieder über die vorhandene JumpBox
 
 Der nächste belegte Unterschied war `JUMP_NOT_ERROR`: Wie die zuvor
-reparierten Sprungbefehle endete sein Decoder-Ausgang nur am Monitor und war
+unvollständigen Sprungbefehle endete sein Decoder-Ausgang nur am Monitor und war
 nicht Teil der gemeinsamen PC-Auswahl. Ein Sprung bei vollständig gelöschten
 Sticky-Fehlerflags konnte sein Ziel deshalb nicht übernehmen.
 
-Die abschließende Steuerstufe ergänzt `JUMP_NOT_ERROR` hinter dem
-Fehlersprung. Sie invertiert ausschließlich das bereits gebildete ODER der
-sechs gespeicherten Fehlerflags, qualifiziert damit
-`JUMP_NOT_ERROR AND NOT ANY_ERROR` und führt dieses Ergebnis mit der bisherigen
-Taken-Bedingung zusammen. Eine zweite ODER-Stufe nimmt das Decodersignal in die
-gemeinsame Steuerbedingung auf. Die beiden endgültigen Ausgänge behalten die
-Netznamen `ANY_JUMP_CONTROL` und `ANY_JUMP_CONDITION`; Decoder,
-Fehlerregister und PC-Multiplexer bleiben unverändert.
+Die Reparatur verwendet ausschließlich die bereits vorhandene FBox `JumpBox`.
+Auf `TinyCPUMain` ist sie genau einmal instanziiert und über sichtbare Leitungen
+unmittelbar mit den sechs Fehlerflags, den sechs Sprungsteuerungen sowie
+`NEGATIVE` und `ZERO` verbunden. Ihre beiden Ausgänge führen ebenfalls über
+durchgehende Leitungen zu den vorhandenen `FetchDecode`-Eingängen. Es wurden
+weder Tunnel ergänzt noch die Sprunglogik auf der Hauptschaltung durch weitere
+Gatterkopien nachgebaut; die kombinatorischen Bauteile verbleiben allein im
+vorhandenen Unterblatt.
 
-Die topologische Regression findet Inverter, Qualifizierung und beide
-ODER-Stufen über ihre Labels. Sie prüft außerdem den Decoderpfad, das vorhandene
-Fehleraggregat, alle Zwischenresultate und die beiden bestehenden
-`FetchDecode`-Eingänge. Ohne die neue Verbindung schlägt sie fehl. Die
-fokussierte Abnahme lautet:
+Die topologische Regression prüft die einzelne `JumpBox`-Instanz, sämtliche 14
+Direktverbindungen, beide Rückwege zur PC-Auswahl und das Fehlen von
+Sprungtunneln beziehungsweise duplizierter Sprunglogik auf `TinyCPUMain`. Ohne
+die neue Verbindung schlägt sie fehl. Die fokussierte Abnahme lautet:
 
 ```bash
 python3 -m unittest \
-  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_jump_not_error_reaches_common_pc_select
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_jump_wiring_is_encapsulated_without_tunnels
 python3 src/tiny_cpu_verify.py
 timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
   -tty stats hardware/logisim/TinyCPU.circ
 scripts/test-offline.sh
 ```
 
-- Damit erreichen alle fünf zuvor offenen Sprungpfade die gemeinsame
-  PC-Auswahl. Die bisherigen Reparaturen schließen 19.8 dennoch erst nach dem
-  nächsten integrierten Lauf; dessen erster Unterschied ist gemäß Stop-Regel
-  vor jeder weiteren Schaltungsänderung zu bestimmen.
+- Damit erreichen alle sechs Sprungsteuerungen die gemeinsame PC-Auswahl über
+  genau eine gekapselte Auswertung. Die bisherigen Reparaturen schließen 19.8
+  dennoch erst nach dem nächsten integrierten Lauf; dessen erster Unterschied
+  ist gemäß Stop-Regel vor jeder weiteren Schaltungsänderung zu bestimmen.
 - Die vollständige elektrische Matrix und die GUI-Kurzabnahme bleiben Aufgabe
   19.9 vorbehalten.
