@@ -86,6 +86,76 @@ def _drivers(circuit: ET.Element,
     return result
 
 
+def _gate_inputs(component: ET.Element) -> list[Point]:
+    """Return input terminals for the standard east-facing gate shape."""
+    attributes = _attributes(component)
+    if attributes.get("facing", "east") != "east":
+        return []
+    count = int(attributes.get("inputs", "2"))
+    x, y = _point(component.get("loc", ""))
+    return [(x - 50, y + 20 * index - 10 * (count - 1))
+            for index in range(count)]
+
+
+def _undriven_gate_input_issues(
+        circuit: ET.Element,
+        definitions: dict[str, ET.Element] | None = None) -> list[CircuitIssue]:
+    """Find wired gate inputs whose net ends in empty space without a driver."""
+    segments = [(_point(w.get("from", "")), _point(w.get("to", "")))
+                for w in circuit.findall("wire")]
+    drivers = _drivers(circuit, definitions)
+    gate_kinds = {
+        "AND Gate", "OR Gate", "XOR Gate", "NAND Gate", "NOR Gate", "NOT Gate",
+    }
+    component_points = {_point(component.get("loc", ""))
+                        for component in circuit.findall("comp")}
+    gate_input_points = {point for component in circuit.findall("comp")
+                         for point in _gate_inputs(component)
+                         if component.get("name", "") in gate_kinds}
+    issues = []
+    for component in circuit.findall("comp"):
+        if component.get("name", "") not in gate_kinds:
+            continue
+        label = (_attributes(component).get("label")
+                 or f"{component.get('name')}@{component.get('loc')}")
+        for terminal in _gate_inputs(component):
+            net_segments = [segment for segment in segments
+                            if _on_segment(terminal, segment)]
+            if not net_segments:
+                continue
+            changed = True
+            while changed:
+                changed = False
+                points = {point for segment in net_segments for point in segment}
+                for candidate in segments:
+                    if candidate not in net_segments and any(
+                            _on_segment(point, candidate)
+                            or _on_segment(candidate[0], segment)
+                            or _on_segment(candidate[1], segment)
+                            for point in points for segment in net_segments):
+                        net_segments.append(candidate)
+                        changed = True
+            if any(any(_on_segment(driver.point, segment) for segment in net_segments)
+                   for driver in drivers):
+                continue
+            endpoints = {point for segment in net_segments for point in segment}
+            # Primitive ports such as Decoder outputs are difficult to infer
+            # from XML alone.  Stay conservative and report only the conspicuous
+            # long rightward stubs produced by an interrupted return route.
+            loose = [point for point in endpoints
+                     if point != terminal and point not in component_points
+                     and point not in gate_input_points
+                     and point[0] - terminal[0] >= 500
+                     and sum(_on_segment(point, segment)
+                             for segment in net_segments) == 1]
+            if loose:
+                issues.append(CircuitIssue(
+                    circuit.get("name", "<unnamed>"),
+                    f"{label} input at {terminal} has an undriven wire ending at {min(loose)}",
+                ))
+    return issues
+
+
 def _net_drivers(circuit: ET.Element,
                  definitions: dict[str, ET.Element] | None = None,
                  omitted_wire: ET.Element | None = None) -> dict[Point, list[_Driver]]:
@@ -131,6 +201,7 @@ def inspect_circuit(circuit: ET.Element,
         if len(drivers) > 1:
             labels = sorted(driver.label for driver in drivers)
             issues.append(CircuitIssue(name, "outputs share one net: " + ", ".join(labels)))
+    issues.extend(_undriven_gate_input_issues(circuit, definitions))
     return issues
 
 

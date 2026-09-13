@@ -37,6 +37,16 @@ class CircuitCheckTests(unittest.TestCase):
         ))
         self.assertGreater(len(decoder.findall("wire")), 0)
 
+    def test_memory_write_or_third_input_is_driven_by_store_reg_offset(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        main = next(circuit for circuit in root.findall("circuit")
+                    if circuit.get("name") == "TinyCPUMain")
+        wires = {(wire.get("from"), wire.get("to"))
+                 for wire in main.findall("wire")}
+        self.assertIn((("(1400,1600)"), ("(1710,1600)")), wires)
+        self.assertIn((("(1710,170)"), ("(1710,1600)")), wires)
+        self.assertNotIn((("(1710,170)"), ("(1710,1680)")), wires)
+
     def test_standalone_fetch_decoder_uses_visible_wires(self):
         path = (
             ROOT / "hardware/logisim/diagnostics"
@@ -99,6 +109,21 @@ class CircuitCheckTests(unittest.TestCase):
         """)
         messages = [issue.message for issue in inspect_circuit(circuit)]
         self.assertIn("outputs share one net: FIRST, SECOND", messages)
+
+    def test_detects_undriven_gate_input_with_dangling_wire(self):
+        circuit = ET.fromstring("""
+          <circuit name="Broken">
+            <comp lib="1" loc="(200,120)" name="OR Gate">
+              <a name="inputs" val="3"/><a name="label" val="WRITE_REQUEST"/>
+            </comp>
+            <wire from="(150,100)" to="(700,100)"/>
+            <wire from="(700,100)" to="(700,180)"/>
+          </circuit>
+        """)
+        messages = [issue.message for issue in inspect_circuit(circuit)]
+        self.assertEqual(messages, [
+            "WRITE_REQUEST input at (150, 100) has an undriven wire ending at (700, 180)"
+        ])
 
     def test_detects_and_repairs_subcircuit_output_bridge(self):
         project = """<?xml version='1.0'?>
