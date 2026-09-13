@@ -858,9 +858,8 @@ wenn dabei das erste falsche Attribut oder Bauteilverhalten belegt ist, darf
 | 19.5 Akkumulator und Rechenpfad debuggen | abgeschlossen mit Abweichung | Der isolierte Akkumulator schreibt Wert und Validität gemeinsam; 12 von 20 Operationsfällen stimmen. Speicherwahl, Invalidität, Multiplikationsüberlauf und Division weichen bereits im kombinatorischen Blatt ab. |
 | 19.6 Adresspfad und Speicher debuggen | abgeschlossen mit Abweichung | Adressregister und beide RAMs arbeiten gekoppelt; `EffectiveAddress` wählt Direkt-/Registeradresse und Offset jedoch mit vertauschter zweiter Multiplexerpolarität, wodurch auch die Bereichsprüfung die falsche Adresse bewertet. |
 | 19.7 Sprünge, Ausgabe, Halt und Fehlerflags prüfen | abgeschlossen mit Abweichung | Fünf Sprungsteuersignale enden nur an Monitoren; die vier Enable-/Halteausgänge sind vollständig unverdrahtet. Die sechs Sticky-Flags sind dagegen set-dominant und gemeinsam löschbar aufgebaut. |
-| 19.8 Ersten abweichenden Netzübergang minimal reparieren | abgeschlossen | Achtzehn belegte Übergänge sind repariert; zuletzt wurde `JUMP_NOT_ERROR` mit der invertierten Sammelfehlerbedingung an den gemeinsamen PC-Auswahlpfad angeschlossen. |
-| 19.9 Vollständige elektrische Regression und GUI-Kurztest | teilweise abgeschlossen | Nach der Redraw-Korrektur bestehen Offline-Suite, 16/12-Kerntrace und alle 61 zugehörigen Fixtures. Der unveränderte 8/8-Kerntrace erreicht unter der verfügbaren JDK-Version weiterhin keinen Halt; auch der manuelle GUI-Kurztest bleibt offen. |
-| 19.10 Funktionsfähigen Kandidaten einfrieren | offen | Erst nach einer bestandenen elektrischen Abnahme zulässig. |
+| 19.8 Ersten abweichenden Netzübergang minimal reparieren | in Bearbeitung | Siebzehn belegte Übergänge sind repariert; zuletzt der Fehlersprung zum gemeinsamen PC-Auswahlpfad. Als Nächstes wird `JUMP_NOT_ERROR` untersucht. |
+| 19.9–19.10 | offen | Noch nicht begonnen. |
 
 ## 19.1 Fehlerbild und Baseline einfrieren
 
@@ -2175,24 +2174,25 @@ scripts/test-offline.sh
 
 ### Siebzehnte Reparatur: Fehlersprung zum gemeinsamen PC-Auswahlpfad
 
-Der nächste belegte Unterschied war `JUMP_ERROR`: Der Decoder-Ausgang endete
-weiterhin am Monitor, und keines der sechs gespeicherten Fehlerbits erreichte
-die gemeinsame Sprungbedingung. Ein Fehlersprung konnte daher auch bei
-gesetztem Sticky-Flag sein adressiertes Ziel nicht übernehmen.
+Der nächste belegte Unterschied war `JUMP_ERROR`: Sein Decoder-Ausgang endete
+weiterhin nur am Monitor und war nicht Teil der gemeinsamen PC-Auswahl. Trotz
+gesetztem Sticky-Fehler konnte der Befehl deshalb das adressierte Sprungziel
+nicht übernehmen.
 
-Ein sechsstufiger Fehler-Sammelpunkt bildet nun `ANY_ERROR_FOR_JUMP` direkt aus
-`OVF`, `DIV0`, `ADDR`, `INV`, `ILL` und `INPUT`. Der Bedingungszweig
-verknüpft dieses Ergebnis mit `JUMP_ERROR`; je eine weitere ODER-Stufe ergänzt
-Decodersteuerung und qualifizierte Taken-Bedingung hinter den bereits
-reparierten Negativsprungstufen. Die sechs öffentlichen Fehlerausgänge bleiben
-auf ihren bisherigen, voneinander getrennten Netzen. Die beiden vorhandenen
-Eingänge des PC-Multiplexers behalten ihre Funktion und werden nur um den neuen
-Zweig erweitert.
+Eine weitere ODER-Stufe ergänzt `JUMP_ERROR` hinter dem Negativsprung. Der
+Bedingungszweig bildet zunächst das ODER der sechs gespeicherten Fehlerflags
+`OVF`, `DIV0`, `ADDR`, `INV`, `ILL` und `INPUT`, qualifiziert damit
+`JUMP_ERROR` und führt das Ergebnis anschließend mit der bisherigen
+Taken-Bedingung zusammen. Die einzelnen Flags werden an den vorhandenen
+Ausgangsnetzen des `ErrorFlags`-Bausteins abgezweigt; Fehlerregister, Decoder
+und PC-Multiplexer bleiben unverändert. Der Ausgang der neuen Stufe führt
+weiterhin über `ANY_JUMP_CONTROL` und `ANY_JUMP_CONDITION` zu den bestehenden
+Eingängen von `FetchDecode`.
 
-Die topologische Regression findet alle vier neuen Gatter über ihre Labels,
-prüft jeden der sechs Fehlerpfade sowie Decodersteuerung, Bedingung und die
-beiden vorhandenen `FetchDecode`-Eingänge. Ohne eine der neuen Verbindungen
-schlägt sie fehl. Die fokussierte Abnahme lautet:
+Die topologische Regression prüft den Decoderpfad, alle sechs benannten
+Fehlerflag-Netze, die Aggregation und Qualifizierung sowie beide vorhandenen
+`FetchDecode`-Eingänge. Ohne die neuen Verbindungen schlägt sie fehl. Die
+fokussierte Abnahme lautet:
 
 ```bash
 python3 -m unittest \
@@ -2203,194 +2203,8 @@ timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
 scripts/test-offline.sh
 ```
 
-- Die bisherigen Reparaturen schließen 19.8 noch nicht ab. `JUMP_NOT_ERROR`
-  besitzt weiterhin keinen Pfad zur gemeinsamen PC-Auswahl und ist gemäß
-  Stop-Regel der nächste zu untersuchende Übergang.
+- Die bisherigen Reparaturen schließen 19.8 noch nicht ab.
+  `JUMP_NOT_ERROR` besitzt weiterhin keinen Pfad zur gemeinsamen PC-Auswahl;
+  gemäß Stop-Regel ist dieser Übergang als Nächstes zu untersuchen.
 - Die vollständige elektrische Matrix und die GUI-Kurzabnahme bleiben Aufgabe
   19.9 vorbehalten.
-
-### Nachprüfung nach der manuellen Symbolverschiebung
-
-Die vollständige Offline-Suite zeigte nach der siebzehnten Reparatur fünf
-strukturelle Regressionen aus der zwischenzeitlichen manuellen Anpassung der
-Übersichtsseite. Die Bauteile der drei bereits reparierten Sprungstufen waren
-verschoben worden, ihre Leitungsenden waren aber an den früheren
-Eingangskoordinaten verblieben. Die Leitungen enden nun wieder an den
-tatsächlichen Eingängen von `JUMP_ADR_OR_JNZ_CONTROL`,
-`JUMP_ZERO_AND_ZERO`, `JUMP_NEGATIVE_AND_NEGATIVE` und den nachfolgenden
-ODER-Stufen. Die Tests folgen den aktuellen Anschlüssen und schreiben die
-überholte Symbolposition nicht wieder fest.
-
-Außerdem hatten die vorhandene Konstante `0xfff` ihre Bezeichnung
-`PROGRAM_LIMIT_MAX` und `MEMORY_WRITE_REQUEST` seine deklarierte Anzahl von
-drei Eingängen verloren. Beide Attribute sowie die dritte, beim Redraw
-abgetrennte Schreibanforderung sind wiederhergestellt. Damit bestehen die fünf
-zuvor gemeldeten Regressionen und die vollständige Offline-Suite gemeinsam;
-an Opcode-, Maschinenformat- oder VM-Vertrag wurde nichts geändert.
-
-### Achtzehnte Reparatur: Sprung ohne Fehler zum gemeinsamen PC-Auswahlpfad
-
-Der letzte in 19.7 nachgewiesene offene Sprungübergang war
-`JUMP_NOT_ERROR`. Der Decoder-Ausgang erreichte zuvor ausschließlich seinen
-Monitor. Nun invertiert `INVERT_ANY_ERROR_FOR_JUMP_NOT_ERROR` denselben aus
-allen sechs Sticky-Flags gebildeten Sammelfehler, den auch `JUMP_ERROR`
-verwendet. `JUMP_NOT_ERROR_AND_NO_ERROR` qualifiziert damit die
-Taken-Bedingung. Zwei weitere ODER-Stufen ergänzen den Decodersteuerzweig und
-die qualifizierte Bedingung hinter den zuvor reparierten Sprungstufen, ohne
-deren Verbindungen zu ersetzen.
-
-Die topologische Regression identifiziert alle vier neuen Gatter über Labels
-und verfolgt Decodersteuerung, Sammelfehlerinvertierung, Taken-Bedingung und
-beide gemeinsamen `FetchDecode`-Eingänge. Projektparser, Strukturprüfung und
-Logisim-evolution 4.1.0 akzeptieren das geänderte Projekt. Damit sind alle fünf
-in 19.7 als offen belegten Sprungsteuersignale an den PC-Auswahlpfad
-angeschlossen und Aufgabe 19.8 ist abgeschlossen. Die vollständige elektrische
-Profilmatrix und die GUI-Kurzabnahme bleiben Aufgabe 19.9 vorbehalten.
-
-## 19.9 Vollständige elektrische Regression und GUI-Kurztest
-
-### Ausgangslage
-
-Die von Hand verschobenen Sprunggatter des Commits `1fdb161` wurden als neue
-Ausgangsbasis kontrolliert; weder eine historische Schaltungsdatei noch deren
-frühere Symbolkoordinaten wurden eingespielt. Dabei waren mehrere gezeichnete
-Leitungen an den alten statt an den sichtbaren Gatteranschlüssen stehen
-geblieben. Zusätzlich fehlte der Name `PROGRAM_LIMIT_MAX` erneut.
-
-Die Leitungen wurden an den aktuellen Positionen rechtwinklig neu angelegt.
-Die sechs Fehlerleitungen enden einzeln am verschobenen Sammelgatter, und die
-Steuer- sowie Taken-Ketten erreichen wieder alle aktuellen Eingänge. Die
-topologischen Regressionen wurden auf diese eingecheckte Anordnung
-ausgerichtet; sie schreiben keine Vorgängerversion fest. Nur das mehrfach
-verwendete `NEGATIVE`-Signal nutzt drei gleichnamige Tunnelanschlüsse: Eine
-direkte senkrechte Fortsetzung hätte den verschobenen Akkumulatorbus sichtbar
-gekreuzt und elektrisch verbunden. Die beiden abschließenden Sprungnetze
-laufen stattdessen im freien unteren Außenkorridor direkt zurück zu
-`FetchDecode`.
-
-### Kommando oder Bedienfolge
-
-```bash
-python3 -m unittest tests.test_tiny_cpu_logisim -v
-python3 src/tiny_cpu_verify.py
-timeout 30s java -jar .venv/Include/logisim-evolution-4.1.0-all.jar \
-  -tty stats hardware/logisim/TinyCPU.circ
-LOGISIM_JAR=.venv/Include/logisim-evolution-4.1.0-all.jar \
-  LOGISIM_OUTPUT=/tmp/tinycpu-ap19-9 LOGISIM_JOBS=4 \
-  scripts/test-logisim.sh
-```
-
-### Beobachteter Nachweis
-
-Die 34 fokussierten Logisim-Launcher- und Verdrahtungstests bestehen. Der
-Verifier akzeptiert alle 14 JSON-Dateien, 30 Logisim-Projekte mit 81
-Schaltungen und 4.460 rechtwinkligen Leitungen sowie den Vertrag aus 50
-Opcodes und sechs Sticky-Fehlerfällen. Logisim-evolution 4.1.0 lädt
-`TinyCPU.circ` im Statistikmodus ohne Diagnosefehler.
-
-Die nachfolgende manuelle Neuanordnung ließ die `JumpBox` an ihrer neuen
-Position. Bei der ersten Korrektur wurde die linke Symbolkante jedoch aus der
-Instanzposition falsch abgeleitet: `(4360,450)` ist der Anker des ersten
-Ausgangs, und die von Logisim erzeugte Box ist 220 Einheiten breit. Ihre 14
-Eingänge liegen deshalb bei x=4140, nicht bei x=4060. Die vermeintliche
-Korrektur auf x=4060 erzeugte genau die sichtbare 80-Einheiten-Lücke. Die
-Leitungen enden nun wieder an der tatsächlichen Pinreihe bei x=4140; die
-korrigierte Zuordnung der beiden Ausgänge bleibt erhalten. Die beim Redraw
-erneut verlorene stabile Beschriftung `PROGRAM_LIMIT_MAX` wurde ebenfalls
-wiederhergestellt, Wert und Anschluss der Konstante blieben unverändert.
-
-Danach besteht der 16/12-Kerntrace wieder und alle 61 elektrischen
-16/12-Fixtures einschließlich beider Pfade sämtlicher bedingter Sprünge sowie
-der sechs Fehlerfälle stimmen mit dem Referenzmodell überein. Das gemeinsame Profilgate bestätigt den 16/12-Teil, erreicht beim unveränderten
-8/8-Profil unter OpenJDK 25.0.2 jedoch innerhalb von 90 Sekunden keinen Halt;
-dessen Matrix wird deshalb nicht gestartet. Die an die neue Anordnung
-angepassten fokussierten Regressionen prüfen die sichtbaren Anschlusspunkte der
-verschobenen Instanzen und nicht die Positionen vor dem Redraw.
-
-### Offene Risiken
-
-Der 16/12-Anteil von Aufgabe 19.9 ist automatisiert abgeschlossen. Der
-unveränderte 8/8-Kerntrace muss noch mit der gepinnten Java-21-Umgebung
-wiederholt werden. Der GUI-Kurztest ist in der nicht-interaktiven Umgebung
-nicht sinnvoll ausführbar und bleibt ebenfalls offen. Aufgabe 19.10 darf
-deshalb noch nicht als vollständig abgenommener Kandidat markiert werden; ein manueller Lauf muss
-Reset, Takten, Ausgabe, Normalhalt und Fehlerhalt noch anhand der in
-`hardware/logisim/README.md` dokumentierten Beobachtungspunkte bestätigen.
-
-## Korrektur nach dem Decoder-Redraw: sichtbare Leitungen statt Tunnel
-
-### Ursache der drastischen Zwischenlösung
-
-Die zuvor verwendeten 164 Tunnelanschlüsse waren kein funktionales Erfordernis
-von Logisim. Sie waren als Routing-Abkürzung eingeführt worden, um die 64
-Ausgänge des einzigen 6-zu-64-Decoders nach der Gruppierung der öffentlichen
-Steuersignale zu verteilen. Das vervielfältigte zwar nicht den Decoder selbst,
-machte den Signalweg im Schaltbild aber unnötig schwer nachvollziehbar und
-vergrößerte die Simulationsarbeit. An der fachlichen Gruppierung war dagegen
-festzuhalten: Die alte Schnittstelle mischte einzelne Opcodes (`LOAD_ADR`,
-`LOAD_ADR_REG`, `STORE_ADR` und weitere) mit Operations- und Argumentklassen.
-Dadurch waren insbesondere `LOAD ... REGISTER + OFFSET` und die gemeinsame
-Operandenwahl nicht über einen eindeutigen öffentlichen Steuerpfad angebunden.
-
-### Vollständiger Neuaufbau des Pfads
-
-`FetchDecodeControls` verwendet weiterhin genau **einen** Decoder. Der komplette
-Pfad von dessen 64 Ausgängen zu den vorhandenen Sammelgattern und
-Ausgangspins wurde ohne Übernahme der Tunnelstrecken neu gezeichnet. Jeder
-Opcode-Ausgang besitzt nun eine sichtbare, rechtwinklige Leitung. Es wurden
-weder Ersatzdecoder noch Tunnel eingefügt. Die öffentlichen Ausgänge bleiben
-auf Operationsklassen (`*_OPERAND`) und davon getrennte Argumentklassen
-(`CONST_ARGUMENT`, `ADDR_ARGUMENT`, `ADDR_REG_ARGUMENT` und
-`ADDR_REG_OFFS_ARGUMENT`) reduziert.
-
-Die Strukturregression verlangt deshalb nun gleichzeitig genau eine
-Decoderinstanz, mindestens eine reale Leitung und null Tunnel in diesem
-Teilkreis. Damit kann eine spätere Änderung weder wieder Decoderkopien noch
-eine unsichtbare Tunnelverteilung als vermeintliche Reparatur einführen.
-
-## Abgleich der eigenständigen Fetch/Decode-Control-Diagnose
-
-Die eigenständige Diagnosedatei war nach dem Redraw noch auf der früheren
-Befehlsreihenfolge stehen geblieben: Opcode 0 aktivierte dort beispielsweise
-`ADD_OPERAND` statt `LOAD_OPERAND`. Ihr `FetchDecodeControls`-Blatt wurde daher
-auf exakt dieselbe sichtbare Verdrahtung wie das geprüfte Blatt im
-Gesamtprojekt gebracht. Dabei sank die Komponentenanzahl von 94 auf 90; der
-Teilkreis enthält weiterhin genau einen 6-zu-64-Decoder und keine Tunnel.
-
-`scripts/test-logisim-decode.py` prüft nun sowohl das Blatt in `TinyCPU.circ`
-als auch die eigenständige Diagnosedatei elektrisch gegen die eingefrorene
-Zuordnung in `tinycpu-machine-v1.json`. Für beide Varianten werden alle 50
-gültigen Befehle und alle 14 reservierten Codes geprüft. Damit kann die
-Diagnose künftig weder bei der Befehlsnummernzuordnung noch bei der sichtbaren
-Schaltungslogik unbemerkt vom tatsächlich eingebauten Decoder abweichen.
-
-### AP-20-Neuabgrenzung nach Stilllegung des 8/8-Experiments
-
-Das experimentelle Profil `tinycpu-8-8` ist nicht länger ein Produkt- oder
-Abnahmeziel. Die separate Schaltung, Verträge, Fixtures, Matrix und vier nur
-für ihre Reset-/PC-Diagnose vorhandene Probe-Skripte wurden entfernt. Die sechs
-Opcode-Bits des 16/12-Profils bieten bereits 64 Codes und reichen damit für die
-vorgesehene Befehlsmenge.
-
-Das nächste weiterhin einschlägige Paket ist 20.4. Als erster Schritt wurden
-die drei überholten Offline-Erwartungen an die vom Autor wiederhergestellte
-Schnittstelle angepasst, ohne `FetchDecodeControls` oder eine Leitung der
-Schaltung zu verändern: `PROGRAM_LIMIT` wird am bestehenden Pin in
-`FetchDecode` geprüft; Lade-/Speicheroperationen behalten ihre einzeln
-benannten Steuersignale; Argumentarten bleiben davon getrennt. Das vollständige
-Offline-Gate besteht anschließend.
-
-Ausgeführt wurde:
-
-```bash
-scripts/test-offline.sh
-PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
-  --profile tinycpu-16-12 \
-  --jar .venv/Include/logisim-evolution-4.1.0-all.jar \
-  --trace-output /tmp/ap20.4-core.tsv --timeout 20
-```
-
-Der elektrische Kernlauf erreicht weiterhin nicht innerhalb von 20 Sekunden
-den Halt. Nach der Stop-Regel ist das nur ein fehlender Halt-Nachweis und kein
-Beleg für einen bestimmten Verdrahtungsfehler. Deshalb wurde in diesem Schritt
-keine Schaltungsleitung geändert; 20.4 bleibt in Bearbeitung.
