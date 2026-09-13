@@ -88,6 +88,22 @@ class LogisimLauncherTests(unittest.TestCase):
                     Path(directory) / "trace.tsv", 90,
                 )
 
+    def test_timeout_reports_when_the_other_halt_output_was_reached(self):
+        source = ROOT / "hardware/logisim/TinyCPU.circ"
+        timed_out = subprocess.TimeoutExpired([], 1, output=b"partial\n")
+        opposite_halt = subprocess.CompletedProcess([], 0, b"0\t1\n", b"")
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory) / "autonomous.circ"
+            autonomous_project(source, project, "TinyCPUMain")
+            output = Path(directory) / "trace.tsv"
+            with patch(
+                "tiny_cpu_logisim.subprocess.run",
+                side_effect=[timed_out, opposite_halt],
+            ):
+                with self.assertRaisesRegex(LogisimError, "non-selected halt output"):
+                    run_trace(project, Path("logisim.jar"), "java", output, 1)
+            self.assertEqual(output.read_bytes(), b"partial\n")
+
     def test_default_cli_profile_is_a_loadable_profile_name(self):
         args = parse_args(["--trace-output", "trace.tsv"])
         profile = load_profile(args.profile)
