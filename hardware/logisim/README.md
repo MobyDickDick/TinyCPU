@@ -10,7 +10,8 @@ scripts/test-logisim.sh
 ```
 
 Der schnelle Offline-Lauf `scripts/test-offline.sh` führt zusätzlich den
-statischen Verdrahtungscheck `scripts/check-logisim-circuit.py` aus. Er bildet
+statischen Verdrahtungscheck `scripts/check-logisim-circuit.py` für **alle**
+eingecheckten `.circ`-Projekte einschließlich Diagnose- und Smoke-Projekten aus. Er bildet
 auch Abzweige nach, deren Endpunkt mitten auf einem anderen Segment liegt, und
 weist Netze mit mehreren Gatterausgängen zurück. Damit werden die roten/orangen
 Konfliktnetze bereits ohne Logisim-JAR erkannt.
