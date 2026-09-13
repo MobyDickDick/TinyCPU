@@ -2488,3 +2488,30 @@ PYTHONPATH=src python3 -c '# autonomous INPUT(); HALT() probe'
 PYTHONPATH=src python3 -c '# autonomous LOAD_CONST(1); HALT_ERROR() probe'
 scripts/test-offline.sh
 ```
+
+### Reparatur des `HALT_ERROR`-Exports
+
+Der eigenständige Decodertest setzte für Opcode `0x37` weiterhin genau den
+Ausgang `HALT_ERROR`, während das integrierte Programm
+`LOAD_CONST(1); HALT_ERROR()` am erwarteten Fehlerhalt-Ausgang in den Timeout
+lief. Der erste abweichende Netzübergang lag am Top-Level: Die Leitung zu
+`HALTED_WITH_ERROR` begann bei `(1400,1700)`. An der bestehenden
+`FetchDecodeControls`-Instanz ist dies der Ausgang `SET_INV`; der unmittelbar
+unter `HALT` liegende Ausgang `HALT_ERROR` befindet sich bei `(1400,1840)`.
+
+Die Reparatur ersetzt nur diesen falschen Leitungsanfang und führt den
+vorhandenen `HALT_ERROR`-Port orthogonal zum unveränderten öffentlichen Pin
+`HALTED_WITH_ERROR`. `FetchDecodeControls` selbst, seine Darstellung und seine
+Schnittstelle wurden nicht verändert. Die topologische Regression verfolgt
+nun das Netz ab dem tatsächlichen benannten Port. Der elektrische Gegenlauf
+mit `LOAD_CONST(1); HALT_ERROR()` erreicht danach innerhalb des
+20-Sekunden-Limits den erwarteten Fehlerhalt.
+
+Ausgeführt wurden:
+
+```bash
+PYTHONPATH=src python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_halt_error_control_reaches_public_halted_with_error_pin
+PYTHONPATH=src python3 -c '# autonomous LOAD_CONST(1); HALT_ERROR() electrical probe'
+scripts/test-offline.sh
+```
