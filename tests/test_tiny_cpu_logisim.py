@@ -398,9 +398,9 @@ class LogisimLauncherTests(unittest.TestCase):
         halted = _component_by_label(main, "HALTED")
 
         # Follow the complete net instead of fixing the test to a particular
-        # canvas route.  (1400,1680) is the HALT port of the controls instance.
+        # canvas route.  (1400,1820) is the HALT port of the controls instance.
         self.assertTrue(
-            _wire_path_exists(main, "(1400,1680)", halted.get("loc")),
+            _wire_path_exists(main, "(1400,1820)", halted.get("loc")),
             "FetchDecodeControls.HALT does not reach TinyCPUMain.HALTED",
         )
 
