@@ -174,6 +174,13 @@ def run_trace(project: Path, jar: Path, java: str, output: Path, timeout: int) -
         result = subprocess.run(command, capture_output=True, timeout=timeout, check=False)
     except subprocess.TimeoutExpired as exc:
         output.write_bytes(exc.stdout or b"")
+        # The retry is diagnostic only and must not double the gate's timeout.
+        unexpected = _unexpected_halt_reached(project, jar, java, min(timeout, 10))
+        if unexpected:
+            raise LogisimError(
+                "Logisim reached the non-selected halt output instead of the "
+                f"expected halt within {timeout} seconds"
+            ) from exc
         raise LogisimError(f"Logisim trace did not halt within {timeout} seconds") from exc
     output.write_bytes(result.stdout)
     diagnostics = result.stderr.decode("utf-8", errors="replace").strip()
@@ -189,6 +196,52 @@ def run_trace(project: Path, jar: Path, java: str, output: Path, timeout: int) -
             if row.strip()]
     if not rows:
         raise LogisimError("electrical table has no data rows")
+
+
+def _unexpected_halt_reached(
+    project: Path, jar: Path, java: str, timeout: int,
+) -> bool:
+    """Return whether a timed-out run actually reached its other halt output.
+
+    ``autonomous_project`` names only the expected terminal output ``halt``.
+    A CPU that reaches the other terminal state otherwise looks exactly like a
+    CPU that stopped making progress: both runs time out.  Retry a temporary
+    copy with the two terminal labels exchanged so the launcher can preserve
+    that important distinction in its diagnostic.
+    """
+    try:
+        tree = ET.parse(project)
+        labels = [
+            attribute
+            for circuit in tree.getroot().findall("circuit")
+            for component in circuit.findall("comp")
+            if component.get("name") == "Pin"
+            for attribute in component.findall("a")
+            if attribute.get("name") == "label"
+        ]
+        selected = next(item for item in labels if item.get("val") == "halt")
+        other = next(
+            item for item in labels
+            if item.get("val") in {"HALTED", "HALTED_WITH_ERROR"}
+        )
+    except (ET.ParseError, OSError, StopIteration):
+        return False
+
+    selected.set("val", "EXPECTED_HALT")
+    other.set("val", "halt")
+    with tempfile.TemporaryDirectory(prefix="tinycpu-opposite-halt-") as directory:
+        diagnostic = Path(directory) / project.name
+        tree.write(diagnostic, encoding="utf-8", xml_declaration=True)
+        try:
+            result = subprocess.run(
+                [java, "-jar", str(jar), "-tty", "table,halt", str(diagnostic)],
+                capture_output=True,
+                timeout=timeout,
+                check=False,
+            )
+        except subprocess.TimeoutExpired:
+            return False
+    return result.returncode == 0 and bool(result.stdout.strip())
 
 
 def _matrix_program(case: dict[str, object], profile) -> Program:
