@@ -2515,3 +2515,30 @@ PYTHONPATH=src python3 -m unittest \
 PYTHONPATH=src python3 -c '# autonomous LOAD_CONST(1); HALT_ERROR() electrical probe'
 scripts/test-offline.sh
 ```
+
+### Reparatur des `INPUT`-Fehlerflags
+
+Nach der Reparatur des Fehlerhalt-Exports erreichten sowohl `INPUT(); HALT()`
+als auch der Matrixfall `INPUT(); HALT_ERROR()` ihren jeweiligen Halt. Diese
+Programme belegten das vom Befehl gesetzte Fehlerflag jedoch nicht unabhängig:
+`HALT_ERROR` hält bedingungslos an. Eine autonome Messung, die stattdessen den
+öffentlichen Ausgang `ERROR_INPUT` als Haltereignis verwendete, lief in den
+Timeout. Der eigenständige Decodertest bestätigte gleichzeitig `SET_INPUT` für
+Opcode `0x33`. Damit lag der erste Unterschied zwischen dem Decoderport und
+dem gleichnamigen Eingang des Fehlerregisters.
+
+Am Hauptblatt waren beide Anschlüsse offen. Die Reparatur verbindet nur den
+vorhandenen `SET_INPUT`-Port `(1400,1760)` über eine eigene orthogonale Route
+mit `ErrorFlags.SET_INPUT` an `(2650,590)`. Der handgezeichnete Teilkreis
+`FetchDecodeControls`, seine Bauteile und seine Darstellung bleiben
+unverändert. Die topologische Regression verfolgt das vollständige neue Netz;
+die elektrische Gegenprobe `INPUT(); HALT()` erreicht danach `ERROR_INPUT`.
+
+Ausgeführt wurden:
+
+```bash
+PYTHONPATH=src python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_input_error_control_reaches_input_error_flag
+PYTHONPATH=src python3 -c '# autonomous INPUT(); HALT() probe with ERROR_INPUT as halt'
+scripts/test-offline.sh
+```
