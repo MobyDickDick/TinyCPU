@@ -48,7 +48,7 @@ Tests mit historischen Canvas-Koordinaten verändert.
 | 20.1 Reproduktionsstand einfrieren | abgeschlossen | Der unveränderte Ausgangsstand reproduziert zuerst den 16/12-Breitenrest im 8/8-Profil; beide elektrischen Profilläufe erreichen anschließend innerhalb von 90 Sekunden keinen normalen Halt. |
 | 20.2 Breitenfehler im 8/8-Profil isolieren | abgeschlossen | Sieben 16-Bit-Attribute im Datenpfad von `Operations` sind auf 8 Bit spezialisiert; der ROM adressiert nun ausdrücklich mit 8 Bit. Die drei fokussierten statischen Abnahmen bestehen. |
 | 20.3 Offline-Baseline vollständig grün stellen | abgeschlossen | Die verlorene 16/12-Profilgrenze und die gruppierte, tunnel-freie Decodergrenze sind wiederhergestellt; das Offline-Gate besteht zweimal nacheinander ohne erzeugte Arbeitsbaumänderungen. |
-| 20.4 Reset, Takt und Fetch für 16/12 wiederherstellen | in Bearbeitung | Nach dem manuellen Reset von `TinyCPU.circ` ist die vom Autor gewünschte Darstellung von `FetchDecodeControls` wieder maßgeblich. Der Offline-Lauf belegt drei nicht mehr passende Regressionserwartungen; daraus folgt ausdrücklich kein Auftrag zum erneuten Decoder-Redraw. |
+| 20.4 Reset, Takt und Fetch für 16/12 wiederherstellen | in Bearbeitung | Der aktuelle Commit-Graph enthält fünf inhaltsgleiche `Keep JumpBox wiring`-Commits und vier inhaltsneutrale Merge-Commits. Offline besteht; elektrisch sind die 16/12-Adressbreite sowie `LOAD_CONST` und `HALT` korrigiert, der Minimalprogrammlauf erreicht aber weiterhin keinen Halt. |
 | 20.5 Reset, Takt und Fetch für 8/8 wiederherstellen | entfallen | Der profilabhängige Programmhöchstwert und drei zuvor implizit einbittige Fetch-Bauteile sind auf 8 Bit festgeschrieben. Zwei identische Minimalprogrammläufe belegen danach weiterhin den ersten elektrischen Unterschied am PC nach der ersten Zustandsänderung. Folgewert-, Takt-, Reset- und Enable-Netz des PC-Registers sind geschlossen; eine direkte temporäre Messung belegt zusätzlich den aktiven Resetpegel am Register und den dabei stabilen PC-Nullwert. `FetchDecodeControls` blieb vollständig unverändert. |
 
 ### Folgeprüfung nach dem manuellen Decoder-Reset
@@ -372,6 +372,57 @@ Decodergrenze nicht mehr der erste Fehler. Gemäß Stop-Regel wurde aus dem
 Timeout keine weitere Schaltungsänderung abgeleitet. 20.4 bleibt offen; als
 nächstes sind Reset, PC-Dateneingang und PC-Ausgang unmittelbar um die erste
 steigende Flanke in einer temporären 16/12-Diagnosekopie gemeinsam zu messen.
+
+
+#### Commit-Prüfung und nächster begrenzter 16/12-Schritt
+
+Die Commit-Prüfung auf `00027e9` erklärt das sichtbare Durcheinander: Die fünf
+Commits `b0ed44a`, `2fcfad4`, `d698d97`, `aa77cb3` und `22e1daa` besitzen
+jeweils denselben Baum `fb0bb43e`. Auch die vier dazwischenliegenden
+Merge-Commits enden in diesem Baum. Sie wiederholen daher weder eine
+Schaltungsänderung noch addieren sie deren Inhalt mehrfach; gegenüber
+`6303f10` bestehen ausschließlich die kompakteren Erwartungen in
+`tests/test_tiny_cpu_logisim.py` und die zugehörige Berichtskorrektur. Ein
+Bereinigen dieser bereits veröffentlichten Historie ist für die Diagnose nicht
+erforderlich und wurde nicht versucht.
+
+Der unveränderte Offline-Lauf besteht mit 72 Tests. Der elektrische 16/12-Lauf
+endet dagegen nach 20 Sekunden ohne normalen Halt. Ein temporär injiziertes ROM
+mit `LOAD_CONST(42)` und `HALT()` reproduziert den Timeout. Vor der Reparatur
+zeigte die eigenständige elektrische Decodertabelle dabei zwei frühere,
+benannte Unterschiede: Opcode `0x00` setzte `LOAD_CONST` nicht, und Opcode
+`0x2c` setzte `HALT` nicht. Außerdem verwendeten PC-Register, Folgewertaddierer,
+PC-Multiplexer, Programmlimitvergleicher, Programmlimitpin und PC-Splitter noch
+die 16-Bit-Breite statt der 12-Bit-Adressbreite des Profils.
+
+Die minimale Reparatur ändert ausschließlich diese sechs Breitenattribute und
+die Eingangsbreite des vorhandenen Splitters. Zwei sichtbare rechtwinklige
+Leitungswege verbinden die bestehenden Decoderzeilen `0x00` und `0x2c` mit den
+bestehenden Ausgängen `LOAD_CONST` und `HALT`. Es wurden keine Bauteile
+hinzugefügt, keine Bauteile verschoben und keine Tunnel angelegt. Die neue
+Regression leitet die Decoderzeilen aus der vorhandenen Decoderinstanz ab und
+findet ihre Ziele über die öffentlichen Portnamen.
+
+Ausgeführt wurde:
+
+```bash
+scripts/test-offline.sh
+python3 scripts/test-logisim-decode.py
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 \
+  --jar "$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  --trace-output /tmp/ap20-current/core.tsv --timeout 20
+```
+
+Das Offline-Gate bleibt grün. Die direkte Decodertabelle bestätigt nach der
+Reparatur `LOAD_CONST=1` für `0x00` und `HALT=1` für `0x2c`; das ältere
+Decoder-Skript stoppt jedoch bereits am absichtlich beibehaltenen, vom Autor
+festgelegten Tabellenkopf und ist daher noch keine gültige Gesamtbestätigung.
+Auch der Minimalprogrammlauf erreicht weiterhin keinen Halt. AP 20.4 bleibt
+folglich offen. Gemäß Stop-Regel wird aus diesem Timeout keine weitere
+Schaltungsänderung abgeleitet; als nächstes ist der Übergang vom ROM-Wort zum
+Opcode-Eingang von `FetchDecodeControls` an PC 0 und PC 1 unmittelbar elektrisch
+zu messen.
 
 ### 20.5 Reset, Takt und Fetch für 8/8 wiederherstellen
 
