@@ -277,7 +277,7 @@
     </comp>
     <comp lib="0" loc="(790,550)" name="Constant">
       <a name="value" val="0xfff"/>
-      <a name="width" val="16"/>
+      <a name="width" val="12"/>
     </comp>
     <comp lib="0" loc="(790,570)" name="Constant"/>
     <comp lib="1" loc="(580,720)" name="OR Gate">
@@ -1293,10 +1293,10 @@
       <a name="bit1" val="0"/>
       <a name="bit10" val="0"/>
       <a name="bit11" val="0"/>
-      <a name="bit12" val="0"/>
-      <a name="bit13" val="0"/>
-      <a name="bit14" val="0"/>
-      <a name="bit15" val="0"/>
+      <a name="bit12" val="1"/>
+      <a name="bit13" val="1"/>
+      <a name="bit14" val="1"/>
+      <a name="bit15" val="1"/>
       <a name="bit16" val="1"/>
       <a name="bit17" val="1"/>
       <a name="bit18" val="1"/>
@@ -1374,10 +1374,6 @@
       <a name="bit1" val="0"/>
       <a name="bit10" val="0"/>
       <a name="bit11" val="0"/>
-      <a name="bit12" val="1"/>
-      <a name="bit13" val="1"/>
-      <a name="bit14" val="1"/>
-      <a name="bit15" val="1"/>
       <a name="bit2" val="0"/>
       <a name="bit3" val="0"/>
       <a name="bit4" val="0"/>
@@ -2059,8 +2055,7 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(310,380)" to="(790,380)"/>
     <wire from="(310,390)" to="(780,390)"/>
     <wire from="(310,400)" to="(770,400)"/>
-    <wire from="(310,60)" to="(760,60)"/>
-    <wire from="(760,60)" to="(760,410)"/>
+    <wire from="(310,410)" to="(760,410)"/>
     <wire from="(310,420)" to="(750,420)"/>
     <wire from="(310,430)" to="(740,430)"/>
     <wire from="(310,440)" to="(730,440)"/>
@@ -2080,8 +2075,7 @@ ffff 1c0065 3 1c0064 2a0000 4ffff 1c0064 240004
     <wire from="(310,580)" to="(590,580)"/>
     <wire from="(310,590)" to="(580,590)"/>
     <wire from="(310,60)" to="(1110,60)"/>
-    <wire from="(310,500)" to="(570,500)"/>
-    <wire from="(570,500)" to="(570,600)"/>
+    <wire from="(310,600)" to="(570,600)"/>
     <wire from="(310,610)" to="(560,610)"/>
     <wire from="(310,620)" to="(550,620)"/>
     <wire from="(310,630)" to="(540,630)"/>
