@@ -2417,3 +2417,39 @@ Insbesondere wird die handgezeichnete Decoderansicht nicht aufgrund einer
 Vermutung umgebaut; vor einer Reparatur müssen die beiden ähnlich benannten
 JumpBox-Ausgänge in einer isolierten elektrischen Abnahme eindeutig zugeordnet
 werden.
+
+### Reparatur des ersten Mehrbefehlsfehlers: versetzte JumpBox-Steuerungen
+
+Die anschließende Portzuordnung hat nicht die beiden JumpBox-Ausgänge, sondern
+die sechs eingehenden Decodersteuerungen als ersten falschen Netzübergang
+bestätigt. Die Sprungausgänge von `FetchDecodeControls` liegen an der Instanz
+auf `(1400,1320)` bis `(1400,1420)`. Die vorhandenen Abgriffe begannen jedoch
+erst bei `(1400,1360)` und reichten bis `(1400,1460)`. Dadurch gelangten unter
+anderem `LOAD_CONST` und `LOAD_ADDRESS` in die gemeinsame Sprungsteuerung; das
+erklärt den beobachteten Sprung vom PC-Wert 0 auf den Akkumulatorwert 7.
+
+Die Reparatur verschiebt ausschließlich die sechs kurzen Querverbindungen zu
+den vorhandenen JumpBox-Leitungswegen um jeweils 40 Pixel nach oben. Die
+JumpBox, ihre Ausgänge und `FetchDecodeControls` selbst bleiben unverändert.
+Die topologische Regression prüft jetzt die tatsächlichen sechs Sprungports
+und schließt damit insbesondere die beiden Ladeports aus der JumpBox aus.
+
+Der fokussierte elektrische Matrixlauf erreicht nach der Änderung
+`load-address` und anschließend alle Fälle bis einschließlich `clear-error`.
+Der Lauf stoppt erstmals bei `input`, das innerhalb des gesetzten
+20-Sekunden-Limits noch keinen normalen Halt erreicht. Nach der Stop-Regel ist
+damit `input` der nächste zu untersuchende Befehl; an weiteren Netzen wurde
+nicht auf Verdacht gearbeitet.
+
+Ausgeführt wurden:
+
+```bash
+python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_jump_wiring_is_encapsulated_without_tunnels
+LOGISIM_JAR="$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 \
+  --trace-output /tmp/tinycpu-next2/core.tsv \
+  --matrix-output /tmp/tinycpu-next2/matrix --timeout 20
+scripts/test-offline.sh
+```
