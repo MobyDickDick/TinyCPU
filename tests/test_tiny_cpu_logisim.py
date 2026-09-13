@@ -1,3 +1,4 @@
+import json
 import os
 import subprocess
 import sys
@@ -63,6 +64,18 @@ def _wire_path_exists(circuit, start, end):
 
 
 class LogisimLauncherTests(unittest.TestCase):
+
+    def test_halt_error_isolated_before_input_error_fixture(self):
+        matrix = json.loads(
+            (ROOT / "hardware/logisim/tinycpu-electrical-matrix-v1.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        cases = matrix["opcode_cases"]
+        ids = [case["id"] for case in cases]
+        self.assertLess(ids.index("halt-error"), ids.index("input"))
+        halt_error = next(case for case in cases if case["id"] == "halt-error")
+        self.assertEqual(halt_error["program"], "LOAD_CONST(1)\nHALT_ERROR()\n")
 
     def test_core_acceptance_injects_minimal_rom_twice(self):
         profile = load_profile("tinycpu-16-12")

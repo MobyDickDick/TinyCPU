@@ -2453,3 +2453,38 @@ LOGISIM_JAR="$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
   --matrix-output /tmp/tinycpu-next2/matrix --timeout 20
 scripts/test-offline.sh
 ```
+
+### Eingrenzung des vermeintlichen `INPUT`-Fehlers
+
+Der nächste Matrixabbruch bei `input` war kein belastbarer Nachweis eines
+Defekts im `INPUT`-Befehl. Das bisherige Programm `INPUT(); HALT_ERROR()`
+benutzte `HALT_ERROR` als Beobachtungspunkt und konnte deshalb nicht zwischen
+einem Eingabefehler und einem defekten Fehlerhalt unterscheiden. Ein
+elektrischer Gegenlauf mit `INPUT(); HALT()` erreicht den normalen Halt. Ein
+separater Lauf mit `LOAD_CONST(1); HALT_ERROR()` erreicht dagegen innerhalb
+von 20 Sekunden keinen Fehlerhalt. Damit liegt der erste neue Unterschied am
+`HALT_ERROR`-Pfad; `INPUT` bleibt bis zu einer unabhängigen Beobachtung seines
+Fehlerflags offen.
+
+Die Matrix führt den gebootstrappten `halt-error`-Fall nun vor `input` aus.
+Das vorangestellte `LOAD_CONST(1)` übernimmt dabei denselben bewährten ersten
+CPU-Schritt wie die Kernabnahme und verhindert, dass das Verhalten der ersten
+Instruktion nach Reset mit dem zu prüfenden Fehlerhalt vermischt wird. Der
+integrierte Lauf stoppt dadurch eindeutig bei `halt-error` statt irreführend
+bei `input`. An der Schaltung wurde nach diesem Befund noch nichts geändert;
+als nächstes muss der elektrische Übergang vom bereits separat bestätigten
+Decoder-Ausgang `HALT_ERROR` zum öffentlichen Ausgang `HALTED_WITH_ERROR`
+untersucht werden.
+
+Ausgeführt wurden:
+
+```bash
+LOGISIM_JAR="$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 \
+  --trace-output /tmp/tinycpu-halt-error-order/core.tsv \
+  --matrix-output /tmp/tinycpu-halt-error-order/matrix --timeout 20
+PYTHONPATH=src python3 -c '# autonomous INPUT(); HALT() probe'
+PYTHONPATH=src python3 -c '# autonomous LOAD_CONST(1); HALT_ERROR() probe'
+scripts/test-offline.sh
+```

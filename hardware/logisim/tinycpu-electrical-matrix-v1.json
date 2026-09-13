@@ -338,6 +338,12 @@
       "program": "LOAD_CONST(1)\nDIV_CONST(0)\nCLEAR_ERROR()\nJUMP_ERROR(5)\nPRINT()\nHALT()\n"
     },
     {
+      "id": "halt-error",
+      "opcode": "HALT_ERROR",
+      "variant": "default",
+      "program": "LOAD_CONST(1)\nHALT_ERROR()\n"
+    },
+    {
       "id": "input",
       "opcode": "INPUT",
       "variant": "default",
@@ -360,12 +366,6 @@
       "opcode": "HALT",
       "variant": "default",
       "program": "HALT()\nHALT_ERROR()\n"
-    },
-    {
-      "id": "halt-error",
-      "opcode": "HALT_ERROR",
-      "variant": "default",
-      "program": "HALT_ERROR()\nHALT()\n"
     },
     {
       "id": "jump-zero-not-taken",
