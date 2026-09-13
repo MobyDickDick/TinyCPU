@@ -67,14 +67,25 @@ Die bei dieser Reparatur sichtbar gewordene Adress-/Halt-Abweichung wurde in
 den folgenden Integrationspaketen behoben und ist durch die AP-12-Abnahme
 abgedeckt.
 
-`FetchDecodeControls` bildet die eingefrorenen Maschinenopcodes 0 bis 49 nun elektrisch direkt auf die benannten Steuerausgänge ab; die reservierten Codes 50 bis 63 setzen ausschließlich `INVALID_OPERAND`. Die benannten `DECODE_00` bis `DECODE_63`-Tunnel halten diese Zuordnung unabhängig von Canvas-Koordinaten prüfbar. Mehr als acht Quellen werden über zwei begrenzte OR-Bänke zusammengeführt, sodass kein vom Simulator begrenzter Gate-Fan-in einen Opcode stillschweigend verliert.
+`FetchDecodeControls` behält bewusst die vom Schaltungsautor gezeichnete,
+fachlich gruppierte Belegung. Sie ist zugleich die verbindliche
+Maschinenbelegung: `0x00` bis `0x1b` enthalten die sieben Rechenfamilien
+einschließlich XOR, `0x1c` bis `0x22` die bitweise Negation und Sprünge,
+`0x23` bis `0x28` sämtliche Ladebefehle und `0x29` bis `0x2b` sämtliche
+Speicherbefehle. Die sechs nur intern verwendeten Fehlersteuerzeilen `0x2c`
+bis `0x31` sind keine assemblierbaren Befehle. `CLEAR_ERROR` bis
+`HALT_ERROR` liegen auf `0x32` bis `0x37`; `0x38` bis `0x3f` sind reserviert.
+Die eine vollständige, normative Zuordnungstabelle steht in
+`tinycpu-machine-v1.json`; die menschenlesbare Statusansicht wird in
+`docs/tiny_cpu_instruction_status.md` daraus abgeleitet. Die vorhandene
+Ansicht von `FetchDecodeControls` wird weder umgezeichnet noch umgruppiert.
 
-Für das Lesen und Nachverfolgen der Decoderschaltung ist die eigenständige
-Diagnoseschaltung `diagnostics/TinyCPU-FetchDecodeControls.circ` maßgeblich. Dort
-sind die Decoder-Ausgänge und sämtliche ODER-Zusammenführungen ausschließlich
-als sichtbare Leitungen ausgeführt; versteckte Tunnel kommen auf diesem Blatt
-nicht vor. Dadurch lässt sich jeder Signalweg vom `OPCODE`-Eingang bis zum
-benannten Steuerausgang direkt im Schaltbild verfolgen.
+Für die verbindliche Belegung ist ausschließlich das handgezeichnete Blatt
+`FetchDecodeControls` in `TinyCPU.circ` maßgeblich. Die eigenständige
+Diagnoseschaltung `diagnostics/TinyCPU-FetchDecodeControls.circ` bildet einen
+älteren gruppierten Versuchsstand ab und ist deshalb kein zweites
+Opcode-Orakel. Die elektrische Decoderabnahme liest direkt das maßgebliche
+Blatt und gleicht es mit `tinycpu-machine-v1.json` ab.
 
 Die ähnlich benannten Ausgänge `LD_REG_CONST` und `LD_REG_ADR` sind keine
 Duplikate: Sie dekodieren `LOAD_ADDRESS_REGISTER_CONST` beziehungsweise

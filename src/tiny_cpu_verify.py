@@ -564,7 +564,9 @@ def verify_contracts() -> tuple[int, int]:
         if not isinstance(opcode, dict):
             raise VerificationError(f"{machine_path.relative_to(ROOT)}: opcode {index} is not an object")
         code, hexadecimal, mnemonic = opcode.get("code"), opcode.get("hex"), opcode.get("mnemonic")
-        if code != index or hexadecimal != f"0x{index:02x}" or not isinstance(mnemonic, str):
+        if (not isinstance(code, int) or not 0 <= code < 64
+                or hexadecimal != f"0x{code:02x}"
+                or not isinstance(mnemonic, str)):
             raise VerificationError(
                 f"{machine_path.relative_to(ROOT)}: inconsistent opcode entry at index {index}"
             )

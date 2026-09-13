@@ -2,6 +2,24 @@
 
 ## Klarstellung nach dem manuellen Reset von `FetchDecodeControls`
 
+### Korrektur der Zeilenbezeichnung
+
+Die Decoderzeile `0x00` der vom Autor vorgegebenen Ansicht ist
+`ADD_OPERAND`, nicht `LOAD_CONST`. `LOAD_CONST` und `HALT` liegen auf den
+Zeilen `0x23` beziehungsweise `0x36`. Diese fachlich gruppierte Reihenfolge
+ist nun auch die verbindliche Zuordnung des Maschinenformats; es existiert
+keine zweite, abweichende Opcode-Tabelle mehr. Frühere Passagen dieses
+Berichts, die `0x00` als `LOAD_CONST` oder `0x2c` als `HALT` bezeichnen,
+dokumentieren den damaligen Stand beziehungsweise einen verworfenen
+Reparaturversuch, nicht die aktuelle Zuordnung.
+
+Die zwischenzeitlich ergänzten Umleitungen von Decoderzeile `0x00` zu
+`LOAD_CONST` und von `0x2c` zu `HALT` wurden deshalb wieder entfernt. Die
+bestehende Ansicht und ihre Leitungsführung bleiben erhalten. Maschinenformat,
+Assemblerartefakte und gezeichnete Decoderzeilen verwenden stattdessen
+dieselbe Zuordnung. Punktuelle, die Ansicht verfälschende Querverbindungen
+sind dafür weder erforderlich noch zulässig.
+
 Das wiederholte Umzeichnen von `FetchDecodeControls` sollte die inzwischen
 geänderte Opcode-Tabelle mit einem gemeinsam verwendeten Decoder abbilden. Es
 war jedoch der falsche Reparaturansatz: Es hat die vom Schaltungsautor bewusst
@@ -389,19 +407,20 @@ erforderlich und wurde nicht versucht.
 Der unveränderte Offline-Lauf besteht mit 72 Tests. Der elektrische 16/12-Lauf
 endet dagegen nach 20 Sekunden ohne normalen Halt. Ein temporär injiziertes ROM
 mit `LOAD_CONST(42)` und `HALT()` reproduziert den Timeout. Vor der Reparatur
-zeigte die eigenständige elektrische Decodertabelle dabei zwei frühere,
-benannte Unterschiede: Opcode `0x00` setzte `LOAD_CONST` nicht, und Opcode
-`0x2c` setzte `HALT` nicht. Außerdem verwendeten PC-Register, Folgewertaddierer,
+zeigte die eigenständige elektrische Decodertabelle zwei Unterschiede zum
+Maschinenformat. Diese wurden damals fälschlich als unterbrochene Leitungen
+interpretiert: Decoderzeile `0x00` setzte `LOAD_CONST` nicht und Zeile `0x2c`
+setzte `HALT` nicht. In der beizubehaltenden Ansicht sind diese Zeilen jedoch
+für `ADD_OPERAND` beziehungsweise `SET_OVF` vorgesehen. Außerdem verwendeten PC-Register, Folgewertaddierer,
 PC-Multiplexer, Programmlimitvergleicher, Programmlimitpin und PC-Splitter noch
 die 16-Bit-Breite statt der 12-Bit-Adressbreite des Profils.
 
-Die minimale Reparatur ändert ausschließlich diese sechs Breitenattribute und
-die Eingangsbreite des vorhandenen Splitters. Zwei sichtbare rechtwinklige
-Leitungswege verbinden die bestehenden Decoderzeilen `0x00` und `0x2c` mit den
-bestehenden Ausgängen `LOAD_CONST` und `HALT`. Es wurden keine Bauteile
-hinzugefügt, keine Bauteile verschoben und keine Tunnel angelegt. Die neue
-Regression leitet die Decoderzeilen aus der vorhandenen Decoderinstanz ab und
-findet ihre Ziele über die öffentlichen Portnamen.
+Der damalige Reparaturversuch änderte neben den sechs Breitenattributen und der
+Eingangsbreite des vorhandenen Splitters auch zwei Leitungswege von den Zeilen
+`0x00` und `0x2c` zu `LOAD_CONST` und `HALT`. Diese beiden Leitungsänderungen
+beruhten auf der falschen Gleichsetzung von Decoderzeile und Maschinenopcode
+und wurden später zurückgenommen. Die Regression sichert nun stattdessen die
+vom Autor vorgegebene Zuordnung `0x00` zu `ADD_OPERAND` und `0x36` zu `HALT`.
 
 Ausgeführt wurde:
 
@@ -414,8 +433,9 @@ PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
   --trace-output /tmp/ap20-current/core.tsv --timeout 20
 ```
 
-Das Offline-Gate bleibt grün. Die direkte Decodertabelle bestätigt nach der
-Reparatur `LOAD_CONST=1` für `0x00` und `HALT=1` für `0x2c`; das ältere
+Das Offline-Gate blieb grün. Die direkte Decodertabelle bestätigte nach dem
+inzwischen verworfenen Versuch `LOAD_CONST=1` für `0x00` und `HALT=1` für
+`0x2c`; das ältere
 Decoder-Skript stoppt jedoch bereits am absichtlich beibehaltenen, vom Autor
 festgelegten Tabellenkopf und ist daher noch keine gültige Gesamtbestätigung.
 Auch der Minimalprogrammlauf erreicht weiterhin keinen Halt. AP 20.4 bleibt
