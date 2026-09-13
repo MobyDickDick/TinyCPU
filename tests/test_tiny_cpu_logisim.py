@@ -357,6 +357,10 @@ class LogisimLauncherTests(unittest.TestCase):
                  if component.get("name") == "JumpBox"]
         self.assertEqual(len(boxes), 1)
         self.assertEqual(_attributes(boxes[0]).get("label"), "JUMP_BOX")
+        self.assertEqual(
+            boxes[0].get("loc"), "(4360,450)",
+            "JumpBox must stay in the existing compact upper-right layout",
+        )
 
         jump_labels = {
             "JUMP_ADR_CONTROL", "JUMP_ZERO_CONTROL", "JUMP_NEGATIVE_CONTROL",
@@ -377,20 +381,22 @@ class LogisimLauncherTests(unittest.TestCase):
         ))
 
         # The generated JumpBox symbol orders inputs by the child sheet's pin
-        # position: errors, controls, then NEGATIVE and ZERO.
+        # position: errors, controls, then NEGATIVE and ZERO.  Keep the box in
+        # its established upper-right position: moving it below the main
+        # circuit makes every signal take a long, hard-to-read detour.
         sources = [
             "(2870,450)", "(2870,470)", "(2870,490)", "(2870,510)",
-            "(2870,530)", "(2870,550)", "(1270,1210)", "(1270,1230)",
-            "(1020,350)", "(1270,1270)", "(1270,1290)", "(1270,1310)",
-            "(2050,450)", "(2050,390)",
+            "(2870,530)", "(2870,550)", "(1400,1360)", "(1400,1380)",
+            "(1400,1400)", "(1400,1420)", "(1400,1440)", "(1400,1460)",
+            "(2080,510)", "(2080,490)",
         ]
-        for source, y in zip(sources, range(1900, 2180, 20)):
+        for source, y in zip(sources, range(450, 730, 20)):
             self.assertTrue(
-                _wire_path_exists(main, source, f"(3500,{y})"),
+                _wire_path_exists(main, source, f"(4140,{y})"),
                 f"{source} does not reach its JumpBox input",
             )
-        self.assertTrue(_wire_path_exists(main, "(3800,1900)", "(670,390)"))
-        self.assertTrue(_wire_path_exists(main, "(3800,1920)", "(670,410)"))
+        self.assertTrue(_wire_path_exists(main, "(4360,450)", "(650,510)"))
+        self.assertTrue(_wire_path_exists(main, "(4360,470)", "(670,530)"))
 
     def test_sub_operand_reaches_operations_input(self):
         expected = ("(1400,1100)", "(2650,1100)")
