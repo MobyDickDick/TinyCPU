@@ -2542,3 +2542,39 @@ PYTHONPATH=src python3 -m unittest \
 PYTHONPATH=src python3 -c '# autonomous INPUT(); HALT() probe with ERROR_INPUT as halt'
 scripts/test-offline.sh
 ```
+
+### Nächster Matrixfehler: `JUMP_ZERO` (nicht genommener Fall)
+
+Nach der `INPUT`-Reparatur besteht der Kernlauf und die elektrische Matrix
+erreicht erstmals alle 50 positiven Opcode-Fälle. Auch die genommenen Fälle
+der fünf bedingten Sprünge laufen durch. Der nächste reproduzierbare Fehler
+ist Fall 51, `jump-zero-not-taken`:
+
+```text
+LOAD_CONST(1)
+JUMP_ZERO(4)
+PRINT()
+HALT()
+HALT_ERROR()
+```
+
+Das Referenzmodell erwartet hier `HALT`, weil der Akkumulator den Wert 1 hat.
+Die Schaltung erreicht stattdessen den nicht ausgewählten Ausgang
+`HALTED_WITH_ERROR`; die Sprungbedingung wird somit im nicht genommenen
+`JUMP_ZERO`-Fall falsch ausgewertet. Der unmittelbar folgende Matrixfall
+`jump-not-zero-not-taken` wird wegen des seriellen Fail-fast-Laufs noch nicht
+gestartet.
+
+Die Eingrenzung bestätigt außerdem, dass dies kein allgemeiner Decoder-,
+Halt- oder Akkumulatorfehler ist: `jump-zero` mit Akkumulator 0 sowie sämtliche
+vorherigen positiven Opcode-Fälle bestehen. Der verbleibende Untersuchungsort
+ist die Polarität beziehungsweise Übergabe der `ZERO`-Bedingung zwischen
+`Datapath`, `JumpBox` und `FetchDecode`. Ohne eine elektrisch bestätigte
+Korrektur wurde die handgezeichnete Schaltung nicht verändert.
+
+Ausgeführt wurden:
+
+```bash
+LOGISIM_JAR=.venv/Include/logisim-evolution-4.1.0-all.jar scripts/test-logisim.sh
+scripts/test-offline.sh
+```

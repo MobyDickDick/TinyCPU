@@ -1,19 +1,18 @@
 # Funktionsstand der TinyCPU-Befehle
 
-**Stand:** 12. September 2026, Schaltungsversion `19e2add`
+**Stand:** 13. September 2026, Schaltungsversion `80c5ab1`
 
 ## Kurzantwort
 
-Zurzeit ist **kein Befehl der Logisim-Schaltung als funktionsfähig
-nachgewiesen**. Das bedeutet nicht, dass jeder einzelne Befehl zwingend einen
-eigenen Defekt hat: Schon der vorgeschaltete Kernlauf erreicht bei beiden
-Hardwareprofilen keinen Halt-Zustand. Deshalb startet die Einzelprüfung der
-Befehle gar nicht. Ohne einen erfolgreichen Ende-zu-Ende-Test wird ein Befehl
-in dieser Übersicht bewusst nicht als „funktioniert“ bezeichnet.
+Der Kernlauf und alle 50 positiven Opcode-Fälle der Logisim-Schaltung sind
+inzwischen elektrisch nachgewiesen. Die vollständige Abnahme scheitert als
+nächstes am zusätzlichen Negativfall `jump-zero-not-taken`: `JUMP_ZERO` springt
+bei Akkumulatorwert 1 fälschlich zum `HALT_ERROR`. Weil die Matrix seriell und
+Fail-fast läuft, sind die vier danach folgenden Nicht-genommen-Fälle und die
+sechs Sticky-Error-Fälle in diesem Lauf noch nicht erneut geprüft worden.
 
-Diese Aussage betrifft die ausführbaren Schaltungen
-`hardware/logisim/TinyCPU.circ` (16/12 Bit) und
-`hardware/logisim/TinyCPU-8-8.circ` (8/8 Bit), nicht das Python-Referenzmodell.
+Diese Aussage betrifft die ausführbare Schaltung
+`hardware/logisim/TinyCPU.circ` (16/12 Bit), nicht das Python-Referenzmodell.
 
 ## Prüfergebnis
 
@@ -25,23 +24,19 @@ LOGISIM_JAR=.venv/Include/logisim-evolution-4.1.0-all.jar scripts/test-logisim.s
 
 Ergebnis:
 
-- **16/12-Bit-Profil:** Kernlauf nach 90 Sekunden ohne Halt abgebrochen.
-- **8/8-Bit-Profil:** Kernlauf nach 90 Sekunden ohne Halt abgebrochen.
-- **Einzelne Befehlstests:** nicht gestartet, da der Kernlauf die notwendige
-  Vorprüfung ist.
-- **Gesamtergebnis:** beide elektrischen Profilabnahmen fehlgeschlagen.
+- **16/12-Bit-Profil:** Kernlauf zweimal erfolgreich.
+- **Positive Befehlstests:** alle 50 Fälle erfolgreich.
+- **Zusätzliche Sprungfälle:** erster Fall `jump-zero-not-taken` fehlgeschlagen.
+- **Gesamtergebnis:** elektrische Profilabnahme fehlgeschlagen.
 
-Auch die schnelle Offline-Prüfung ist derzeit nicht erfolgreich:
+Die schnelle Offline-Prüfung ist erfolgreich (82 Tests).
 
-```text
-TinyCPU verification failed: hardware/logisim/TinyCPU-8-8.circ:
-legacy 16/12 width remains in width
-```
+## Vollständig abgenommene Befehle
 
-## Befehle, die funktionieren
-
-**Keine.** Gegenwärtig hat kein Befehl einen erfolgreichen elektrischen
-Ende-zu-Ende-Nachweis in beiden unterstützten Profilen.
+**Keine.** Die positiven Einzelfälle sind zwar erfolgreich, die verbindliche
+Gesamtabnahme ist wegen des zusätzlichen `JUMP_ZERO`-Negativfalls aber noch
+nicht vollständig. Die nachfolgende Tabelle verwendet deshalb weiterhin den
+strengen Status „kein vollständiger elektrischer Nachweis“.
 
 ## Befehle, die derzeit nicht als funktionsfähig gelten
 
