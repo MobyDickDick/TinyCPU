@@ -66,8 +66,10 @@ Tests mit historischen Canvas-Koordinaten verändert.
 | 20.1 Reproduktionsstand einfrieren | abgeschlossen | Der unveränderte Ausgangsstand reproduziert zuerst den 16/12-Breitenrest im 8/8-Profil; beide elektrischen Profilläufe erreichen anschließend innerhalb von 90 Sekunden keinen normalen Halt. |
 | 20.2 Breitenfehler im 8/8-Profil isolieren | abgeschlossen | Sieben 16-Bit-Attribute im Datenpfad von `Operations` sind auf 8 Bit spezialisiert; der ROM adressiert nun ausdrücklich mit 8 Bit. Die drei fokussierten statischen Abnahmen bestehen. |
 | 20.3 Offline-Baseline vollständig grün stellen | abgeschlossen | Die verlorene 16/12-Profilgrenze und die gruppierte, tunnel-freie Decodergrenze sind wiederhergestellt; das Offline-Gate besteht zweimal nacheinander ohne erzeugte Arbeitsbaumänderungen. |
-| 20.4 Reset, Takt und Fetch für 16/12 wiederherstellen | in Bearbeitung | Der aktuelle Commit-Graph enthält fünf inhaltsgleiche `Keep JumpBox wiring`-Commits und vier inhaltsneutrale Merge-Commits. Offline besteht; elektrisch sind die 16/12-Adressbreite sowie `LOAD_CONST` und `HALT` korrigiert, der Minimalprogrammlauf erreicht aber weiterhin keinen Halt. |
+| 20.4 Reset, Takt und Fetch für 16/12 wiederherstellen | abgeschlossen | Zwei unabhängige Läufe von `LOAD_CONST(3); HALT()` liefern denselben elektrischen Trace und erreichen den normalen Halt. |
 | 20.5 Reset, Takt und Fetch für 8/8 wiederherstellen | entfallen | Der profilabhängige Programmhöchstwert und drei zuvor implizit einbittige Fetch-Bauteile sind auf 8 Bit festgeschrieben. Zwei identische Minimalprogrammläufe belegen danach weiterhin den ersten elektrischen Unterschied am PC nach der ersten Zustandsänderung. Folgewert-, Takt-, Reset- und Enable-Netz des PC-Registers sind geschlossen; eine direkte temporäre Messung belegt zusätzlich den aktiven Resetpegel am Register und den dabei stabilen PC-Nullwert. `FetchDecodeControls` blieb vollständig unverändert. |
+| 20.6 ISA- und Fehlerregression schrittweise öffnen | abgeschlossen | Kernlauf, alle 50 Opcodes, beide Pfade der bedingten Sprünge und alle sechs Sticky-Fehlerfälle bestehen in der vollständigen elektrischen 16/12-Profilabnahme. |
+| 20.7 Redraw-sichere Regressionen ergänzen | in Bearbeitung | Die während 20.6 ergänzten semantischen Topologietests bestehen; ihre abschließende Mutationsabnahme ist der nächste Schritt. |
 
 ### Folgeprüfung nach dem manuellen Decoder-Reset
 
@@ -2662,3 +2664,37 @@ Nach der Korrektur bestanden der isolierte `halt-error`-Lauf, die elektrische
 Decoderprüfung sowie die vollständige Profilabnahme mit Kernlauf und allen 61
 Matrixfällen. Der unabhängige Offline-Lauf bleibt wegen der zwei bereits
 dokumentierten `JumpBox`-Topologieprüfungen rot.
+
+### Abschluss von AP 20.6: vollständige ISA- und Fehlerregression
+
+- **Ausgangs-Commit:** `22c8af49d232612ae22f5329adf2b35fbd68609e`.
+- **Arbeitsbaum vor der Abnahme:** sauber (`git status --porcelain=v1`
+  lieferte keine Ausgabe).
+- **Simulator:** Logisim-evolution 4.1.0 aus
+  `.venv/Include/logisim-evolution-4.1.0-all.jar`.
+
+Nach der semantischen Korrektur der beiden `JumpBox`-Topologieprüfungen
+besteht das Offline-Gate wieder vollständig. Die anschließende elektrische
+Profilabnahme führt zwei unabhängige Minimalkernläufe und alle 61 Matrixfälle
+aus. Die Matrix umfasst alle 50 Opcode-Positivfälle, die jeweils zusätzlichen
+nicht genommenen Pfade der fünf bedingten Sprünge sowie alle sechs
+Sticky-Fehlerfälle. Kein Fall wird übersprungen oder nur statisch bewertet.
+
+Ausgeführt wurden:
+
+```bash
+scripts/test-offline.sh
+LOGISIM_JAR="$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  LOGISIM_OUTPUT="$PWD/artifacts/ap20.6-final" scripts/test-logisim.sh
+```
+
+| Lauf | Exitcode | Ergebnis |
+|---|---:|---|
+| Offline-Gate | 0 | Verifier, statischer Schaltungscheck und alle 86 Unit-Tests bestehen. |
+| Elektrische 16/12-Profilabnahme | 0 | Beide Kernläufe und alle 61 Matrixfälle bestehen gegen das Python-Referenzmodell. |
+
+Die unveränderten elektrischen Tabellen liegen gemäß Artefaktrichtlinie
+unter `artifacts/ap20.6-final/` und werden nicht eingecheckt. AP 20.6 ist damit
+abgeschlossen. Als nächstes folgt AP 20.7 mit der Mutationsabnahme der
+während der Reparaturen beibehaltenen redraw-sicheren Regressionen; erst
+danach darf AP 20.8 den Funktionsstatus endgültig aktualisieren.
