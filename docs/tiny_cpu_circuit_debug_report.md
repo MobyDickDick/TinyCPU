@@ -2609,3 +2609,36 @@ scripts/test-offline.sh
 LOGISIM_JAR="$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
   LOGISIM_OUTPUT=/tmp/tinycpu-jz-fix scripts/test-logisim.sh
 ```
+
+### Reparatur der Fehlerbedingungen in der `JumpBox`
+
+Der reproduzierte Fall `jump-not-error-not-taken` zeigte, dass die beiden
+Fehlerbedingungen in der `JumpBox` vertauscht waren: `JUMP_NOT_ERROR` wurde
+mit `ANY_ERROR_FOR_JUMP` verknüpft, während `JUMP_ERROR` den invertierten
+Fehlerzustand erhielt. Die positiven Einzelfälle konnten diesen Tausch nicht
+aufdecken, weil dort jeweils zum gleichen Ziel gesprungen wird; der separate
+nicht genommene Fall machte die falsche Polarität sichtbar.
+
+Die Reparatur lässt Steuerleitungen, Gatter und Sammel-ORs an ihren bestehenden
+Positionen und tauscht ausschließlich die Bedingungsnetze an den beiden
+AND-Gattern. Eine topologische Regression verfolgt nun beide Steuerungen und
+beide Fehlerpolaritäten bis zu den jeweils zusammengehörigen Gattereingängen.
+Zusätzlich wurde die Nullzweig-Regression an die zwischenzeitlich vom Autor
+angepassten, elektrisch unveränderten Koordinaten der `JumpBox` angeglichen.
+`FetchDecodeControls` blieb vollständig unverändert.
+
+Danach bestehen der Kernlauf, alle 50 positiven Opcode-Fälle, sämtliche fünf
+zusätzlichen Sprungfälle sowie die ersten vier Sticky-Error-Fälle. Der nächste
+reproduzierbare Fehler ist `reserved-opcode`: Dieser Fall erreicht innerhalb
+des 90-Sekunden-Limits keinen Halt. Gemäß Stop-Regel wurde dieser Folgefehler
+nicht mitrepariert.
+
+Ausgeführt wurden:
+
+```bash
+PYTHONPATH=src python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_jump_box_gates_zero_conditions_with_the_matching_controls \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_jump_box_gates_error_conditions_with_the_matching_controls
+scripts/test-offline.sh
+LOGISIM_JAR=.venv/Include/logisim-evolution-4.1.0-all.jar scripts/test-logisim.sh
+```

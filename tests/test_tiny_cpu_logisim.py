@@ -560,10 +560,22 @@ class LogisimLauncherTests(unittest.TestCase):
         self.assertEqual(jump_not_zero.get("name"), "AND Gate")
         self.assertEqual(_attributes(taken).get("inputs"), "3")
         self.assertTrue(_wire_path_exists(jump_box, "(1430,490)", "(2010,700)"))
-        self.assertTrue(_wire_path_exists(jump_box, "(1800,810)", "(2010,740)"))
-        self.assertTrue(_wire_path_exists(jump_box, "(1430,470)", "(2010,770)"))
-        self.assertTrue(_wire_path_exists(jump_box, "(1430,740)", "(2010,810)"))
+        self.assertTrue(_wire_path_exists(jump_box, "(1800,740)", "(2010,740)"))
+        self.assertTrue(_wire_path_exists(jump_box, "(1430,470)", "(2010,780)"))
+        self.assertTrue(_wire_path_exists(jump_box, "(1430,740)", "(2010,820)"))
         self.assertTrue(_wire_path_exists(jump_box, "(1430,450)", "(2350,760)"))
+
+    def test_jump_box_gates_error_conditions_with_the_matching_controls(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        jump_box = next(
+            circuit for circuit in root.findall("circuit")
+            if circuit.get("name") == "JumpBox"
+        )
+
+        self.assertTrue(_wire_path_exists(jump_box, "(1430,530)", "(3210,1070)"))
+        self.assertTrue(_wire_path_exists(jump_box, "(1630,360)", "(3210,1110)"))
+        self.assertTrue(_wire_path_exists(jump_box, "(1430,550)", "(2870,910)"))
+        self.assertTrue(_wire_path_exists(jump_box, "(2890,1110)", "(2870,950)"))
 
     def test_sub_operand_reaches_operations_input(self):
         expected = ("(1400,1100)", "(2650,1100)")
