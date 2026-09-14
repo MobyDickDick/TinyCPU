@@ -368,6 +368,47 @@ class LogisimLauncherTests(unittest.TestCase):
             "ADD_OPERAND_SELECT does not reach ADD_OPERAND",
         )
 
+    def test_reserved_opcode_3f_sets_illegal_and_halts_with_error(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        controls = next(
+            circuit for circuit in root.findall("circuit")
+            if circuit.get("name") == "FetchDecodeControls"
+        )
+        decoder = next(
+            component for component in controls.findall("comp")
+            if component.get("name") == "Decoder"
+        )
+        decoder_x, decoder_y = map(
+            int, decoder.get("loc").strip("()").split(",")
+        )
+        reserved_3f = f"({decoder_x + 20},{decoder_y - 640 + 0x3f * 10})"
+
+        for gate_label, output_label in (
+            ("RESERVED_OPCODE_SET_ILL", "SET_ILL"),
+            ("RESERVED_OPCODE_HALT_ERROR", "HALT_ERROR"),
+        ):
+            gate = _component_by_label(controls, gate_label)
+            gate_x, gate_y = map(int, gate.get("loc").strip("()").split(","))
+            gate_inputs = (
+                f"({gate_x - 50},{gate_y - 10})",
+                f"({gate_x - 50},{gate_y + 10})",
+            )
+            self.assertTrue(
+                any(
+                    _wire_path_exists(controls, reserved_3f, terminal)
+                    for terminal in gate_inputs
+                ),
+                f"reserved opcode 0x3f does not reach {gate_label}",
+            )
+            self.assertTrue(
+                _wire_path_exists(
+                    controls,
+                    gate.get("loc"),
+                    _component_by_label(controls, output_label).get("loc"),
+                ),
+                f"{gate_label} does not reach {output_label}",
+            )
+
     def test_visible_top_level_memory_or_gate_has_every_input_connected(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
