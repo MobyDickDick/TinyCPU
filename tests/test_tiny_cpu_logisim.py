@@ -63,6 +63,18 @@ def _wire_path_exists(circuit, start, end):
     return False
 
 
+def _point_offset(component, x=0, y=0):
+    """Return a component connection point relative to its labelled location."""
+    component_x, component_y = map(
+        int, component.get("loc").strip("()").split(",")
+    )
+    return f"({component_x + x},{component_y + y})"
+
+
+def _pin_location(circuit, label):
+    return _component_by_label(circuit, label).get("loc")
+
+
 class LogisimLauncherTests(unittest.TestCase):
 
     def test_halt_error_isolated_before_input_error_fixture(self):
@@ -604,16 +616,33 @@ class LogisimLauncherTests(unittest.TestCase):
             circuit for circuit in root.findall("circuit")
             if circuit.get("name") == "JumpBox"
         )
+        jump_zero = _component_by_label(jump_box, "JUMP_ZERO_AND_ZERO")
+        invert_zero = _component_by_label(jump_box, "INVERT_ZERO_FOR_JNZ")
         jump_not_zero = _component_by_label(jump_box, "JUMP_NOT_ZERO_AND_NOT_ZERO")
         taken = _component_by_label(jump_box, "JUMP_ZERO_OR_PREVIOUS_TAKEN")
 
         self.assertEqual(jump_not_zero.get("name"), "AND Gate")
         self.assertEqual(_attributes(taken).get("inputs"), "3")
-        self.assertTrue(_wire_path_exists(jump_box, "(1430,490)", "(2010,700)"))
-        self.assertTrue(_wire_path_exists(jump_box, "(1800,740)", "(2010,740)"))
-        self.assertTrue(_wire_path_exists(jump_box, "(1430,470)", "(2010,780)"))
-        self.assertTrue(_wire_path_exists(jump_box, "(1430,740)", "(2010,820)"))
-        self.assertTrue(_wire_path_exists(jump_box, "(1430,450)", "(2350,760)"))
+        self.assertTrue(_wire_path_exists(
+            jump_box, _pin_location(jump_box, "JUMP_NOT_ZERO"),
+            _point_offset(jump_not_zero, -50, -20),
+        ))
+        self.assertTrue(_wire_path_exists(
+            jump_box, invert_zero.get("loc"),
+            _point_offset(jump_not_zero, -50, 20),
+        ))
+        self.assertTrue(_wire_path_exists(
+            jump_box, _pin_location(jump_box, "JUMP_ZERO"),
+            _point_offset(jump_zero, -50, -20),
+        ))
+        self.assertTrue(_wire_path_exists(
+            jump_box, _pin_location(jump_box, "ZERO"),
+            _point_offset(jump_zero, -50, 20),
+        ))
+        self.assertTrue(_wire_path_exists(
+            jump_box, _pin_location(jump_box, "JUMP_ADR"),
+            _point_offset(taken, -50, 0),
+        ))
 
     def test_jump_box_gates_error_conditions_with_the_matching_controls(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
@@ -621,11 +650,36 @@ class LogisimLauncherTests(unittest.TestCase):
             circuit for circuit in root.findall("circuit")
             if circuit.get("name") == "JumpBox"
         )
+        any_error = _component_by_label(jump_box, "ANY_ERROR_FOR_JUMP")
+        invert_error = _component_by_label(
+            jump_box, "INVERT_ANY_ERROR_FOR_JUMP_NOT_ERROR"
+        )
+        # These two historical labels describe their former positions in the
+        # chain.  Assert their actual operands through named components so a
+        # drawing-only move cannot invalidate the topology test again.
+        jump_error = _component_by_label(
+            jump_box, "JUMP_NOT_ERROR_AND_NO_ERROR"
+        )
+        jump_not_error = _component_by_label(
+            jump_box, "JUMP_ERROR_AND_ANY_ERROR"
+        )
 
-        self.assertTrue(_wire_path_exists(jump_box, "(1430,530)", "(3210,1070)"))
-        self.assertTrue(_wire_path_exists(jump_box, "(1630,360)", "(3210,1110)"))
-        self.assertTrue(_wire_path_exists(jump_box, "(1430,550)", "(2870,910)"))
-        self.assertTrue(_wire_path_exists(jump_box, "(2890,1110)", "(2870,950)"))
+        self.assertTrue(_wire_path_exists(
+            jump_box, _pin_location(jump_box, "JUMP_ERROR"),
+            _point_offset(jump_error, -50, -20),
+        ))
+        self.assertTrue(_wire_path_exists(
+            jump_box, any_error.get("loc"),
+            _point_offset(jump_error, -50, 20),
+        ))
+        self.assertTrue(_wire_path_exists(
+            jump_box, _pin_location(jump_box, "JUMP_NOT_ERROR"),
+            _point_offset(jump_not_error, -50, -20),
+        ))
+        self.assertTrue(_wire_path_exists(
+            jump_box, invert_error.get("loc"),
+            _point_offset(jump_not_error, -50, 20),
+        ))
 
     def test_sub_operand_reaches_operations_input(self):
         expected = ("(1400,1100)", "(2650,1100)")
