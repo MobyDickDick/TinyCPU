@@ -2642,3 +2642,23 @@ PYTHONPATH=src python3 -m unittest \
 scripts/test-offline.sh
 LOGISIM_JAR=.venv/Include/logisim-evolution-4.1.0-all.jar scripts/test-logisim.sh
 ```
+## Reparatur von `HALT_ERROR` (14. September 2026)
+
+Die vollständige elektrische Matrix identifizierte `halt-error` als ersten
+abweichenden Fall: `LOAD_CONST(1); HALT_ERROR()` erreichte den erwarteten
+Fehlerhalt auch nach 90 Sekunden nicht. Die isolierte elektrische
+Decoderprüfung zeigte, dass die Leitungen für `HALT_ERROR` (`0x37`) und den
+reservierten Opcode `0x3f` zwar optisch nahe am neu eingefügten ODER-Gatter
+endeten, aber nicht auf dessen tatsächlichen Eingangsanschlüssen lagen.
+
+Die beiden Fehlerhaltleitungen wurden getrennt auf die echten Gattereingänge
+geführt. Analog wurde der `SET_ILL`-Pfad berichtigt; andernfalls aktivierte der
+interne Opcode `0x2f` zusätzlich das falsche Fehlerbit. Der elektrische
+Decodertest deckt nun ausdrücklich den Sonderfall `0x3f` ab, und der
+Strukturtest prüft neben `0x3f` auch den regulären Opcode `0x37` an den
+tatsächlichen, um 20 Rastereinheiten versetzten Gattereingängen.
+
+Nach der Korrektur bestanden der isolierte `halt-error`-Lauf, die elektrische
+Decoderprüfung sowie die vollständige Profilabnahme mit Kernlauf und allen 61
+Matrixfällen. Der unabhängige Offline-Lauf bleibt wegen der zwei bereits
+dokumentierten `JumpBox`-Topologieprüfungen rot.

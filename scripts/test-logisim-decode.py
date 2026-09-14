@@ -56,6 +56,9 @@ def expected_row(code: int, opcodes: dict[str, dict[str, object]]) -> dict[str, 
     row = dict.fromkeys(OUTPUTS, 0)
     instruction = next((item for item in opcodes.values() if item["code"] == code), None)
     if instruction is None:
+        if code == 0x3F:
+            row["SET_ILL"] = 1
+            row["HALT_ERROR"] = 1
         if code in INTERNAL_ROWS:
             row[INTERNAL_ROWS[code]] = 1
         else:
