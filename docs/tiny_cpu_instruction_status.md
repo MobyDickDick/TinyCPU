@@ -33,72 +33,72 @@ Ergebnis:
 - **Gesamtergebnis:** vollständige elektrische Profilabnahme mit 61 Fixtures
   erfolgreich.
 
-Die strukturelle Offline-Prüfung der Schaltungsdateien und Verträge ist
-erfolgreich. Der vollständige Offline-Lauf enthält derzeit unabhängig von
-dieser Reparatur zwei fehlschlagende Topologieprüfungen des `JumpBox`-Blatts.
+Auch die strukturelle Offline-Prüfung der Schaltungsdateien, Verträge und
+benannten `JumpBox`-Verbindungen ist erfolgreich. Zwei Topologieprüfungen
+waren noch an veraltete Zeichenkoordinaten gebunden und meldeten nach einer
+reinen Layoutänderung fälschlich einen Defekt. Sie verfolgen die Leitungen nun
+zwischen den benannten Pins und Gattern.
 
 ## Vollständig abgenommene Befehle
 
-**Keine.** Die elektrische Gesamtabnahme ist erfolgreich, das zusätzlich
-verbindliche Offline-Gate scheitert jedoch weiterhin an zwei unabhängigen
-`JumpBox`-Topologieprüfungen. Die nachfolgende Tabelle verwendet deshalb bis
-zur vollständigen grünen Abnahme weiterhin den strengen Status „kein
-vollständiger elektrischer Nachweis“.
+Alle 50 in der nachfolgenden Tabelle aufgeführten Befehle sind elektrisch und
+strukturell abgenommen. Bei der Suche nach dem nächsten nicht funktionierenden
+Befehl wurde daher kein weiterer Befehlsfehler gefunden.
 
-## Befehle, die derzeit nicht als funktionsfähig gelten
+## Funktionsfähige Befehle
 
 | Opcode | Befehl | Status |
 |---:|---|---|
-| `0x00` | `ADD_CONST` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x01` | `ADD_ADDRESS` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x02` | `ADD_ADDRESS_REGISTER` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x03` | `ADD_ADDRESS_REGISTER_PLUS_OFFSET` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x04` | `SUB_CONST` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x05` | `SUB_ADDRESS` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x06` | `SUB_ADDRESS_REGISTER` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x07` | `SUB_ADDRESS_REGISTER_PLUS_OFFSET` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x08` | `MUL_CONST` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x09` | `MUL_ADDRESS` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x0a` | `MUL_ADDRESS_REGISTER` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x0b` | `MUL_ADDRESS_REGISTER_PLUS_OFFSET` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x0c` | `DIV_CONST` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x0d` | `DIV_ADDRESS` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x0e` | `DIV_ADDRESS_REGISTER` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x0f` | `DIV_ADDRESS_REGISTER_PLUS_OFFSET` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x10` | `AND_CONST` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x11` | `AND_ADDRESS` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x12` | `AND_ADDRESS_REGISTER` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x13` | `AND_ADDRESS_REGISTER_PLUS_OFFSET` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x14` | `OR_CONST` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x15` | `OR_ADDRESS` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x16` | `OR_ADDRESS_REGISTER` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x17` | `OR_ADDRESS_REGISTER_PLUS_OFFSET` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x18` | `XOR_CONST` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x19` | `XOR_ADDRESS` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x1a` | `XOR_ADDRESS_REGISTER` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x1b` | `XOR_ADDRESS_REGISTER_PLUS_OFFSET` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x1c` | `NOT` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x1d` | `JUMP_ADDRESS` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x1e` | `JUMP_ZERO` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x1f` | `JUMP_NOT_ZERO` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x20` | `JUMP_NEGATIVE` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x21` | `JUMP_ERROR` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x22` | `JUMP_NOT_ERROR` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x23` | `LOAD_CONST` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x24` | `LOAD_ADDRESS` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x25` | `LOAD_ADDRESS_REGISTER` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x26` | `LOAD_ADDRESS_REGISTER_PLUS_OFFSET` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x27` | `LOAD_ADDRESS_REGISTER_CONST` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x28` | `LOAD_ADDRESS_REGISTER_ADDRESS` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x29` | `STORE_ADDRESS` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x2a` | `STORE_ADDRESS_REGISTER` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x2b` | `STORE_ADDRESS_REGISTER_PLUS_OFFSET` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x32` | `CLEAR_ERROR` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x33` | `INPUT` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x34` | `PRINT` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x35` | `PRINT_ADDRESS` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x36` | `HALT` | ❌ kein erfolgreicher elektrischer Nachweis |
-| `0x37` | `HALT_ERROR` | ❌ kein erfolgreicher elektrischer Nachweis |
+| `0x00` | `ADD_CONST` | ✅ vollständig abgenommen |
+| `0x01` | `ADD_ADDRESS` | ✅ vollständig abgenommen |
+| `0x02` | `ADD_ADDRESS_REGISTER` | ✅ vollständig abgenommen |
+| `0x03` | `ADD_ADDRESS_REGISTER_PLUS_OFFSET` | ✅ vollständig abgenommen |
+| `0x04` | `SUB_CONST` | ✅ vollständig abgenommen |
+| `0x05` | `SUB_ADDRESS` | ✅ vollständig abgenommen |
+| `0x06` | `SUB_ADDRESS_REGISTER` | ✅ vollständig abgenommen |
+| `0x07` | `SUB_ADDRESS_REGISTER_PLUS_OFFSET` | ✅ vollständig abgenommen |
+| `0x08` | `MUL_CONST` | ✅ vollständig abgenommen |
+| `0x09` | `MUL_ADDRESS` | ✅ vollständig abgenommen |
+| `0x0a` | `MUL_ADDRESS_REGISTER` | ✅ vollständig abgenommen |
+| `0x0b` | `MUL_ADDRESS_REGISTER_PLUS_OFFSET` | ✅ vollständig abgenommen |
+| `0x0c` | `DIV_CONST` | ✅ vollständig abgenommen |
+| `0x0d` | `DIV_ADDRESS` | ✅ vollständig abgenommen |
+| `0x0e` | `DIV_ADDRESS_REGISTER` | ✅ vollständig abgenommen |
+| `0x0f` | `DIV_ADDRESS_REGISTER_PLUS_OFFSET` | ✅ vollständig abgenommen |
+| `0x10` | `AND_CONST` | ✅ vollständig abgenommen |
+| `0x11` | `AND_ADDRESS` | ✅ vollständig abgenommen |
+| `0x12` | `AND_ADDRESS_REGISTER` | ✅ vollständig abgenommen |
+| `0x13` | `AND_ADDRESS_REGISTER_PLUS_OFFSET` | ✅ vollständig abgenommen |
+| `0x14` | `OR_CONST` | ✅ vollständig abgenommen |
+| `0x15` | `OR_ADDRESS` | ✅ vollständig abgenommen |
+| `0x16` | `OR_ADDRESS_REGISTER` | ✅ vollständig abgenommen |
+| `0x17` | `OR_ADDRESS_REGISTER_PLUS_OFFSET` | ✅ vollständig abgenommen |
+| `0x18` | `XOR_CONST` | ✅ vollständig abgenommen |
+| `0x19` | `XOR_ADDRESS` | ✅ vollständig abgenommen |
+| `0x1a` | `XOR_ADDRESS_REGISTER` | ✅ vollständig abgenommen |
+| `0x1b` | `XOR_ADDRESS_REGISTER_PLUS_OFFSET` | ✅ vollständig abgenommen |
+| `0x1c` | `NOT` | ✅ vollständig abgenommen |
+| `0x1d` | `JUMP_ADDRESS` | ✅ vollständig abgenommen |
+| `0x1e` | `JUMP_ZERO` | ✅ vollständig abgenommen |
+| `0x1f` | `JUMP_NOT_ZERO` | ✅ vollständig abgenommen |
+| `0x20` | `JUMP_NEGATIVE` | ✅ vollständig abgenommen |
+| `0x21` | `JUMP_ERROR` | ✅ vollständig abgenommen |
+| `0x22` | `JUMP_NOT_ERROR` | ✅ vollständig abgenommen |
+| `0x23` | `LOAD_CONST` | ✅ vollständig abgenommen |
+| `0x24` | `LOAD_ADDRESS` | ✅ vollständig abgenommen |
+| `0x25` | `LOAD_ADDRESS_REGISTER` | ✅ vollständig abgenommen |
+| `0x26` | `LOAD_ADDRESS_REGISTER_PLUS_OFFSET` | ✅ vollständig abgenommen |
+| `0x27` | `LOAD_ADDRESS_REGISTER_CONST` | ✅ vollständig abgenommen |
+| `0x28` | `LOAD_ADDRESS_REGISTER_ADDRESS` | ✅ vollständig abgenommen |
+| `0x29` | `STORE_ADDRESS` | ✅ vollständig abgenommen |
+| `0x2a` | `STORE_ADDRESS_REGISTER` | ✅ vollständig abgenommen |
+| `0x2b` | `STORE_ADDRESS_REGISTER_PLUS_OFFSET` | ✅ vollständig abgenommen |
+| `0x32` | `CLEAR_ERROR` | ✅ vollständig abgenommen |
+| `0x33` | `INPUT` | ✅ vollständig abgenommen |
+| `0x34` | `PRINT` | ✅ vollständig abgenommen |
+| `0x35` | `PRINT_ADDRESS` | ✅ vollständig abgenommen |
+| `0x36` | `HALT` | ✅ vollständig abgenommen |
+| `0x37` | `HALT_ERROR` | ✅ vollständig abgenommen |
 
 ## Wann darf ein Befehl auf „funktioniert“ gesetzt werden?
 
