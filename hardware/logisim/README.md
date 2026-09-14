@@ -1,5 +1,34 @@
 # TinyCPU in Logisim-evolution
 
+## Manueller GUI-Kurztest
+
+Dieser Kurztest ergänzt die automatischen Gates; er ersetzt weder
+`scripts/test-offline.sh` noch `scripts/test-logisim.sh`. Er ist mit
+Logisim-evolution 4.1.0 an einem Desktop mit sichtbarer Anzeige auszuführen:
+
+1. `TinyCPU.circ` öffnen, `TinyCPUMain` wählen und mit **Simulation > Reset
+   Simulation** zurücksetzen. `PC_VALUE` muss `0` zeigen, beide Haltausgänge
+   und alle sechs Fehlerausgänge müssen `0` sein.
+2. **Simulation > Ticks Enabled** ausgeschaltet lassen und wiederholt
+   **Simulation > Manual Tick Full Cycle** auslösen. Der PC muss sich pro
+   Befehlsflanke entsprechend dem Countdown-Programm ändern; beim ersten
+   `PRINT` müssen `PRINT_ENABLE=1`, `PRINT_VALID=1` und `PRINT_VALUE=3` sein.
+   Die folgenden Ausgaben sind `2` und `1`.
+3. Bis zum normalen Ende weiter takten. Dann muss `HALTED=1` und
+   `HALTED_WITH_ERROR=0` sein. Nach einem erneuten Reset müssen PC und beide
+   Haltausgänge wieder den Zustand aus Schritt 1 zeigen.
+4. Für die getrennte Fehlerhaltprobe in einer Arbeitskopie die ersten beiden
+   ROM-Einträge durch `0x230001` (`LOAD_CONST 1`) und `0x370000`
+   (`HALT_ERROR`) ersetzen, erneut resetten und einen vollen Einzeltakt
+   auslösen. Während am PC danach der zweite Befehl decodiert wird, muss
+   `HALTED=0` und `HALTED_WITH_ERROR=1` sein. Die Arbeitskopie danach
+   verwerfen; die eingecheckte Schaltung darf durch den Kurztest nicht geändert
+   werden.
+
+Das Protokoll nennt Datum, getesteten Commit, Logisim-/Java-Version und die
+beobachteten Werte aller vier Schritte. Ein bloßes erfolgreiches Öffnen der
+Datei ist keine GUI-Abnahme.
+
 ## Gemeinsame elektrische Profilabnahme
 
 From a fresh checkout with Java 21 or newer available, run the complete

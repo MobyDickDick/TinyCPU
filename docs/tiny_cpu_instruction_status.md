@@ -15,6 +15,11 @@ löst den erwarteten Fehlerhalt aus.
 
 Diese Aussage betrifft die ausführbare Schaltung
 `hardware/logisim/TinyCPU.circ` (16/12 Bit), nicht das Python-Referenzmodell.
+Der Kandidat `955347029ea77a7b1735b65242978616768a87c7` hat diese elektrische
+Abnahme am 14. September 2026 in einem frischen Worktree zweimal bestanden.
+Die davon getrennte manuelle GUI-Kurzabnahme ist noch offen; sie ist keine
+Voraussetzung für die unten einzeln als elektrisch nachgewiesen markierten
+Opcode-Fälle, wohl aber für den Abschluss des gesamten AP 20.8.
 
 ## Prüfergebnis
 
