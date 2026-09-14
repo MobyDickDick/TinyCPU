@@ -77,6 +77,110 @@ def _pin_location(circuit, label):
 
 class LogisimLauncherTests(unittest.TestCase):
 
+    def test_recovery_topology_regressions_reject_named_port_mutations(self):
+        """Prove AP 20 repairs are guarded independently of canvas layout."""
+        source = ROOT / "hardware/logisim/TinyCPU.circ"
+
+        def disconnect(tree, circuit_name, point):
+            circuit = next(
+                candidate for candidate in tree.getroot().findall("circuit")
+                if candidate.get("name") == circuit_name
+            )
+            wires = [
+                wire for wire in circuit.findall("wire")
+                if point in (wire.get("from"), wire.get("to"))
+            ]
+            self.assertTrue(
+                wires,
+                f"mutation point {circuit_name}.{point} is not connected",
+            )
+            for wire in wires:
+                circuit.remove(wire)
+
+        def reserved_opcode_point(tree):
+            controls = next(
+                candidate for candidate in tree.getroot().findall("circuit")
+                if candidate.get("name") == "FetchDecodeControls"
+            )
+            decoder = next(
+                component for component in controls.findall("comp")
+                if component.get("name") == "Decoder"
+            )
+            decoder_x, decoder_y = map(
+                int, decoder.get("loc").strip("()").split(",")
+            )
+            return f"({decoder_x + 20},{decoder_y - 640 + 0x3f * 10})"
+
+        mutations = (
+            (
+                "normal halt export",
+                "TinyCPUMain",
+                lambda tree: "(1400,1820)",
+                self.test_halt_control_reaches_public_halted_pin,
+            ),
+            (
+                "error halt export",
+                "TinyCPUMain",
+                lambda tree: "(1400,1840)",
+                self.test_halt_error_control_reaches_public_halted_with_error_pin,
+            ),
+            (
+                "jump control alignment",
+                "TinyCPUMain",
+                lambda tree: "(1400,1320)",
+                self.test_jump_wiring_is_encapsulated_without_tunnels,
+            ),
+            (
+                "zero jump polarity",
+                "JumpBox",
+                lambda tree: _pin_location(
+                    next(
+                        circuit for circuit in tree.getroot().findall("circuit")
+                        if circuit.get("name") == "JumpBox"
+                    ),
+                    "JUMP_ZERO",
+                ),
+                self.test_jump_box_gates_zero_conditions_with_the_matching_controls,
+            ),
+            (
+                "error jump polarity",
+                "JumpBox",
+                lambda tree: _pin_location(
+                    next(
+                        circuit for circuit in tree.getroot().findall("circuit")
+                        if circuit.get("name") == "JumpBox"
+                    ),
+                    "JUMP_ERROR",
+                ),
+                self.test_jump_box_gates_error_conditions_with_the_matching_controls,
+            ),
+            (
+                "reserved opcode error halt",
+                "FetchDecodeControls",
+                reserved_opcode_point,
+                self.test_reserved_opcode_3f_sets_illegal_and_halts_with_error,
+            ),
+            (
+                "memory write gate input",
+                "TinyCPUMain",
+                lambda tree: "(530,700)",
+                self.test_visible_top_level_memory_or_gate_has_every_input_connected,
+            ),
+        )
+
+        for name, circuit_name, point_for, regression in mutations:
+            with self.subTest(mutation=name), tempfile.TemporaryDirectory() as directory:
+                temporary_root = Path(directory)
+                target = temporary_root / "hardware/logisim/TinyCPU.circ"
+                target.parent.mkdir(parents=True)
+                tree = ET.parse(source)
+                disconnect(tree, circuit_name, point_for(tree))
+                tree.write(target, encoding="utf-8", xml_declaration=True)
+
+                with patch(f"{__name__}.ROOT", temporary_root):
+                    with self.assertRaises(AssertionError):
+                        regression()
+
     def test_halt_error_isolated_before_input_error_fixture(self):
         matrix = json.loads(
             (ROOT / "hardware/logisim/tinycpu-electrical-matrix-v1.json").read_text(

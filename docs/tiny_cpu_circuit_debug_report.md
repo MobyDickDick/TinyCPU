@@ -69,7 +69,8 @@ Tests mit historischen Canvas-Koordinaten verändert.
 | 20.4 Reset, Takt und Fetch für 16/12 wiederherstellen | abgeschlossen | Zwei unabhängige Läufe von `LOAD_CONST(3); HALT()` liefern denselben elektrischen Trace und erreichen den normalen Halt. |
 | 20.5 Reset, Takt und Fetch für 8/8 wiederherstellen | entfallen | Der profilabhängige Programmhöchstwert und drei zuvor implizit einbittige Fetch-Bauteile sind auf 8 Bit festgeschrieben. Zwei identische Minimalprogrammläufe belegen danach weiterhin den ersten elektrischen Unterschied am PC nach der ersten Zustandsänderung. Folgewert-, Takt-, Reset- und Enable-Netz des PC-Registers sind geschlossen; eine direkte temporäre Messung belegt zusätzlich den aktiven Resetpegel am Register und den dabei stabilen PC-Nullwert. `FetchDecodeControls` blieb vollständig unverändert. |
 | 20.6 ISA- und Fehlerregression schrittweise öffnen | abgeschlossen | Kernlauf, alle 50 Opcodes, beide Pfade der bedingten Sprünge und alle sechs Sticky-Fehlerfälle bestehen in der vollständigen elektrischen 16/12-Profilabnahme. |
-| 20.7 Redraw-sichere Regressionen ergänzen | in Bearbeitung | Die während 20.6 ergänzten semantischen Topologietests bestehen; ihre abschließende Mutationsabnahme ist der nächste Schritt. |
+| 20.7 Redraw-sichere Regressionen ergänzen | abgeschlossen | Sieben gezielte temporäre Leitungsunterbrechungen belegen, dass die semantischen Regressionen frühere Halt-, Sprung-, Fehlerhalt- und offene Gate-Fehler erkennen, ohne die eingecheckte Schaltung zu verändern. |
+| 20.8 Endabnahme und Funktionsstatus aktualisieren | offen | Offline- und elektrisches Gate müssen in einem frischen Checkout zweimal bestehen; anschließend ist der GUI-Kurztest zu protokollieren. |
 
 ### Folgeprüfung nach dem manuellen Decoder-Reset
 
@@ -2698,3 +2699,35 @@ unter `artifacts/ap20.6-final/` und werden nicht eingecheckt. AP 20.6 ist damit
 abgeschlossen. Als nächstes folgt AP 20.7 mit der Mutationsabnahme der
 während der Reparaturen beibehaltenen redraw-sicheren Regressionen; erst
 danach darf AP 20.8 den Funktionsstatus endgültig aktualisieren.
+
+### Abschluss von AP 20.7: Mutationsabnahme der Topologieregressionen
+
+Die semantischen Regressionen wurden abschließend gegen gezielt defekte,
+temporäre Kopien von `TinyCPU.circ` geprüft. Der neue Mutationslauf trennt an
+jeweils einem benannten Port die Verbindung für Normalhalt, Fehlerhalt, die
+Zuordnung der Sprungsteuerungen, Null- und Fehlerbedingung der `JumpBox`, den
+reservierten Opcode `0x3f` sowie einen Eingang des Speicher-Schreibgatters.
+Jede der sieben Mutationen muss genau ihre bereits vorhandene Regression
+fehlschlagen lassen. Am unveränderten Projekt laufen dieselben semantischen
+Prüfungen weiterhin erfolgreich.
+
+Die Mutation bestimmt ihre Ziele über Schaltungsnamen, Pin- beziehungsweise
+Bauteillabels und Netzanschlüsse. Nur die öffentlichen Ports der manuell
+gezeichneten Decoderinstanz werden aufgrund ihrer Schnittstellenreihenfolge
+adressiert; Leitungsverläufe und Zwischenpunkte sind keine Erwartungen. Jede
+Kopie liegt in einem eigenen temporären Verzeichnis, und ein zusätzlicher
+Quellschutztest stellt weiterhin sicher, dass die eingecheckte Schaltung nicht
+verändert wird. `FetchDecodeControls` wurde für dieses Paket weder geändert
+noch umgezeichnet.
+
+Ausgeführt wurden:
+
+```bash
+PYTHONPATH=src python3 -m unittest \
+  tests.test_tiny_cpu_logisim.LogisimLauncherTests.test_recovery_topology_regressions_reject_named_port_mutations -v
+scripts/test-offline.sh
+```
+
+Beide Läufe bestehen. Damit ist AP 20.7 abgeschlossen. Das nächste aktive
+Paket ist AP 20.8 mit der wiederholten Endabnahme und dem dokumentierten
+GUI-Kurztest; dieses Paket ändert den Funktionsstatus noch nicht.

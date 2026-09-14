@@ -10,9 +10,10 @@ keine aktuellen Abnahmeziele.
 
 AP 20 konzentriert sich damit ausschließlich auf `TinyCPU.circ`. Die Pakete
 20.4 für Reset, Takt und Fetch sowie 20.6 für die schrittweise ISA- und
-Fehlerregression des 16/12-Profils sind abgeschlossen. Das nächste aktive
-Paket ist 20.7: die abschließende Prüfung der redraw-sicheren Regressionen.
-ISA und Opcode-Belegung bleiben unverändert.
+Fehlerregression des 16/12-Profils und 20.7 für die redraw-sicheren
+Regressionen sind abgeschlossen. Das nächste aktive Paket ist 20.8: die
+Endabnahme und Aktualisierung des Funktionsstatus. ISA und Opcode-Belegung
+bleiben unverändert.
 
 ## Gemeinsame Regeln
 
@@ -56,8 +57,9 @@ Folgende Stop-Regeln gelten:
 20.1 bis 20.4 sind abgeschlossen; 20.5 entfällt mit der Stilllegung des
 8/8-Profils. 20.6 ist nach dem grünen, reproduzierten 16/12-Minimalkerntrace
 gestartet und mit der vollständigen elektrischen 16/12-Matrix abgeschlossen.
-20.7 wurde während jeder Reparatur mitgeführt; seine Abnahme erfolgt nun als
-nächstes. 20.8 ist das einzige Paket, das den
+20.7 wurde während jeder Reparatur mitgeführt und durch gezielte Mutationen
+der benannten Portverbindungen abschließend abgenommen. 20.8 ist das einzige
+noch offene Paket und das einzige Paket, das den
 Funktionsstatus auf „funktionsfähig“ setzen darf.
 
 ## Definition of Done
