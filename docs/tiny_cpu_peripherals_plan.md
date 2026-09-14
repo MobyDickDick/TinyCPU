@@ -1,6 +1,6 @@
 # Vorschlag: Peripherie und Integration
 
-**Status: in Umsetzung (Interrupt-Annahmepfad verdrahtet).** Dieses Dokument trifft die nach AP 17 noch offene
+**Status: in Umsetzung (Interrupt-Maskierung verdrahtet).** Dieses Dokument trifft die nach AP 17 noch offene
 Produktentscheidung. Die Richtung **Peripherie und Integration** wird als
 **AP 18** ausgewählt. Das Paket ergänzt genau einen speicherabgebildeten
 Ausgabeport und eine externe, maskierbare Interruptquelle. Weitere Geräte und
@@ -125,8 +125,12 @@ Instruktionsgrenze und den invertierten Handlerzustand. Ihr Annahmeimpuls wird
 direkt ausgegeben und löscht über einen eigenen Rückkopplungspfad das
 Pending-Bit, sofern nicht gleichzeitig eine neue Anforderungsflanke eintrifft.
 Der Komponentenvertrag und ein Leitungs-Mutationstest schützen sowohl die vier
-Annahmebedingungen als auch Ausgabe und Löschpfad. Die verbleibende Masken- und
-Rückkehrlogik sowie die
+Annahmebedingungen als auch Ausgabe und Löschpfad. Die Maskenlogik setzt den
+taktsynchronen Zustand durch `ENABLE_REQUEST` oder eine Rückkehr, löscht ihn
+durch `DISABLE_REQUEST` oder Interruptannahme und hält ihn andernfalls über
+einen expliziten Rückkopplungspfad. Takt, Reset und der öffentliche
+Zustandsausgang sind vertraglich geprüft; ein Mutationstest schützt den
+Next-State-Pfad. Die verbleibende Rückkehrlogik sowie die
 funktionale Verdrahtung dieser Grenzen in die vollständige CPU folgt weiterhin
 innerhalb von Schritt 3.
 

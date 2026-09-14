@@ -237,6 +237,12 @@
     <comp lib="1" loc="(540,320)" name="NOT Gate"><a name="label" val="NOT_IN_HANDLER"/></comp>
     <comp lib="1" loc="(680,200)" name="NOT Gate"><a name="label" val="INTERRUPT_ACCEPT_NOT"/></comp>
     <comp lib="1" loc="(610,300)" name="AND Gate"><a name="label" val="PENDING_HOLD_UNTIL_ACCEPT"/></comp>
+    <comp lib="1" loc="(350,520)" name="OR Gate"><a name="label" val="MASK_SET_REQUEST"/></comp>
+    <comp lib="1" loc="(350,580)" name="OR Gate"><a name="label" val="MASK_CLEAR_REQUEST"/></comp>
+    <comp lib="1" loc="(430,580)" name="NOT Gate"><a name="label" val="MASK_CLEAR_NOT"/></comp>
+    <comp lib="1" loc="(510,560)" name="AND Gate"><a name="label" val="MASK_HOLD"/></comp>
+    <comp lib="1" loc="(590,530)" name="OR Gate"><a name="label" val="MASK_NEXT"/></comp>
+    <comp lib="0" loc="(390,220)" name="Constant"><a name="label" val="MASK_WRITE_ENABLE"/><a name="value" val="0x1"/></comp>
     <comp lib="1" loc="(610,240)" name="AND Gate"><a name="label" val="ILLEGAL_RETURN_GATE"/></comp>
     <comp lib="2" loc="(700,300)" name="Multiplexer"><a name="label" val="INTERRUPT_TARGET_SELECT"/><a name="width" val="12"/></comp>
     <comp lib="9" loc="(170,50)" name="Text"><a name="text" val="AP-18 interrupt state: reset &gt; accept at instruction boundary &gt; instruction; rising edges remain pending while masked"/></comp>
@@ -293,5 +299,36 @@
     <wire from="(490,260)" to="(700,260)"/>
     <wire from="(700,220)" to="(700,260)"/>
     <wire from="(700,220)" to="(820,220)"/>
+    <wire from="(160,200)" to="(300,200)"/>
+    <wire from="(300,200)" to="(300,510)"/>
+    <wire from="(160,280)" to="(300,280)"/>
+    <wire from="(300,280)" to="(300,530)"/>
+    <wire from="(160,240)" to="(300,240)"/>
+    <wire from="(300,240)" to="(300,570)"/>
+    <wire from="(650,180)" to="(780,180)"/>
+    <wire from="(780,180)" to="(780,590)"/>
+    <wire from="(780,590)" to="(300,590)"/>
+    <wire from="(350,580)" to="(380,580)"/>
+    <wire from="(430,580)" to="(460,580)"/>
+    <wire from="(460,580)" to="(460,570)"/>
+    <wire from="(490,200)" to="(460,200)"/>
+    <wire from="(460,200)" to="(460,550)"/>
+    <wire from="(350,520)" to="(540,520)"/>
+    <wire from="(510,560)" to="(540,560)"/>
+    <wire from="(540,560)" to="(540,540)"/>
+    <wire from="(590,530)" to="(400,530)"/>
+    <wire from="(400,530)" to="(400,200)"/>
+    <wire from="(400,200)" to="(430,200)"/>
+    <wire from="(390,220)" to="(430,220)"/>
+    <wire from="(160,360)" to="(370,360)"/>
+    <wire from="(370,360)" to="(370,240)"/>
+    <wire from="(370,240)" to="(430,240)"/>
+    <wire from="(160,400)" to="(470,400)"/>
+    <wire from="(470,400)" to="(470,270)"/>
+    <wire from="(470,270)" to="(460,270)"/>
+    <wire from="(490,200)" to="(490,480)"/>
+    <wire from="(490,480)" to="(800,480)"/>
+    <wire from="(800,480)" to="(800,180)"/>
+    <wire from="(800,180)" to="(820,180)"/>
   </circuit>
 </project>

@@ -212,9 +212,11 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Rückkopplung maskierte Anforderungen bis zur Annahme hält; Reset sowie der
   direkte Zustandsausgang sind vertraglich geprüft. Pending-Zustand, Maske,
   Instruktionsgrenze und invertierter Handlerzustand bilden inzwischen den
-  Annahmeimpuls, der zugleich das Pending-Bit gezielt löscht. Die
-  weitere funktionale Einfügung dieser Grenzen in die vollständige CPU und die
-  elektrische Matrix sind noch umzusetzen.
+  Annahmeimpuls, der zugleich das Pending-Bit gezielt löscht. Die Maske wird
+  durch Maskenbefehle und Rückkehr gesetzt, durch Deaktivierung oder Annahme
+  gelöscht und andernfalls taktsynchron gehalten; Takt, Reset und Ausgang sind
+  im Vertrag samt Mutationstest abgesichert. Die weitere funktionale Einfügung
+  dieser Grenzen in die vollständige CPU und die elektrische Matrix sind noch umzusetzen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
