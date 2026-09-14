@@ -4,14 +4,14 @@
 
 ## Kurzantwort
 
-Der Kernlauf, alle 50 positiven Opcode-Fälle und die ersten vier zusätzlichen
+Der Kernlauf, alle 50 positiven Opcode-Fälle und sämtliche fünf zusätzlichen
 Nicht-genommen-Fälle der Logisim-Schaltung sind inzwischen elektrisch
-nachgewiesen. `JUMP_ZERO` wertet dabei Null und Nicht-Null jetzt korrekt aus.
-Die vollständige Abnahme scheitert als nächstes am Fall
-`jump-not-error-not-taken`: `JUMP_NOT_ERROR` springt bei gesetztem
-Divisionsfehler fälschlich zum `HALT_ERROR`. Weil die Matrix seriell und
-Fail-fast läuft, sind die sechs Sticky-Error-Fälle in diesem Lauf noch nicht
-erneut geprüft worden.
+nachgewiesen. `JUMP_NOT_ERROR` wertet den zusammengefassten Fehlerzustand jetzt
+mit der richtigen Polarität aus. Die vollständige Abnahme scheitert als
+nächstes am Sticky-Error-Fall `reserved-opcode`, der nicht innerhalb des
+90-Sekunden-Limits hält. Die vier davor liegenden Sticky-Error-Fälle bestehen;
+der abschließende `input-error`-Fall wird wegen des seriellen Fail-fast-Laufs
+noch nicht gestartet.
 
 Diese Aussage betrifft die ausführbare Schaltung
 `hardware/logisim/TinyCPU.circ` (16/12 Bit), nicht das Python-Referenzmodell.
@@ -28,16 +28,17 @@ Ergebnis:
 
 - **16/12-Bit-Profil:** Kernlauf zweimal erfolgreich.
 - **Positive Befehlstests:** alle 50 Fälle erfolgreich.
-- **Zusätzliche Sprungfälle:** die ersten vier Fälle erfolgreich; der fünfte
-  Fall `jump-not-error-not-taken` fehlgeschlagen.
+- **Zusätzliche Sprungfälle:** alle fünf Fälle erfolgreich.
+- **Sticky-Error-Fälle:** die ersten vier Fälle erfolgreich; der fünfte Fall
+  `reserved-opcode` erreicht keinen Halt innerhalb des Limits.
 - **Gesamtergebnis:** elektrische Profilabnahme fehlgeschlagen.
 
-Die schnelle Offline-Prüfung ist erfolgreich (82 Tests).
+Die schnelle Offline-Prüfung ist erfolgreich (83 Tests).
 
 ## Vollständig abgenommene Befehle
 
 **Keine.** Die positiven Einzelfälle sind zwar erfolgreich, die verbindliche
-Gesamtabnahme ist wegen des zusätzlichen `JUMP_ZERO`-Negativfalls aber noch
+Gesamtabnahme ist wegen des Sticky-Error-Falls `reserved-opcode` aber noch
 nicht vollständig. Die nachfolgende Tabelle verwendet deshalb weiterhin den
 strengen Status „kein vollständiger elektrischer Nachweis“.
 
