@@ -548,6 +548,23 @@ class LogisimLauncherTests(unittest.TestCase):
         self.assertTrue(_wire_path_exists(main, "(4360,450)", "(670,510)"))
         self.assertTrue(_wire_path_exists(main, "(4360,470)", "(650,530)"))
 
+    def test_jump_box_gates_zero_conditions_with_the_matching_controls(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        jump_box = next(
+            circuit for circuit in root.findall("circuit")
+            if circuit.get("name") == "JumpBox"
+        )
+        jump_not_zero = _component_by_label(jump_box, "JUMP_NOT_ZERO_AND_NOT_ZERO")
+        taken = _component_by_label(jump_box, "JUMP_ZERO_OR_PREVIOUS_TAKEN")
+
+        self.assertEqual(jump_not_zero.get("name"), "AND Gate")
+        self.assertEqual(_attributes(taken).get("inputs"), "3")
+        self.assertTrue(_wire_path_exists(jump_box, "(1430,490)", "(2010,700)"))
+        self.assertTrue(_wire_path_exists(jump_box, "(1800,810)", "(2010,740)"))
+        self.assertTrue(_wire_path_exists(jump_box, "(1430,470)", "(2010,770)"))
+        self.assertTrue(_wire_path_exists(jump_box, "(1430,740)", "(2010,810)"))
+        self.assertTrue(_wire_path_exists(jump_box, "(1430,450)", "(2350,760)"))
+
     def test_sub_operand_reaches_operations_input(self):
         expected = ("(1400,1100)", "(2650,1100)")
         stale_sub_monitor_route = {
