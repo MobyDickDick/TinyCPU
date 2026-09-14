@@ -2578,3 +2578,34 @@ Ausgeführt wurden:
 LOGISIM_JAR=.venv/Include/logisim-evolution-4.1.0-all.jar scripts/test-logisim.sh
 scripts/test-offline.sh
 ```
+
+### Reparatur der Nullbedingungen in der `JumpBox`
+
+Die elektrische Eingrenzung bestätigte die falsche Polarität und zusätzlich
+eine fehlende Steuerung im Nullzweig der `JumpBox`: Das mit
+`JUMP_ZERO_AND_ZERO` beschriftete Gatter erhielt den invertierten Nullwert,
+während der Nicht-Null-Zweig ein OR-Gatter ohne `JUMP_NOT_ZERO`-Verknüpfung
+war. Dadurch konnte insbesondere `JUMP_ZERO` bei Akkumulatorwert 1 springen.
+
+Die Reparatur verwendet das vorhandene Inverter- und AND-Gatter nun für
+`JUMP_NOT_ZERO AND NOT ZERO`, führt den nicht invertierten Nullwert an
+`JUMP_ZERO_AND_ZERO` und nimmt den unbedingten Sprung als dritten Eingang in
+das bestehende Sammel-OR auf. `FetchDecodeControls` blieb vollständig
+unverändert. Eine topologische Regression sichert die beiden kontrollierten
+Nullzweige und den separaten unbedingten Sprungpfad ab.
+
+Danach bestehen der Kernlauf, alle 50 positiven Opcode-Fälle sowie
+`jump-zero-not-taken`, `jump-not-zero-not-taken`,
+`jump-negative-not-taken` und `jump-error-not-taken`. Der serielle Lauf stoppt
+erstmals bei Fall 55, `jump-not-error-not-taken`: Bei einem zuvor gesetzten
+Divisionsfehler erreicht die Schaltung den nicht ausgewählten Fehlerhalt.
+Gemäß Stop-Regel wurde dieser nächste Fehler nur identifiziert und nicht auf
+Verdacht mitrepariert.
+
+Ausgeführt wurden:
+
+```bash
+scripts/test-offline.sh
+LOGISIM_JAR="$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  LOGISIM_OUTPUT=/tmp/tinycpu-jz-fix scripts/test-logisim.sh
+```

@@ -1,15 +1,17 @@
 # Funktionsstand der TinyCPU-Befehle
 
-**Stand:** 13. September 2026, Schaltungsversion `80c5ab1`
+**Stand:** 14. September 2026
 
 ## Kurzantwort
 
-Der Kernlauf und alle 50 positiven Opcode-Fälle der Logisim-Schaltung sind
-inzwischen elektrisch nachgewiesen. Die vollständige Abnahme scheitert als
-nächstes am zusätzlichen Negativfall `jump-zero-not-taken`: `JUMP_ZERO` springt
-bei Akkumulatorwert 1 fälschlich zum `HALT_ERROR`. Weil die Matrix seriell und
-Fail-fast läuft, sind die vier danach folgenden Nicht-genommen-Fälle und die
-sechs Sticky-Error-Fälle in diesem Lauf noch nicht erneut geprüft worden.
+Der Kernlauf, alle 50 positiven Opcode-Fälle und die ersten vier zusätzlichen
+Nicht-genommen-Fälle der Logisim-Schaltung sind inzwischen elektrisch
+nachgewiesen. `JUMP_ZERO` wertet dabei Null und Nicht-Null jetzt korrekt aus.
+Die vollständige Abnahme scheitert als nächstes am Fall
+`jump-not-error-not-taken`: `JUMP_NOT_ERROR` springt bei gesetztem
+Divisionsfehler fälschlich zum `HALT_ERROR`. Weil die Matrix seriell und
+Fail-fast läuft, sind die sechs Sticky-Error-Fälle in diesem Lauf noch nicht
+erneut geprüft worden.
 
 Diese Aussage betrifft die ausführbare Schaltung
 `hardware/logisim/TinyCPU.circ` (16/12 Bit), nicht das Python-Referenzmodell.
@@ -26,7 +28,8 @@ Ergebnis:
 
 - **16/12-Bit-Profil:** Kernlauf zweimal erfolgreich.
 - **Positive Befehlstests:** alle 50 Fälle erfolgreich.
-- **Zusätzliche Sprungfälle:** erster Fall `jump-zero-not-taken` fehlgeschlagen.
+- **Zusätzliche Sprungfälle:** die ersten vier Fälle erfolgreich; der fünfte
+  Fall `jump-not-error-not-taken` fehlgeschlagen.
 - **Gesamtergebnis:** elektrische Profilabnahme fehlgeschlagen.
 
 Die schnelle Offline-Prüfung ist erfolgreich (82 Tests).
