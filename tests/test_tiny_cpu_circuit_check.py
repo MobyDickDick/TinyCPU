@@ -17,6 +17,19 @@ class CircuitCheckTests(unittest.TestCase):
             with self.subTest(project=project.relative_to(ROOT)):
                 self.assertEqual(inspect_project(project), [])
 
+    def test_diagnostic_sheets_belong_to_the_integrated_cpu(self):
+        integrated = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        integrated_names = {
+            circuit.get("name") for circuit in integrated.findall("circuit")
+        }
+
+        diagnostics = ROOT / "hardware/logisim/diagnostics"
+        for project in sorted(diagnostics.glob("*.circ")):
+            with self.subTest(project=project.relative_to(ROOT)):
+                circuits = ET.parse(project).getroot().findall("circuit")
+                self.assertEqual(len(circuits), 1)
+                self.assertIn(circuits[0].get("name"), integrated_names)
+
 
     def test_main_fetch_decoder_uses_one_shared_decoder_net(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()

@@ -15,11 +15,14 @@ and `TinyCPU-FetchDecodeControls.circ`. This keeps the PC/ROM path and control
 signal decoding electrically separate so that they can be examined
 independently.
 
-Each of the six diagnostic projects consists of exactly one independently
-loadable sheet and passes the structural connectivity check. An automated test
-compares them byte for byte with files newly generated from `TinyCPU.circ`, so
-future changes to the reference circuit cannot diverge unnoticed from the
-diagnostic projects.
+Each retained diagnostic project consists of exactly one independently
+loadable sheet and passes the structural connectivity check. Diagnostic sheets
+whose circuit no longer exists in `TinyCPU.circ` are not retained: the former
+`AddSub`, `AddSubCircuit`, `AddValidCircuit`, `FBox`, `SubCircuit`, and
+`SubValidCircuit` projects belonged to superseded arithmetic designs and were
+removed. An automated test verifies that every remaining diagnostic sheet has
+a corresponding circuit in the integrated CPU, so obsolete standalone copies
+cannot accumulate unnoticed.
 
 ## Reproducible verification
 
