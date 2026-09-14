@@ -83,7 +83,12 @@
         "pending_state_output",
         "accept_requires_pending_enabled_boundary_and_idle",
         "accept_state_output",
-        "pending_cleared_on_accept"
+        "pending_cleared_on_accept",
+        "mask_set_by_enable_or_return",
+        "mask_cleared_by_disable_or_accept",
+        "mask_state_hold",
+        "mask_clock_and_reset",
+        "mask_state_output"
       ]
     }
   },
