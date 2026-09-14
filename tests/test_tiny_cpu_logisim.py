@@ -382,6 +382,7 @@ class LogisimLauncherTests(unittest.TestCase):
             int, decoder.get("loc").strip("()").split(",")
         )
         reserved_3f = f"({decoder_x + 20},{decoder_y - 640 + 0x3f * 10})"
+        halt_error = f"({decoder_x + 20},{decoder_y - 640 + 0x37 * 10})"
 
         for gate_label, output_label in (
             ("RESERVED_OPCODE_SET_ILL", "SET_ILL"),
@@ -390,8 +391,8 @@ class LogisimLauncherTests(unittest.TestCase):
             gate = _component_by_label(controls, gate_label)
             gate_x, gate_y = map(int, gate.get("loc").strip("()").split(","))
             gate_inputs = (
-                f"({gate_x - 50},{gate_y - 10})",
-                f"({gate_x - 50},{gate_y + 10})",
+                f"({gate_x - 50},{gate_y - 20})",
+                f"({gate_x - 50},{gate_y + 20})",
             )
             self.assertTrue(
                 any(
@@ -400,6 +401,14 @@ class LogisimLauncherTests(unittest.TestCase):
                 ),
                 f"reserved opcode 0x3f does not reach {gate_label}",
             )
+            if output_label == "HALT_ERROR":
+                self.assertTrue(
+                    any(
+                        _wire_path_exists(controls, halt_error, terminal)
+                        for terminal in gate_inputs
+                    ),
+                    "HALT_ERROR opcode 0x37 does not reach its output gate",
+                )
             self.assertTrue(
                 _wire_path_exists(
                     controls,

@@ -4,13 +4,14 @@
 
 ## Kurzantwort
 
-Der Kernlauf, alle 50 positiven Opcode-Fälle und sämtliche fünf zusätzlichen
-Nicht-genommen-Fälle der Logisim-Schaltung sind inzwischen elektrisch
-nachgewiesen. Der danach als erster ausgefallene Sticky-Error-Fall
-`reserved-opcode` ist korrigiert: Decoderzeile `0x3f` setzt jetzt `ILL` und
-löst zugleich den erwarteten Fehlerhalt aus. Sowohl dieser Fall als auch der
-anschließende `missing-input`-Fall bestehen in gezielten elektrischen Läufen.
-Eine erneute vollständige serielle Profilabnahme steht noch aus.
+Der Kernlauf, alle 50 positiven Opcode-Fälle, sämtliche fünf zusätzlichen
+Nicht-genommen-Fälle und alle sechs Sticky-Error-Fälle der Logisim-Schaltung
+sind inzwischen in einer vollständigen elektrischen Profilabnahme
+nachgewiesen. Der dabei identifizierte, nicht funktionierende Befehl war
+`HALT_ERROR` (`0x37`): Seine Decoderleitung endete zwischen den Eingängen des
+gemeinsamen Fehlerhalt-ODER-Gatters. Die Leitung erreicht nun einen echten
+Gattereingang; auch der reservierte Opcode `0x3f` setzt weiterhin `ILL` und
+löst den erwarteten Fehlerhalt aus.
 
 Diese Aussage betrifft die ausführbare Schaltung
 `hardware/logisim/TinyCPU.circ` (16/12 Bit), nicht das Python-Referenzmodell.
@@ -20,7 +21,7 @@ Diese Aussage betrifft die ausführbare Schaltung
 Ausgeführt wurde:
 
 ```bash
-LOGISIM_JAR=.venv/Include/logisim-evolution-4.1.0-all.jar scripts/test-logisim.sh
+LOGISIM_JOBS=4 LOGISIM_JAR=.venv/Include/logisim-evolution-4.1.0-all.jar scripts/test-logisim.sh
 ```
 
 Ergebnis:
@@ -28,11 +29,9 @@ Ergebnis:
 - **16/12-Bit-Profil:** Kernlauf zweimal erfolgreich.
 - **Positive Befehlstests:** alle 50 Fälle erfolgreich.
 - **Zusätzliche Sprungfälle:** alle fünf Fälle erfolgreich.
-- **Sticky-Error-Fälle:** die zuvor erfolgreichen ersten vier Fälle sowie die
-  gezielt erneut ausgeführten Fälle `reserved-opcode` und `missing-input`
+- **Sticky-Error-Fälle:** alle sechs Fälle erfolgreich.
+- **Gesamtergebnis:** vollständige elektrische Profilabnahme mit 61 Fixtures
   erfolgreich.
-- **Gesamtergebnis:** vollständige elektrische Profilabnahme nach der Reparatur
-  noch nicht erneut ausgeführt.
 
 Die strukturelle Offline-Prüfung der Schaltungsdateien und Verträge ist
 erfolgreich. Der vollständige Offline-Lauf enthält derzeit unabhängig von
@@ -40,11 +39,11 @@ dieser Reparatur zwei fehlschlagende Topologieprüfungen des `JumpBox`-Blatts.
 
 ## Vollständig abgenommene Befehle
 
-**Keine.** Die positiven Einzelfälle und die beiden zuletzt gezielt geprüften
-Sticky-Error-Fälle sind zwar erfolgreich, die verbindliche Gesamtabnahme wurde
-nach der Reparatur aber noch nicht vollständig wiederholt. Die nachfolgende
-Tabelle verwendet deshalb weiterhin den strengen Status „kein vollständiger
-elektrischer Nachweis“.
+**Keine.** Die elektrische Gesamtabnahme ist erfolgreich, das zusätzlich
+verbindliche Offline-Gate scheitert jedoch weiterhin an zwei unabhängigen
+`JumpBox`-Topologieprüfungen. Die nachfolgende Tabelle verwendet deshalb bis
+zur vollständigen grünen Abnahme weiterhin den strengen Status „kein
+vollständiger elektrischer Nachweis“.
 
 ## Befehle, die derzeit nicht als funktionsfähig gelten
 

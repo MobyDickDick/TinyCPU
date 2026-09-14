@@ -1785,10 +1785,10 @@
     <comp lib="2" loc="(290,700)" name="Decoder">
       <a name="select" val="6"/>
     </comp>
-    <comp lib="1" loc="(1500,1220)" name="OR Gate">
+    <comp lib="1" loc="(1500,1250)" name="OR Gate">
       <a name="label" val="RESERVED_OPCODE_SET_ILL"/>
     </comp>
-    <comp lib="1" loc="(1500,1360)" name="OR Gate">
+    <comp lib="1" loc="(1500,1450)" name="OR Gate">
       <a name="label" val="RESERVED_OPCODE_HALT_ERROR"/>
     </comp>
     <comp lib="9" loc="(1735,1345)" name="Text">
@@ -2071,10 +2071,11 @@
     <wire from="(400,1380)" to="(1090,1380)"/>
     <wire from="(400,620)" to="(400,1380)"/>
     <wire from="(330,1230)" to="(1450,1230)"/>
-    <wire from="(330,1370)" to="(1450,1370)"/>
-    <wire from="(410,1350)" to="(1450,1350)"/>
-    <wire from="(410,610)" to="(410,1360)"/>
-    <wire from="(410,1350)" to="(410,1360)"/>
+    <wire from="(330,1460)" to="(330,1470)"/>
+    <wire from="(330,1470)" to="(1450,1470)"/>
+    <wire from="(410,1370)" to="(1450,1370)"/>
+    <wire from="(1450,1370)" to="(1450,1430)"/>
+    <wire from="(410,610)" to="(410,1370)"/>
     <wire from="(420,1340)" to="(1550,1340)"/>
     <wire from="(420,600)" to="(420,1340)"/>
     <wire from="(430,1320)" to="(1550,1320)"/>
@@ -2087,11 +2088,14 @@
     <wire from="(460,560)" to="(460,1260)"/>
     <wire from="(470,1240)" to="(1550,1240)"/>
     <wire from="(470,550)" to="(470,1240)"/>
-    <wire from="(480,1210)" to="(1450,1210)"/>
-    <wire from="(480,540)" to="(480,1220)"/>
-    <wire from="(480,1210)" to="(480,1220)"/>
-    <wire from="(1500,1220)" to="(1550,1220)"/>
-    <wire from="(1500,1360)" to="(1550,1360)"/>
+    <wire from="(480,1270)" to="(1450,1270)"/>
+    <wire from="(480,540)" to="(480,1270)"/>
+    <wire from="(1500,1250)" to="(1520,1250)"/>
+    <wire from="(1520,1220)" to="(1520,1250)"/>
+    <wire from="(1520,1220)" to="(1550,1220)"/>
+    <wire from="(1500,1450)" to="(1520,1450)"/>
+    <wire from="(1520,1360)" to="(1520,1450)"/>
+    <wire from="(1520,1360)" to="(1550,1360)"/>
     <wire from="(490,1200)" to="(1550,1200)"/>
     <wire from="(490,530)" to="(490,1200)"/>
     <wire from="(500,1180)" to="(1550,1180)"/>
