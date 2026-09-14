@@ -6,12 +6,11 @@
 
 Der Kernlauf, alle 50 positiven Opcode-Fälle und sämtliche fünf zusätzlichen
 Nicht-genommen-Fälle der Logisim-Schaltung sind inzwischen elektrisch
-nachgewiesen. `JUMP_NOT_ERROR` wertet den zusammengefassten Fehlerzustand jetzt
-mit der richtigen Polarität aus. Die vollständige Abnahme scheitert als
-nächstes am Sticky-Error-Fall `reserved-opcode`, der nicht innerhalb des
-90-Sekunden-Limits hält. Die vier davor liegenden Sticky-Error-Fälle bestehen;
-der abschließende `input-error`-Fall wird wegen des seriellen Fail-fast-Laufs
-noch nicht gestartet.
+nachgewiesen. Der danach als erster ausgefallene Sticky-Error-Fall
+`reserved-opcode` ist korrigiert: Decoderzeile `0x3f` setzt jetzt `ILL` und
+löst zugleich den erwarteten Fehlerhalt aus. Sowohl dieser Fall als auch der
+anschließende `missing-input`-Fall bestehen in gezielten elektrischen Läufen.
+Eine erneute vollständige serielle Profilabnahme steht noch aus.
 
 Diese Aussage betrifft die ausführbare Schaltung
 `hardware/logisim/TinyCPU.circ` (16/12 Bit), nicht das Python-Referenzmodell.
@@ -29,18 +28,23 @@ Ergebnis:
 - **16/12-Bit-Profil:** Kernlauf zweimal erfolgreich.
 - **Positive Befehlstests:** alle 50 Fälle erfolgreich.
 - **Zusätzliche Sprungfälle:** alle fünf Fälle erfolgreich.
-- **Sticky-Error-Fälle:** die ersten vier Fälle erfolgreich; der fünfte Fall
-  `reserved-opcode` erreicht keinen Halt innerhalb des Limits.
-- **Gesamtergebnis:** elektrische Profilabnahme fehlgeschlagen.
+- **Sticky-Error-Fälle:** die zuvor erfolgreichen ersten vier Fälle sowie die
+  gezielt erneut ausgeführten Fälle `reserved-opcode` und `missing-input`
+  erfolgreich.
+- **Gesamtergebnis:** vollständige elektrische Profilabnahme nach der Reparatur
+  noch nicht erneut ausgeführt.
 
-Die schnelle Offline-Prüfung ist erfolgreich (83 Tests).
+Die strukturelle Offline-Prüfung der Schaltungsdateien und Verträge ist
+erfolgreich. Der vollständige Offline-Lauf enthält derzeit unabhängig von
+dieser Reparatur zwei fehlschlagende Topologieprüfungen des `JumpBox`-Blatts.
 
 ## Vollständig abgenommene Befehle
 
-**Keine.** Die positiven Einzelfälle sind zwar erfolgreich, die verbindliche
-Gesamtabnahme ist wegen des Sticky-Error-Falls `reserved-opcode` aber noch
-nicht vollständig. Die nachfolgende Tabelle verwendet deshalb weiterhin den
-strengen Status „kein vollständiger elektrischer Nachweis“.
+**Keine.** Die positiven Einzelfälle und die beiden zuletzt gezielt geprüften
+Sticky-Error-Fälle sind zwar erfolgreich, die verbindliche Gesamtabnahme wurde
+nach der Reparatur aber noch nicht vollständig wiederholt. Die nachfolgende
+Tabelle verwendet deshalb weiterhin den strengen Status „kein vollständiger
+elektrischer Nachweis“.
 
 ## Befehle, die derzeit nicht als funktionsfähig gelten
 
