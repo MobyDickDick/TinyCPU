@@ -248,6 +248,8 @@
     <comp lib="1" loc="(680,620)" name="NOT Gate"><a name="label" val="VALID_RETURN_NOT"/></comp>
     <comp lib="1" loc="(610,680)" name="AND Gate"><a name="label" val="RETURN_VALID_HOLD"/></comp>
     <comp lib="1" loc="(700,660)" name="OR Gate"><a name="label" val="RETURN_VALID_NEXT"/></comp>
+    <comp lib="1" loc="(610,740)" name="AND Gate"><a name="label" val="HANDLER_HOLD"/></comp>
+    <comp lib="1" loc="(700,720)" name="OR Gate"><a name="label" val="HANDLER_NEXT"/></comp>
     <comp lib="0" loc="(560,600)" name="Tunnel"><a name="label" val="RETURN_REQUEST_FOR_VALIDATION"/></comp>
     <comp lib="0" loc="(560,620)" name="Tunnel"><a name="label" val="HANDLER_FOR_RETURN_VALIDATION"/></comp>
     <comp lib="0" loc="(560,640)" name="Tunnel"><a name="label" val="SAVED_RETURN_VALID"/></comp>
@@ -262,7 +264,14 @@
     <comp lib="0" loc="(700,320)" name="Tunnel"><a name="label" val="HANDLER_FOR_RETURN_VALIDATION"/></comp>
     <comp lib="0" loc="(700,380)" name="Tunnel"><a name="label" val="SAVED_RETURN_VALID"/></comp>
     <comp lib="0" loc="(630,180)" name="Tunnel"><a name="label" val="INTERRUPT_ACCEPT_FOR_RETURN"/></comp>
-    <comp lib="0" loc="(430,380)" name="Tunnel"><a name="label" val="RETURN_VALID_REGISTER_NEXT"/></comp>
+    <comp lib="0" loc="(430,440)" name="Tunnel"><a name="label" val="RETURN_VALID_REGISTER_NEXT"/></comp>
+    <comp lib="0" loc="(580,735)" name="Tunnel"><a name="label" val="HANDLER_FOR_RETURN_VALIDATION"/></comp>
+    <comp lib="0" loc="(580,745)" name="Tunnel"><a name="label" val="NO_VALID_RETURN"/></comp>
+    <comp lib="0" loc="(610,740)" name="Tunnel"><a name="label" val="HELD_HANDLER"/></comp>
+    <comp lib="0" loc="(670,715)" name="Tunnel"><a name="label" val="INTERRUPT_ACCEPT_FOR_RETURN"/></comp>
+    <comp lib="0" loc="(670,725)" name="Tunnel"><a name="label" val="HELD_HANDLER"/></comp>
+    <comp lib="0" loc="(700,720)" name="Tunnel"><a name="label" val="HANDLER_REGISTER_NEXT"/></comp>
+    <comp lib="0" loc="(450,320)" name="Tunnel"><a name="label" val="HANDLER_REGISTER_NEXT"/></comp>
     <comp lib="2" loc="(700,300)" name="Multiplexer"><a name="label" val="INTERRUPT_TARGET_SELECT"/><a name="width" val="12"/></comp>
     <comp lib="9" loc="(170,50)" name="Text"><a name="text" val="AP-18 interrupt state: reset &gt; accept at instruction boundary &gt; instruction; rising edges remain pending while masked"/></comp>
     <wire from="(160,120)" to="(360,120)"/>
@@ -350,11 +359,17 @@
     <wire from="(500,210)" to="(810,210)"/>
     <wire from="(810,180)" to="(810,210)"/>
     <wire from="(810,180)" to="(820,180)"/>
-    <wire from="(160,320)" to="(430,320)"/>
+    <wire from="(430,320)" to="(450,320)"/>
+    <wire from="(160,320)" to="(320,320)"/>
+    <wire from="(320,320)" to="(320,380)"/>
+    <wire from="(320,380)" to="(430,380)"/>
     <wire from="(610,180)" to="(630,180)"/>
     <wire from="(630,180)" to="(630,400)"/>
     <wire from="(430,340)" to="(630,340)"/>
     <wire from="(430,400)" to="(630,400)"/>
+    <wire from="(160,360)" to="(340,360)"/>
+    <wire from="(340,360)" to="(340,460)"/>
+    <wire from="(340,460)" to="(430,460)"/>
     <wire from="(160,360)" to="(430,360)"/>
     <wire from="(160,360)" to="(360,360)"/>
     <wire from="(360,360)" to="(360,420)"/>
@@ -363,6 +378,9 @@
     <wire from="(160,400)" to="(350,400)"/>
     <wire from="(350,400)" to="(350,440)"/>
     <wire from="(350,440)" to="(460,440)"/>
+    <wire from="(160,400)" to="(330,400)"/>
+    <wire from="(330,400)" to="(330,480)"/>
+    <wire from="(330,480)" to="(460,480)"/>
     <wire from="(490,320)" to="(740,320)"/>
     <wire from="(740,260)" to="(740,320)"/>
     <wire from="(740,260)" to="(820,260)"/>

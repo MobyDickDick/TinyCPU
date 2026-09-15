@@ -1,6 +1,6 @@
 # Vorschlag: Peripherie und Integration
 
-**Status: in Umsetzung (Rückkehrgültigkeit wird verbraucht).** Dieses Dokument trifft die nach AP 17 noch offene
+**Status: in Umsetzung (Handlerzustand wird geführt).** Dieses Dokument trifft die nach AP 17 noch offene
 Produktentscheidung. Die Richtung **Peripherie und Integration** wird als
 **AP 18** ausgewählt. Das Paket ergänzt genau einen speicherabgebildeten
 Ausgabeport und eine externe, maskierbare Interruptquelle. Weitere Geräte und
@@ -130,7 +130,7 @@ taktsynchronen Zustand durch `ENABLE_REQUEST` oder eine Rückkehr, löscht ihn
 durch `DISABLE_REQUEST` oder Interruptannahme und hält ihn andernfalls über
 einen expliziten Rückkopplungspfad. Takt, Reset und der öffentliche
 Zustandsausgang sind vertraglich geprüft; ein Mutationstest schützt den
-Next-State-Pfad. Die verbleibende Rückkehrlogik sowie die
+Next-State-Pfad. Die verbleibende Auswahl der Rücksprungadresse sowie die
 funktionale Verdrahtung dieser Grenzen in die vollständige CPU folgt weiterhin
 innerhalb von Schritt 3. Bei einer Interruptannahme übernimmt das
 Rückkehradressregister inzwischen `NEXT_PC`; derselbe Annahmeimpuls setzt das
@@ -142,9 +142,15 @@ Reset- und Ausgangspfade. Eine zulässige Rückkehr wird nun nur aus
 Dieser Impuls löscht das Validitätsbit; ohne ihn hält dessen expliziter
 Rückkopplungspfad den Zustand, während eine neue Interruptannahme weiterhin
 Vorrang beim Setzen hat. Der Komponentenvertrag und ein Leitungs-Mutationstest
-schützen die drei Bedingungen sowie Lösch-, Halte- und Setzpfad. Die
-Handlerzustandsübergänge und die Auswahl der Rücksprungadresse sind weiterhin
-offen. Die neuen, lokal benannten Tunnel sind eine dokumentierte Ausnahme von
+schützen die drei Bedingungen sowie Lösch-, Halte- und Setzpfad. Der
+Handlerzustand wird bei einer Interruptannahme gesetzt, bis zu einer gültigen
+Rückkehr gehalten und durch genau diesen Rückkehrimpuls gelöscht. Dabei wurden
+die zuvor nur strukturell beanspruchten Registeranschlüsse berichtigt:
+`NEXT_PC` speist das Rückkehradressregister und der Validitäts-Next-State das
+zugehörige Validitätsregister; beide Zustände besitzen nun ihre eigenen
+Takt- und Resetpfade. Komponentenvertrag und Leitungs-Mutationstest schützen
+auch den Handler-Next-State-Pfad. Die Auswahl der Rücksprungadresse ist
+weiterhin offen. Die neuen, lokal benannten Tunnel sind eine dokumentierte Ausnahme von
 der sonst bevorzugten Direktverdrahtung: Direkte Rückleitungen würden im
 bereits belegten Registerkorridor bestehende Zustandsnetze kreuzen. Bei einem
 späteren Redraw ist diese Ausnahme erneut zu prüfen.
