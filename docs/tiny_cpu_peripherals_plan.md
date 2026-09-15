@@ -1,7 +1,7 @@
 # Vorschlag: Peripherie und Integration
 
-**Status: in Umsetzung (Handlerzustand wird geführt).** Dieses Dokument trifft die nach AP 17 noch offene
-Produktentscheidung. Die Richtung **Peripherie und Integration** wird als
+**Status: in Umsetzung (Rücksprungziel wird ausgewählt).** Dieses Dokument trifft
+die nach AP 17 noch offene Produktentscheidung. Die Richtung **Peripherie und Integration** wird als
 **AP 18** ausgewählt. Das Paket ergänzt genau einen speicherabgebildeten
 Ausgabeport und eine externe, maskierbare Interruptquelle. Weitere Geräte und
 ein allgemein erweiterbarer Systembus bleiben späteren Paketen vorbehalten.
@@ -130,10 +130,9 @@ taktsynchronen Zustand durch `ENABLE_REQUEST` oder eine Rückkehr, löscht ihn
 durch `DISABLE_REQUEST` oder Interruptannahme und hält ihn andernfalls über
 einen expliziten Rückkopplungspfad. Takt, Reset und der öffentliche
 Zustandsausgang sind vertraglich geprüft; ein Mutationstest schützt den
-Next-State-Pfad. Die verbleibende Auswahl der Rücksprungadresse sowie die
-funktionale Verdrahtung dieser Grenzen in die vollständige CPU folgt weiterhin
-innerhalb von Schritt 3. Bei einer Interruptannahme übernimmt das
-Rückkehradressregister inzwischen `NEXT_PC`; derselbe Annahmeimpuls setzt das
+Next-State-Pfad. Die funktionale Verdrahtung dieser Grenzen in die vollständige
+CPU folgt weiterhin innerhalb von Schritt 3. Bei einer Interruptannahme übernimmt
+das Rückkehradressregister inzwischen `NEXT_PC`; derselbe Annahmeimpuls setzt das
 zugehörige Validitätsregister. Beide Register teilen sich Takt und Reset und
 führen ihre Zustände direkt an die öffentlichen Ausgänge. Der Komponentenvertrag
 und ein gezielter Leitungs-Mutationstest schützen Daten-, Annahme-, Takt-,
@@ -149,9 +148,12 @@ die zuvor nur strukturell beanspruchten Registeranschlüsse berichtigt:
 `NEXT_PC` speist das Rückkehradressregister und der Validitäts-Next-State das
 zugehörige Validitätsregister; beide Zustände besitzen nun ihre eigenen
 Takt- und Resetpfade. Komponentenvertrag und Leitungs-Mutationstest schützen
-auch den Handler-Next-State-Pfad. Die Auswahl der Rücksprungadresse ist
-weiterhin offen. Die neuen, lokal benannten Tunnel sind eine dokumentierte Ausnahme von
-der sonst bevorzugten Direktverdrahtung: Direkte Rückleitungen würden im
+auch den Handler-Next-State-Pfad. Der Zielmultiplexer liefert im normalen
+Interruptpfad den festen Vektor und schaltet ausschließlich beim gültigen
+Rückkehrimpuls auf die gespeicherte Rückkehradresse um. Daten-, Auswahl- und
+Ausgangspfad sind vertraglich geprüft und durch einen gezielten
+Leitungs-Mutationstest geschützt. Die neuen, lokal benannten Tunnel sind eine
+dokumentierte Ausnahme von der sonst bevorzugten Direktverdrahtung: Direkte Rückleitungen würden im
 bereits belegten Registerkorridor bestehende Zustandsnetze kreuzen. Bei einem
 späteren Redraw ist diese Ausnahme erneut zu prüfen.
 
