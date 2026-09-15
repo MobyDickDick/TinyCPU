@@ -5,11 +5,36 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from tiny_cpu_circuit_check import inspect_circuit, inspect_project, repair_project
+from tiny_cpu_wire_contacts import inspect_circuit as inspect_wire_contacts
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class CircuitCheckTests(unittest.TestCase):
+    def test_wire_contact_audit_finds_t_junction_and_overlap(self):
+        circuit = ET.fromstring("""
+          <circuit name="Crowded">
+            <wire from="(0,20)" to="(100,20)"/>
+            <wire from="(50,0)" to="(50,20)"/>
+            <wire from="(80,20)" to="(120,20)"/>
+          </circuit>
+        """)
+        issues = inspect_wire_contacts(circuit)
+        self.assertEqual(
+            [(issue.kind, issue.at) for issue in issues],
+            [("endpoint-on-wire junction", "(50, 20)"),
+             ("collinear overlap", "(80, 20)..(100, 20)")],
+        )
+
+    def test_wire_contact_audit_ignores_nonconnecting_crossing(self):
+        circuit = ET.fromstring("""
+          <circuit name="Crossing">
+            <wire from="(0,20)" to="(100,20)"/>
+            <wire from="(50,0)" to="(50,40)"/>
+          </circuit>
+        """)
+        self.assertEqual(inspect_wire_contacts(circuit), [])
+
     def test_all_projects_have_no_static_gate_wiring_faults(self):
         projects = sorted((ROOT / "hardware/logisim").rglob("*.circ"))
         self.assertGreater(len(projects), 1)

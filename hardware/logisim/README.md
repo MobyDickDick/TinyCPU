@@ -1253,3 +1253,24 @@ deleting such a wire, the checker still requires one loose end and a real
 three-way junction at the other end.  This explicit annotation is intentional:
 Logisim's `loc` is not the input-terminal coordinate for every component, so a
 purely geometric guess could silently delete a functional input connection.
+
+### Geometrischer Kontakt-Audit
+
+Der Treiber-Test oben findet nur Kollisionen, deren Bauteilausgänge er bereits
+kennt. Für dicht gezeichnete Verdrahtungen gibt es deshalb zusätzlich einen
+von Bauteiltypen unabhängigen Geometrie-Test:
+
+```bash
+python3 scripts/check-logisim-wire-contacts.py \
+  --circuit InterruptController hardware/logisim/TinyCPU-Peripherals.circ
+```
+
+Er meldet zwei besonders leicht zu übersehende Formen elektrischer Berührung:
+ein Leitungsende, das in der Mitte einer anderen Leitung landet, und zwei
+kollineare Leitungen mit einer Überlappung positiver Länge. Zu jedem Fund nennt
+er Schaltung, Koordinate, Leitungsnummern und beide Segmente. Rechtwinklige
+Kreuzungen ohne dort endende Leitung werden nicht gemeldet, weil sie in Logisim
+keine Verbindung herstellen. Der Prozess liefert Status 1, sobald er einen
+Kontakt findet; `--json` erzeugt dieselben Befunde für weitere Prüfwerkzeuge in
+maschinenlesbarer Form. Mit mehrfach angegebenem `--circuit NAME` lässt sich
+ein großes Projekt gezielt untersuchen.
