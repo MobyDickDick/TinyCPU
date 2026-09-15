@@ -54,6 +54,14 @@ class CircuitVerificationTests(unittest.TestCase):
     def test_ap18_circuit_matches_public_pin_contract(self) -> None:
         VERIFY.verify_system_circuit()
 
+    def test_ap18_schematic_uses_only_visible_wiring(self) -> None:
+        root = MODULE_PATH.parents[1]
+        project = VERIFY.ET.parse(
+            root / "hardware" / "logisim" / "TinyCPU-Peripherals.circ"
+        ).getroot()
+        self.assertEqual(project.findall(".//comp[@name='Tunnel']"), [])
+        self.assertEqual(project.findall(".//comp[@name='Text']"), [])
+
     def test_ap18_output_port_owns_value_and_valid_registers(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
