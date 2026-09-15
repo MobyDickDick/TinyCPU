@@ -218,8 +218,11 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   im Vertrag samt Mutationstest abgesichert. Bei der Annahme erfassen nun
   Rückkehradress- und Validitätsregister den nächsten PC und führen beide
   Zustände über vertraglich und per Mutationstest geschützte Takt-, Reset- und
-  Ausgangspfade nach außen. Die weitere funktionale Einfügung
-  dieser Grenzen in die vollständige CPU und die elektrische Matrix sind noch umzusetzen.
+  Ausgangspfade nach außen. Der Zielmultiplexer führt inzwischen den
+  Interruptvektor und wählt nur bei einer gültigen Rückkehr die gespeicherte Rückkehradresse; Daten-, Auswahl-
+  und Ausgangspfad sind gegen Leitungsregressionen geschützt. Die weitere
+  funktionale Einfügung dieser Grenzen in die vollständige CPU und die
+  elektrische Matrix sind noch umzusetzen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

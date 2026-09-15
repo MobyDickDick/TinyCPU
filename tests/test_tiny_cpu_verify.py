@@ -272,8 +272,23 @@ class CircuitVerificationTests(unittest.TestCase):
                                         "InterruptController wiring"):
                 VERIFY.verify_system_circuit()
 
-
-
+    def test_ap18_interrupt_controller_requires_return_target_selection(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
+        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
+            '<wire from="(650,310)" to="(670,310)"/>', "", 1), encoding="utf-8")
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        original = VERIFY.LOGISIM
+        VERIFY.LOGISIM = temporary / "logisim"
+        self.addCleanup(setattr, VERIFY, "LOGISIM", original)
+        with mock.patch.object(VERIFY, "load_system_profile",
+                               return_value=replace(system, circuit_path=circuit)):
+            with self.assertRaisesRegex(VERIFY.VerificationError,
+                                        "InterruptController wiring"):
+                VERIFY.verify_system_circuit()
 
 
 if __name__ == "__main__":

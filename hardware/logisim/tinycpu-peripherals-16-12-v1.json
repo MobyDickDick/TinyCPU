@@ -96,6 +96,10 @@
         "handler_set_on_interrupt_accept",
         "handler_cleared_on_valid_return",
         "handler_held_until_valid_return",
+        "interrupt_vector_selected_without_valid_return",
+        "return_address_selected_on_valid_return",
+        "valid_return_selects_target",
+        "selected_target_output",
         "return_state_clock_and_reset",
         "return_state_outputs"
       ]

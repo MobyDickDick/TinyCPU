@@ -521,6 +521,13 @@ def verify_system_circuit() -> None:
         ("(490,440)", "(790,440)"),
         ("(790,340)", "(820,340)"),
         ("(610,620)", "(650,620)"),
+        ("(330,80)", "(350,80)"),
+        ("(650,290)", "(670,290)"),
+        ("(490,380)", "(520,380)"),
+        ("(650,310)", "(670,310)"),
+        ("(680,330)", "(680,350)"),
+        ("(700,300)", "(730,300)"),
+        ("(800,140)", "(820,140)"),
     }
     expected_interrupt_paths = {
         "request_to_level_register", "request_level_clock_and_reset",
@@ -536,6 +543,9 @@ def verify_system_circuit() -> None:
         "return_address_valid_held_without_valid_return",
         "handler_set_on_interrupt_accept", "handler_cleared_on_valid_return",
         "handler_held_until_valid_return",
+        "interrupt_vector_selected_without_valid_return",
+        "return_address_selected_on_valid_return",
+        "valid_return_selects_target", "selected_target_output",
         "return_state_outputs",
     }
     if (not required_interrupt_wires <= interrupt_wires

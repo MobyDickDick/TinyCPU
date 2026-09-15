@@ -272,6 +272,14 @@
     <comp lib="0" loc="(670,725)" name="Tunnel"><a name="label" val="HELD_HANDLER"/></comp>
     <comp lib="0" loc="(700,720)" name="Tunnel"><a name="label" val="HANDLER_REGISTER_NEXT"/></comp>
     <comp lib="0" loc="(450,320)" name="Tunnel"><a name="label" val="HANDLER_REGISTER_NEXT"/></comp>
+    <comp lib="0" loc="(350,80)" name="Tunnel"><a name="label" val="INTERRUPT_VECTOR_TARGET"/></comp>
+    <comp lib="0" loc="(650,290)" name="Tunnel"><a name="label" val="INTERRUPT_VECTOR_TARGET"/></comp>
+    <comp lib="0" loc="(520,380)" name="Tunnel"><a name="label" val="SAVED_RETURN_TARGET"/></comp>
+    <comp lib="0" loc="(650,310)" name="Tunnel"><a name="label" val="SAVED_RETURN_TARGET"/></comp>
+    <comp lib="0" loc="(650,620)" name="Tunnel"><a name="label" val="VALID_RETURN_TARGET_SELECT"/></comp>
+    <comp lib="0" loc="(680,350)" name="Tunnel"><a name="label" val="VALID_RETURN_TARGET_SELECT"/></comp>
+    <comp lib="0" loc="(730,300)" name="Tunnel"><a name="label" val="SELECTED_INTERRUPT_TARGET"/></comp>
+    <comp lib="0" loc="(800,140)" name="Tunnel"><a name="label" val="SELECTED_INTERRUPT_TARGET"/></comp>
     <comp lib="2" loc="(700,300)" name="Multiplexer"><a name="label" val="INTERRUPT_TARGET_SELECT"/><a name="width" val="12"/></comp>
     <comp lib="9" loc="(170,50)" name="Text"><a name="text" val="AP-18 interrupt state: reset &gt; accept at instruction boundary &gt; instruction; rising edges remain pending while masked"/></comp>
     <wire from="(160,120)" to="(360,120)"/>
@@ -391,5 +399,12 @@
     <wire from="(790,340)" to="(790,440)"/>
     <wire from="(790,340)" to="(820,340)"/>
     <wire from="(610,620)" to="(650,620)"/>
+    <wire from="(330,80)" to="(350,80)"/>
+    <wire from="(650,290)" to="(670,290)"/>
+    <wire from="(490,380)" to="(520,380)"/>
+    <wire from="(650,310)" to="(670,310)"/>
+    <wire from="(680,330)" to="(680,350)"/>
+    <wire from="(700,300)" to="(730,300)"/>
+    <wire from="(800,140)" to="(820,140)"/>
   </circuit>
 </project>
