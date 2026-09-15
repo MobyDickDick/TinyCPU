@@ -497,6 +497,20 @@ def verify_system_circuit() -> None:
         ("(490,480)", "(800,480)"),
         ("(800,480)", "(800,180)"),
         ("(800,180)", "(820,180)"),
+        ("(160,320)", "(430,320)"),
+        ("(430,340)", "(650,340)"),
+        ("(650,180)", "(650,340)"),
+        ("(430,380)", "(650,380)"),
+        ("(430,400)", "(650,400)"),
+        ("(650,380)", "(650,400)"),
+        ("(160,360)", "(430,360)"),
+        ("(360,420)", "(430,420)"),
+        ("(460,380)", "(460,400)"),
+        ("(350,440)", "(460,440)"),
+        ("(490,320)", "(760,320)"),
+        ("(760,300)", "(820,300)"),
+        ("(490,380)", "(780,380)"),
+        ("(780,340)", "(820,340)"),
     }
     expected_interrupt_paths = {
         "request_to_level_register", "request_level_clock_and_reset",
@@ -506,6 +520,9 @@ def verify_system_circuit() -> None:
         "pending_cleared_on_accept", "mask_set_by_enable_or_return",
         "mask_cleared_by_disable_or_accept", "mask_state_hold",
         "mask_clock_and_reset", "mask_state_output",
+        "return_address_captured_on_accept",
+        "return_address_valid_set_on_accept", "return_state_clock_and_reset",
+        "return_state_outputs",
     }
     if (not required_interrupt_wires <= interrupt_wires
             or set(interrupt_contract.get("verified_paths", []))
