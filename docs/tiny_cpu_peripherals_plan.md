@@ -1,6 +1,6 @@
 # Vorschlag: Peripherie und Integration
 
-**Status: in Umsetzung (Interrupt-Rückkehradresse wird erfasst).** Dieses Dokument trifft die nach AP 17 noch offene
+**Status: in Umsetzung (Rückkehrgültigkeit wird verbraucht).** Dieses Dokument trifft die nach AP 17 noch offene
 Produktentscheidung. Die Richtung **Peripherie und Integration** wird als
 **AP 18** ausgewählt. Das Paket ergänzt genau einen speicherabgebildeten
 Ausgabeport und eine externe, maskierbare Interruptquelle. Weitere Geräte und
@@ -137,9 +137,17 @@ Rückkehradressregister inzwischen `NEXT_PC`; derselbe Annahmeimpuls setzt das
 zugehörige Validitätsregister. Beide Register teilen sich Takt und Reset und
 führen ihre Zustände direkt an die öffentlichen Ausgänge. Der Komponentenvertrag
 und ein gezielter Leitungs-Mutationstest schützen Daten-, Annahme-, Takt-,
-Reset- und Ausgangspfade. Das Löschen der Rückkehrgültigkeit, die
+Reset- und Ausgangspfade. Eine zulässige Rückkehr wird nun nur aus
+`RETURN_REQUEST`, aktivem Handlerzustand und gültiger Rückkehradresse gebildet.
+Dieser Impuls löscht das Validitätsbit; ohne ihn hält dessen expliziter
+Rückkopplungspfad den Zustand, während eine neue Interruptannahme weiterhin
+Vorrang beim Setzen hat. Der Komponentenvertrag und ein Leitungs-Mutationstest
+schützen die drei Bedingungen sowie Lösch-, Halte- und Setzpfad. Die
 Handlerzustandsübergänge und die Auswahl der Rücksprungadresse sind weiterhin
-offen.
+offen. Die neuen, lokal benannten Tunnel sind eine dokumentierte Ausnahme von
+der sonst bevorzugten Direktverdrahtung: Direkte Rückleitungen würden im
+bereits belegten Registerkorridor bestehende Zustandsnetze kreuzen. Bei einem
+späteren Redraw ist diese Ausnahme erneut zu prüfen.
 
 ## Kompatibilitätsfolgen
 

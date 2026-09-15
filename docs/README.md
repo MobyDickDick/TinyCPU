@@ -57,8 +57,10 @@ löscht. Pending-Zustand, Interruptmaske, Instruktionsgrenze und invertierter
 Handlerzustand sind nun zum Annahmeimpuls verknüpft; derselbe Impuls löscht das
 Pending-Bit gezielt. Bei der Annahme erfassen außerdem Rückkehradress- und
 Validitätsregister den nächsten PC; ihre Daten-, Annahme-, Takt-, Reset- und
-Ausgangspfade sind vertraglich und per Mutationstest geschützt. Das Löschen
-und der eigentliche Rücksprung bleiben offen. Die funktionale Einfügung
+Ausgangspfade sind vertraglich und per Mutationstest geschützt. Eine zulässige
+Rückkehr verbraucht die gespeicherte Gültigkeit nun über einen geprüften
+Next-State-Pfad. Handlerzustandswechsel und der eigentliche Rücksprung bleiben
+offen. Die funktionale Einfügung
 dieser Grenzen in die vollständige CPU und die elektrische Systemabnahme sind
 noch offen. Die Speicherpfadgrenze des Ausgabeports ist inzwischen vollständig
 verdrahtet und wird offline einschließlich ihrer getrennten RAM-/Port-Freigaben
