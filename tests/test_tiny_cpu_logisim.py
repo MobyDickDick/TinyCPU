@@ -342,7 +342,7 @@ class LogisimLauncherTests(unittest.TestCase):
             root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             wires = {(w.get("from"), w.get("to")) for w in main.findall("wire")}
-            expected = (("(2410,1460)", "(2660,1460)") if name == "TinyCPU.circ"
+            expected = (("(2440,1460)", "(2660,1460)") if name == "TinyCPU.circ"
                         else ("(2720,1760)", "(2940,1760)"))
             self.assertIn(
                 expected, wires,

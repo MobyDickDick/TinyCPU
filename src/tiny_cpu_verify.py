@@ -417,6 +417,8 @@ def verify_system_circuit() -> None:
         "PENDING_HOLD_UNTIL_ACCEPT", "MASK_SET_REQUEST",
         "MASK_CLEAR_REQUEST", "MASK_CLEAR_NOT", "MASK_HOLD", "MASK_NEXT",
         "MASK_WRITE_ENABLE",
+        "VALID_RETURN_GATE", "VALID_RETURN_NOT", "RETURN_VALID_HOLD",
+        "RETURN_VALID_NEXT",
     }
     if not required_interrupt_labels <= interrupt_labels:
         raise VerificationError(
@@ -502,7 +504,6 @@ def verify_system_circuit() -> None:
         ("(610,180)", "(630,180)"),
         ("(630,180)", "(630,400)"),
         ("(430,340)", "(630,340)"),
-        ("(430,380)", "(630,380)"),
         ("(430,400)", "(630,400)"),
         ("(160,360)", "(430,360)"),
         ("(360,420)", "(430,420)"),
@@ -514,6 +515,7 @@ def verify_system_circuit() -> None:
         ("(760,300)", "(820,300)"),
         ("(490,440)", "(790,440)"),
         ("(790,340)", "(820,340)"),
+        ("(610,620)", "(650,620)"),
     }
     expected_interrupt_paths = {
         "request_to_level_register", "request_level_clock_and_reset",
@@ -525,6 +527,8 @@ def verify_system_circuit() -> None:
         "mask_clock_and_reset", "mask_state_output",
         "return_address_captured_on_accept",
         "return_address_valid_set_on_accept", "return_state_clock_and_reset",
+        "return_address_valid_cleared_on_valid_return",
+        "return_address_valid_held_without_valid_return",
         "return_state_outputs",
     }
     if (not required_interrupt_wires <= interrupt_wires
