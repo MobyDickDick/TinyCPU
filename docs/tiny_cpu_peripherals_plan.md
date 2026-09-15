@@ -1,6 +1,6 @@
 # Vorschlag: Peripherie und Integration
 
-**Status: in Umsetzung (Interrupt-Maskierung verdrahtet).** Dieses Dokument trifft die nach AP 17 noch offene
+**Status: in Umsetzung (Interrupt-Rückkehradresse wird erfasst).** Dieses Dokument trifft die nach AP 17 noch offene
 Produktentscheidung. Die Richtung **Peripherie und Integration** wird als
 **AP 18** ausgewählt. Das Paket ergänzt genau einen speicherabgebildeten
 Ausgabeport und eine externe, maskierbare Interruptquelle. Weitere Geräte und
@@ -132,7 +132,14 @@ einen expliziten Rückkopplungspfad. Takt, Reset und der öffentliche
 Zustandsausgang sind vertraglich geprüft; ein Mutationstest schützt den
 Next-State-Pfad. Die verbleibende Rückkehrlogik sowie die
 funktionale Verdrahtung dieser Grenzen in die vollständige CPU folgt weiterhin
-innerhalb von Schritt 3.
+innerhalb von Schritt 3. Bei einer Interruptannahme übernimmt das
+Rückkehradressregister inzwischen `NEXT_PC`; derselbe Annahmeimpuls setzt das
+zugehörige Validitätsregister. Beide Register teilen sich Takt und Reset und
+führen ihre Zustände direkt an die öffentlichen Ausgänge. Der Komponentenvertrag
+und ein gezielter Leitungs-Mutationstest schützen Daten-, Annahme-, Takt-,
+Reset- und Ausgangspfade. Das Löschen der Rückkehrgültigkeit, die
+Handlerzustandsübergänge und die Auswahl der Rücksprungadresse sind weiterhin
+offen.
 
 ## Kompatibilitätsfolgen
 

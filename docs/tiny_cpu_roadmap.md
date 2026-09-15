@@ -215,7 +215,10 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Annahmeimpuls, der zugleich das Pending-Bit gezielt löscht. Die Maske wird
   durch Maskenbefehle und Rückkehr gesetzt, durch Deaktivierung oder Annahme
   gelöscht und andernfalls taktsynchron gehalten; Takt, Reset und Ausgang sind
-  im Vertrag samt Mutationstest abgesichert. Die weitere funktionale Einfügung
+  im Vertrag samt Mutationstest abgesichert. Bei der Annahme erfassen nun
+  Rückkehradress- und Validitätsregister den nächsten PC und führen beide
+  Zustände über vertraglich und per Mutationstest geschützte Takt-, Reset- und
+  Ausgangspfade nach außen. Die weitere funktionale Einfügung
   dieser Grenzen in die vollständige CPU und die elektrische Matrix sind noch umzusetzen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss

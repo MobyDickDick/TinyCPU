@@ -88,7 +88,11 @@
         "mask_cleared_by_disable_or_accept",
         "mask_state_hold",
         "mask_clock_and_reset",
-        "mask_state_output"
+        "mask_state_output",
+        "return_address_captured_on_accept",
+        "return_address_valid_set_on_accept",
+        "return_state_clock_and_reset",
+        "return_state_outputs"
       ]
     }
   },
