@@ -221,67 +221,70 @@
     <comp lib="0" loc="(820,300)" name="Pin"><a name="appearance" val="classic"/><a name="facing" val="west"/><a name="label" val="RETURN_ADDRESS"/><a name="type" val="output"/><a name="width" val="12"/></comp>
     <comp lib="0" loc="(820,340)" name="Pin"><a name="appearance" val="classic"/><a name="facing" val="west"/><a name="label" val="RETURN_ADDRESS_VALID"/><a name="type" val="output"/></comp>
     <comp lib="0" loc="(820,380)" name="Pin"><a name="appearance" val="classic"/><a name="facing" val="west"/><a name="label" val="ILLEGAL_RETURN"/><a name="type" val="output"/></comp>
-    <comp lib="0" loc="(300,80)" name="Constant"><a name="label" val="INTERRUPT_VECTOR"/><a name="value" val="0xff0"/><a name="width" val="12"/></comp>
-    <comp lib="5" loc="(430,110)" name="Register"><a name="label" val="REQUEST_LEVEL"/><a name="width" val="1"/></comp>
-    <comp lib="5" loc="(430,170)" name="Register"><a name="label" val="INTERRUPT_ENABLED"/><a name="width" val="1"/></comp>
-    <comp lib="5" loc="(430,230)" name="Register"><a name="label" val="INTERRUPT_PENDING"/><a name="width" val="1"/></comp>
-    <comp lib="5" loc="(430,290)" name="Register"><a name="label" val="IN_INTERRUPT_HANDLER"/><a name="width" val="1"/></comp>
-    <comp lib="5" loc="(430,350)" name="Register"><a name="label" val="RETURN_ADDRESS"/><a name="width" val="12"/></comp>
-    <comp lib="5" loc="(430,410)" name="Register"><a name="label" val="RETURN_ADDRESS_VALID"/><a name="width" val="1"/></comp>
-    <comp lib="1" loc="(610,120)" name="AND Gate"><a name="label" val="RISING_EDGE_DETECT"/></comp>
-    <comp lib="1" loc="(540,140)" name="NOT Gate"><a name="label" val="PREVIOUS_REQUEST_NOT"/></comp>
-    <comp lib="0" loc="(390,160)" name="Constant"><a name="label" val="REQUEST_LEVEL_WRITE_ENABLE"/><a name="value" val="0x1"/></comp>
-    <comp lib="1" loc="(350,260)" name="OR Gate"><a name="label" val="PENDING_SET_OR_HOLD"/></comp>
-    <comp lib="0" loc="(390,280)" name="Constant"><a name="label" val="PENDING_WRITE_ENABLE"/><a name="value" val="0x1"/></comp>
-    <comp lib="1" loc="(610,180)" name="AND Gate"><a name="label" val="INTERRUPT_ACCEPT_GATE"/><a name="inputs" val="4"/></comp>
-    <comp lib="1" loc="(540,320)" name="NOT Gate"><a name="label" val="NOT_IN_HANDLER"/></comp>
-    <comp lib="1" loc="(680,200)" name="NOT Gate"><a name="label" val="INTERRUPT_ACCEPT_NOT"/></comp>
-    <comp lib="1" loc="(610,300)" name="AND Gate"><a name="label" val="PENDING_HOLD_UNTIL_ACCEPT"/></comp>
-    <comp lib="1" loc="(350,520)" name="OR Gate"><a name="label" val="MASK_SET_REQUEST"/></comp>
-    <comp lib="1" loc="(350,580)" name="OR Gate"><a name="label" val="MASK_CLEAR_REQUEST"/></comp>
-    <comp lib="1" loc="(430,580)" name="NOT Gate"><a name="label" val="MASK_CLEAR_NOT"/></comp>
-    <comp lib="1" loc="(510,560)" name="AND Gate"><a name="label" val="MASK_HOLD"/></comp>
-    <comp lib="1" loc="(590,530)" name="OR Gate"><a name="label" val="MASK_NEXT"/></comp>
-    <comp lib="0" loc="(390,220)" name="Constant"><a name="label" val="MASK_WRITE_ENABLE"/><a name="value" val="0x1"/></comp>
-    <comp lib="1" loc="(610,240)" name="AND Gate"><a name="label" val="ILLEGAL_RETURN_GATE"/></comp>
-    <comp lib="1" loc="(610,620)" name="AND Gate"><a name="inputs" val="3"/><a name="label" val="VALID_RETURN_GATE"/></comp>
-    <comp lib="1" loc="(680,620)" name="NOT Gate"><a name="label" val="VALID_RETURN_NOT"/></comp>
-    <comp lib="1" loc="(610,680)" name="AND Gate"><a name="label" val="RETURN_VALID_HOLD"/></comp>
-    <comp lib="1" loc="(700,660)" name="OR Gate"><a name="label" val="RETURN_VALID_NEXT"/></comp>
-    <comp lib="1" loc="(610,740)" name="AND Gate"><a name="label" val="HANDLER_HOLD"/></comp>
-    <comp lib="1" loc="(700,720)" name="OR Gate"><a name="label" val="HANDLER_NEXT"/></comp>
-    <comp lib="0" loc="(560,600)" name="Tunnel"><a name="label" val="RETURN_REQUEST_FOR_VALIDATION"/></comp>
-    <comp lib="0" loc="(560,620)" name="Tunnel"><a name="label" val="HANDLER_FOR_RETURN_VALIDATION"/></comp>
-    <comp lib="0" loc="(560,640)" name="Tunnel"><a name="label" val="SAVED_RETURN_VALID"/></comp>
-    <comp lib="0" loc="(560,670)" name="Tunnel"><a name="label" val="SAVED_RETURN_VALID"/></comp>
-    <comp lib="0" loc="(560,690)" name="Tunnel"><a name="label" val="NO_VALID_RETURN"/></comp>
-    <comp lib="0" loc="(650,650)" name="Tunnel"><a name="label" val="INTERRUPT_ACCEPT_FOR_RETURN"/></comp>
-    <comp lib="0" loc="(680,620)" name="Tunnel"><a name="label" val="NO_VALID_RETURN"/></comp>
-    <comp lib="0" loc="(610,680)" name="Tunnel"><a name="label" val="HELD_RETURN_VALID"/></comp>
-    <comp lib="0" loc="(650,670)" name="Tunnel"><a name="label" val="HELD_RETURN_VALID"/></comp>
-    <comp lib="0" loc="(700,660)" name="Tunnel"><a name="label" val="RETURN_VALID_REGISTER_NEXT"/></comp>
-    <comp lib="0" loc="(240,280)" name="Tunnel"><a name="label" val="RETURN_REQUEST_FOR_VALIDATION"/></comp>
-    <comp lib="0" loc="(700,320)" name="Tunnel"><a name="label" val="HANDLER_FOR_RETURN_VALIDATION"/></comp>
-    <comp lib="0" loc="(700,380)" name="Tunnel"><a name="label" val="SAVED_RETURN_VALID"/></comp>
-    <comp lib="0" loc="(630,180)" name="Tunnel"><a name="label" val="INTERRUPT_ACCEPT_FOR_RETURN"/></comp>
-    <comp lib="0" loc="(430,440)" name="Tunnel"><a name="label" val="RETURN_VALID_REGISTER_NEXT"/></comp>
-    <comp lib="0" loc="(580,735)" name="Tunnel"><a name="label" val="HANDLER_FOR_RETURN_VALIDATION"/></comp>
-    <comp lib="0" loc="(580,745)" name="Tunnel"><a name="label" val="NO_VALID_RETURN"/></comp>
-    <comp lib="0" loc="(610,740)" name="Tunnel"><a name="label" val="HELD_HANDLER"/></comp>
-    <comp lib="0" loc="(670,715)" name="Tunnel"><a name="label" val="INTERRUPT_ACCEPT_FOR_RETURN"/></comp>
-    <comp lib="0" loc="(670,725)" name="Tunnel"><a name="label" val="HELD_HANDLER"/></comp>
-    <comp lib="0" loc="(700,720)" name="Tunnel"><a name="label" val="HANDLER_REGISTER_NEXT"/></comp>
-    <comp lib="0" loc="(450,320)" name="Tunnel"><a name="label" val="HANDLER_REGISTER_NEXT"/></comp>
-    <comp lib="0" loc="(350,80)" name="Tunnel"><a name="label" val="INTERRUPT_VECTOR_TARGET"/></comp>
-    <comp lib="0" loc="(650,290)" name="Tunnel"><a name="label" val="INTERRUPT_VECTOR_TARGET"/></comp>
-    <comp lib="0" loc="(520,380)" name="Tunnel"><a name="label" val="SAVED_RETURN_TARGET"/></comp>
-    <comp lib="0" loc="(650,310)" name="Tunnel"><a name="label" val="SAVED_RETURN_TARGET"/></comp>
-    <comp lib="0" loc="(650,620)" name="Tunnel"><a name="label" val="VALID_RETURN_TARGET_SELECT"/></comp>
-    <comp lib="0" loc="(680,350)" name="Tunnel"><a name="label" val="VALID_RETURN_TARGET_SELECT"/></comp>
-    <comp lib="0" loc="(730,300)" name="Tunnel"><a name="label" val="SELECTED_INTERRUPT_TARGET"/></comp>
-    <comp lib="0" loc="(800,140)" name="Tunnel"><a name="label" val="SELECTED_INTERRUPT_TARGET"/></comp>
-    <comp lib="2" loc="(700,300)" name="Multiplexer"><a name="label" val="INTERRUPT_TARGET_SELECT"/><a name="width" val="12"/></comp>
+    <comp lib="0" loc="(300,80)" name="Constant"><a name="label" val="INTERRUPT_VECTOR"/><a name="value" val="0xff0"/><a name="width" val="12"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="5" loc="(430,110)" name="Register"><a name="label" val="REQUEST_LEVEL"/><a name="width" val="1"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="5" loc="(430,170)" name="Register"><a name="label" val="INTERRUPT_ENABLED"/><a name="width" val="1"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="5" loc="(430,230)" name="Register"><a name="label" val="INTERRUPT_PENDING"/><a name="width" val="1"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="5" loc="(430,290)" name="Register"><a name="label" val="IN_INTERRUPT_HANDLER"/><a name="width" val="1"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="5" loc="(430,350)" name="Register"><a name="label" val="RETURN_ADDRESS"/><a name="width" val="12"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="5" loc="(430,410)" name="Register"><a name="label" val="RETURN_ADDRESS_VALID"/><a name="width" val="1"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="1" loc="(610,120)" name="AND Gate"><a name="label" val="RISING_EDGE_DETECT"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="1" loc="(540,140)" name="NOT Gate"><a name="label" val="PREVIOUS_REQUEST_NOT"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="0" loc="(390,160)" name="Constant"><a name="label" val="REQUEST_LEVEL_WRITE_ENABLE"/><a name="value" val="0x1"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="1" loc="(350,260)" name="OR Gate"><a name="label" val="PENDING_SET_OR_HOLD"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="0" loc="(390,280)" name="Constant"><a name="label" val="PENDING_WRITE_ENABLE"/><a name="value" val="0x1"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="1" loc="(610,180)" name="AND Gate"><a name="label" val="INTERRUPT_ACCEPT_GATE"/><a name="inputs" val="4"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="1" loc="(540,320)" name="NOT Gate"><a name="label" val="NOT_IN_HANDLER"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="1" loc="(680,200)" name="NOT Gate"><a name="label" val="INTERRUPT_ACCEPT_NOT"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="1" loc="(610,300)" name="AND Gate"><a name="label" val="PENDING_HOLD_UNTIL_ACCEPT"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="1" loc="(350,520)" name="OR Gate"><a name="label" val="MASK_SET_REQUEST"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="1" loc="(350,580)" name="OR Gate"><a name="label" val="MASK_CLEAR_REQUEST"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="1" loc="(430,580)" name="NOT Gate"><a name="label" val="MASK_CLEAR_NOT"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="1" loc="(510,560)" name="AND Gate"><a name="label" val="MASK_HOLD"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="1" loc="(590,530)" name="OR Gate"><a name="label" val="MASK_NEXT"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="0" loc="(390,220)" name="Constant"><a name="label" val="MASK_WRITE_ENABLE"/><a name="value" val="0x1"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="1" loc="(610,240)" name="AND Gate"><a name="label" val="ILLEGAL_RETURN_GATE"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="1" loc="(610,620)" name="AND Gate"><a name="inputs" val="3"/><a name="label" val="VALID_RETURN_GATE"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="1" loc="(680,620)" name="NOT Gate"><a name="label" val="VALID_RETURN_NOT"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="1" loc="(610,680)" name="AND Gate"><a name="label" val="RETURN_VALID_HOLD"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="1" loc="(700,660)" name="OR Gate"><a name="label" val="RETURN_VALID_NEXT"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="1" loc="(610,740)" name="AND Gate"><a name="label" val="HANDLER_HOLD"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="1" loc="(700,720)" name="OR Gate"><a name="label" val="HANDLER_NEXT"/><a name="labelfont" val="SansSerif plain 8"/></comp>
+    <comp lib="0" loc="(560,600)" name="Tunnel"><a name="label" val="RETURN_REQUEST_FOR_VALIDATION"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(560,620)" name="Tunnel"><a name="label" val="HANDLER_FOR_RETURN_VALIDATION"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(560,640)" name="Tunnel"><a name="label" val="SAVED_RETURN_VALID"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(560,670)" name="Tunnel"><a name="label" val="SAVED_RETURN_VALID"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(560,690)" name="Tunnel"><a name="label" val="NO_VALID_RETURN"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(650,650)" name="Tunnel"><a name="label" val="INTERRUPT_ACCEPT_FOR_RETURN"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(680,620)" name="Tunnel"><a name="label" val="NO_VALID_RETURN"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(610,680)" name="Tunnel"><a name="label" val="HELD_RETURN_VALID"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(650,670)" name="Tunnel"><a name="label" val="HELD_RETURN_VALID"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(700,660)" name="Tunnel"><a name="label" val="RETURN_VALID_REGISTER_NEXT"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(240,280)" name="Tunnel"><a name="label" val="RETURN_REQUEST_FOR_VALIDATION"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(700,320)" name="Tunnel"><a name="label" val="HANDLER_FOR_RETURN_VALIDATION"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(700,380)" name="Tunnel"><a name="label" val="SAVED_RETURN_VALID"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(630,180)" name="Tunnel"><a name="label" val="INTERRUPT_ACCEPT_FOR_RETURN"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(430,440)" name="Tunnel"><a name="label" val="RETURN_VALID_REGISTER_NEXT"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(580,735)" name="Tunnel"><a name="label" val="HANDLER_FOR_RETURN_VALIDATION"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(580,745)" name="Tunnel"><a name="label" val="NO_VALID_RETURN"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(610,740)" name="Tunnel"><a name="label" val="HELD_HANDLER"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(670,715)" name="Tunnel"><a name="label" val="INTERRUPT_ACCEPT_FOR_RETURN"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(670,725)" name="Tunnel"><a name="label" val="HELD_HANDLER"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(700,720)" name="Tunnel"><a name="label" val="HANDLER_REGISTER_NEXT"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(450,320)" name="Tunnel"><a name="label" val="HANDLER_REGISTER_NEXT"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(350,80)" name="Tunnel"><a name="label" val="INTERRUPT_VECTOR_TARGET"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(650,290)" name="Tunnel"><a name="label" val="INTERRUPT_VECTOR_TARGET"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(520,380)" name="Tunnel"><a name="label" val="SAVED_RETURN_TARGET"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(650,310)" name="Tunnel"><a name="label" val="SAVED_RETURN_TARGET"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(650,620)" name="Tunnel"><a name="label" val="VALID_RETURN_TARGET_SELECT"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(680,350)" name="Tunnel"><a name="label" val="VALID_RETURN_TARGET_SELECT"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(730,300)" name="Tunnel"><a name="label" val="SELECTED_INTERRUPT_TARGET"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="0" loc="(800,140)" name="Tunnel"><a name="label" val="SELECTED_INTERRUPT_TARGET"/><a name="labelfont" val="SansSerif plain 6"/></comp>
+    <comp lib="2" loc="(700,300)" name="Multiplexer"><a name="label" val="INTERRUPT_TARGET_SELECT"/><a name="width" val="12"/><a name="labelfont" val="SansSerif plain 8"/></comp>
     <comp lib="9" loc="(170,50)" name="Text"><a name="text" val="AP-18 interrupt state: reset &gt; accept at instruction boundary &gt; instruction; rising edges remain pending while masked"/></comp>
+    <comp lib="9" loc="(250,500)" name="Text"><a name="font" val="SansSerif bold 11"/><a name="text" val="MASK NEXT STATE"/></comp>
+    <comp lib="9" loc="(510,570)" name="Text"><a name="font" val="SansSerif bold 11"/><a name="text" val="RETURN VALID NEXT STATE"/></comp>
+    <comp lib="9" loc="(510,710)" name="Text"><a name="font" val="SansSerif bold 11"/><a name="text" val="HANDLER NEXT STATE"/></comp>
     <wire from="(160,120)" to="(360,120)"/>
     <wire from="(360,120)" to="(360,140)"/>
     <wire from="(360,140)" to="(430,140)"/>
