@@ -59,8 +59,9 @@ Pending-Bit gezielt. Bei der Annahme erfassen außerdem Rückkehradress- und
 Validitätsregister den nächsten PC; ihre Daten-, Annahme-, Takt-, Reset- und
 Ausgangspfade sind vertraglich und per Mutationstest geschützt. Eine zulässige
 Rückkehr verbraucht die gespeicherte Gültigkeit nun über einen geprüften
-Next-State-Pfad. Handlerzustandswechsel und der eigentliche Rücksprung bleiben
-offen. Die funktionale Einfügung
+Next-State-Pfad. Der Handlerzustand wird bei Annahme gesetzt, bis zu einer
+gültigen Rückkehr gehalten und dann gelöscht. Die Auswahl der Rücksprungadresse
+bleibt offen. Die funktionale Einfügung
 dieser Grenzen in die vollständige CPU und die elektrische Systemabnahme sind
 noch offen. Die Speicherpfadgrenze des Ausgabeports ist inzwischen vollständig
 verdrahtet und wird offline einschließlich ihrer getrennten RAM-/Port-Freigaben

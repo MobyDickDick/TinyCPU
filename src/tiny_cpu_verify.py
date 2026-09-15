@@ -418,7 +418,7 @@ def verify_system_circuit() -> None:
         "MASK_CLEAR_REQUEST", "MASK_CLEAR_NOT", "MASK_HOLD", "MASK_NEXT",
         "MASK_WRITE_ENABLE",
         "VALID_RETURN_GATE", "VALID_RETURN_NOT", "RETURN_VALID_HOLD",
-        "RETURN_VALID_NEXT",
+        "RETURN_VALID_NEXT", "HANDLER_HOLD", "HANDLER_NEXT",
     }
     if not required_interrupt_labels <= interrupt_labels:
         raise VerificationError(
@@ -500,15 +500,20 @@ def verify_system_circuit() -> None:
         ("(500,210)", "(810,210)"),
         ("(810,180)", "(810,210)"),
         ("(810,180)", "(820,180)"),
-        ("(160,320)", "(430,320)"),
+        ("(430,320)", "(450,320)"),
+        ("(160,320)", "(320,320)"),
+        ("(320,320)", "(320,380)"),
+        ("(320,380)", "(430,380)"),
         ("(610,180)", "(630,180)"),
         ("(630,180)", "(630,400)"),
         ("(430,340)", "(630,340)"),
         ("(430,400)", "(630,400)"),
+        ("(340,460)", "(430,460)"),
         ("(160,360)", "(430,360)"),
         ("(360,420)", "(430,420)"),
         ("(460,380)", "(460,400)"),
         ("(350,440)", "(460,440)"),
+        ("(330,480)", "(460,480)"),
         ("(490,320)", "(740,320)"),
         ("(740,260)", "(820,260)"),
         ("(490,380)", "(760,380)"),
@@ -529,6 +534,8 @@ def verify_system_circuit() -> None:
         "return_address_valid_set_on_accept", "return_state_clock_and_reset",
         "return_address_valid_cleared_on_valid_return",
         "return_address_valid_held_without_valid_return",
+        "handler_set_on_interrupt_accept", "handler_cleared_on_valid_return",
+        "handler_held_until_valid_return",
         "return_state_outputs",
     }
     if (not required_interrupt_wires <= interrupt_wires

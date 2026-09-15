@@ -93,6 +93,9 @@
         "return_address_valid_set_on_accept",
         "return_address_valid_cleared_on_valid_return",
         "return_address_valid_held_without_valid_return",
+        "handler_set_on_interrupt_accept",
+        "handler_cleared_on_valid_return",
+        "handler_held_until_valid_return",
         "return_state_clock_and_reset",
         "return_state_outputs"
       ]
