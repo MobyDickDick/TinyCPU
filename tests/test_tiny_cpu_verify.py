@@ -5,6 +5,7 @@ import json
 import shutil
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from dataclasses import replace
 from pathlib import Path
 from unittest import mock
@@ -297,6 +298,32 @@ class CircuitVerificationTests(unittest.TestCase):
             with self.assertRaisesRegex(VERIFY.VerificationError,
                                         "InterruptController wiring"):
                 VERIFY.verify_system_circuit()
+
+    def test_ap18_interrupt_controller_routing_corridors_are_bounded(self) -> None:
+        """Visual routing rails stop at their first and last electrical branch."""
+        root = ET.parse(
+            MODULE_PATH.parents[1] / "hardware" / "logisim" / "TinyCPU-Peripherals.circ"
+        ).getroot()
+        interrupt = root.find("circuit[@name='InterruptController']")
+        self.assertIsNotNone(interrupt)
+        wires = {
+            (wire.get("from"), wire.get("to"))
+            for wire in interrupt.findall("wire")
+        }
+        self.assertTrue({
+            ("(1140,725)", "(1140,740)"),
+            ("(1180,180)", "(1180,715)"),
+            ("(1200,80)", "(1200,290)"),
+            ("(1220,620)", "(1220,745)"),
+            ("(1240,280)", "(1240,600)"),
+            ("(1280,310)", "(1280,380)"),
+            ("(1300,380)", "(1300,670)"),
+            ("(1320,140)", "(1320,300)"),
+        } <= wires)
+        self.assertFalse(any(
+            start.endswith(",50)") and end.endswith(",850)")
+            for start, end in wires
+        ))
 
 
 if __name__ == "__main__":
