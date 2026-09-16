@@ -3,9 +3,10 @@ from __future__ import annotations
 import importlib.util
 import json
 import shutil
+import sys
 import tempfile
 import unittest
-import xml.etree.ElementTree as ET
+from collections import Counter
 from dataclasses import replace
 from pathlib import Path
 from unittest import mock
@@ -16,6 +17,15 @@ SPEC = importlib.util.spec_from_file_location("tiny_cpu_verify", MODULE_PATH)
 assert SPEC and SPEC.loader
 VERIFY = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(VERIFY)
+
+WIRE_MODULE_PATH = MODULE_PATH.with_name("tiny_cpu_wire_contacts.py")
+WIRE_SPEC = importlib.util.spec_from_file_location(
+    "tiny_cpu_wire_contacts", WIRE_MODULE_PATH
+)
+assert WIRE_SPEC and WIRE_SPEC.loader
+WIRE_CONTACTS = importlib.util.module_from_spec(WIRE_SPEC)
+sys.modules[WIRE_SPEC.name] = WIRE_CONTACTS
+WIRE_SPEC.loader.exec_module(WIRE_CONTACTS)
 
 
 class CircuitVerificationTests(unittest.TestCase):
@@ -55,13 +65,46 @@ class CircuitVerificationTests(unittest.TestCase):
     def test_ap18_circuit_matches_public_pin_contract(self) -> None:
         VERIFY.verify_system_circuit()
 
-    def test_ap18_schematic_uses_only_visible_wiring(self) -> None:
+    def test_ap18_long_interrupt_routes_use_scoped_named_tunnels(self) -> None:
         root = MODULE_PATH.parents[1]
         project = VERIFY.ET.parse(
             root / "hardware" / "logisim" / "TinyCPU-Peripherals.circ"
         ).getroot()
-        self.assertEqual(project.findall(".//comp[@name='Tunnel']"), [])
-        self.assertEqual(project.findall(".//comp[@name='Text']"), [])
+        interrupt = project.find("circuit[@name='InterruptController']")
+        self.assertIsNotNone(interrupt)
+        self.assertEqual(
+            [component for circuit in project.findall("circuit")
+             if circuit is not interrupt
+             for component in circuit.findall("comp[@name='Tunnel']")],
+            [],
+        )
+        tunnel_labels = Counter(
+            component.find("a[@name='label']").get("val")
+            for component in interrupt.findall("comp[@name='Tunnel']")
+        )
+        self.assertEqual(tunnel_labels, {
+            "NO_VALID_RETURN": 3,
+            "INTERRUPT_ACCEPT_FOR_RETURN": 3,
+            "HANDLER_FOR_RETURN_VALIDATION": 3,
+            "SAVED_RETURN_VALID": 3,
+            "HELD_HANDLER": 2,
+            "SAVED_RETURN_TARGET": 2,
+            "INTERRUPT_VECTOR_TARGET": 2,
+            "VALID_RETURN_TARGET_SELECT": 2,
+            "HELD_RETURN_VALID": 2,
+            "HANDLER_REGISTER_NEXT": 2,
+            "SELECTED_INTERRUPT_TARGET": 2,
+            "RETURN_VALID_REGISTER_NEXT": 2,
+            "RETURN_REQUEST_FOR_VALIDATION": 2,
+        })
+
+    def test_ap18_interrupt_controller_has_no_implicit_wire_contacts(self) -> None:
+        project = VERIFY.ET.parse(
+            MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU-Peripherals.circ"
+        ).getroot()
+        interrupt = project.find("circuit[@name='InterruptController']")
+        self.assertIsNotNone(interrupt)
+        self.assertEqual(WIRE_CONTACTS.inspect_circuit(interrupt), [])
 
     def test_ap18_output_port_owns_value_and_valid_registers(self) -> None:
         root = MODULE_PATH.parents[1]
@@ -162,7 +205,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(490,140)" to="(510,140)" />', "", 1), encoding="utf-8")
+            '<wire from="(870,280)" to="(880,280)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -180,7 +223,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(350,260)" to="(430,260)" />', "", 1), encoding="utf-8")
+            '<wire from="(1010,480)" to="(1030,480)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -198,7 +241,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(590,530)" to="(400,530)" />', "", 1), encoding="utf-8")
+            '<wire from="(810,970)" to="(880,970)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -216,7 +259,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(530,175)" to="(580,175)" />', "", 1), encoding="utf-8")
+            '<wire from="(1010,310)" to="(1080,310)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -234,7 +277,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(320,380)" to="(430,380)" />', "", 1), encoding="utf-8")
+            '<wire from="(540,510)" to="(640,510)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -252,7 +295,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(610,620)" to="(650,620)" />', "", 1), encoding="utf-8")
+            '<wire from="(1260,1140)" to="(1330,1140)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -270,7 +313,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(430,320)" to="(450,320)" />', "", 1), encoding="utf-8")
+            '<wire from="(1170,1240)" to="(1200,1240)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -288,7 +331,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(650,310)" to="(670,310)" />', "", 1), encoding="utf-8")
+            '<wire from="(1230,420)" to="(1230,430)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -299,31 +342,39 @@ class CircuitVerificationTests(unittest.TestCase):
                                         "InterruptController wiring"):
                 VERIFY.verify_system_circuit()
 
-    def test_ap18_interrupt_controller_routing_corridors_are_bounded(self) -> None:
-        """Visual routing rails stop at their first and last electrical branch."""
-        root = ET.parse(
-            MODULE_PATH.parents[1] / "hardware" / "logisim" / "TinyCPU-Peripherals.circ"
-        ).getroot()
-        interrupt = root.find("circuit[@name='InterruptController']")
+    def test_ap18_system_verifier_rejects_implicit_interrupt_contact(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
+        project = VERIFY.ET.parse(circuit)
+        interrupt = project.getroot().find("circuit[@name='InterruptController']")
         self.assertIsNotNone(interrupt)
-        wires = {
-            (wire.get("from"), wire.get("to"))
-            for wire in interrupt.findall("wire")
-        }
-        self.assertTrue({
-            ("(1140,725)", "(1140,740)"),
-            ("(1180,180)", "(1180,715)"),
-            ("(1200,80)", "(1200,290)"),
-            ("(1220,620)", "(1220,745)"),
-            ("(1240,280)", "(1240,600)"),
-            ("(1280,310)", "(1280,380)"),
-            ("(1300,380)", "(1300,670)"),
-            ("(1320,140)", "(1320,300)"),
-        } <= wires)
-        self.assertFalse(any(
-            start.endswith(",50)") and end.endswith(",850)")
-            for start, end in wires
-        ))
+        VERIFY.ET.SubElement(interrupt, "wire", {
+            "from": "(900,230)", "to": "(900,280)"
+        })
+        project.write(circuit, encoding="unicode")
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        original = VERIFY.LOGISIM
+        VERIFY.LOGISIM = temporary / "logisim"
+        self.addCleanup(setattr, VERIFY, "LOGISIM", original)
+        with mock.patch.object(VERIFY, "load_system_profile",
+                               return_value=replace(system, circuit_path=circuit)):
+            with self.assertRaisesRegex(VERIFY.VerificationError,
+                                        "implicit wire contacts"):
+                VERIFY.verify_system_circuit()
+
+    def test_ap18_contact_audit_detects_a_regression(self) -> None:
+        project = VERIFY.ET.parse(
+            MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU-Peripherals.circ"
+        ).getroot()
+        interrupt = project.find("circuit[@name='InterruptController']")
+        self.assertIsNotNone(interrupt)
+        VERIFY.ET.SubElement(interrupt, "wire", {
+            "from": "(900,230)", "to": "(900,280)"
+        })
+        self.assertTrue(WIRE_CONTACTS.inspect_circuit(interrupt))
 
 
 if __name__ == "__main__":
