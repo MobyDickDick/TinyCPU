@@ -6,7 +6,6 @@ import shutil
 import sys
 import tempfile
 import unittest
-from collections import Counter
 from dataclasses import replace
 from pathlib import Path
 from unittest import mock
@@ -65,38 +64,22 @@ class CircuitVerificationTests(unittest.TestCase):
     def test_ap18_circuit_matches_public_pin_contract(self) -> None:
         VERIFY.verify_system_circuit()
 
-    def test_ap18_long_interrupt_routes_use_scoped_named_tunnels(self) -> None:
-        root = MODULE_PATH.parents[1]
+    def test_ap18_interrupt_controller_uses_only_visible_enlarged_routes(self) -> None:
         project = VERIFY.ET.parse(
-            root / "hardware" / "logisim" / "TinyCPU-Peripherals.circ"
+            MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU-Peripherals.circ"
         ).getroot()
         interrupt = project.find("circuit[@name='InterruptController']")
         self.assertIsNotNone(interrupt)
-        self.assertEqual(
-            [component for circuit in project.findall("circuit")
-             if circuit is not interrupt
-             for component in circuit.findall("comp[@name='Tunnel']")],
-            [],
-        )
-        tunnel_labels = Counter(
-            component.find("a[@name='label']").get("val")
-            for component in interrupt.findall("comp[@name='Tunnel']")
-        )
-        self.assertEqual(tunnel_labels, {
-            "NO_VALID_RETURN": 3,
-            "INTERRUPT_ACCEPT_FOR_RETURN": 3,
-            "HANDLER_FOR_RETURN_VALIDATION": 3,
-            "SAVED_RETURN_VALID": 3,
-            "HELD_HANDLER": 2,
-            "SAVED_RETURN_TARGET": 2,
-            "INTERRUPT_VECTOR_TARGET": 2,
-            "VALID_RETURN_TARGET_SELECT": 2,
-            "HELD_RETURN_VALID": 2,
-            "HANDLER_REGISTER_NEXT": 2,
-            "SELECTED_INTERRUPT_TARGET": 2,
-            "RETURN_VALID_REGISTER_NEXT": 2,
-            "RETURN_REQUEST_FOR_VALIDATION": 2,
-        })
+        self.assertEqual(interrupt.findall("comp[@name='Tunnel']"), [])
+        points = {
+            endpoint
+            for wire in interrupt.findall("wire")
+            for endpoint in (tuple(map(int, wire.get("from").strip("()").split(","))),
+                             tuple(map(int, wire.get("to").strip("()").split(","))))
+        }
+        self.assertLess(min(x for x, _ in points), 0)
+        self.assertGreater(max(x for x, _ in points), 2000)
+        self.assertGreater(max(y for _, y in points), 1800)
 
     def test_ap18_interrupt_controller_has_no_implicit_wire_contacts(self) -> None:
         project = VERIFY.ET.parse(
@@ -340,6 +323,26 @@ class CircuitVerificationTests(unittest.TestCase):
                                return_value=replace(system, circuit_path=circuit)):
             with self.assertRaisesRegex(VERIFY.VerificationError,
                                         "InterruptController wiring"):
+                VERIFY.verify_system_circuit()
+
+    def test_ap18_system_verifier_rejects_disconnected_visible_route(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
+        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
+            '<wire from="(-560,1440)" to="(2000,1440)"/>', "", 1),
+            encoding="utf-8",
+        )
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        original = VERIFY.LOGISIM
+        VERIFY.LOGISIM = temporary / "logisim"
+        self.addCleanup(setattr, VERIFY, "LOGISIM", original)
+        with mock.patch.object(VERIFY, "load_system_profile",
+                               return_value=replace(system, circuit_path=circuit)):
+            with self.assertRaisesRegex(VERIFY.VerificationError,
+                                        "visible route HANDLER_REGISTER_NEXT is disconnected"):
                 VERIFY.verify_system_circuit()
 
     def test_ap18_system_verifier_rejects_implicit_interrupt_contact(self) -> None:

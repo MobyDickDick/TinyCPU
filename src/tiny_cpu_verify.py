@@ -364,6 +364,54 @@ def verify_system_circuit() -> None:
             f"{display_path(system.circuit_path)}: InterruptController has implicit wire "
             f"contacts: {contact_issues[0]}"
         )
+    if interrupt.findall("comp[@name='Tunnel']"):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: InterruptController must use visible wiring"
+        )
+
+    # The former long feedback routes are explicit wires now. Check their
+    # electrical connectivity independently of the enlarged drawing geometry.
+    route_terminals = {
+        "HANDLER_FOR_RETURN_VALIDATION": {"(870,690)", "(890,1090)", "(890,1190)"},
+        "HANDLER_REGISTER_NEXT": {"(940,650)", "(1200,1240)"},
+        "HELD_HANDLER": {"(1000,1210)", "(1020,1260)"},
+        "HELD_RETURN_VALID": {"(990,1150)", "(1190,1120)"},
+        "INTERRUPT_ACCEPT_FOR_RETURN": {"(990,1230)", "(1140,280)", "(1200,1160)"},
+        "INTERRUPT_VECTOR_TARGET": {"(730,210)", "(1010,410)"},
+        "NO_VALID_RETURN": {"(890,1170)", "(890,1230)", "(1100,1090)"},
+        "RETURN_REQUEST_FOR_VALIDATION": {"(570,410)", "(890,1070)"},
+        "RETURN_VALID_REGISTER_NEXT": {"(700,670)", "(1330,1140)"},
+        "SAVED_RETURN_TARGET": {"(1000,600)", "(1010,520)"},
+        "SAVED_RETURN_VALID": {"(890,1110)", "(890,1130)", "(990,560)"},
+        "SELECTED_INTERRUPT_TARGET": {"(1230,430)", "(1420,270)"},
+        "VALID_RETURN_TARGET_SELECT": {"(1040,1030)", "(1160,540)"},
+    }
+    adjacency: dict[str, set[str]] = {}
+    for wire in interrupt.findall("wire"):
+        start, end = wire.get("from"), wire.get("to")
+        adjacency.setdefault(start, set()).add(end)
+        adjacency.setdefault(end, set()).add(start)
+
+    route_components = {}
+    for name, terminals in route_terminals.items():
+        pending = [next(iter(terminals))]
+        reached = set()
+        while pending:
+            point = pending.pop()
+            if point in reached:
+                continue
+            reached.add(point)
+            pending.extend(adjacency.get(point, ()))
+        if not terminals <= reached:
+            raise VerificationError(
+                f"{display_path(system.circuit_path)}: InterruptController visible route "
+                f"{name} is disconnected"
+            )
+        route_components[name] = frozenset(reached)
+    if len(set(route_components.values())) != len(route_components):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: InterruptController visible routes are joined"
+        )
     interrupt_pins = {}
     for component in interrupt.findall("comp[@name='Pin']"):
         attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
