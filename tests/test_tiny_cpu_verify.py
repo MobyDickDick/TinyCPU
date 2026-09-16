@@ -89,6 +89,14 @@ class CircuitVerificationTests(unittest.TestCase):
         self.assertIsNotNone(interrupt)
         self.assertEqual(WIRE_CONTACTS.inspect_circuit(interrupt), [])
 
+    def test_ap18_output_port_has_unambiguous_control_routes(self) -> None:
+        project = VERIFY.ET.parse(
+            MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU-Peripherals.circ"
+        ).getroot()
+        output = project.find("circuit[@name='OutputPort']")
+        self.assertIsNotNone(output)
+        self.assertEqual(WIRE_CONTACTS.inspect_circuit(output), [])
+
     def test_ap18_output_port_owns_value_and_valid_registers(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
@@ -113,7 +121,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(330,260)" to="(430,260)" />', "", 1), encoding="utf-8")
+            '<wire from="(400,260)" to="(430,260)" />', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
