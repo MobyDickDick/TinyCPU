@@ -76,10 +76,15 @@ Fehlersuche an der aktuellen `TinyCPU.circ`, ohne einen manuellen Redraw durch
 eine historische Zeichnung zu ersetzen oder die abgeschlossenen ISA-Verträge
 neu zu öffnen.
 
-Die inzwischen erneut fehlgeschlagenen Offline- und elektrischen Profilgates
-werden in
+Die Wiederherstellung und Endabnahme der Offline- und elektrischen Profilgates
+wird in
 [`tiny_cpu_recovery_work_packages.md`](tiny_cpu_recovery_work_packages.md) als
 AP 20 behandelt. Reset, Takt und Fetch des 16/12-Profils sind mit dem
 zweifach ausgeführten Minimalprogramm aus `LOAD_CONST(3)` und `HALT()` wieder
-abgenommen. Als nächstes aktives Paket öffnet 20.6 die ISA- und
-Fehlerregression beim jeweils ersten elektrischen Unterschied.
+abgenommen; die vollständige ISA-, Fehler- und Mutationsregression aus 20.6
+und 20.7 ist ebenfalls abgeschlossen. Das einzige noch aktive Paket 20.8 hat
+die automatischen Gates zuletzt am 16. September 2026 auf dem Kandidaten
+`1dbaae8dd18681d31571d8091511759521e9c9b1` zweimal in einem frischen Worktree
+bestanden. Offen bleibt ausschließlich der vorgeschriebene manuelle GUI-Kurztest
+an einem sichtbaren Logisim-Desktop; ohne diesen Nachweis wird der
+Funktionsstatus nicht endgültig freigegeben.
