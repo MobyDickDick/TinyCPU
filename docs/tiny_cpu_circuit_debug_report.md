@@ -2778,3 +2778,47 @@ umetikettiert. Deshalb bleiben AP 20.8 und die endgültige Statusfreigabe offen,
 bis Reset, Einzeltakt, die Ausgaben `3, 2, 1`, Normalhalt und Fehlerhalt an
 einem sichtbaren Logisim-Desktop nach dem dokumentierten Ablauf protokolliert
 sind.
+
+#### Erneute AP-20.8-Abnahme auf dem aktuellen Kandidaten
+
+- **Kandidat:** `1dbaae8dd18681d31571d8091511759521e9c9b1`
+- **Datum:** 16. September 2026
+- **Ausführung:** abgetrennter frischer Git-Worktree ohne lokale Änderungen
+- **Java:** OpenJDK 25.0.2 (`25.0.2+10-69`)
+- **Logisim-evolution:** 4.1.0, JAR-SHA-256
+  `fe6386a3217a591bcc311a4eda49e1f43a389b499dd3d0f6f40f344fc85f2577`
+
+Die beiden vorgeschriebenen automatischen Gates wurden auf dem aktuellen
+Kandidaten erneut zweimal nacheinander ausgeführt. Beide Offline-Läufe
+validierten 10 JSON-Dateien, 23 Logisim-Projekte mit 46 Schaltungen, 2.753
+rechtwinklige Leitungen, 50 Opcodes, sechs Sticky-Error-Fixtures und alle 94
+Unit-Tests. Beide elektrischen Läufe bestanden mit jeweils zwei identischen
+Minimalkerntraces und allen 61 Matrix-Fixtures. Der frische Worktree blieb nach
+jedem der vier Läufe sauber.
+
+```bash
+scripts/test-offline.sh
+LOGISIM_JOBS=4 \
+  LOGISIM_JAR=/workspace/TinyCPU/.venv/Include/logisim-evolution-4.1.0-all.jar \
+  LOGISIM_OUTPUT="$PWD/artifacts/ap20.8-final/electrical-1" \
+  scripts/test-logisim.sh
+scripts/test-offline.sh
+LOGISIM_JOBS=4 \
+  LOGISIM_JAR=/workspace/TinyCPU/.venv/Include/logisim-evolution-4.1.0-all.jar \
+  LOGISIM_OUTPUT="$PWD/artifacts/ap20.8-final/electrical-2" \
+  scripts/test-logisim.sh
+```
+
+| Lauf | Exitcode | Laufzeit | Ergebnis |
+|---|---:|---:|---|
+| Offline 1 | 0 | 18 s | Verifier, Schaltungscheck und 94 Tests bestanden |
+| Elektrisch 1 | 0 | 114 s | zwei Kernläufe und 61/61 Matrix-Fixtures bestanden |
+| Offline 2 | 0 | 16 s | Verifier, Schaltungscheck und 94 Tests bestanden |
+| Elektrisch 2 | 0 | 116 s | zwei Kernläufe und 61/61 Matrix-Fixtures bestanden |
+
+Auch diese Ausführungsumgebung stellt weder `DISPLAY` noch `Xvfb`, `Xorg` oder
+`xdotool` bereit. Der dokumentierte manuelle GUI-Kurztest wurde deshalb nicht
+durch eine Headless- oder Tabellenlogger-Ausführung ersetzt. AP 20.8 bleibt
+weiterhin ausschließlich wegen dieses extern auszuführenden Sichtnachweises
+offen; aus den erfolgreichen automatischen Läufen ergibt sich keine
+Schaltungsänderung.
