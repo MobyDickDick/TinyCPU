@@ -1274,3 +1274,13 @@ keine Verbindung herstellen. Der Prozess liefert Status 1, sobald er einen
 Kontakt findet; `--json` erzeugt dieselben Befunde für weitere Prüfwerkzeuge in
 maschinenlesbarer Form. Mit mehrfach angegebenem `--circuit NAME` lässt sich
 ein großes Projekt gezielt untersuchen.
+
+Für den `InterruptController` ist dieser Audit nun eine feste Regression. Die
+zwischenzeitliche direkte Verdrahtung verband durch überlappende Schienen
+mehrere logisch getrennte Zustandsnetze; der Treiber-Test allein meldete das
+nicht, weil diese Netze überwiegend Registereingänge und Rückführungen statt
+mehrerer erkannter Ausgänge zusammenführten. Die bereinigte Schaltung verwendet
+deshalb wieder ausschließlich explizit benannte lokale Tunnel für die langen
+Rückführungen. Kurze Leitungen bleiben sichtbar, besitzen keine impliziten
+T-Kontakte oder kollinearen Überlappungen, und sowohl ein positiver Audit als
+auch ein absichtlich eingebrachter Kontakt werden im Python-Test geprüft.
