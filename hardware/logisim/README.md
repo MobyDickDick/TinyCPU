@@ -6,6 +6,93 @@ Dieser Kurztest ergänzt die automatischen Gates; er ersetzt weder
 `scripts/test-offline.sh` noch `scripts/test-logisim.sh`. Er ist mit
 Logisim-evolution 4.1.0 an einem Desktop mit sichtbarer Anzeige auszuführen:
 
+### Logisim unter Linux starten
+
+`DISPLAY` ist nur die Adresse eines bereits laufenden X-Servers; die Variable
+allein erzeugt keine Anzeige. Auf einem Linux-Desktop ist sie normalerweise
+schon gesetzt und kann vor dem Start aus dem Wurzelverzeichnis dieses
+Repositories geprüft werden:
+
+```bash
+test -n "${DISPLAY:-}" && printf 'DISPLAY=%s\n' "$DISPLAY"
+java -jar /pfad/zu/logisim-evolution-4.1.0-all.jar hardware/logisim/TinyCPU.circ
+```
+
+Bei einer SSH-Verbindung muss X11-Forwarding auf Server und Client erlaubt
+sein. `ssh -X host` (gegebenenfalls `ssh -Y host`) setzt `DISPLAY` in der
+entfernten Sitzung automatisch; ein manuelles `export DISPLAY=:0` ist nur
+richtig, wenn unter `:0` tatsächlich ein erreichbarer X-Server läuft und die
+Sitzung darauf zugreifen darf. Für einen Container müssen sowohl die
+`DISPLAY`-Variable als auch der X11-Socket des Hosts durchgereicht werden, zum
+Beispiel mit `-e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw`; auch dabei muss
+der Host den Zugriff ausdrücklich erlauben. `Xvfb` kann zwar einen virtuellen
+X-Server bereitstellen, ersetzt aber ohne sichtbare und bediente Oberfläche
+nicht den hier verlangten manuellen Sichtnachweis.
+
+### Logisim unter Windows/Git Bash starten
+
+Unter Windows wird `DISPLAY` für eine native Java-Anwendung nicht benötigt.
+Insbesondere ist `DISPLAY=needs-to-be-defined` keine verwendbare Anzeige; die
+Linux-Prüfung oben ist in Git Bash daher nicht aussagekräftig. Entscheidend ist
+zuerst, dass ein JDK ab Version 21 installiert und `java.exe` über `PATH`
+auffindbar ist:
+
+```bash
+java.exe --version
+command -v java.exe
+```
+
+Meldet Git Bash `java.exe: command not found`, muss zuerst ein JDK installiert
+oder dessen `bin`-Verzeichnis in den Windows-`PATH` aufgenommen werden. Danach
+Git Bash neu öffnen und die beiden Prüfungen wiederholen.
+
+Ist das JDK beispielsweise unter `C:\Program Files\jdk-27\bin` installiert,
+kann Git Bash die native Windows-EXE direkt über den entsprechenden
+Git-Bash-Pfad aufrufen. Die Anführungszeichen sind wegen des Leerzeichens in
+`Program Files` erforderlich:
+
+```bash
+"/c/Program Files/jdk-27/bin/java.exe" --version
+"/c/Program Files/jdk-27/bin/java.exe" -jar \
+  './.venv/Include/logisim-evolution-4.1.0-all.jar' \
+  hardware/logisim/TinyCPU.circ
+```
+
+Alternativ kann das Verzeichnis für die aktuelle Git-Bash-Sitzung in `PATH`
+aufgenommen werden. `hash -r` verwirft dabei die gemerkte erfolglose
+Befehlssuche:
+
+```bash
+export PATH="/c/Program Files/jdk-27/bin:$PATH"
+hash -r
+java.exe --version
+```
+
+Für eine dauerhafte Lösung sollte `C:\Program Files\jdk-27\bin` in den
+Windows-Benutzer-`PATH` eingetragen und Git Bash danach neu gestartet werden.
+Git Bash kann Windows-Programme mit der Endung `.exe` direkt ausführen; es ist
+keine getrennte Linux-VM, deren Betriebssystemgrenze Java überwinden müsste.
+Für das elektrische Gate lässt sich der absolute Java-Pfad ohne dauerhafte
+`PATH`-Änderung außerdem ausdrücklich übergeben:
+
+```bash
+JAVA='/c/Program Files/jdk-27/bin/java.exe' scripts/test-logisim.sh
+```
+
+Aus dem Wurzelverzeichnis dieses Repositories kann die vorhandene JAR bei
+eingerichtetem `PATH` anschließend so gestartet werden:
+
+```bash
+JAR='./.venv/Include/logisim-evolution-4.1.0-all.jar'
+test -f "$JAR" || { printf 'JAR fehlt: %s\n' "$JAR" >&2; exit 1; }
+java.exe -jar "$JAR" hardware/logisim/TinyCPU.circ
+```
+
+Der Pfad `/pfad/zu/...` aus dem Linux-Beispiel ist nur ein Platzhalter und darf
+nicht wörtlich übernommen werden. Liegt die JAR an einer anderen Stelle, muss
+`JAR` entsprechend auf den tatsächlich vorhandenen Pfad zeigen. Ein
+`export DISPLAY=:0` behebt weder ein fehlendes Java noch eine fehlende JAR.
+
 1. `TinyCPU.circ` öffnen, `TinyCPUMain` wählen und mit **Simulation > Reset
    Simulation** zurücksetzen. `PC_VALUE` muss `0` zeigen, beide Haltausgänge
    und alle sechs Fehlerausgänge müssen `0` sein.
