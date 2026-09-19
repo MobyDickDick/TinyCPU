@@ -92,8 +92,8 @@ AP 20 behandelt. Reset, Takt und Fetch des 16/12-Profils sind mit dem
 zweifach ausgeführten Minimalprogramm aus `LOAD_CONST(3)` und `HALT()` wieder
 abgenommen; die vollständige ISA-, Fehler- und Mutationsregression aus 20.6
 und 20.7 ist ebenfalls abgeschlossen. Das einzige noch aktive Paket 20.8 hat
-die automatischen Gates zuletzt am 16. September 2026 auf dem Kandidaten
-`1dbaae8dd18681d31571d8091511759521e9c9b1` zweimal in einem frischen Worktree
+die automatischen Gates zuletzt am 19. September 2026 auf dem Kandidaten
+`b3cdc9b9c66628552e7ebefcc130dda00c1b26b6` zweimal in einem frischen Worktree
 bestanden. Offen bleibt ausschließlich der vorgeschriebene manuelle GUI-Kurztest
 an einem sichtbaren Logisim-Desktop; ohne diesen Nachweis wird der
 Funktionsstatus nicht endgültig freigegeben.
