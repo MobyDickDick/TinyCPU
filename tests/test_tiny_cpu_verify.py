@@ -68,14 +68,14 @@ class CircuitVerificationTests(unittest.TestCase):
     def test_ap18_schematic_uses_only_visible_wiring(self) -> None:
         root = MODULE_PATH.parents[1]
         project = VERIFY.ET.parse(
-            root / "hardware" / "logisim" / "TinyCPU-Peripherals.circ"
+            root / "hardware" / "logisim" / "TinyCPU_Peripherals.circ"
         ).getroot()
         self.assertEqual(project.findall(".//comp[@name='Tunnel']"), [])
         self.assertEqual(project.findall(".//comp[@name='Text']"), [])
 
     def test_ap18_output_port_has_unambiguous_control_routes(self) -> None:
         project = VERIFY.ET.parse(
-            MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU-Peripherals.circ"
+            MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU_Peripherals.circ"
         ).getroot()
         output = project.find("circuit[@name='OutputPort']")
         self.assertIsNotNone(output)
@@ -86,7 +86,7 @@ class CircuitVerificationTests(unittest.TestCase):
         source = root / "hardware" / "logisim"
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
-        circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
             'label" val="OUTPUT_VALID"', 'label" val="BROKEN_VALID"', 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
@@ -103,7 +103,7 @@ class CircuitVerificationTests(unittest.TestCase):
         source = root / "hardware" / "logisim"
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
-        circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
             '<wire from="(400,260)" to="(430,260)" />', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
@@ -120,7 +120,7 @@ class CircuitVerificationTests(unittest.TestCase):
         source = root / "hardware" / "logisim"
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
-        circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
             'label" val="RAM_WRITE_GATE"', 'label" val="BROKEN_RAM_WRITE_GATE"', 1),
             encoding="utf-8",
@@ -140,7 +140,7 @@ class CircuitVerificationTests(unittest.TestCase):
         source = root / "hardware" / "logisim"
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
-        circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
             '<wire from="(410,280)" to="(540,280)" />', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
@@ -158,7 +158,7 @@ class CircuitVerificationTests(unittest.TestCase):
         source = root / "hardware" / "logisim"
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
-        circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
             'label" val="REQUEST_LEVEL"', 'label" val="BROKEN_REQUEST_LEVEL"', 1),
             encoding="utf-8",
@@ -178,7 +178,7 @@ class CircuitVerificationTests(unittest.TestCase):
         source = root / "hardware" / "logisim"
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
-        circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
             '<wire from="(490,140)" to="(510,140)" />', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
@@ -196,7 +196,7 @@ class CircuitVerificationTests(unittest.TestCase):
         source = root / "hardware" / "logisim"
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
-        circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
             '<wire from="(350,260)" to="(430,260)" />', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
@@ -214,7 +214,7 @@ class CircuitVerificationTests(unittest.TestCase):
         source = root / "hardware" / "logisim"
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
-        circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
             '<wire from="(590,530)" to="(400,530)" />', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
@@ -232,7 +232,7 @@ class CircuitVerificationTests(unittest.TestCase):
         source = root / "hardware" / "logisim"
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
-        circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
             '<wire from="(530,175)" to="(580,175)" />', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
@@ -250,7 +250,7 @@ class CircuitVerificationTests(unittest.TestCase):
         source = root / "hardware" / "logisim"
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
-        circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
             '<wire from="(320,380)" to="(430,380)" />', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
@@ -268,7 +268,7 @@ class CircuitVerificationTests(unittest.TestCase):
         source = root / "hardware" / "logisim"
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
-        circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
             '<wire from="(610,620)" to="(650,620)" />', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
@@ -286,7 +286,7 @@ class CircuitVerificationTests(unittest.TestCase):
         source = root / "hardware" / "logisim"
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
-        circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
             '<wire from="(430,320)" to="(450,320)" />', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
@@ -304,7 +304,7 @@ class CircuitVerificationTests(unittest.TestCase):
         source = root / "hardware" / "logisim"
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
-        circuit = temporary / "logisim" / "TinyCPU-Peripherals.circ"
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
             '<wire from="(650,310)" to="(670,310)" />', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
@@ -320,7 +320,7 @@ class CircuitVerificationTests(unittest.TestCase):
     def test_ap18_interrupt_controller_routing_corridors_are_bounded(self) -> None:
         """Visual routing rails stop at their first and last electrical branch."""
         root = ET.parse(
-            MODULE_PATH.parents[1] / "hardware" / "logisim" / "TinyCPU-Peripherals.circ"
+            MODULE_PATH.parents[1] / "hardware" / "logisim" / "TinyCPU_Peripherals.circ"
         ).getroot()
         interrupt = root.find("circuit[@name='InterruptController']")
         self.assertIsNotNone(interrupt)
