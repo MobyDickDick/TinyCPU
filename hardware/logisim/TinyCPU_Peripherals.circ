@@ -85,6 +85,27 @@
       <a name="label" val="RETURN_ADDRESS_VALID"/>
       <a name="type" val="output"/>
     </comp>
+    <comp loc="(600,200)" name="OutputMemoryPath"/>
+    <comp loc="(600,320)" name="InterruptController"/>
+    <wire from="(600,240)" to="(610,240)"/>
+    <wire from="(610,200)" to="(610,240)"/>
+    <wire from="(610,200)" to="(800,200)"/>
+    <wire from="(600,260)" to="(620,260)"/>
+    <wire from="(620,240)" to="(620,260)"/>
+    <wire from="(620,240)" to="(800,240)"/>
+    <wire from="(600,360)" to="(580,360)"/>
+    <wire from="(580,270)" to="(580,360)"/>
+    <wire from="(580,270)" to="(610,270)"/>
+    <wire from="(610,270)" to="(610,280)"/>
+    <wire from="(610,280)" to="(800,280)"/>
+    <wire from="(600,340)" to="(680,340)"/>
+    <wire from="(680,320)" to="(680,340)"/>
+    <wire from="(680,320)" to="(800,320)"/>
+    <wire from="(600,460)" to="(780,460)"/>
+    <wire from="(780,360)" to="(780,460)"/>
+    <wire from="(780,360)" to="(800,360)"/>
+    <wire from="(600,400)" to="(800,400)"/>
+    <wire from="(600,440)" to="(800,440)"/>
   </circuit>
   <circuit name="OutputPort">
     <a name="appearance" val="logisim_evolution"/>

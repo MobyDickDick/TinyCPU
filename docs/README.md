@@ -64,8 +64,11 @@ Next-State-Pfad. Der Handlerzustand wird bei Annahme gesetzt, bis zu einer
 gültigen Rückkehr gehalten und dann gelöscht. Der Zielmultiplexer führt den
 Interruptvektor und schaltet bei einer gültigen Rückkehr auf die gespeicherte
 Rückkehradresse um; auch dieser Pfad ist vertraglich und per Mutationstest
-geschützt. Die funktionale Einfügung dieser Grenzen in die vollständige CPU
-und die elektrische Systemabnahme sind noch offen. Die dafür verbindliche
+geschützt. Beide Bausteingrenzen stehen nun genau einmal auf dem System-
+Top-Level; ihre sieben öffentlichen Zustandsausgänge sind direkt und per
+Mutationstest geschützt mit den Trace-Pins verbunden. Die CPU-seitigen Daten-,
+Steuer-, Takt- und Resetpfade und die elektrische Systemabnahme sind noch offen.
+Die dafür verbindliche
 elektrische Fallliste ist inzwischen versioniert, mit den übrigen
 Systemverträgen quergeprüft und deckt alle neuen Opcodes und Verhaltensfälle
 ab; ausgeführt wird sie erst nach der CPU-Integration. Die Speicherpfadgrenze
