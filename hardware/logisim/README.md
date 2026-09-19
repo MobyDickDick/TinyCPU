@@ -1262,7 +1262,7 @@ von Bauteiltypen unabhängigen Geometrie-Test:
 
 ```bash
 python3 scripts/check-logisim-wire-contacts.py \
-  --circuit InterruptController hardware/logisim/TinyCPU-Peripherals.circ
+  --circuit InterruptController hardware/logisim/TinyCPU_Peripherals.circ
 ```
 
 Er meldet zwei besonders leicht zu übersehende Formen elektrischer Berührung:
