@@ -2865,3 +2865,47 @@ Die Umgebung besitzt weiterhin weder ein gesetztes `DISPLAY` noch `Xvfb`,
 diesem Kandidaten nicht wahrheitsgemäß protokollieren. Die automatischen Teile
 von AP 20.8 sind aktuell und reproduzierbar grün; das Paket und die endgültige
 Statusfreigabe bleiben ausschließlich bis zum externen Sichtnachweis offen.
+
+#### Endabnahme des zusammengeführten Kandidaten
+
+- **Kandidat:** `29e10e5d8dd3b7fe8ddffd2afcbedd6fc18d337d`
+- **Datum:** 19. September 2026
+- **Ausführung:** abgetrennter frischer Git-Worktree ohne lokale Änderungen
+- **Java:** OpenJDK 25.0.2 (`25.0.2+10-69`)
+- **Logisim-evolution:** 4.1.0, JAR-SHA-256
+  `fe6386a3217a591bcc311a4eda49e1f43a389b499dd3d0f6f40f344fc85f2577`
+
+Auch der zusammengeführte Kandidat wurde mit beiden vorgeschriebenen Gates
+zweimal nacheinander abgenommen. Die Offline-Läufe validierten jeweils elf
+JSON-Dateien, 23 Logisim-Projekte mit 46 Schaltungen und 2.764
+rechtwinkligen Leitungen sowie alle 104 Unit-Tests. Beide elektrischen Läufe
+bestanden mit je zwei identischen Minimalkerntraces und allen 61
+Matrix-Fixtures. Der frische Worktree blieb nach allen vier Läufen sauber.
+
+```bash
+scripts/test-offline.sh
+LOGISIM_JOBS=4 \
+  LOGISIM_JAR=/workspace/TinyCPU/.venv/Include/logisim-evolution-4.1.0-all.jar \
+  LOGISIM_OUTPUT="$PWD/artifacts/ap20.8-final/electrical-1" \
+  scripts/test-logisim.sh
+scripts/test-offline.sh
+LOGISIM_JOBS=4 \
+  LOGISIM_JAR=/workspace/TinyCPU/.venv/Include/logisim-evolution-4.1.0-all.jar \
+  LOGISIM_OUTPUT="$PWD/artifacts/ap20.8-final/electrical-2" \
+  scripts/test-logisim.sh
+```
+
+| Lauf | Exitcode | Laufzeit | Ergebnis |
+|---|---:|---:|---|
+| Offline 1 | 0 | 13 s | Verifier, Schaltungscheck und 104 Tests bestanden |
+| Elektrisch 1 | 0 | 120 s | zwei Kernläufe und 61/61 Matrix-Fixtures bestanden |
+| Offline 2 | 0 | 13 s | Verifier, Schaltungscheck und 104 Tests bestanden |
+| Elektrisch 2 | 0 | 117 s | zwei Kernläufe und 61/61 Matrix-Fixtures bestanden |
+
+Für den vorgeschriebenen GUI-Kurztest wurde erneut eine sichtbare
+Logisim-Sitzung vorbereitet. In der Umgebung sind jedoch weiterhin weder
+`DISPLAY` noch `Xvfb`, `Xorg` oder `xdotool` vorhanden. Die verfügbare
+Paketquelle enthält auch die Pakete `xvfb` und `xdotool` nicht. Deshalb wurde
+kein Headless-Lauf als manueller Sichtnachweis ausgegeben. AP 20.8 bleibt nur
+wegen dieses extern durchzuführenden GUI-Kurztests offen; die automatische
+Endabnahme ist für den zusammengeführten Kandidaten vollständig grün.
