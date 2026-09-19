@@ -108,7 +108,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(300,360)" to="(400,360)"/>', "", 1), encoding="utf-8")
+            '<wire from="(200,360)" to="(380,360)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -280,7 +280,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(1010,560)" to="(1310,560)"/>', "", 1), encoding="utf-8")
+            '<wire from="(1010,560)" to="(1350,560)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -370,7 +370,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(1080,640)" to="(1230,640)"/>', "", 1), encoding="utf-8")
+            '<wire from="(1080,640)" to="(1270,640)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -398,12 +398,29 @@ class CircuitVerificationTests(unittest.TestCase):
             ("(820,840)", "(820,970)"),
             ("(840,740)", "(840,860)"),
             ("(870,760)", "(870,880)"),
-            ("(1170,660)", "(1170,790)"),
+            ("(1210,660)", "(1210,790)"),
         } <= wires)
         self.assertFalse(any(
             start.endswith(",50)") and end.endswith(",850)")
             for start, end in wires
         ))
+
+    def test_ap18_interrupt_handler_and_return_valid_feedback_are_separate(self) -> None:
+        """The two one-bit states must not share the former x=1040 branch."""
+        root = ET.parse(
+            MODULE_PATH.parents[1] / "hardware" / "logisim" / "TinyCPU_Peripherals.circ"
+        ).getroot()
+        interrupt = root.find("circuit[@name='InterruptController']")
+        self.assertIsNotNone(interrupt)
+        wires = {
+            (wire.get("from"), wire.get("to"))
+            for wire in interrupt.findall("wire")
+        }
+        self.assertIn(("(520,640)", "(1080,640)"), wires)
+        self.assertIn(("(1080,640)", "(1080,880)"), wires)
+        self.assertIn(("(1040,370)", "(1040,900)"), wires)
+        self.assertNotIn(("(520,640)", "(1040,640)"), wires)
+        self.assertNotIn(("(1040,640)", "(1080,640)"), wires)
 
 
 if __name__ == "__main__":
