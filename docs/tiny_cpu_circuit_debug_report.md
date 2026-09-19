@@ -70,7 +70,7 @@ Tests mit historischen Canvas-Koordinaten verändert.
 | 20.5 Reset, Takt und Fetch für 8/8 wiederherstellen | entfallen | Der profilabhängige Programmhöchstwert und drei zuvor implizit einbittige Fetch-Bauteile sind auf 8 Bit festgeschrieben. Zwei identische Minimalprogrammläufe belegen danach weiterhin den ersten elektrischen Unterschied am PC nach der ersten Zustandsänderung. Folgewert-, Takt-, Reset- und Enable-Netz des PC-Registers sind geschlossen; eine direkte temporäre Messung belegt zusätzlich den aktiven Resetpegel am Register und den dabei stabilen PC-Nullwert. `FetchDecodeControls` blieb vollständig unverändert. |
 | 20.6 ISA- und Fehlerregression schrittweise öffnen | abgeschlossen | Kernlauf, alle 50 Opcodes, beide Pfade der bedingten Sprünge und alle sechs Sticky-Fehlerfälle bestehen in der vollständigen elektrischen 16/12-Profilabnahme. |
 | 20.7 Redraw-sichere Regressionen ergänzen | abgeschlossen | Sieben gezielte temporäre Leitungsunterbrechungen belegen, dass die semantischen Regressionen frühere Halt-, Sprung-, Fehlerhalt- und offene Gate-Fehler erkennen, ohne die eingecheckte Schaltung zu verändern. |
-| 20.8 Endabnahme und Funktionsstatus aktualisieren | in Bearbeitung | Commit `9553470` besteht Offline- und elektrisches Gate in einem frischen Checkout zweimal. Der GUI-Kurztest ist jetzt eindeutig dokumentiert, konnte in der anzeigelosen Umgebung aber noch nicht ausgeführt werden. |
+| 20.8 Endabnahme und Funktionsstatus aktualisieren | in Bearbeitung | Der aktuelle Kandidat `825b585` besteht Offline- und elektrisches Gate in einem frischen Checkout zweimal. Der GUI-Kurztest ist eindeutig dokumentiert, konnte in der anzeigelosen Umgebung aber noch nicht ausgeführt werden. |
 
 ### Folgeprüfung nach dem manuellen Decoder-Reset
 
@@ -2822,3 +2822,46 @@ durch eine Headless- oder Tabellenlogger-Ausführung ersetzt. AP 20.8 bleibt
 weiterhin ausschließlich wegen dieses extern auszuführenden Sichtnachweises
 offen; aus den erfolgreichen automatischen Läufen ergibt sich keine
 Schaltungsänderung.
+
+#### Endabnahme nach den Änderungen an der Peripherieschaltung
+
+- **Kandidat:** `825b5858a63d8d2e0ffdc7640d029f1df9cb8b4b`
+- **Datum:** 19. September 2026
+- **Ausführung:** abgetrennter frischer Git-Worktree ohne lokale Änderungen
+- **Java:** OpenJDK 25.0.2 (`25.0.2+10-69`)
+- **Logisim-evolution:** 4.1.0, JAR-SHA-256
+  `fe6386a3217a591bcc311a4eda49e1f43a389b499dd3d0f6f40f344fc85f2577`
+
+Nach den zwischenzeitlichen Änderungen an der eigenständigen
+Peripherieschaltung wurden die verpflichtenden Bestands-Gates erneut zweimal
+im selben frischen Worktree ausgeführt. Beide Offline-Läufe validierten elf
+JSON-Dateien, 23 Logisim-Projekte mit 46 Schaltungen und 2.764 rechtwinkligen
+Leitungen sowie alle 104 Unit-Tests. Beide elektrischen Läufe bestanden mit
+jeweils zwei identischen Minimalkerntraces und allen 61 Matrix-Fixtures. Der
+Worktree blieb nach allen vier Läufen sauber.
+
+```bash
+scripts/test-offline.sh
+LOGISIM_JOBS=4 \
+  LOGISIM_JAR=/workspace/TinyCPU/.venv/Include/logisim-evolution-4.1.0-all.jar \
+  LOGISIM_OUTPUT="$PWD/artifacts/ap20.8-current/electrical-1" \
+  scripts/test-logisim.sh
+scripts/test-offline.sh
+LOGISIM_JOBS=4 \
+  LOGISIM_JAR=/workspace/TinyCPU/.venv/Include/logisim-evolution-4.1.0-all.jar \
+  LOGISIM_OUTPUT="$PWD/artifacts/ap20.8-current/electrical-2" \
+  scripts/test-logisim.sh
+```
+
+| Lauf | Exitcode | Laufzeit | Ergebnis |
+|---|---:|---:|---|
+| Offline 1 | 0 | 13 s | Verifier, Schaltungscheck und 104 Tests bestanden |
+| Elektrisch 1 | 0 | 128 s | zwei Kernläufe und 61/61 Matrix-Fixtures bestanden |
+| Offline 2 | 0 | 12 s | Verifier, Schaltungscheck und 104 Tests bestanden |
+| Elektrisch 2 | 0 | 123 s | zwei Kernläufe und 61/61 Matrix-Fixtures bestanden |
+
+Die Umgebung besitzt weiterhin weder ein gesetztes `DISPLAY` noch `Xvfb`,
+`Xorg` oder `xdotool`. Der manuelle GUI-Kurztest lässt sich daher auch auf
+diesem Kandidaten nicht wahrheitsgemäß protokollieren. Die automatischen Teile
+von AP 20.8 sind aktuell und reproduzierbar grün; das Paket und die endgültige
+Statusfreigabe bleiben ausschließlich bis zum externen Sichtnachweis offen.
