@@ -135,9 +135,19 @@
       <a name="label" val="OUTPUT_VALID"/>
       <a name="width" val="1"/>
     </comp>
+    <comp lib="1" loc="(330,260)" name="AND Gate">
+      <a name="label" val="OUTPUT_WRITE_ACCEPTED"/>
+      <a name="inputs" val="2"/>
+      <a name="size" val="30"/>
+    </comp>
     <wire from="(200,130)" to="(370,130)"/>
-    <wire from="(200,240)" to="(450,240)"/>
-    <wire from="(200,260)" to="(330,260)"/>
+    <wire from="(200,240)" to="(280,240)"/>
+    <wire from="(280,240)" to="(280,250)"/>
+    <wire from="(280,240)" to="(450,240)"/>
+    <wire from="(280,250)" to="(300,250)"/>
+    <wire from="(200,260)" to="(280,260)"/>
+    <wire from="(280,260)" to="(280,270)"/>
+    <wire from="(280,270)" to="(300,270)"/>
     <wire from="(200,320)" to="(350,320)"/>
     <wire from="(200,380)" to="(400,380)"/>
     <wire from="(330,150)" to="(330,260)"/>
@@ -227,25 +237,31 @@
       <a name="type" val="output"/>
     </comp>
     <comp lib="0" loc="(320,230)" name="Constant">
+      <a name="label" val="OUTPUT_ADDRESS"/>
       <a name="value" val="0xfff"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="1" loc="(610,420)" name="AND Gate">
-      <a name="label" val="RAM_WRITE"/>
+      <a name="label" val="RAM_WRITE_GATE"/>
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="negate0" val="true"/>
       <a name="size" val="30"/>
     </comp>
     <comp lib="1" loc="(610,500)" name="AND Gate">
-      <a name="label" val="PORT_WRITE"/>
+      <a name="inputs" val="3"/>
+      <a name="label" val="OUTPUT_WRITE_GATE"/>
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="size" val="30"/>
     </comp>
     <comp lib="2" loc="(1080,100)" name="Multiplexer">
+      <a name="label" val="OUTPUT_READ_VALUE_SELECT"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="2" loc="(1080,160)" name="Multiplexer"/>
+    <comp lib="2" loc="(1080,160)" name="Multiplexer">
+      <a name="label" val="OUTPUT_READ_VALID_SELECT"/>
+    </comp>
     <comp lib="3" loc="(400,220)" name="Comparator">
+      <a name="label" val="OUTPUT_ADDRESS_DECODE"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="5" loc="(760,290)" name="Register">
@@ -269,6 +285,8 @@
     <wire from="(100,220)" to="(280,220)"/>
     <wire from="(100,320)" to="(760,320)"/>
     <wire from="(100,380)" to="(680,380)"/>
+    <wire from="(500,380)" to="(500,500)"/>
+    <wire from="(500,500)" to="(580,500)"/>
     <wire from="(100,440)" to="(560,440)"/>
     <wire from="(100,600)" to="(720,600)"/>
     <wire from="(100,640)" to="(740,640)"/>
@@ -283,7 +301,7 @@
     <wire from="(280,210)" to="(280,220)"/>
     <wire from="(280,210)" to="(360,210)"/>
     <wire from="(320,230)" to="(360,230)"/>
-    <wire from="(400,220)" to="(520,220)"/>
+    <wire from="(440,220)" to="(520,220)"/>
     <wire from="(520,220)" to="(1030,220)"/>
     <wire from="(520,220)" to="(520,410)"/>
     <wire from="(520,410)" to="(540,410)"/>
@@ -330,6 +348,7 @@
     <a name="circuitnamedboxfixedsize" val="true"/>
     <a name="simulationFrequency" val="1.0"/>
     <comp lib="0" loc="(1210,660)" name="Constant">
+      <a name="label" val="INTERRUPT_VECTOR"/>
       <a name="value" val="0xff0"/>
       <a name="width" val="12"/>
     </comp>
@@ -419,30 +438,31 @@
     <comp lib="0" loc="(840,120)" name="Constant"/>
     <comp lib="1" loc="(1140,260)" name="AND Gate">
       <a name="inputs" val="4"/>
-      <a name="label" val="ACCEPT"/>
+      <a name="label" val="INTERRUPT_ACCEPT_GATE"/>
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="negate3" val="true"/>
       <a name="size" val="30"/>
     </comp>
     <comp lib="1" loc="(1140,760)" name="AND Gate">
       <a name="inputs" val="3"/>
-      <a name="label" val="VALID_RETURN"/>
+      <a name="label" val="VALID_RETURN_GATE"/>
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="size" val="30"/>
     </comp>
     <comp lib="1" loc="(1260,550)" name="AND Gate">
+      <a name="label" val="ILLEGAL_RETURN_GATE"/>
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="negate1" val="true"/>
       <a name="size" val="30"/>
     </comp>
     <comp lib="1" loc="(650,130)" name="AND Gate">
-      <a name="label" val="RISING_EDGE"/>
+      <a name="label" val="RISING_EDGE_DETECT"/>
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="negate0" val="true"/>
       <a name="size" val="30"/>
     </comp>
     <comp lib="1" loc="(650,320)" name="AND Gate">
-      <a name="label" val="PENDING_HOLD"/>
+      <a name="label" val="PENDING_HOLD_UNTIL_ACCEPT"/>
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="negate1" val="true"/>
       <a name="size" val="30"/>
@@ -468,7 +488,7 @@
       <a name="size" val="30"/>
     </comp>
     <comp lib="1" loc="(770,310)" name="OR Gate">
-      <a name="label" val="PENDING_NEXT"/>
+      <a name="label" val="PENDING_SET_OR_HOLD"/>
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="size" val="30"/>
     </comp>
@@ -489,19 +509,23 @@
       <a name="size" val="30"/>
     </comp>
     <comp lib="2" loc="(1280,670)" name="Multiplexer">
+      <a name="label" val="INTERRUPT_TARGET_SELECT"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="5" loc="(900,280)" name="Register">
+      <a name="label" val="INTERRUPT_PENDING"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="width" val="1"/>
     </comp>
     <comp lib="5" loc="(900,420)" name="Register">
+      <a name="label" val="INTERRUPT_ENABLED"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="width" val="1"/>
     </comp>
     <comp lib="5" loc="(900,580)" name="Register">
+      <a name="label" val="RETURN_ADDRESS"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="width" val="12"/>
@@ -513,11 +537,13 @@
       <a name="width" val="1"/>
     </comp>
     <comp lib="5" loc="(900,700)" name="Register">
+      <a name="label" val="RETURN_ADDRESS_VALID"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="width" val="1"/>
     </comp>
     <comp lib="5" loc="(900,820)" name="Register">
+      <a name="label" val="IN_INTERRUPT_HANDLER"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="width" val="1"/>
@@ -548,11 +574,15 @@
     <wire from="(1000,810)" to="(1000,850)"/>
     <wire from="(1000,850)" to="(1040,850)"/>
     <wire from="(1010,270)" to="(1010,390)"/>
-    <wire from="(1010,270)" to="(1110,270)"/>
+    <wire from="(1010,270)" to="(1090,270)"/>
+    <wire from="(1090,265)" to="(1090,270)"/>
+    <wire from="(1090,265)" to="(1110,265)"/>
     <wire from="(1010,390)" to="(1010,450)"/>
     <wire from="(1010,450)" to="(1320,450)"/>
     <wire from="(1040,280)" to="(1040,850)"/>
     <wire from="(1040,280)" to="(1100,280)"/>
+    <wire from="(1100,275)" to="(1100,280)"/>
+    <wire from="(1100,275)" to="(1110,275)"/>
     <wire from="(1040,850)" to="(1060,850)"/>
     <wire from="(1060,730)" to="(1060,760)"/>
     <wire from="(1060,730)" to="(1320,730)"/>
@@ -581,7 +611,9 @@
     <wire from="(520,100)" to="(570,100)"/>
     <wire from="(520,1020)" to="(820,1020)"/>
     <wire from="(520,1050)" to="(840,1050)"/>
-    <wire from="(520,240)" to="(1110,240)"/>
+    <wire from="(520,240)" to="(1080,240)"/>
+    <wire from="(1080,240)" to="(1080,245)"/>
+    <wire from="(1080,245)" to="(1110,245)"/>
     <wire from="(520,410)" to="(720,410)"/>
     <wire from="(520,460)" to="(610,460)"/>
     <wire from="(520,540)" to="(1080,540)"/>
@@ -686,7 +718,9 @@
     <wire from="(960,610)" to="(1140,610)"/>
     <wire from="(960,730)" to="(1000,730)"/>
     <wire from="(960,850)" to="(1000,850)"/>
-    <wire from="(990,250)" to="(1110,250)"/>
+    <wire from="(990,250)" to="(1070,250)"/>
+    <wire from="(1070,250)" to="(1070,255)"/>
+    <wire from="(1070,255)" to="(1110,255)"/>
     <wire from="(990,250)" to="(990,260)"/>
     <wire from="(990,260)" to="(990,310)"/>
     <wire from="(990,310)" to="(1320,310)"/>

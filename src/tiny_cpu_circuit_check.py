@@ -93,7 +93,9 @@ def _gate_inputs(component: ET.Element) -> list[Point]:
         return []
     count = int(attributes.get("inputs", "2"))
     x, y = _point(component.get("loc", ""))
-    return [(x - 50, y + 20 * index - 10 * (count - 1))
+    size = int(attributes.get("size", "50"))
+    spacing = 10 if size == 30 else 20
+    return [(x - size, y + spacing * index - spacing * (count - 1) // 2)
             for index in range(count)]
 
 

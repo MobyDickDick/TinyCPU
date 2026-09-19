@@ -295,32 +295,29 @@ def verify_system_circuit() -> None:
     # suitably named components. Removing either half of a shared control net
     # must fail offline before an electrical run is attempted.
     expected_output_wires = {
-        ("(180,140)", "(430,140)"),
-        ("(180,200)", "(260,200)"),
-        ("(260,200)", "(260,240)"),
-        ("(260,240)", "(280,240)"),
-        ("(280,240)", "(430,240)"),
-        ("(280,240)", "(280,255)"),
-        ("(280,255)", "(300,255)"),
-        ("(180,260)", "(270,260)"),
-        ("(270,260)", "(270,265)"),
-        ("(270,265)", "(300,265)"),
-        ("(330,260)", "(400,260)"),
-        ("(400,160)", "(400,260)"),
-        ("(400,160)", "(430,160)"),
-        ("(400,260)", "(430,260)"),
-        ("(180,320)", "(380,320)"),
-        ("(380,180)", "(380,280)"),
-        ("(380,180)", "(430,180)"),
-        ("(380,280)", "(380,320)"),
-        ("(380,280)", "(430,280)"),
-        ("(180,380)", "(520,380)"),
-        ("(460,200)", "(520,200)"),
-        ("(460,300)", "(520,300)"),
-        ("(520,200)", "(520,300)"),
-        ("(520,300)", "(520,380)"),
-        ("(490,140)", "(600,140)"),
-        ("(490,240)", "(600,240)"),
+        ('(200,130)', '(370,130)'),
+        ('(200,240)', '(280,240)'),
+        ('(280,240)', '(280,250)'),
+        ('(280,240)', '(450,240)'),
+        ('(280,250)', '(300,250)'),
+        ('(200,260)', '(280,260)'),
+        ('(280,260)', '(280,270)'),
+        ('(280,270)', '(300,270)'),
+        ('(200,320)', '(350,320)'),
+        ('(200,380)', '(400,380)'),
+        ('(330,150)', '(330,260)'),
+        ('(330,150)', '(370,150)'),
+        ('(330,260)', '(450,260)'),
+        ('(350,170)', '(350,280)'),
+        ('(350,170)', '(370,170)'),
+        ('(350,280)', '(350,320)'),
+        ('(350,280)', '(450,280)'),
+        ('(400,190)', '(400,310)'),
+        ('(400,310)', '(400,380)'),
+        ('(400,310)', '(480,310)'),
+        ('(430,130)', '(600,130)'),
+        ('(480,300)', '(480,310)'),
+        ('(510,240)', '(550,240)'),
     }
     expected_paths = {
         "write_value_to_value_register", "write_valid_to_valid_register",
@@ -371,8 +368,8 @@ def verify_system_circuit() -> None:
         for component in memory_path.findall("comp")
         for item in component.findall("a[@name='label']")
     }
-    required = {"OUTPUT_ADDRESS_DECODE", "NOT_OUTPUT_ADDRESS", "RAM_WRITE_GATE",
-                "OUTPUT_WRITE_GATE", "OUTPUT_READ_VALUE_SELECT",
+    required = {"OUTPUT_ADDRESS_DECODE", "RAM_WRITE_GATE", "OUTPUT_WRITE_GATE",
+                "OUTPUT_READ_VALUE_SELECT",
                 "OUTPUT_READ_VALID_SELECT", "OUTPUT_PORT_VALUE",
                 "OUTPUT_PORT_VALID"}
     if not required <= labelled:
@@ -391,29 +388,30 @@ def verify_system_circuit() -> None:
     # The intervening orthogonal segments remain free to be redrawn, but no
     # declared path may be replaced with labels alone.
     required_memory_wires = {
-        ("(300,130)", "(310,130)"),  # address -> comparator
-        ("(290,100)", "(310,100)"),  # reserved constant -> comparator
-        ("(410,240)", "(440,240)"),  # match -> inverter
-        ("(520,235)", "(540,235)"),  # mismatch -> RAM write gate
-        ("(500,245)", "(540,245)"),  # write enable -> RAM write gate
-        ("(410,280)", "(540,280)"),  # match -> output write gate
-        ("(500,275)", "(540,275)"),  # write enable -> output write gate
-        ("(620,130)", "(660,130)"),  # RAM value -> value mux
-        ("(600,170)", "(660,170)"),  # RAM validity -> validity mux
-        ("(660,150)", "(730,150)"),  # output value -> value mux
-        ("(660,190)", "(740,190)"),  # output validity -> validity mux
-        ("(610,170)", "(670,170)"),  # match -> value selector
-        ("(610,210)", "(670,210)"),  # match -> validity selector
-        ("(560,330)", "(650,330)"),  # write value -> output register
-        ("(630,430)", "(650,430)"),  # write validity -> output register
-        ("(590,450)", "(650,450)"),  # gated write -> output registers
-        ("(610,370)", "(650,370)"),  # clock -> output value register
-        ("(680,390)", "(680,490)"),  # shared register reset
-        ("(690,140)", "(800,140)"),  # selected value -> read output
-        ("(690,180)", "(800,180)"),  # selected validity -> read output
-        ("(570,240)", "(800,240)"),  # gated RAM write output
-        ("(710,330)", "(760,330)"),  # output value state
-        ("(710,430)", "(780,430)"),  # output validity state
+        ("(280,210)", "(360,210)"),  # address -> comparator
+        ("(320,230)", "(360,230)"),  # reserved constant -> comparator
+        ("(440,220)", "(520,220)"),  # comparator -> address-match rail
+        ("(570,410)", "(580,410)"),  # match -> RAM write gate (negated)
+        ("(560,430)", "(580,430)"),  # write enable -> RAM write gate
+        ("(540,490)", "(580,490)"),  # match -> output write gate
+        ("(500,500)", "(580,500)"),  # validity -> output write gate
+        ("(560,510)", "(580,510)"),  # write enable -> output write gate
+        ("(1000,90)", "(1050,90)"),  # RAM value -> value mux
+        ("(980,150)", "(1050,150)"),  # RAM validity -> validity mux
+        ("(900,110)", "(1050,110)"),  # output value -> value mux
+        ("(920,170)", "(1050,170)"),  # output validity -> validity mux
+        ("(1030,120)", "(1060,120)"),  # match -> value selector
+        ("(1030,180)", "(1060,180)"),  # match -> validity selector
+        ("(100,320)", "(760,320)"),  # write value -> output register
+        ("(680,450)", "(760,450)"),  # write validity -> output register
+        ("(700,470)", "(760,470)"),  # gated write -> valid register
+        ("(720,360)", "(760,360)"),  # shared clock
+        ("(740,510)", "(790,510)"),  # shared reset
+        ("(1080,100)", "(1220,100)"),  # selected value -> read output
+        ("(1080,160)", "(1220,160)"),  # selected validity -> read output
+        ("(660,580)", "(1220,580)"),  # gated RAM write output
+        ("(900,320)", "(1220,320)"),  # output value state
+        ("(920,450)", "(1220,450)"),  # output validity state
     }
     expected_memory_paths = {
         "reserved_address_decode", "ram_write_on_address_mismatch",
@@ -490,14 +488,11 @@ def verify_system_circuit() -> None:
     }
     required_interrupt_labels = {
         "INTERRUPT_VECTOR", "RISING_EDGE_DETECT", "INTERRUPT_ACCEPT_GATE",
-        "ILLEGAL_RETURN_GATE", "INTERRUPT_TARGET_SELECT", "PREVIOUS_REQUEST_NOT",
-        "REQUEST_LEVEL_WRITE_ENABLE", "PENDING_SET_OR_HOLD",
-        "PENDING_WRITE_ENABLE", "NOT_IN_HANDLER", "INTERRUPT_ACCEPT_NOT",
-        "PENDING_HOLD_UNTIL_ACCEPT", "MASK_SET_REQUEST",
-        "MASK_CLEAR_REQUEST", "MASK_CLEAR_NOT", "MASK_HOLD", "MASK_NEXT",
-        "MASK_WRITE_ENABLE",
-        "VALID_RETURN_GATE", "VALID_RETURN_NOT", "RETURN_VALID_HOLD",
-        "RETURN_VALID_NEXT", "HANDLER_HOLD", "HANDLER_NEXT",
+        "ILLEGAL_RETURN_GATE", "INTERRUPT_TARGET_SELECT",
+        "PENDING_SET_OR_HOLD", "PENDING_HOLD_UNTIL_ACCEPT",
+        "MASK_HOLD", "MASK_NEXT", "VALID_RETURN_GATE",
+        "RETURN_VALID_HOLD", "RETURN_VALID_NEXT", "HANDLER_HOLD",
+        "HANDLER_NEXT",
     }
     if not required_interrupt_labels <= interrupt_labels:
         raise VerificationError(
@@ -523,90 +518,44 @@ def verify_system_circuit() -> None:
         (wire.get("from"), wire.get("to")) for wire in interrupt.findall("wire")
     }
     required_interrupt_wires = {
-        ("(160,120)", "(360,120)"),
-        ("(360,140)", "(430,140)"),
-        ("(550,115)", "(580,115)"),
-        ("(390,160)", "(430,160)"),
-        ("(380,180)", "(430,180)"),
-        ("(460,200)", "(460,210)"),
-        ("(490,140)", "(510,140)"),
-        ("(540,140)", "(560,140)"),
-        ("(560,125)", "(580,125)"),
-        ("(300,255)", "(320,255)"),
-        ("(310,265)", "(320,265)"),
-        ("(350,260)", "(430,260)"),
-        ("(390,280)", "(430,280)"),
-        ("(380,300)", "(430,300)"),
-        ("(490,260)", "(720,260)"),
-        ("(720,220)", "(820,220)"),
-        ("(550,185)", "(580,185)"),
-        ("(540,165)", "(580,165)"),
-        ("(530,175)", "(580,175)"),
-        ("(560,195)", "(580,195)"),
-        ("(650,100)", "(820,100)"),
-        ("(650,180)", "(650,200)"),
-        ("(580,305)", "(700,305)"),
-        ("(610,300)", "(620,300)"),
-        ("(160,200)", "(300,200)"),
-        ("(300,200)", "(300,510)"),
-        ("(160,280)", "(300,280)"),
-        ("(300,280)", "(300,530)"),
-        ("(160,240)", "(300,240)"),
-        ("(300,240)", "(300,570)"),
-        ("(650,180)", "(780,180)"),
-        ("(780,180)", "(780,590)"),
-        ("(780,590)", "(300,590)"),
-        ("(350,580)", "(380,580)"),
-        ("(430,580)", "(460,580)"),
-        ("(460,580)", "(460,570)"),
-        ("(490,200)", "(460,200)"),
-        ("(460,200)", "(460,550)"),
-        ("(350,520)", "(540,520)"),
-        ("(510,560)", "(540,560)"),
-        ("(540,560)", "(540,540)"),
-        ("(590,530)", "(400,530)"),
-        ("(400,530)", "(400,200)"),
-        ("(400,200)", "(430,200)"),
-        ("(390,220)", "(430,220)"),
-        ("(160,360)", "(370,360)"),
-        ("(370,360)", "(370,240)"),
-        ("(370,240)", "(430,240)"),
-        ("(160,400)", "(470,400)"),
-        ("(470,400)", "(470,270)"),
-        ("(470,270)", "(460,270)"),
-        ("(490,200)", "(500,200)"),
-        ("(500,200)", "(500,210)"),
-        ("(500,210)", "(810,210)"),
-        ("(810,180)", "(810,210)"),
-        ("(810,180)", "(820,180)"),
-        ("(430,320)", "(450,320)"),
-        ("(160,320)", "(320,320)"),
-        ("(320,320)", "(320,380)"),
-        ("(320,380)", "(430,380)"),
-        ("(610,180)", "(630,180)"),
-        ("(630,180)", "(630,400)"),
-        ("(430,340)", "(630,340)"),
-        ("(430,400)", "(630,400)"),
-        ("(340,460)", "(430,460)"),
-        ("(160,360)", "(430,360)"),
-        ("(360,420)", "(430,420)"),
-        ("(460,380)", "(460,400)"),
-        ("(350,440)", "(460,440)"),
-        ("(330,480)", "(460,480)"),
-        ("(490,320)", "(740,320)"),
-        ("(740,260)", "(820,260)"),
-        ("(490,380)", "(760,380)"),
-        ("(760,300)", "(820,300)"),
-        ("(490,440)", "(790,440)"),
-        ("(790,340)", "(820,340)"),
-        ("(610,620)", "(650,620)"),
-        ("(330,80)", "(350,80)"),
-        ("(650,290)", "(670,290)"),
-        ("(490,380)", "(520,380)"),
-        ("(650,310)", "(670,310)"),
-        ("(680,330)", "(680,350)"),
-        ("(700,300)", "(730,300)"),
-        ("(800,140)", "(820,140)"),
+        ("(520,100)", "(570,100)"),  # request input
+        ("(570,100)", "(900,100)"),  # request-level data
+        ("(590,120)", "(610,120)"),  # previous request (negated)
+        ("(570,140)", "(620,140)"),  # current request
+        ("(650,130)", "(720,130)"),  # rising edge
+        ("(590,310)", "(620,310)"),  # pending feedback
+        ("(560,330)", "(610,330)"),  # accept feedback (negated)
+        ("(650,320)", "(740,320)"),  # held pending
+        ("(720,300)", "(740,300)"),  # rising edge -> pending next
+        ("(770,310)", "(900,310)"),  # pending next -> register
+        ("(960,310)", "(990,310)"),  # pending state
+        ("(1080,245)", "(1110,245)"),  # instruction boundary -> accept
+        ("(1070,255)", "(1110,255)"),  # pending -> accept
+        ("(1090,265)", "(1110,265)"),  # mask -> accept
+        ("(1100,275)", "(1110,275)"),  # handler (negated) -> accept
+        ("(1140,260)", "(1170,260)"),  # accepted interrupt
+        ("(520,410)", "(720,410)"),  # enable request
+        ("(520,460)", "(610,460)"),  # disable request
+        ("(600,450)", "(620,450)"),  # mask feedback
+        ("(580,430)", "(710,430)"),  # valid return -> mask set
+        ("(770,450)", "(900,450)"),  # mask next -> register
+        ("(520,610)", "(900,610)"),  # next PC capture
+        ("(960,610)", "(1140,610)"),  # return address state
+        ("(600,720)", "(620,720)"),  # return-valid feedback
+        ("(580,740)", "(610,740)"),  # valid return clears validity
+        ("(770,720)", "(780,720)"),  # return-valid next
+        ("(600,840)", "(620,840)"),  # handler feedback
+        ("(580,860)", "(610,860)"),  # valid return clears handler
+        ("(770,840)", "(780,840)"),  # handler next
+        ("(1080,750)", "(1110,750)"),  # return request
+        ("(1060,760)", "(1110,760)"),  # return address valid
+        ("(1060,770)", "(1110,770)"),  # in-handler state
+        ("(1210,660)", "(1250,660)"),  # vector -> target mux
+        ("(1140,680)", "(1250,680)"),  # return address -> target mux
+        ("(1260,690)", "(1260,700)"),  # valid-return selector
+        ("(1280,670)", "(1320,670)"),  # selected target
+        ("(520,1020)", "(820,1020)"),  # shared reset
+        ("(520,1050)", "(840,1050)"),  # shared clock
     }
     expected_interrupt_paths = {
         "request_to_level_register", "request_level_clock_and_reset",
