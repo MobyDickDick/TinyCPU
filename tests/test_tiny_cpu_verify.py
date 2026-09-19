@@ -188,9 +188,9 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            'label" val="REQUEST_LEVEL"', 'label" val="BROKEN_REQUEST_LEVEL"', 1),
-            encoding="utf-8",
-        )
+            '<a name="width" val="12"/>\n    </comp>\n    <comp lib="5" loc="(900,700)"',
+            '<a name="width" val="1"/>\n    </comp>\n    <comp lib="5" loc="(900,700)"', 1),
+            encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -334,7 +334,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(1210,660)" to="(1250,660)"/>', "", 1), encoding="utf-8")
+            '<wire from="(1240,660)" to="(1260,660)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"

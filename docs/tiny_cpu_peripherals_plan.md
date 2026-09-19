@@ -158,6 +158,13 @@ dokumentierte Ausnahme von der sonst bevorzugten Direktverdrahtung: Direkte Rüc
 bereits belegten Registerkorridor bestehende Zustandsnetze kreuzen. Bei einem
 späteren Redraw ist diese Ausnahme erneut zu prüfen.
 
+Der Offline-Prüfer bleibt auch nach einem regulären Speichern der Zeichnung in
+Logisim stabil: Bauteile, deren Beschriftungen Logisim nicht sichtbar rendert
+und beim Speichern entfernt, werden über Typ, Breite, Vertragswert und ihre
+direkten Portverbindungen erkannt. Die Mutationstests prüfen weiterhin echte
+Register- und Multiplexerpfade und verlangen keine unsichtbaren Labels als
+Ersatz für elektrische Konnektivität.
+
 Die vollständige elektrische Fallliste ist inzwischen vor der
 Systemintegration als `tinycpu-system-electrical-matrix-v1.json` eingefroren.
 Sie verknüpft jedes Szenario mit dem System-, Maschinenformat- und
