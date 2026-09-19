@@ -180,10 +180,22 @@ Bausteingrenzen jetzt genau einmal. Die Zustandsausgänge des Ausgabeports und
 der Interruptsteuerung sind mit sichtbaren Leitungen direkt bis zu allen sieben
 öffentlichen Trace-Pins geführt. Der Offline-Prüfer verfolgt dabei die echten
 Ausgänge der generierten Bausteinsymbole; ein Entfernen einer Leitung lässt die
-Abnahme gezielt fehlschlagen. CPU-Daten-, Steuer-, Takt- und Resetpfade sind auf
-dem Top-Level noch nicht angeschlossen. Dieser Schritt behauptet daher weder
-einen ausführbaren Systemkern noch einen elektrischen Matrixnachweis; als
-nächstes folgt die Einfügung der CPU-seitigen Ein- und Steuerpfade.
+Abnahme gezielt fehlschlagen. Die nachfolgende Kontrolle der vom
+Schaltungsautor umgezeichneten Fassung hat die funktionalen Leitungen der drei
+Bausteine bestätigt und die zugehörigen Top-Level-Koordinaten in den
+Regressionen nachgeführt. Die kanonische Leitungsliste des besonders
+rückkopplungsreichen `InterruptController` ist zusätzlich im
+Komponentenvertrag gehasht; jede entfernte oder hinzugefügte Leitung bricht
+damit die Offline-Abnahme ab, ohne die neue Anordnung zurückzuzeichnen.
+
+Als nächster Integrationsschritt sind nun `CLK`, `RESET` und
+`INTERRUPT_REQUEST` vom öffentlichen Systemeingang direkt zu den jeweils
+betroffenen Bausteinen geführt. Der Offline-Prüfer und ein Mutationstest
+schützen alle fünf Endanschlüsse. Die CPU-Datenpfade sowie die Befehls- und
+PC-Steuerpfade sind auf dem Top-Level weiterhin nicht angeschlossen. Dieser
+Schritt behauptet daher weder einen ausführbaren Systemkern noch einen
+elektrischen Matrixnachweis; als nächstes folgt die Einfügung dieser
+CPU-seitigen Daten-, Befehls- und PC-Steuerpfade.
 
 ## Kompatibilitätsfolgen
 

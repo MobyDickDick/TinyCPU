@@ -9,6 +9,7 @@ expensive simulator acceptance run is started.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -249,22 +250,32 @@ def verify_system_circuit() -> None:
         )
     top_wires = {(wire.get("from"), wire.get("to")) for wire in circuit.findall("wire")}
     required_top_wires = {
-        ("(600,240)", "(610,240)"),  # output-port value state
-        ("(600,260)", "(620,260)"),  # output-port validity state
-        ("(600,340)", "(680,340)"),  # pending state
-        ("(600,360)", "(580,360)"),  # mask state
+        ("(600,170)", "(790,170)"),  # output-port value state
+        ("(600,190)", "(770,190)"),  # output-port validity state
+        ("(770,190)", "(770,210)"),
+        ("(770,210)", "(790,210)"),
+        ("(600,340)", "(800,340)"),  # pending state
+        ("(600,360)", "(800,360)"),  # mask state
         ("(600,400)", "(800,400)"),  # return address
         ("(600,440)", "(800,440)"),  # return-address validity
-        ("(600,460)", "(780,460)"),  # handler state
-        ("(610,200)", "(800,200)"),
-        ("(620,240)", "(800,240)"),
-        ("(610,280)", "(800,280)"),
-        ("(680,320)", "(800,320)"),
-        ("(780,360)", "(800,360)"),
+        ("(600,460)", "(800,460)"),  # handler state
+        ("(200,200)", "(260,200)"),  # clock distribution
+        ("(260,200)", "(260,250)"),
+        ("(260,250)", "(400,250)"),
+        ("(260,250)", "(260,340)"),
+        ("(260,340)", "(400,340)"),
+        ("(200,240)", "(280,240)"),  # reset distribution
+        ("(280,240)", "(280,270)"),
+        ("(280,270)", "(400,270)"),
+        ("(280,270)", "(280,320)"),
+        ("(280,320)", "(400,320)"),
+        ("(200,280)", "(300,280)"),  # interrupt request
+        ("(300,280)", "(300,360)"),
+        ("(300,360)", "(400,360)"),
     }
     if not required_top_wires <= top_wires:
         raise VerificationError(
-            f"{display_path(system.circuit_path)}: system top state wiring differs from contract"
+            f"{display_path(system.circuit_path)}: system top integration wiring differs from contract"
         )
 
     contract = load_json(LOGISIM / "tinycpu-peripherals-16-12-v1.json")
@@ -312,7 +323,7 @@ def verify_system_circuit() -> None:
         attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
         if attributes.get("label") == "OUTPUT_WRITE_ACCEPTED":
             accepted_write_gates.append((component.get("loc"), attributes.get("inputs", "2")))
-    if (accepted_write_gates != [("(330,260)", "2")]
+    if (accepted_write_gates != [("(340,260)", "2")]
             or component_contract.get("accepted_write") != "WRITE_VALID AND WRITE_ENABLE"):
         raise VerificationError(
             f"{display_path(system.circuit_path)}: OutputPort accepted-write gate differs from contract"
@@ -324,27 +335,30 @@ def verify_system_circuit() -> None:
     # suitably named components. Removing either half of a shared control net
     # must fail offline before an electrical run is attempted.
     expected_output_wires = {
-        ("(200,130)", "(370,130)"),
-        ("(200,240)", "(280,240)"),
-        ("(200,270)", "(300,270)"),
-        ("(200,320)", "(350,320)"),
-        ("(200,380)", "(400,380)"),
-        ("(280,240)", "(280,250)"),
-        ("(280,240)", "(450,240)"),
-        ("(280,250)", "(300,250)"),
-        ("(330,150)", "(330,260)"),
-        ("(330,150)", "(370,150)"),
-        ("(330,260)", "(450,260)"),
-        ("(350,170)", "(350,280)"),
-        ("(350,170)", "(370,170)"),
-        ("(350,280)", "(350,320)"),
-        ("(350,280)", "(450,280)"),
-        ("(400,190)", "(400,310)"),
-        ("(400,310)", "(400,380)"),
-        ("(400,310)", "(480,310)"),
-        ("(430,130)", "(600,130)"),
-        ("(480,300)", "(480,310)"),
-        ("(510,240)", "(550,240)"),
+        ("(200,130)", "(500,130)"),
+        ("(200,230)", "(290,230)"),
+        ("(200,270)", "(310,270)"),
+        ("(200,320)", "(480,320)"),
+        ("(200,380)", "(530,380)"),
+        ("(290,230)", "(290,250)"),
+        ("(290,230)", "(560,230)"),
+        ("(290,250)", "(310,250)"),
+        ("(340,260)", "(460,260)"),
+        ("(460,150)", "(460,260)"),
+        ("(460,150)", "(500,150)"),
+        ("(460,260)", "(580,260)"),
+        ("(480,170)", "(480,280)"),
+        ("(480,170)", "(500,170)"),
+        ("(480,280)", "(480,320)"),
+        ("(480,280)", "(580,280)"),
+        ("(530,190)", "(530,310)"),
+        ("(530,310)", "(530,380)"),
+        ("(530,310)", "(610,310)"),
+        ("(560,130)", "(730,130)"),
+        ("(560,230)", "(560,240)"),
+        ("(560,240)", "(580,240)"),
+        ("(610,300)", "(610,310)"),
+        ("(640,240)", "(680,240)"),
     }
     expected_paths = {
         "write_value_to_value_register", "write_valid_to_valid_register",
@@ -430,22 +444,22 @@ def verify_system_circuit() -> None:
         ("(560,360)", "(620,360)"),  # match -> output write gate
         ("(600,350)", "(620,350)"),  # validity -> output write gate
         ("(540,370)", "(620,370)"),  # write enable -> output write gate
-        ("(410,90)", "(900,90)"),  # RAM value -> value mux
-        ("(410,150)", "(900,150)"),  # RAM validity -> validity mux
-        ("(840,110)", "(900,110)"),  # output value -> value mux
-        ("(860,170)", "(900,170)"),  # output validity -> validity mux
-        ("(910,120)", "(910,130)"),  # match -> value selector
-        ("(880,200)", "(910,200)"),  # match -> validity selector
-        ("(410,260)", "(760,260)"),  # write value -> output register
-        ("(680,390)", "(760,390)"),  # write validity -> output register
-        ("(700,410)", "(760,410)"),  # gated write -> valid register
-        ("(720,300)", "(760,300)"),  # shared clock
-        ("(740,320)", "(790,320)"),  # shared reset
-        ("(930,100)", "(950,100)"),  # selected value -> read output
-        ("(930,160)", "(950,160)"),  # selected validity -> read output
-        ("(650,470)", "(960,470)"),  # gated RAM write output
-        ("(840,260)", "(960,260)"),  # output value state
-        ("(860,390)", "(960,390)"),  # output validity state
+        ("(410,90)", "(920,90)"),  # RAM value -> value mux
+        ("(410,150)", "(920,150)"),  # RAM validity -> validity mux
+        ("(860,110)", "(920,110)"),  # output value -> value mux
+        ("(900,170)", "(920,170)"),  # output validity -> validity mux
+        ("(930,120)", "(930,130)"),  # match -> value selector
+        ("(880,200)", "(930,200)"),  # match -> validity selector
+        ("(410,260)", "(780,260)"),  # write value -> output register
+        ("(700,390)", "(780,390)"),  # write validity -> output register
+        ("(720,410)", "(780,410)"),  # gated write -> valid register
+        ("(740,300)", "(780,300)"),  # shared clock
+        ("(760,320)", "(810,320)"),  # shared reset
+        ("(950,100)", "(970,100)"),  # selected value -> read output
+        ("(950,160)", "(970,160)"),  # selected validity -> read output
+        ("(650,470)", "(980,470)"),  # gated RAM write output
+        ("(860,260)", "(980,260)"),  # output value state
+        ("(900,390)", "(980,390)"),  # output validity state
     }
     expected_memory_paths = {
         "reserved_address_decode", "ram_write_on_address_mismatch",
@@ -545,46 +559,13 @@ def verify_system_circuit() -> None:
     interrupt_wires = {
         (wire.get("from"), wire.get("to")) for wire in interrupt.findall("wire")
     }
-    required_interrupt_wires = {
-        ("(520,130)", "(570,130)"),  # request input
-        ("(570,130)", "(900,130)"),  # request-level data
-        ("(590,150)", "(610,150)"),  # previous request (negated)
-        ("(570,170)", "(620,170)"),  # current request
-        ("(650,160)", "(720,160)"),  # rising edge
-        ("(590,310)", "(620,310)"),  # pending feedback
-        ("(560,330)", "(610,330)"),  # accept feedback (negated)
-        ("(650,320)", "(740,320)"),  # held pending
-        ("(720,300)", "(740,300)"),  # rising edge -> pending next
-        ("(770,310)", "(900,310)"),  # pending next -> register
-        ("(960,310)", "(990,310)"),  # pending state
-        ("(520,240)", "(1110,240)"),  # instruction boundary -> accept
-        ("(990,250)", "(1110,250)"),  # pending -> accept
-        ("(1010,270)", "(1110,270)"),  # mask -> accept
-        ("(1040,280)", "(1100,280)"),  # handler (negated) -> accept
-        ("(1140,260)", "(1170,260)"),  # accepted interrupt
-        ("(520,430)", "(720,430)"),  # enable request
-        ("(520,480)", "(610,480)"),  # disable request
-        ("(600,470)", "(620,470)"),  # mask feedback
-        ("(580,450)", "(710,450)"),  # valid return -> mask set
-        ("(770,470)", "(900,470)"),  # mask next -> register
-        ("(520,610)", "(900,610)"),  # next PC capture
-        ("(960,610)", "(1190,610)"),  # return address state
-        ("(600,730)", "(620,730)"),  # return-valid feedback
-        ("(580,750)", "(610,750)"),  # valid return clears validity
-        ("(770,730)", "(900,730)"),  # return-valid next
-        ("(600,850)", "(620,850)"),  # handler feedback
-        ("(580,870)", "(610,870)"),  # valid return clears handler
-        ("(770,850)", "(780,850)"),  # handler next
-        ("(1080,790)", "(1110,790)"),  # return request
-        ("(1060,800)", "(1110,800)"),  # return address valid
-        ("(1040,810)", "(1110,810)"),  # in-handler state
-        ("(1240,660)", "(1260,660)"),  # vector -> target mux
-        ("(1190,680)", "(1260,680)"),  # return address -> target mux
-        ("(1270,690)", "(1270,700)"),  # valid-return selector
-        ("(1290,670)", "(1310,670)"),  # selected target
-        ("(520,920)", "(820,920)"),  # shared reset
-        ("(520,950)", "(840,950)"),  # shared clock
-    }
+    # The controller is a deliberately hand-routed state machine.  Its
+    # versioned canonical wire list lets a visual redraw be reviewed once and
+    # then protects every branch, including long feedback paths which cannot
+    # be identified reliably from component labels alone.
+    wire_fingerprint = hashlib.sha256("\n".join(
+        f"{start}->{end}" for start, end in sorted(interrupt_wires)
+    ).encode("ascii")).hexdigest()
     expected_interrupt_paths = {
         "request_to_level_register", "request_level_clock_and_reset",
         "previous_level_inversion", "rising_edge_detection",
@@ -604,7 +585,7 @@ def verify_system_circuit() -> None:
         "valid_return_selects_target", "selected_target_output",
         "return_state_outputs",
     }
-    if (not required_interrupt_wires <= interrupt_wires
+    if (wire_fingerprint != interrupt_contract.get("wiring_sha256")
             or set(interrupt_contract.get("verified_paths", []))
             != expected_interrupt_paths):
         raise VerificationError(

@@ -8,8 +8,10 @@ nicht selbst dessen Spezifikation.
 
 `TinyCPU_Peripherals.circ` enthält derzeit drei eigenständig prüfbare
 Bausteine: `OutputPort`, `OutputMemoryPath` und `InterruptController`.
-`TinyCPUSystemMain` beschreibt nur die öffentliche Systemgrenze. Die Bausteine
-sind noch nicht in den vollständigen CPU- und Speicherpfad eingefügt. Deshalb
+`TinyCPUSystemMain` beschreibt nur die öffentliche Systemgrenze. Takt, Reset
+und externe Interruptanforderung erreichen inzwischen die jeweils betroffenen
+Bausteine; CPU-Daten-, Befehls- und PC-Steuerpfade sind noch nicht eingefügt.
+Deshalb
 ist der klassische Interruptcontroller vorläufig eine **Referenzlösung für
 AP 18**, keine unumkehrbare Festlegung der TinyCPU-Architektur.
 

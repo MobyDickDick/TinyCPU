@@ -87,6 +87,19 @@
     </comp>
     <comp loc="(600,130)" name="OutputMemoryPath"/>
     <comp loc="(600,320)" name="InterruptController"/>
+    <wire from="(200,200)" to="(260,200)"/>
+    <wire from="(200,240)" to="(280,240)"/>
+    <wire from="(200,280)" to="(300,280)"/>
+    <wire from="(260,200)" to="(260,250)"/>
+    <wire from="(260,250)" to="(260,340)"/>
+    <wire from="(260,250)" to="(400,250)"/>
+    <wire from="(260,340)" to="(400,340)"/>
+    <wire from="(280,240)" to="(280,270)"/>
+    <wire from="(280,270)" to="(280,320)"/>
+    <wire from="(280,270)" to="(400,270)"/>
+    <wire from="(280,320)" to="(400,320)"/>
+    <wire from="(300,280)" to="(300,360)"/>
+    <wire from="(300,360)" to="(400,360)"/>
     <wire from="(600,170)" to="(790,170)"/>
     <wire from="(600,190)" to="(770,190)"/>
     <wire from="(600,340)" to="(800,340)"/>
