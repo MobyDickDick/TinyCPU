@@ -5,6 +5,7 @@
   "machine_format": "tinycpu-system-machine-v1.json",
   "machine_format_id": "tinycpu-system-machine-v1",
   "trace_schema": "tinycpu-system-trace-v1.json",
+  "electrical_matrix": "tinycpu-system-electrical-matrix-v1.json",
   "circuit": "TinyCPU_Peripherals.circ",
   "top_circuit": "TinyCPUSystemMain",
   "components": {

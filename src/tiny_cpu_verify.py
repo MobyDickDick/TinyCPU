@@ -154,9 +154,71 @@ def _rom_words(text: str, *, source: Path, address_bits: int, word_bits: int) ->
 
 
 
+def verify_system_electrical_matrix(system: object, matrix: object | None = None) -> int:
+    """Validate AP-18's executable scenario inventory before electrical integration."""
+    source = system.electrical_matrix_path
+    matrix = load_json(source) if matrix is None else matrix
+    if not isinstance(matrix, dict):
+        raise VerificationError(f"{display_path(source)}: matrix root must be an object")
+    if (matrix.get("schema") != system.electrical_matrix
+            or matrix.get("system") != system.name
+            or matrix.get("machine_format") != system.machine_format
+            or matrix.get("trace_schema") != system.trace_schema):
+        raise VerificationError(f"{display_path(source)}: system matrix cross-links differ")
+
+    required = matrix.get("required_behaviors")
+    cases = matrix.get("cases")
+    if (not isinstance(required, list) or not required
+            or any(not isinstance(item, str) or not item for item in required)
+            or len(required) != len(set(required))):
+        raise VerificationError(f"{display_path(source)}: required_behaviors must be unique names")
+    if not isinstance(cases, list) or not cases or any(not isinstance(case, dict) for case in cases):
+        raise VerificationError(f"{display_path(source)}: cases must be a non-empty object array")
+    ids = [case.get("id") for case in cases]
+    if any(not isinstance(case_id, str) or not case_id for case_id in ids) or len(ids) != len(set(ids)):
+        raise VerificationError(f"{display_path(source)}: case ids must be unique names")
+
+    covered: set[str] = set()
+    system_opcodes = {"ENABLE_INTERRUPTS", "DISABLE_INTERRUPTS", "RETURN_FROM_INTERRUPT"}
+    for case in cases:
+        coverage = case.get("covers")
+        events = case.get("events")
+        if (not isinstance(coverage, list) or not coverage
+                or any(not isinstance(item, str) for item in coverage)):
+            raise VerificationError(f"{display_path(source)}: case {case.get('id')!r} has invalid coverage")
+        if (not isinstance(events, list) or any(
+                not isinstance(event, dict)
+                or not isinstance(event.get("edge"), int)
+                or event["edge"] < 0
+                or not set(event) <= {"edge", "interrupt_request", "reset"}
+                or any(not isinstance(value, bool) for key, value in event.items() if key != "edge")
+                for event in events)):
+            raise VerificationError(f"{display_path(source)}: case {case.get('id')!r} has invalid events")
+        try:
+            assemble(str(case.get("program", "")), system.base_profile, system)
+            vector_program = case.get("vector_program")
+            if vector_program is not None:
+                assemble(str(vector_program), system.base_profile, system)
+        except AssemblyError as exc:
+            raise VerificationError(
+                f"{display_path(source)}: case {case.get('id')!r} is invalid: {exc}"
+            ) from exc
+        covered.update(coverage)
+
+    missing = set(required).union(system_opcodes) - covered
+    unknown = covered - set(required) - system_opcodes
+    if missing or unknown:
+        raise VerificationError(
+            f"{display_path(source)}: system matrix coverage mismatch; "
+            f"missing={sorted(missing)}, unknown={sorted(unknown)}"
+        )
+    return len(cases)
+
+
 def verify_system_circuit() -> None:
     """Match the AP-18 system's public electrical boundary to its contract."""
     system = load_system_profile("tinycpu-peripherals-16-12-v1")
+    verify_system_electrical_matrix(system)
     project = ET.parse(system.circuit_path).getroot()
     main = project.find("main")
     if main is None or main.get("name") != system.top_circuit:

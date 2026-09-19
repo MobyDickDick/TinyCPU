@@ -21,6 +21,8 @@ class SystemProfile:
     machine_path: Path
     trace_schema: str
     trace_path: Path
+    electrical_matrix: str
+    electrical_matrix_path: Path
     circuit_path: Path
     top_circuit: str
     public_pins: dict[str, dict[str, object]]
@@ -41,12 +43,16 @@ def load_system_profile(name: str) -> SystemProfile:
     base = load_profile(data["base_profile"])
     machine_path = path.with_name(data["machine_format"])
     trace_path = path.with_name(data["trace_schema"])
+    matrix_path = path.with_name(data["electrical_matrix"])
     machine = json.loads(machine_path.read_text(encoding="utf-8"))
     trace = json.loads(trace_path.read_text(encoding="utf-8"))
+    matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
     if machine.get("format") != data["machine_format_id"]:
         raise ValueError(f"system profile {name!r} has an inconsistent machine format")
     if trace.get("system") != name or trace.get("schema") != trace_path.stem:
         raise ValueError(f"system profile {name!r} has an inconsistent trace schema")
+    if matrix.get("system") != name or matrix.get("schema") != matrix_path.stem:
+        raise ValueError(f"system profile {name!r} has an inconsistent electrical matrix")
     output_address = data["io"]["output_address"]
     vector = data["interrupt"]["vector"]
     if not 0 <= output_address < base.memory_size or not 0 <= vector < base.memory_size:
@@ -60,5 +66,6 @@ def load_system_profile(name: str) -> SystemProfile:
     if not isinstance(public_pins, dict) or not public_pins:
         raise ValueError(f"system profile {name!r} has no public pin contract")
     return SystemProfile(name, base, output_address, vector, machine["format"],
-                         machine_path, trace["schema"], trace_path, circuit_path,
+                         machine_path, trace["schema"], trace_path,
+                         matrix["schema"], matrix_path, circuit_path,
                          data["top_circuit"], public_pins)

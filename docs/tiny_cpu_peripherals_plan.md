@@ -1,6 +1,6 @@
 # Vorschlag: Peripherie und Integration
 
-**Status: in Umsetzung (Rücksprungziel wird ausgewählt).** Dieses Dokument trifft
+**Status: in Umsetzung (elektrische Systemintegration ausstehend).** Dieses Dokument trifft
 die nach AP 17 noch offene Produktentscheidung. Die Richtung **Peripherie und Integration** wird als
 **AP 18** ausgewählt. Das Paket ergänzt genau einen speicherabgebildeten
 Ausgabeport und eine externe, maskierbare Interruptquelle. Weitere Geräte und
@@ -156,6 +156,16 @@ Leitungs-Mutationstest geschützt. Die neuen, lokal benannten Tunnel sind eine
 dokumentierte Ausnahme von der sonst bevorzugten Direktverdrahtung: Direkte Rückleitungen würden im
 bereits belegten Registerkorridor bestehende Zustandsnetze kreuzen. Bei einem
 späteren Redraw ist diese Ausnahme erneut zu prüfen.
+
+Die vollständige elektrische Fallliste ist inzwischen vor der
+Systemintegration als `tinycpu-system-electrical-matrix-v1.json` eingefroren.
+Sie verknüpft jedes Szenario mit dem System-, Maschinenformat- und
+Trace-Vertrag, enthält deterministische externe Ereignisse pro Taktflanke und
+deckt alle drei neuen Opcodes sowie Ausgabevalidität, Maskierung, Annahme,
+Rückkehr, Reset und beide Fehlerpfade ab. Der Offline-Verifier assembliert die
+Programme und lehnt fehlende oder unbekannte Abdeckung ab. Diese Fallliste ist
+noch **kein** elektrischer Nachweis: Ihre Ausführung gegen die VM beginnt erst,
+wenn die Bausteine funktional in die vollständige CPU eingefügt sind.
 
 ## Kompatibilitätsfolgen
 

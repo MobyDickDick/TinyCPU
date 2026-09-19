@@ -65,6 +65,17 @@ class CircuitVerificationTests(unittest.TestCase):
     def test_ap18_circuit_matches_public_pin_contract(self) -> None:
         VERIFY.verify_system_circuit()
 
+    def test_ap18_system_matrix_covers_every_new_behavior(self) -> None:
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        self.assertEqual(VERIFY.verify_system_electrical_matrix(system), 7)
+
+    def test_ap18_system_matrix_rejects_missing_coverage(self) -> None:
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        matrix = VERIFY.load_json(system.electrical_matrix_path)
+        matrix["cases"][0]["covers"] = ["output-invalid-write"]
+        with self.assertRaisesRegex(VERIFY.VerificationError, "coverage mismatch"):
+            VERIFY.verify_system_electrical_matrix(system, matrix)
+
     def test_ap18_schematic_uses_only_visible_wiring(self) -> None:
         root = MODULE_PATH.parents[1]
         project = VERIFY.ET.parse(
