@@ -259,19 +259,15 @@ def verify_system_circuit() -> None:
         ("(600,400)", "(800,400)"),  # return address
         ("(600,440)", "(800,440)"),  # return-address validity
         ("(600,460)", "(800,460)"),  # handler state
-        ("(200,200)", "(260,200)"),  # clock distribution
-        ("(260,200)", "(260,250)"),
-        ("(260,250)", "(400,250)"),
+        ("(200,250)", "(260,250)"),  # clock distribution
+        ("(260,250)", "(380,250)"),
         ("(260,250)", "(260,340)"),
-        ("(260,340)", "(400,340)"),
-        ("(200,240)", "(280,240)"),  # reset distribution
-        ("(280,240)", "(280,270)"),
-        ("(280,270)", "(400,270)"),
+        ("(260,340)", "(380,340)"),
+        ("(200,270)", "(280,270)"),  # reset distribution
+        ("(280,270)", "(380,270)"),
         ("(280,270)", "(280,320)"),
-        ("(280,320)", "(400,320)"),
-        ("(200,280)", "(300,280)"),  # interrupt request
-        ("(300,280)", "(300,360)"),
-        ("(300,360)", "(400,360)"),
+        ("(280,320)", "(380,320)"),
+        ("(200,360)", "(380,360)"),  # interrupt request
     }
     if not required_top_wires <= top_wires:
         raise VerificationError(
@@ -454,7 +450,8 @@ def verify_system_circuit() -> None:
         ("(700,390)", "(780,390)"),  # write validity -> output register
         ("(720,410)", "(780,410)"),  # gated write -> valid register
         ("(740,300)", "(780,300)"),  # shared clock
-        ("(760,320)", "(810,320)"),  # shared reset
+        ("(760,330)", "(810,330)"),  # shared reset rail
+        ("(810,320)", "(810,330)"),  # reset branch to value register
         ("(950,100)", "(970,100)"),  # selected value -> read output
         ("(950,160)", "(970,160)"),  # selected validity -> read output
         ("(650,470)", "(980,470)"),  # gated RAM write output
