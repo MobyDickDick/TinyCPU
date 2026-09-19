@@ -175,6 +175,16 @@ Programme und lehnt fehlende oder unbekannte Abdeckung ab. Diese Fallliste ist
 noch **kein** elektrischer Nachweis: Ihre Ausführung gegen die VM beginnt erst,
 wenn die Bausteine funktional in die vollständige CPU eingefügt sind.
 
+Als erster Integrationsschritt enthält `TinyCPUSystemMain` die beiden
+Bausteingrenzen jetzt genau einmal. Die Zustandsausgänge des Ausgabeports und
+der Interruptsteuerung sind mit sichtbaren Leitungen direkt bis zu allen sieben
+öffentlichen Trace-Pins geführt. Der Offline-Prüfer verfolgt dabei die echten
+Ausgänge der generierten Bausteinsymbole; ein Entfernen einer Leitung lässt die
+Abnahme gezielt fehlschlagen. CPU-Daten-, Steuer-, Takt- und Resetpfade sind auf
+dem Top-Level noch nicht angeschlossen. Dieser Schritt behauptet daher weder
+einen ausführbaren Systemkern noch einen elektrischen Matrixnachweis; als
+nächstes folgt die Einfügung der CPU-seitigen Ein- und Steuerpfade.
+
 ## Kompatibilitätsfolgen
 
 1. TinyCPU 1.0, `tinycpu-machine-v1` und beide vorhandenen Hardwareprofile

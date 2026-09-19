@@ -238,6 +238,35 @@ def verify_system_circuit() -> None:
     if system.circuit_path.name == system.base_profile.circuit:
         raise VerificationError("AP-18 must use an independent circuit")
 
+    # Require the component boundaries on the top sheet and follow their
+    # generated-box outputs all the way to the public state pins.  This keeps
+    # an electrically empty overview sheet from passing component-only checks.
+    top_instances = Counter(component.get("name") for component in circuit.findall("comp")
+                            if component.get("lib") is None)
+    if top_instances != Counter({"OutputMemoryPath": 1, "InterruptController": 1}):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: system top components differ from contract"
+        )
+    top_wires = {(wire.get("from"), wire.get("to")) for wire in circuit.findall("wire")}
+    required_top_wires = {
+        ("(600,240)", "(610,240)"),  # output-port value state
+        ("(600,260)", "(620,260)"),  # output-port validity state
+        ("(600,340)", "(680,340)"),  # pending state
+        ("(600,360)", "(580,360)"),  # mask state
+        ("(600,400)", "(800,400)"),  # return address
+        ("(600,440)", "(800,440)"),  # return-address validity
+        ("(600,460)", "(780,460)"),  # handler state
+        ("(610,200)", "(800,200)"),
+        ("(620,240)", "(800,240)"),
+        ("(610,280)", "(800,280)"),
+        ("(680,320)", "(800,320)"),
+        ("(780,360)", "(800,360)"),
+    }
+    if not required_top_wires <= top_wires:
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: system top state wiring differs from contract"
+        )
+
     contract = load_json(LOGISIM / "tinycpu-peripherals-16-12-v1.json")
     component_contract = contract.get("components", {}).get("output_port", {})
     output_name = component_contract.get("circuit")

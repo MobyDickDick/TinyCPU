@@ -224,7 +224,10 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Fallliste ist nun vollständig versioniert und wird offline auf Querverweise,
   assemblierbare Programme sowie lückenlose Opcode- und Verhaltensabdeckung
   geprüft. Die funktionale Einfügung dieser Grenzen in die vollständige CPU
-  und die anschließende Ausführung der Matrix sind noch umzusetzen.
+  ist mit der einmaligen Platzierung beider Bausteine und der direkten
+  Verdrahtung aller öffentlichen Zustandsausgänge begonnen. CPU-seitige Daten-,
+  Steuer-, Takt- und Resetpfade sowie die anschließende Ausführung der Matrix
+  sind noch umzusetzen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

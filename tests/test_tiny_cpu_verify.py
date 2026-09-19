@@ -83,6 +83,24 @@ class CircuitVerificationTests(unittest.TestCase):
         ).getroot()
         self.assertEqual(project.findall(".//comp[@name='Tunnel']"), [])
 
+    def test_ap18_system_top_requires_public_state_wiring(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
+        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
+            '<wire from="(600,460)" to="(780,460)"/>', "", 1), encoding="utf-8")
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        original = VERIFY.LOGISIM
+        VERIFY.LOGISIM = temporary / "logisim"
+        self.addCleanup(setattr, VERIFY, "LOGISIM", original)
+        with mock.patch.object(VERIFY, "load_system_profile",
+                               return_value=replace(system, circuit_path=circuit)):
+            with self.assertRaisesRegex(VERIFY.VerificationError,
+                                        "system top state wiring"):
+                VERIFY.verify_system_circuit()
+
     def test_ap18_output_port_has_unambiguous_control_routes(self) -> None:
         project = VERIFY.ET.parse(
             MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU_Peripherals.circ"
