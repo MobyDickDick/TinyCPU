@@ -147,8 +147,9 @@ class TinyCPU:
             address = self._address(instruction)
             if address is not None:
                 if self.system is not None and address == self.system.output_address:
-                    self.output_port = self.accumulator if self.accumulator_valid else 0
-                    self.output_port_valid = self.accumulator_valid
+                    if self.accumulator_valid:
+                        self.output_port = self.accumulator
+                        self.output_port_valid = True
                 else:
                     self.memory[address] = (self.accumulator if self.accumulator_valid else 0,
                                             self.accumulator_valid)

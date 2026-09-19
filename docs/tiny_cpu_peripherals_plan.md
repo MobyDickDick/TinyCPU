@@ -1,6 +1,6 @@
 # Vorschlag: Peripherie und Integration
 
-**Status: in Umsetzung (Rücksprungziel wird ausgewählt).** Dieses Dokument trifft
+**Status: in Umsetzung (elektrische Systemintegration ausstehend).** Dieses Dokument trifft
 die nach AP 17 noch offene Produktentscheidung. Die Richtung **Peripherie und Integration** wird als
 **AP 18** ausgewählt. Das Paket ergänzt genau einen speicherabgebildeten
 Ausgabeport und eine externe, maskierbare Interruptquelle. Weitere Geräte und
@@ -89,7 +89,8 @@ Release-Gate als fertige System-CPU behandelt.
 
 Der erste interne Baustein `OutputPort` ist jetzt ebenfalls Bestandteil der
 Schaltung. Zwei taktsynchrone Register übernehmen Wert und Validität gemeinsam
-bei `WRITE_ENABLE`; `RESET` löscht beide Zustände. Sein maschinenlesbarer
+nur bei der akzeptierten Schreibbedingung `WRITE_VALID AND WRITE_ENABLE`;
+`RESET` löscht beide Zustände. Sein maschinenlesbarer
 Komponentenvertrag und der Offline-Prüfer sichern Pinrichtungen, Breiten, die
 beiden getrennten Zustandsregister und nun auch jeden Daten-, Freigabe-, Takt-,
 Reset- und Ausgangspfad ab. Damit kann weder eine nur einseitige Freigabe noch
@@ -156,6 +157,16 @@ Leitungs-Mutationstest geschützt. Die neuen, lokal benannten Tunnel sind eine
 dokumentierte Ausnahme von der sonst bevorzugten Direktverdrahtung: Direkte Rückleitungen würden im
 bereits belegten Registerkorridor bestehende Zustandsnetze kreuzen. Bei einem
 späteren Redraw ist diese Ausnahme erneut zu prüfen.
+
+Die vollständige elektrische Fallliste ist inzwischen vor der
+Systemintegration als `tinycpu-system-electrical-matrix-v1.json` eingefroren.
+Sie verknüpft jedes Szenario mit dem System-, Maschinenformat- und
+Trace-Vertrag, enthält deterministische externe Ereignisse pro Taktflanke und
+deckt alle drei neuen Opcodes sowie Ausgabevalidität, Maskierung, Annahme,
+Rückkehr, Reset und beide Fehlerpfade ab. Der Offline-Verifier assembliert die
+Programme und lehnt fehlende oder unbekannte Abdeckung ab. Diese Fallliste ist
+noch **kein** elektrischer Nachweis: Ihre Ausführung gegen die VM beginnt erst,
+wenn die Bausteine funktional in die vollständige CPU eingefügt sind.
 
 ## Kompatibilitätsfolgen
 
