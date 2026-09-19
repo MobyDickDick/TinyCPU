@@ -2858,7 +2858,7 @@
       <a name="bit9" val="0"/>
       <a name="incoming" val="16"/>
     </comp>
-    <comp lib="0" loc="(350,200)" name="Splitter">
+    <comp lib="0" loc="(360,200)" name="Splitter">
       <a name="bit1" val="0"/>
       <a name="bit10" val="0"/>
       <a name="bit11" val="0"/>
@@ -2949,11 +2949,12 @@
     <wire from="(320,120)" to="(320,130)"/>
     <wire from="(320,120)" to="(350,120)"/>
     <wire from="(320,130)" to="(470,130)"/>
-    <wire from="(330,200)" to="(330,240)"/>
-    <wire from="(330,200)" to="(350,200)"/>
-    <wire from="(330,240)" to="(470,240)"/>
+    <wire from="(330,200)" to="(340,200)"/>
+    <wire from="(340,200)" to="(340,240)"/>
+    <wire from="(340,200)" to="(360,200)"/>
+    <wire from="(340,240)" to="(470,240)"/>
     <wire from="(370,110)" to="(420,110)"/>
-    <wire from="(370,190)" to="(400,190)"/>
+    <wire from="(380,190)" to="(400,190)"/>
     <wire from="(400,190)" to="(400,320)"/>
     <wire from="(400,320)" to="(550,320)"/>
     <wire from="(420,110)" to="(420,260)"/>
@@ -3164,7 +3165,7 @@
       <a name="bit9" val="0"/>
       <a name="incoming" val="16"/>
     </comp>
-    <comp lib="0" loc="(450,200)" name="Splitter">
+    <comp lib="0" loc="(460,200)" name="Splitter">
       <a name="bit1" val="0"/>
       <a name="bit10" val="0"/>
       <a name="bit11" val="0"/>
@@ -3256,12 +3257,12 @@
     <wire from="(420,120)" to="(420,130)"/>
     <wire from="(420,120)" to="(450,120)"/>
     <wire from="(420,130)" to="(570,130)"/>
-    <wire from="(430,200)" to="(430,240)"/>
-    <wire from="(430,200)" to="(450,200)"/>
-    <wire from="(430,240)" to="(570,240)"/>
-    <wire from="(450,180)" to="(470,180)"/>
+    <wire from="(430,200)" to="(440,200)"/>
+    <wire from="(440,200)" to="(440,240)"/>
+    <wire from="(440,200)" to="(460,200)"/>
+    <wire from="(440,240)" to="(570,240)"/>
     <wire from="(470,110)" to="(520,110)"/>
-    <wire from="(470,190)" to="(500,190)"/>
+    <wire from="(480,190)" to="(500,190)"/>
     <wire from="(500,190)" to="(500,320)"/>
     <wire from="(500,320)" to="(580,320)"/>
     <wire from="(520,110)" to="(520,260)"/>
@@ -3354,7 +3355,7 @@
       <a name="bit9" val="0"/>
       <a name="incoming" val="16"/>
     </comp>
-    <comp lib="0" loc="(530,210)" name="Splitter">
+    <comp lib="0" loc="(540,210)" name="Splitter">
       <a name="bit1" val="0"/>
       <a name="bit10" val="0"/>
       <a name="bit11" val="0"/>
@@ -3445,12 +3446,12 @@
     <wire from="(500,130)" to="(500,140)"/>
     <wire from="(500,130)" to="(530,130)"/>
     <wire from="(500,140)" to="(650,140)"/>
-    <wire from="(510,210)" to="(510,250)"/>
-    <wire from="(510,210)" to="(530,210)"/>
-    <wire from="(510,250)" to="(650,250)"/>
-    <wire from="(540,190)" to="(550,190)"/>
+    <wire from="(510,210)" to="(520,210)"/>
+    <wire from="(520,210)" to="(520,250)"/>
+    <wire from="(520,210)" to="(540,210)"/>
+    <wire from="(520,250)" to="(650,250)"/>
     <wire from="(550,120)" to="(600,120)"/>
-    <wire from="(550,200)" to="(580,200)"/>
+    <wire from="(560,200)" to="(580,200)"/>
     <wire from="(580,200)" to="(580,330)"/>
     <wire from="(580,330)" to="(730,330)"/>
     <wire from="(600,120)" to="(600,270)"/>
@@ -3598,13 +3599,13 @@
       <a name="text" val="bitwise OR: inactive outputs are neutral"/>
     </comp>
     <wire from="(170,100)" to="(420,100)"/>
-    <wire from="(170,160)" to="(290,160)"/>
-    <wire from="(170,220)" to="(290,220)"/>
+    <wire from="(170,160)" to="(260,160)"/>
+    <wire from="(170,220)" to="(260,220)"/>
     <wire from="(170,320)" to="(540,320)"/>
-    <wire from="(290,160)" to="(290,170)"/>
-    <wire from="(290,170)" to="(300,170)"/>
-    <wire from="(290,210)" to="(290,220)"/>
-    <wire from="(290,210)" to="(300,210)"/>
+    <wire from="(260,160)" to="(260,170)"/>
+    <wire from="(260,170)" to="(300,170)"/>
+    <wire from="(260,210)" to="(260,220)"/>
+    <wire from="(260,210)" to="(300,210)"/>
     <wire from="(350,190)" to="(510,190)"/>
     <wire from="(420,100)" to="(420,230)"/>
     <wire from="(420,230)" to="(520,230)"/>
