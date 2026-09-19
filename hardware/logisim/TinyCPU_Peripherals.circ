@@ -137,11 +137,21 @@
       <a name="label" val="OUTPUT_VALID" />
       <a name="width" val="1" />
     </comp>
+    <comp lib="1" loc="(330,260)" name="AND Gate">
+      <a name="label" val="OUTPUT_WRITE_ACCEPTED" />
+      <a name="inputs" val="2" />
+    </comp>
     <wire from="(180,140)" to="(430,140)" />
-    <wire from="(180,200)" to="(300,200)" />
-    <wire from="(300,200)" to="(300,240)" />
-    <wire from="(300,240)" to="(430,240)" />
-    <wire from="(180,260)" to="(400,260)" />
+    <wire from="(180,200)" to="(260,200)" />
+    <wire from="(260,200)" to="(260,240)" />
+    <wire from="(260,240)" to="(280,240)" />
+    <wire from="(280,240)" to="(430,240)" />
+    <wire from="(280,240)" to="(280,255)" />
+    <wire from="(280,255)" to="(300,255)" />
+    <wire from="(180,260)" to="(270,260)" />
+    <wire from="(270,260)" to="(270,265)" />
+    <wire from="(270,265)" to="(300,265)" />
+    <wire from="(330,260)" to="(400,260)" />
     <wire from="(400,160)" to="(400,260)" />
     <wire from="(400,160)" to="(430,160)" />
     <wire from="(400,260)" to="(430,260)" />

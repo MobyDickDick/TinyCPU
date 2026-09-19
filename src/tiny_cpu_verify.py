@@ -278,6 +278,16 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             f"{display_path(system.circuit_path)}: OutputPort registers differ from contract"
         )
+    accepted_write_gates = []
+    for component in output.findall("comp[@name='AND Gate']"):
+        attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
+        if attributes.get("label") == "OUTPUT_WRITE_ACCEPTED":
+            accepted_write_gates.append((component.get("loc"), attributes.get("inputs", "2")))
+    if (accepted_write_gates != [("(330,260)", "2")]
+            or component_contract.get("accepted_write") != "WRITE_VALID AND WRITE_ENABLE"):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: OutputPort accepted-write gate differs from contract"
+        )
     output_wires = {
         (wire.get("from"), wire.get("to")) for wire in output.findall("wire")
     }
@@ -286,10 +296,16 @@ def verify_system_circuit() -> None:
     # must fail offline before an electrical run is attempted.
     expected_output_wires = {
         ("(180,140)", "(430,140)"),
-        ("(180,200)", "(300,200)"),
-        ("(300,200)", "(300,240)"),
-        ("(300,240)", "(430,240)"),
-        ("(180,260)", "(400,260)"),
+        ("(180,200)", "(260,200)"),
+        ("(260,200)", "(260,240)"),
+        ("(260,240)", "(280,240)"),
+        ("(280,240)", "(430,240)"),
+        ("(280,240)", "(280,255)"),
+        ("(280,255)", "(300,255)"),
+        ("(180,260)", "(270,260)"),
+        ("(270,260)", "(270,265)"),
+        ("(270,265)", "(300,265)"),
+        ("(330,260)", "(400,260)"),
         ("(400,160)", "(400,260)"),
         ("(400,160)", "(430,160)"),
         ("(400,260)", "(430,260)"),
@@ -308,7 +324,7 @@ def verify_system_circuit() -> None:
     }
     expected_paths = {
         "write_value_to_value_register", "write_valid_to_valid_register",
-        "shared_write_enable", "shared_clock", "shared_reset",
+        "shared_accepted_write_enable", "shared_clock", "shared_reset",
         "value_register_to_output", "valid_register_to_output",
     }
     if (output_wires != expected_output_wires

@@ -89,7 +89,8 @@ Release-Gate als fertige System-CPU behandelt.
 
 Der erste interne Baustein `OutputPort` ist jetzt ebenfalls Bestandteil der
 Schaltung. Zwei taktsynchrone Register übernehmen Wert und Validität gemeinsam
-bei `WRITE_ENABLE`; `RESET` löscht beide Zustände. Sein maschinenlesbarer
+nur bei der akzeptierten Schreibbedingung `WRITE_VALID AND WRITE_ENABLE`;
+`RESET` löscht beide Zustände. Sein maschinenlesbarer
 Komponentenvertrag und der Offline-Prüfer sichern Pinrichtungen, Breiten, die
 beiden getrennten Zustandsregister und nun auch jeden Daten-, Freigabe-, Takt-,
 Reset- und Ausgangspfad ab. Damit kann weder eine nur einseitige Freigabe noch

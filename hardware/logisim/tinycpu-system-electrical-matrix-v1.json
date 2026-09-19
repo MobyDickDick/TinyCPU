@@ -33,7 +33,7 @@
     {
       "id": "output-invalid-write",
       "covers": ["output-invalid-write"],
-      "program": "LOAD_ADDRESS(20)\nSTORE_ADDRESS(4095)\nHALT()\n",
+      "program": "LOAD_CONST(23)\nSTORE_ADDRESS(4095)\nLOAD_ADDRESS(20)\nSTORE_ADDRESS(4095)\nHALT_ERROR()\n",
       "events": []
     },
     {

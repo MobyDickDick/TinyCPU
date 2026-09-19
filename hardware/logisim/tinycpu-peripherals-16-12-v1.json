@@ -17,13 +17,14 @@
       },
       "write_priority": [
         "reset",
-        "write",
+        "accepted_write",
         "hold"
       ],
+      "accepted_write": "WRITE_VALID AND WRITE_ENABLE",
       "verified_paths": [
         "write_value_to_value_register",
         "write_valid_to_valid_register",
-        "shared_write_enable",
+        "shared_accepted_write_enable",
         "shared_clock",
         "shared_reset",
         "value_register_to_output",

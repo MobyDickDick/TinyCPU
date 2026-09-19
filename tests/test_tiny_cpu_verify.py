@@ -116,7 +116,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(400,260)" to="(430,260)" />', "", 1), encoding="utf-8")
+            '<wire from="(330,260)" to="(400,260)" />', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -124,6 +124,24 @@ class CircuitVerificationTests(unittest.TestCase):
         with mock.patch.object(VERIFY, "load_system_profile",
                                return_value=replace(system, circuit_path=circuit)):
             with self.assertRaisesRegex(VERIFY.VerificationError, "OutputPort wiring"):
+                VERIFY.verify_system_circuit()
+
+    def test_ap18_output_port_requires_accepted_write_gate(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
+        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
+            'label" val="OUTPUT_WRITE_ACCEPTED"',
+            'label" val="BROKEN_WRITE_ACCEPTED"', 1), encoding="utf-8")
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        original = VERIFY.LOGISIM
+        VERIFY.LOGISIM = temporary / "logisim"
+        self.addCleanup(setattr, VERIFY, "LOGISIM", original)
+        with mock.patch.object(VERIFY, "load_system_profile",
+                               return_value=replace(system, circuit_path=circuit)):
+            with self.assertRaisesRegex(VERIFY.VerificationError, "accepted-write gate"):
                 VERIFY.verify_system_circuit()
 
     def test_ap18_output_memory_path_enforces_reserved_address(self) -> None:
