@@ -388,30 +388,30 @@ def verify_system_circuit() -> None:
     # The intervening orthogonal segments remain free to be redrawn, but no
     # declared path may be replaced with labels alone.
     required_memory_wires = {
-        ("(280,210)", "(360,210)"),  # address -> comparator
-        ("(320,230)", "(360,230)"),  # reserved constant -> comparator
-        ("(440,220)", "(520,220)"),  # comparator -> address-match rail
-        ("(570,410)", "(580,410)"),  # match -> RAM write gate (negated)
-        ("(560,430)", "(580,430)"),  # write enable -> RAM write gate
-        ("(540,490)", "(580,490)"),  # match -> output write gate
-        ("(500,500)", "(580,500)"),  # validity -> output write gate
-        ("(560,510)", "(580,510)"),  # write enable -> output write gate
-        ("(1000,90)", "(1050,90)"),  # RAM value -> value mux
-        ("(980,150)", "(1050,150)"),  # RAM validity -> validity mux
-        ("(900,110)", "(1050,110)"),  # output value -> value mux
-        ("(920,170)", "(1050,170)"),  # output validity -> validity mux
-        ("(1030,120)", "(1060,120)"),  # match -> value selector
-        ("(1030,180)", "(1060,180)"),  # match -> validity selector
-        ("(100,320)", "(760,320)"),  # write value -> output register
-        ("(680,450)", "(760,450)"),  # write validity -> output register
-        ("(700,470)", "(760,470)"),  # gated write -> valid register
-        ("(720,360)", "(760,360)"),  # shared clock
-        ("(740,510)", "(790,510)"),  # shared reset
-        ("(1080,100)", "(1220,100)"),  # selected value -> read output
-        ("(1080,160)", "(1220,160)"),  # selected validity -> read output
-        ("(660,580)", "(1220,580)"),  # gated RAM write output
-        ("(900,320)", "(1220,320)"),  # output value state
-        ("(920,450)", "(1220,450)"),  # output validity state
+        ("(410,210)", "(480,210)"),  # address -> comparator
+        ("(460,230)", "(480,230)"),  # reserved constant -> comparator
+        ("(520,220)", "(560,220)"),  # comparator -> address-match rail
+        ("(560,480)", "(610,480)"),  # match -> RAM write gate (negated)
+        ("(540,500)", "(620,500)"),  # write enable -> RAM write gate
+        ("(560,380)", "(620,380)"),  # match -> output write gate
+        ("(600,370)", "(620,370)"),  # validity -> output write gate
+        ("(540,390)", "(620,390)"),  # write enable -> output write gate
+        ("(410,90)", "(900,90)"),  # RAM value -> value mux
+        ("(410,150)", "(900,150)"),  # RAM validity -> validity mux
+        ("(840,110)", "(900,110)"),  # output value -> value mux
+        ("(860,170)", "(900,170)"),  # output validity -> validity mux
+        ("(880,120)", "(910,120)"),  # match -> value selector
+        ("(880,200)", "(910,200)"),  # match -> validity selector
+        ("(410,280)", "(760,280)"),  # write value -> output register
+        ("(680,410)", "(760,410)"),  # write validity -> output register
+        ("(700,430)", "(760,430)"),  # gated write -> valid register
+        ("(720,320)", "(760,320)"),  # shared clock
+        ("(740,340)", "(790,340)"),  # shared reset
+        ("(930,100)", "(950,100)"),  # selected value -> read output
+        ("(930,160)", "(950,160)"),  # selected validity -> read output
+        ("(650,490)", "(960,490)"),  # gated RAM write output
+        ("(840,280)", "(960,280)"),  # output value state
+        ("(860,410)", "(960,410)"),  # output validity state
     }
     expected_memory_paths = {
         "reserved_address_decode", "ram_write_on_address_mismatch",
@@ -518,27 +518,27 @@ def verify_system_circuit() -> None:
         (wire.get("from"), wire.get("to")) for wire in interrupt.findall("wire")
     }
     required_interrupt_wires = {
-        ("(520,100)", "(570,100)"),  # request input
-        ("(570,100)", "(900,100)"),  # request-level data
-        ("(590,120)", "(610,120)"),  # previous request (negated)
-        ("(570,140)", "(620,140)"),  # current request
-        ("(650,130)", "(720,130)"),  # rising edge
+        ("(520,120)", "(570,120)"),  # request input
+        ("(570,120)", "(900,120)"),  # request-level data
+        ("(590,140)", "(610,140)"),  # previous request (negated)
+        ("(570,160)", "(620,160)"),  # current request
+        ("(650,150)", "(720,150)"),  # rising edge
         ("(590,310)", "(620,310)"),  # pending feedback
         ("(560,330)", "(610,330)"),  # accept feedback (negated)
         ("(650,320)", "(740,320)"),  # held pending
         ("(720,300)", "(740,300)"),  # rising edge -> pending next
         ("(770,310)", "(900,310)"),  # pending next -> register
         ("(960,310)", "(990,310)"),  # pending state
-        ("(1080,245)", "(1110,245)"),  # instruction boundary -> accept
-        ("(1070,255)", "(1110,255)"),  # pending -> accept
-        ("(1090,265)", "(1110,265)"),  # mask -> accept
-        ("(1100,275)", "(1110,275)"),  # handler (negated) -> accept
+        ("(520,240)", "(1110,240)"),  # instruction boundary -> accept
+        ("(990,250)", "(1110,250)"),  # pending -> accept
+        ("(1010,270)", "(1110,270)"),  # mask -> accept
+        ("(1040,280)", "(1100,280)"),  # handler (negated) -> accept
         ("(1140,260)", "(1170,260)"),  # accepted interrupt
-        ("(520,410)", "(720,410)"),  # enable request
-        ("(520,460)", "(610,460)"),  # disable request
-        ("(600,450)", "(620,450)"),  # mask feedback
-        ("(580,430)", "(710,430)"),  # valid return -> mask set
-        ("(770,450)", "(900,450)"),  # mask next -> register
+        ("(520,430)", "(720,430)"),  # enable request
+        ("(520,480)", "(610,480)"),  # disable request
+        ("(600,470)", "(620,470)"),  # mask feedback
+        ("(580,450)", "(710,450)"),  # valid return -> mask set
+        ("(770,470)", "(900,470)"),  # mask next -> register
         ("(520,610)", "(900,610)"),  # next PC capture
         ("(960,610)", "(1140,610)"),  # return address state
         ("(600,720)", "(620,720)"),  # return-valid feedback
@@ -554,8 +554,8 @@ def verify_system_circuit() -> None:
         ("(1140,680)", "(1250,680)"),  # return address -> target mux
         ("(1260,690)", "(1260,700)"),  # valid-return selector
         ("(1280,670)", "(1320,670)"),  # selected target
-        ("(520,1020)", "(820,1020)"),  # shared reset
-        ("(520,1050)", "(840,1050)"),  # shared clock
+        ("(520,910)", "(820,910)"),  # shared reset
+        ("(520,940)", "(840,940)"),  # shared clock
     }
     expected_interrupt_paths = {
         "request_to_level_register", "request_level_clock_and_reset",
