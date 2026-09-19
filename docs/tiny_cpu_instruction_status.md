@@ -1,6 +1,6 @@
 # Funktionsstand der TinyCPU-Befehle
 
-**Stand:** 16. September 2026
+**Stand:** 19. September 2026
 
 ## Kurzantwort
 
@@ -15,8 +15,8 @@ löst den erwarteten Fehlerhalt aus.
 
 Diese Aussage betrifft die ausführbare Schaltung
 `hardware/logisim/TinyCPU.circ` (16/12 Bit), nicht das Python-Referenzmodell.
-Der Kandidat `1dbaae8dd18681d31571d8091511759521e9c9b1` hat diese elektrische
-Abnahme am 16. September 2026 in einem frischen Worktree zweimal bestanden.
+Der Kandidat `825b5858a63d8d2e0ffdc7640d029f1df9cb8b4b` hat diese elektrische
+Abnahme am 19. September 2026 in einem frischen Worktree zweimal bestanden.
 Die davon getrennte manuelle GUI-Kurzabnahme ist noch offen; sie ist keine
 Voraussetzung für die unten einzeln als elektrisch nachgewiesen markierten
 Opcode-Fälle, wohl aber für den Abschluss des gesamten AP 20.8.
