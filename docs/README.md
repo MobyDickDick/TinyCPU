@@ -66,8 +66,10 @@ Interruptvektor und schaltet bei einer gültigen Rückkehr auf die gespeicherte
 Rückkehradresse um; auch dieser Pfad ist vertraglich und per Mutationstest
 geschützt. Beide Bausteingrenzen stehen nun genau einmal auf dem System-
 Top-Level; ihre sieben öffentlichen Zustandsausgänge sind direkt und per
-Mutationstest geschützt mit den Trace-Pins verbunden. Die CPU-seitigen Daten-,
-Steuer-, Takt- und Resetpfade und die elektrische Systemabnahme sind noch offen.
+Mutationstest geschützt mit den Trace-Pins verbunden. Takt, Reset und externe
+Interruptanforderung sind nach Kontrolle der beibehaltenen Neuanordnung direkt
+mit den betroffenen Bausteingrenzen verdrahtet. Die CPU-seitigen Daten-,
+Befehls- und PC-Steuerpfade und die elektrische Systemabnahme sind noch offen.
 Die dafür verbindliche
 elektrische Fallliste ist inzwischen versioniert, mit den übrigen
 Systemverträgen quergeprüft und deckt alle neuen Opcodes und Verhaltensfälle

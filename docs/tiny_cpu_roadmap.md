@@ -225,9 +225,11 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   assemblierbare Programme sowie lückenlose Opcode- und Verhaltensabdeckung
   geprüft. Die funktionale Einfügung dieser Grenzen in die vollständige CPU
   ist mit der einmaligen Platzierung beider Bausteine und der direkten
-  Verdrahtung aller öffentlichen Zustandsausgänge begonnen. CPU-seitige Daten-,
-  Steuer-, Takt- und Resetpfade sowie die anschließende Ausführung der Matrix
-  sind noch umzusetzen.
+  Verdrahtung aller öffentlichen Zustandsausgänge begonnen. Nach Kontrolle der
+  beibehaltenen Neuanordnung erreichen auch Takt, Reset und externe
+  Interruptanforderung die betroffenen Bausteine. CPU-seitige Daten-, Befehls-
+  und PC-Steuerpfade sowie die anschließende Ausführung der Matrix sind noch
+  umzusetzen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
