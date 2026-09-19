@@ -366,9 +366,11 @@ def verify_system_circuit() -> None:
         for component in memory_path.findall("comp")
         for item in component.findall("a[@name='label']")
     }
-    required = {"OUTPUT_ADDRESS_DECODE", "RAM_WRITE_GATE", "OUTPUT_WRITE_GATE",
-                "OUTPUT_READ_VALUE_SELECT",
-                "OUTPUT_READ_VALID_SELECT", "OUTPUT_PORT_VALUE",
+    # Logisim removes labels from components which do not render them when a
+    # project is saved in the GUI.  Treat labels as identifiers only for the
+    # gates where they are retained, and identify the comparator/multiplexers
+    # by their electrical role below instead of requiring hidden metadata.
+    required = {"RAM_WRITE_GATE", "OUTPUT_WRITE_GATE", "OUTPUT_PORT_VALUE",
                 "OUTPUT_PORT_VALID"}
     if not required <= labelled:
         raise VerificationError(
@@ -378,6 +380,11 @@ def verify_system_circuit() -> None:
     if constant is None or int(constant.get("val", "-1"), 0) != path_contract.get("output_address"):
         raise VerificationError(
             f"{display_path(system.circuit_path)}: OutputMemoryPath address differs from contract"
+        )
+    path_components = Counter(component.get("name") for component in memory_path.findall("comp"))
+    if path_components["Comparator"] != 1 or path_components["Multiplexer"] != 2:
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: OutputMemoryPath routing differs from contract"
         )
     memory_wires = {
         (wire.get("from"), wire.get("to")) for wire in memory_path.findall("wire")
@@ -461,21 +468,11 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             f"{display_path(system.circuit_path)}: InterruptController pins differ from contract"
         )
-    register_labels = {
-        "REQUEST_LEVEL": "request_level",
-        "INTERRUPT_ENABLED": "enabled",
-        "INTERRUPT_PENDING": "pending",
-        "IN_INTERRUPT_HANDLER": "in_handler",
-        "RETURN_ADDRESS": "return_address",
-        "RETURN_ADDRESS_VALID": "return_address_valid",
-    }
-    interrupt_registers = {}
+    interrupt_registers = []
     for component in interrupt.findall("comp[@name='Register']"):
         attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
-        label = attributes.get("label", "")
-        if label in register_labels:
-            interrupt_registers[register_labels[label]] = int(attributes.get("width", "1"))
-    if interrupt_registers != interrupt_contract.get("registers"):
+        interrupt_registers.append(int(attributes.get("width", "1")))
+    if Counter(interrupt_registers) != Counter(interrupt_contract.get("registers", {}).values()):
         raise VerificationError(
             f"{display_path(system.circuit_path)}: InterruptController registers differ from contract"
         )
@@ -485,8 +482,7 @@ def verify_system_circuit() -> None:
         for item in component.findall("a[@name='label']")
     }
     required_interrupt_labels = {
-        "INTERRUPT_VECTOR", "RISING_EDGE_DETECT", "INTERRUPT_ACCEPT_GATE",
-        "ILLEGAL_RETURN_GATE", "INTERRUPT_TARGET_SELECT",
+        "RISING_EDGE_DETECT", "INTERRUPT_ACCEPT_GATE", "ILLEGAL_RETURN_GATE",
         "PENDING_SET_OR_HOLD", "PENDING_HOLD_UNTIL_ACCEPT",
         "MASK_HOLD", "MASK_NEXT", "VALID_RETURN_GATE",
         "RETURN_VALID_HOLD", "RETURN_VALID_NEXT", "HANDLER_HOLD",
@@ -498,10 +494,15 @@ def verify_system_circuit() -> None:
         )
     vector = None
     for constant_component in interrupt.findall("comp[@name='Constant']"):
-        label = constant_component.find("a[@name='label']")
-        if label is not None and label.get("val") == "INTERRUPT_VECTOR":
-            vector = constant_component.find("a[@name='value']")
-            break
+        value = constant_component.find("a[@name='value']")
+        width = constant_component.find("a[@name='width']")
+        if (value is not None and width is not None
+                and int(width.get("val", "1"), 0) == address_bits):
+            if vector is not None:
+                raise VerificationError(
+                    f"{display_path(system.circuit_path)}: InterruptController vector is ambiguous"
+                )
+            vector = value
     if vector is None or int(vector.get("val", "-1"), 0) != interrupt_contract.get("vector"):
         raise VerificationError(
             f"{display_path(system.circuit_path)}: InterruptController vector differs from contract"
@@ -538,20 +539,20 @@ def verify_system_circuit() -> None:
         ("(580,450)", "(710,450)"),  # valid return -> mask set
         ("(770,470)", "(900,470)"),  # mask next -> register
         ("(520,610)", "(900,610)"),  # next PC capture
-        ("(960,610)", "(1140,610)"),  # return address state
+        ("(960,610)", "(1190,610)"),  # return address state
         ("(600,730)", "(620,730)"),  # return-valid feedback
         ("(580,750)", "(610,750)"),  # valid return clears validity
         ("(770,730)", "(900,730)"),  # return-valid next
         ("(600,850)", "(620,850)"),  # handler feedback
         ("(580,870)", "(610,870)"),  # valid return clears handler
         ("(770,850)", "(780,850)"),  # handler next
-        ("(1080,750)", "(1110,750)"),  # return request
-        ("(1060,760)", "(1110,760)"),  # return address valid
-        ("(1060,770)", "(1110,770)"),  # in-handler state
-        ("(1210,660)", "(1250,660)"),  # vector -> target mux
-        ("(1140,680)", "(1250,680)"),  # return address -> target mux
-        ("(1260,690)", "(1260,700)"),  # valid-return selector
-        ("(1280,670)", "(1320,670)"),  # selected target
+        ("(1080,790)", "(1110,790)"),  # return request
+        ("(1060,800)", "(1110,800)"),  # return address valid
+        ("(1040,810)", "(1110,810)"),  # in-handler state
+        ("(1240,660)", "(1260,660)"),  # vector -> target mux
+        ("(1190,680)", "(1260,680)"),  # return address -> target mux
+        ("(1270,690)", "(1270,700)"),  # valid-return selector
+        ("(1290,670)", "(1310,670)"),  # selected target
         ("(520,920)", "(820,920)"),  # shared reset
         ("(520,950)", "(840,950)"),  # shared clock
     }
