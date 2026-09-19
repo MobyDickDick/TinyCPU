@@ -202,6 +202,7 @@
       <a name="width" val="16"/>
     </comp>
     <comp lib="0" loc="(460,210)" name="Constant">
+      <a name="label" val="OUTPUT_ADDRESS"/>
       <a name="value" val="0xfff"/>
       <a name="width" val="12"/>
     </comp>
@@ -250,10 +251,14 @@
       <a name="size" val="30"/>
     </comp>
     <comp lib="2" loc="(930,100)" name="Multiplexer">
+      <a name="label" val="OUTPUT_READ_VALUE_SELECT"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="2" loc="(930,160)" name="Multiplexer"/>
+    <comp lib="2" loc="(930,160)" name="Multiplexer">
+      <a name="label" val="OUTPUT_READ_VALID_SELECT"/>
+    </comp>
     <comp lib="3" loc="(520,200)" name="Comparator">
+      <a name="label" val="OUTPUT_ADDRESS_DECODE"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="5" loc="(760,230)" name="Register">
@@ -331,6 +336,7 @@
     <a name="circuitnamedboxfixedsize" val="true"/>
     <a name="simulationFrequency" val="1.0"/>
     <comp lib="0" loc="(1210,660)" name="Constant">
+      <a name="label" val="INTERRUPT_VECTOR"/>
       <a name="value" val="0xff0"/>
       <a name="width" val="12"/>
     </comp>
@@ -491,6 +497,7 @@
       <a name="size" val="30"/>
     </comp>
     <comp lib="2" loc="(1280,670)" name="Multiplexer">
+      <a name="label" val="INTERRUPT_TARGET_SELECT"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="5" loc="(900,100)" name="Register">
@@ -500,26 +507,31 @@
       <a name="width" val="1"/>
     </comp>
     <comp lib="5" loc="(900,280)" name="Register">
+      <a name="label" val="INTERRUPT_PENDING"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="width" val="1"/>
     </comp>
     <comp lib="5" loc="(900,440)" name="Register">
+      <a name="label" val="INTERRUPT_ENABLED"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="width" val="1"/>
     </comp>
     <comp lib="5" loc="(900,580)" name="Register">
+      <a name="label" val="RETURN_ADDRESS"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="5" loc="(900,700)" name="Register">
+      <a name="label" val="RETURN_ADDRESS_VALID"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="width" val="1"/>
     </comp>
     <comp lib="5" loc="(900,830)" name="Register">
+      <a name="label" val="IN_INTERRUPT_HANDLER"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="width" val="1"/>
