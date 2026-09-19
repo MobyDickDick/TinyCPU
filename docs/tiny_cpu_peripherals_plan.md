@@ -78,7 +78,7 @@ Nicht Bestandteil sind DMA, verschachtelte oder priorisierte Interrupts,
 mehrere Interruptquellen, Timer, serielle Protokolle, Eingabegeräte,
 Bus-Arbitration, Wait States und eine Änderung des 8/8-Profils.
 
-Die eigenständige Datei `TinyCPU-Peripherals.circ` friert nun außerdem die
+Die eigenständige Datei `TinyCPU_Peripherals.circ` friert nun außerdem die
 elektrische Systemgrenze ein. Ihr Top-Level `TinyCPUSystemMain` exportiert die
 Interruptanforderung und sämtliche zusätzlichen Trace-Zustände als direkte
 Pins. Der Offline-Prüfer gleicht Richtung und Breite jedes Pins mit dem

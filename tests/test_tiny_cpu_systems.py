@@ -22,7 +22,7 @@ class SystemProfileTests(unittest.TestCase):
         self.assertEqual(system.interrupt_vector, 4080)
         self.assertEqual(system.machine_format, "tinycpu-system-machine-v1")
         self.assertEqual(system.trace_schema, "tinycpu-system-trace-v1")
-        self.assertEqual(system.circuit_path.name, "TinyCPU-Peripherals.circ")
+        self.assertEqual(system.circuit_path.name, "TinyCPU_Peripherals.circ")
         self.assertEqual(system.top_circuit, "TinyCPUSystemMain")
         self.assertEqual(system.public_pins["INTERRUPT_REQUEST"], {
             "direction": "input", "bits": 1
