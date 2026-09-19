@@ -13,6 +13,7 @@ Dieses Verzeichnis enthält ausschließlich Dokumentation zur TinyCPU:
 - [`tiny_cpu_debugger.md`](tiny_cpu_debugger.md): Bedienung und JSON-Vertrag des symbolischen Debuggers
 - [`tiny_cpu_profiles_plan.md`](tiny_cpu_profiles_plan.md): abgegrenzter Vorschlag für AP 17 (zweites Hardwareprofil)
 - [`tiny_cpu_peripherals_plan.md`](tiny_cpu_peripherals_plan.md): abgegrenzter Vorschlag für AP 18 (Peripherie und Integration)
+- [`tiny_cpu_peripherals.md`](tiny_cpu_peripherals.md): sichtbarer Maschinenvertrag und Erklärung der AP-18-Referenzlösung
 - [`tiny_cpu_circuit_debug_plan.md`](tiny_cpu_circuit_debug_plan.md): zehnstufiger Arbeitsplan für die reproduzierbare Fehlersuche in `TinyCPU.circ`
 - [`tiny_cpu_recovery_work_packages.md`](tiny_cpu_recovery_work_packages.md): priorisierte Arbeitspakete zur Wiederherstellung der elektrischen 16/12-CPU
 - [`tiny_cpu_compatibility.md`](tiny_cpu_compatibility.md): Kompatibilitätsregeln

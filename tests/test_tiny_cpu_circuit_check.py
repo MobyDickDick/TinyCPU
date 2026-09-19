@@ -163,6 +163,22 @@ class CircuitCheckTests(unittest.TestCase):
             "WRITE_REQUEST input at (150, 100) has an undriven wire ending at (700, 180)"
         ])
 
+    def test_compact_gate_uses_its_declared_terminal_spacing(self):
+        circuit = ET.fromstring("""
+          <circuit name="Compact">
+            <comp lib="1" loc="(200,120)" name="AND Gate">
+              <a name="inputs" val="3"/><a name="label" val="COMPACT"/>
+              <a name="size" val="30"/>
+            </comp>
+            <wire from="(170,110)" to="(700,110)"/>
+            <wire from="(700,110)" to="(700,180)"/>
+          </circuit>
+        """)
+        messages = [issue.message for issue in inspect_circuit(circuit)]
+        self.assertEqual(messages, [
+            "COMPACT input at (170, 110) has an undriven wire ending at (700, 180)"
+        ])
+
     def test_detects_and_repairs_subcircuit_output_bridge(self):
         project = """<?xml version='1.0'?>
           <project>
