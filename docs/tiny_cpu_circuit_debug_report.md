@@ -70,7 +70,7 @@ Tests mit historischen Canvas-Koordinaten verändert.
 | 20.5 Reset, Takt und Fetch für 8/8 wiederherstellen | entfallen | Der profilabhängige Programmhöchstwert und drei zuvor implizit einbittige Fetch-Bauteile sind auf 8 Bit festgeschrieben. Zwei identische Minimalprogrammläufe belegen danach weiterhin den ersten elektrischen Unterschied am PC nach der ersten Zustandsänderung. Folgewert-, Takt-, Reset- und Enable-Netz des PC-Registers sind geschlossen; eine direkte temporäre Messung belegt zusätzlich den aktiven Resetpegel am Register und den dabei stabilen PC-Nullwert. `FetchDecodeControls` blieb vollständig unverändert. |
 | 20.6 ISA- und Fehlerregression schrittweise öffnen | abgeschlossen | Kernlauf, alle 50 Opcodes, beide Pfade der bedingten Sprünge und alle sechs Sticky-Fehlerfälle bestehen in der vollständigen elektrischen 16/12-Profilabnahme. |
 | 20.7 Redraw-sichere Regressionen ergänzen | abgeschlossen | Sieben gezielte temporäre Leitungsunterbrechungen belegen, dass die semantischen Regressionen frühere Halt-, Sprung-, Fehlerhalt- und offene Gate-Fehler erkennen, ohne die eingecheckte Schaltung zu verändern. |
-| 20.8 Endabnahme und Funktionsstatus aktualisieren | in Bearbeitung | Der aktuelle Kandidat `090183e` besteht Offline- und elektrisches Gate in einem frischen Checkout zweimal. Da weder `DISPLAY` noch `Xvfb`, `Xorg` oder `xdotool` verfügbar sind, bleibt ausschließlich der extern auszuführende GUI-Kurztest offen. |
+| 20.8 Endabnahme und Funktionsstatus aktualisieren | in Bearbeitung | Der aktuelle Kandidat `c13ab89` besteht Offline- und elektrisches Gate in einem frischen Checkout zweimal. Da weder `DISPLAY` noch `Xvfb`, `Xorg` oder `xdotool` verfügbar sind, bleibt ausschließlich der extern auszuführende GUI-Kurztest offen. |
 
 ### Folgeprüfung nach dem manuellen Decoder-Reset
 
@@ -3094,3 +3094,49 @@ extern anhand der dokumentierten Bedienfolge protokolliert werden. AP 20.8 und
 die endgültige Statusfreigabe bleiben ausschließlich bis zu diesem Sichtnachweis
 offen; die automatische Endabnahme des aktuellen Kandidaten ist zweimal
 reproduzierbar grün.
+
+#### Endabnahme nach Zusammenführung der letzten Kandidatenprüfung
+
+- **Kandidat:** `c13ab89cd3b698323d38d33f75982741b28e265e`
+- **Datum:** 20. September 2026
+- **Ausführung:** abgetrennter frischer Git-Worktree ohne lokale Änderungen
+- **Python:** 3.14.4
+- **Java:** OpenJDK 25.0.2 (`25.0.2+10-69`)
+- **Logisim-evolution:** 4.1.0, JAR-SHA-256
+  `fe6386a3217a591bcc311a4eda49e1f43a389b499dd3d0f6f40f344fc85f2577`
+
+Der zusammengeführte Stand der vorherigen AP-20.8-Abnahme wurde in einem
+frischen, abgetrennten Worktree erneut geprüft. Beide Offline-Läufe bestanden
+mit allen 104 Unit-Tests. Zwei aufeinanderfolgende elektrische Läufe bestanden
+mit je zwei identischen Minimalkerntraces und sämtlichen 61 Matrix-Fixtures.
+Der Prüf-Worktree blieb nach allen Läufen unverändert.
+
+```bash
+scripts/test-offline.sh
+scripts/test-offline.sh
+LOGISIM_JOBS=4 \
+  LOGISIM_JAR=/workspace/TinyCPU/.venv/Include/logisim-evolution-4.1.0-all.jar \
+  LOGISIM_OUTPUT=/tmp/ap20.8-c13ab89/electrical-2 \
+  scripts/test-logisim.sh
+LOGISIM_JOBS=4 \
+  LOGISIM_JAR=/workspace/TinyCPU/.venv/Include/logisim-evolution-4.1.0-all.jar \
+  LOGISIM_OUTPUT=/tmp/ap20.8-c13ab89/electrical-3 \
+  scripts/test-logisim.sh
+```
+
+| Lauf | Exitcode | Laufzeit | Ergebnis |
+|---|---:|---:|---|
+| Offline 1 | 0 | 13 s | Verifier, Schaltungscheck und 104 Tests bestanden |
+| Offline 2 | 0 | 13 s | Verifier, Schaltungscheck und 104 Tests bestanden |
+| Elektrisch 1 | 0 | 124 s | zwei Kernläufe und 61/61 Matrix-Fixtures bestanden |
+| Elektrisch 2 | 0 | 121 s | zwei Kernläufe und 61/61 Matrix-Fixtures bestanden |
+
+Der GUI-Preflight lieferte ein leeres `DISPLAY`; `Xvfb`, `Xorg` und `xdotool`
+sind weiterhin nicht installiert. Ein sichtbarer und manuell bedienbarer
+Logisim-Desktop steht in dieser Umgebung damit nicht zur Verfügung. Der
+erfolgreiche Tabellenlogger-Lauf wird nicht als GUI-Kurztest gewertet. Reset,
+Einzeltakt, die sichtbaren Ausgaben `3, 2, 1`, Normalhalt und Fehlerhalt müssen
+weiterhin extern anhand der dokumentierten Bedienfolge protokolliert werden.
+AP 20.8 und die endgültige Statusfreigabe bleiben ausschließlich bis zu diesem
+Sichtnachweis offen; die automatische Endabnahme des aktuellen Kandidaten ist
+zweimal reproduzierbar grün.
