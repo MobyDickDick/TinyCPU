@@ -308,6 +308,14 @@ def verify_system_circuit() -> None:
         "core_write_value_to_memory_write_value": ("CORE_WRITE_VALUE", "WRITE_VALUE"),
         "core_write_valid_to_memory_write_valid": ("CORE_WRITE_VALID", "WRITE_VALID"),
         "core_write_enable_to_memory_write_enable": ("CORE_WRITE_ENABLE", "WRITE_ENABLE"),
+        "core_instruction_boundary_to_interrupt_boundary": (
+            "CORE_INSTRUCTION_BOUNDARY", "INSTRUCTION_BOUNDARY"),
+        "core_enable_request_to_interrupt_enable_request": (
+            "CORE_ENABLE_REQUEST", "ENABLE_REQUEST"),
+        "core_disable_request_to_interrupt_disable_request": (
+            "CORE_DISABLE_REQUEST", "DISABLE_REQUEST"),
+        "core_return_request_to_interrupt_return_request": (
+            "CORE_RETURN_REQUEST", "RETURN_REQUEST"),
     }
     required_cpu_wires = {
         frozenset((cpu_pin_locations[source], cpu_pin_locations[target]))

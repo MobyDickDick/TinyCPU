@@ -157,6 +157,10 @@ class CircuitVerificationTests(unittest.TestCase):
             ("CORE_WRITE_VALUE", "WRITE_VALUE"),
             ("CORE_WRITE_VALID", "WRITE_VALID"),
             ("CORE_WRITE_ENABLE", "WRITE_ENABLE"),
+            ("CORE_INSTRUCTION_BOUNDARY", "INSTRUCTION_BOUNDARY"),
+            ("CORE_ENABLE_REQUEST", "ENABLE_REQUEST"),
+            ("CORE_DISABLE_REQUEST", "DISABLE_REQUEST"),
+            ("CORE_RETURN_REQUEST", "RETURN_REQUEST"),
         ):
             with self.subTest(path=(source_label, target_label)):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
@@ -286,8 +290,8 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<comp lib="5" loc="(900,670)" name="Register">\n      <a name="appearance" val="logisim_evolution"/>\n      <a name="labelfont" val="SansSerif plain 9"/>\n      <a name="width" val="12"/>',
-            '<comp lib="5" loc="(900,670)" name="Register">\n      <a name="appearance" val="logisim_evolution"/>\n      <a name="labelfont" val="SansSerif plain 9"/>\n      <a name="width" val="1"/>', 1),
+            '<comp lib="5" loc="(900,660)" name="Register">\n      <a name="appearance" val="logisim_evolution"/>\n      <a name="labelfont" val="SansSerif plain 9"/>\n      <a name="width" val="12"/>',
+            '<comp lib="5" loc="(900,660)" name="Register">\n      <a name="appearance" val="logisim_evolution"/>\n      <a name="labelfont" val="SansSerif plain 9"/>\n      <a name="width" val="1"/>', 1),
             encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
@@ -324,7 +328,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(1010,360)" to="(1110,360)"/>', "", 1), encoding="utf-8")
+            '<wire from="(1010,350)" to="(1110,350)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -342,7 +346,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(1010,560)" to="(1350,560)"/>', "", 1), encoding="utf-8")
+            '<wire from="(1010,550)" to="(1350,550)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -360,7 +364,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(1040,370)" to="(1100,370)"/>', "", 1), encoding="utf-8")
+            '<wire from="(1040,360)" to="(1100,360)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -378,7 +382,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(1040,910)" to="(1110,910)"/>', "", 1), encoding="utf-8")
+            '<wire from="(1040,900)" to="(1110,900)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -396,7 +400,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(1060,830)" to="(1060,900)"/>', "", 1), encoding="utf-8")
+            '<wire from="(1060,820)" to="(1060,890)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -414,7 +418,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(1080,640)" to="(1080,890)"/>', "", 1), encoding="utf-8")
+            '<wire from="(1080,630)" to="(1080,880)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -432,7 +436,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(1080,640)" to="(1270,640)"/>', "", 1), encoding="utf-8")
+            '<wire from="(1080,630)" to="(1270,630)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -455,12 +459,12 @@ class CircuitVerificationTests(unittest.TestCase):
             for wire in interrupt.findall("wire")
         }
         self.assertTrue({
-            ("(560,310)", "(560,420)"),
-            ("(580,540)", "(580,850)"),
-            ("(820,850)", "(820,980)"),
-            ("(840,740)", "(840,870)"),
-            ("(870,770)", "(870,890)"),
-            ("(1210,660)", "(1210,790)"),
+            ("(560,300)", "(560,410)"),
+            ("(580,530)", "(580,840)"),
+            ("(820,840)", "(820,970)"),
+            ("(840,730)", "(840,860)"),
+            ("(870,760)", "(870,880)"),
+            ("(1210,650)", "(1210,780)"),
         } <= wires)
         self.assertFalse(any(
             start.endswith(",50)") and end.endswith(",850)")
@@ -478,11 +482,11 @@ class CircuitVerificationTests(unittest.TestCase):
             (wire.get("from"), wire.get("to"))
             for wire in interrupt.findall("wire")
         }
-        self.assertIn(("(520,640)", "(1080,640)"), wires)
-        self.assertIn(("(1080,640)", "(1080,890)"), wires)
-        self.assertIn(("(1040,370)", "(1040,910)"), wires)
-        self.assertNotIn(("(520,640)", "(1040,640)"), wires)
-        self.assertNotIn(("(1040,640)", "(1080,640)"), wires)
+        self.assertIn(("(520,630)", "(1080,630)"), wires)
+        self.assertIn(("(1080,630)", "(1080,880)"), wires)
+        self.assertIn(("(1040,360)", "(1040,900)"), wires)
+        self.assertNotIn(("(520,630)", "(1040,630)"), wires)
+        self.assertNotIn(("(1040,630)", "(1080,630)"), wires)
 
 
 if __name__ == "__main__":

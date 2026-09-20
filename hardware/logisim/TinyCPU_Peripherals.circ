@@ -155,6 +155,22 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="CORE_WRITE_ENABLE"/>
     </comp>
+    <comp lib="0" loc="(230,390)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_INSTRUCTION_BOUNDARY"/>
+    </comp>
+    <comp lib="0" loc="(230,410)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_ENABLE_REQUEST"/>
+    </comp>
+    <comp lib="0" loc="(230,430)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_DISABLE_REQUEST"/>
+    </comp>
+    <comp lib="0" loc="(230,450)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_RETURN_REQUEST"/>
+    </comp>
     <comp lib="0" loc="(230,70)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="CLK"/>
@@ -239,6 +255,10 @@
     <wire from="(230,290)" to="(700,290)"/>
     <wire from="(230,340)" to="(700,340)"/>
     <wire from="(230,360)" to="(700,360)"/>
+    <wire from="(230,390)" to="(700,390)"/>
+    <wire from="(230,410)" to="(700,410)"/>
+    <wire from="(230,430)" to="(700,430)"/>
+    <wire from="(230,450)" to="(700,450)"/>
   </circuit>
   <circuit name="OutputPort">
     <a name="appearance" val="logisim_evolution"/>

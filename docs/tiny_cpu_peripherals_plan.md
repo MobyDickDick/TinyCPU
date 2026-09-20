@@ -228,7 +228,13 @@ vorläufigen Kernanschlüssen direkt zu den entsprechenden Ausgängen der Grenze
 Vertrag, Offline-Prüfer und Leitungs-Mutationstest sichern die drei Signale
 gemeinsam anhand ihrer Pinbezeichnungen. Damit ist der CPU-seitige Schreibpfad
 bis zur Speichergrenze vollständig vorbereitet; Befehls- und PC-Steuerpfade
-sowie die Top-Level-Verdrahtung bleiben offen.
+sowie die Top-Level-Verdrahtung bleiben offen. Der folgende abgegrenzte Schritt
+führt nun die Instruktionsgrenze und die drei Befehlsimpulse für Aktivierung,
+Deaktivierung und Rückkehr von ausdrücklich benannten, vorläufigen
+Kernanschlüssen direkt zu den Interruptausgängen der Grenze. Vertrag,
+Offline-Prüfer und Leitungs-Mutationstest sichern alle vier Signale anhand der
+Pinbezeichnungen. Damit bleibt innerhalb der CPU-Grenze nur noch der
+PC-Steuerpfad offen; die Top-Level-Verdrahtung ist weiterhin nicht eingefügt.
 
 ## Kompatibilitätsfolgen
 

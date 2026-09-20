@@ -236,8 +236,10 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   zur Speichergrenze und ist mutationstestgeschützt. Auch Schreibwert,
   Schreibgültigkeit und Schreibfreigabe reichen nun von benannten vorläufigen
   Kernanschlüssen direkt und mutationstestgeschützt bis zu den Ausgängen der
-  CPU-Grenze. Befehls- und PC-Steuerpfade, ihre Top-Level-Verdrahtung sowie die
-  anschließende Ausführung der Matrix sind noch umzusetzen.
+  CPU-Grenze. Instruktionsgrenze sowie Aktivierungs-, Deaktivierungs- und
+  Rückkehrimpuls werden ebenfalls direkt und mutationstestgeschützt
+  weitergereicht. PC-Steuerpfad, Top-Level-Verdrahtung und die anschließende
+  Ausführung der Matrix sind noch umzusetzen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
