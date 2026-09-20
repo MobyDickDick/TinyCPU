@@ -20,6 +20,10 @@
         "CORE_WRITE_VALUE": {"direction": "input", "bits": 16},
         "CORE_WRITE_VALID": {"direction": "input", "bits": 1},
         "CORE_WRITE_ENABLE": {"direction": "input", "bits": 1},
+        "CORE_INSTRUCTION_BOUNDARY": {"direction": "input", "bits": 1},
+        "CORE_ENABLE_REQUEST": {"direction": "input", "bits": 1},
+        "CORE_DISABLE_REQUEST": {"direction": "input", "bits": 1},
+        "CORE_RETURN_REQUEST": {"direction": "input", "bits": 1},
         "READ_VALUE": {"direction": "output", "bits": 16},
         "READ_VALID": {"direction": "output", "bits": 1},
         "ADDRESS": {"direction": "output", "bits": 12},
@@ -43,7 +47,11 @@
         "core_address_to_memory_address",
         "core_write_value_to_memory_write_value",
         "core_write_valid_to_memory_write_valid",
-        "core_write_enable_to_memory_write_enable"
+        "core_write_enable_to_memory_write_enable",
+        "core_instruction_boundary_to_interrupt_boundary",
+        "core_enable_request_to_interrupt_enable_request",
+        "core_disable_request_to_interrupt_disable_request",
+        "core_return_request_to_interrupt_return_request"
       ]
     },
     "output_port": {
@@ -112,7 +120,7 @@
       ],
       "disable_on_accept": true,
       "restore_mask_on_return": true,
-      "wiring_sha256": "70989bbd6f33d94e093aaa16e371013976b1e58707fa8bb6ad235409973184c5",
+      "wiring_sha256": "e309ff65af9c734bd7d68edc434c838599abe9fc10c3b0d7d933f2412e31c004",
       "verified_paths": [
         "request_to_level_register",
         "request_level_clock_and_reset",

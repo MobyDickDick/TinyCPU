@@ -15,10 +15,12 @@ und externe Interruptanforderung erreichen inzwischen die jeweils betroffenen
 Bausteine. Hinter der neuen Grenze sind der atomare Leseweg aus RAM-Wert und
 RAM-Gültigkeit, der 12-Bit-Adressweg und die drei CPU-seitigen Signale für
 Schreibwert, Schreibgültigkeit und Schreibfreigabe von vorläufigen
-CPU-Kernanschlüssen bis zur Speichergrenze direkt verdrahtet; Befehls- und
-PC-Steuerpfade sowie die Top-Level-Verdrahtung sind noch nicht eingefügt. Die
-Prüfung dieser Wege folgt den benannten Pins und bleibt dadurch auch nach einer
-manuellen Neuanordnung der Grenze wirksam.
+CPU-Kernanschlüssen bis zur Speichergrenze direkt verdrahtet. Auch die
+Instruktionsgrenze und die drei Befehlsimpulse für Aktivierung, Deaktivierung
+und Rückkehr reichen direkt zu den Interruptausgängen. Der PC-Steuerpfad sowie
+die Top-Level-Verdrahtung sind noch nicht eingefügt. Die Prüfung dieser Wege
+folgt den benannten Pins und bleibt dadurch auch nach einer manuellen
+Neuanordnung der Grenze wirksam.
 Deshalb
 ist der klassische Interruptcontroller vorläufig eine **Referenzlösung für
 AP 18**, keine unumkehrbare Festlegung der TinyCPU-Architektur.

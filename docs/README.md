@@ -78,8 +78,10 @@ die 12-Bit-Adresse vom vorläufigen Kernanschluss zur Speichergrenze. Die
 CPU-seitigen Signale für Schreibwert, Schreibgültigkeit und Schreibfreigabe
 reichen ebenfalls direkt bis zur Speichergrenze. Die Regression verfolgt all
 diese Wege anhand der benannten Pins statt veralteter Zeichenkoordinaten.
-Befehls- und PC-Steuerpfade, die Top-Level-Verdrahtung und die elektrische
-Systemabnahme sind noch offen.
+Die Instruktionsgrenze und die drei Befehlsimpulse für Interruptaktivierung,
+-deaktivierung und Rückkehr sind nun ebenfalls direkt und
+mutationstestgeschützt weitergereicht. Der PC-Steuerpfad, die
+Top-Level-Verdrahtung und die elektrische Systemabnahme sind noch offen.
 Die dafür verbindliche
 elektrische Fallliste ist inzwischen versioniert, mit den übrigen
 Systemverträgen quergeprüft und deckt alle neuen Opcodes und Verhaltensfälle
