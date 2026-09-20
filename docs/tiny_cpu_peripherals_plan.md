@@ -197,6 +197,18 @@ Schritt behauptet daher weder einen ausführbaren Systemkern noch einen
 elektrischen Matrixnachweis; als nächstes folgt die Einfügung dieser
 CPU-seitigen Daten-, Befehls- und PC-Steuerpfade.
 
+Vor dieser Einfügung ist deren vollständige elektrische Schnittstelle jetzt
+als `CPUIntegrationBoundary` festgeschrieben. Sie trennt RAM-Lesedaten und
+-Gültigkeit von der durch `OutputMemoryPath` ausgewählten Leseseite, führt die
+Schreibadresse samt Wert, Gültigkeit und Freigaben und benennt sämtliche drei
+neuen Befehlsimpulse sowie Instruktionsgrenze, Folge-PC, Interruptannahme,
+Interruptziel und illegale Rückkehr. Der Systemvertrag und Offline-Prüfer
+gleichen für jeden Pin Richtung und Breite ab; ein Mutationstest schützt die
+Grenze. Sie ist bewusst noch nicht auf dem Top-Level instanziiert und enthält
+noch keinen CPU-Kern. Als nächster Schritt folgt daher die Implementierung
+hinter dieser Grenze und erst danach ihre direkte Verdrahtung mit
+`OutputMemoryPath` und `InterruptController`.
+
 ## Kompatibilitätsfolgen
 
 1. TinyCPU 1.0, `tinycpu-machine-v1` und beide vorhandenen Hardwareprofile

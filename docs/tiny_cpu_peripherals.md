@@ -7,10 +7,13 @@ nicht selbst dessen Spezifikation.
 ## Status und bewusste Grenze
 
 `TinyCPU_Peripherals.circ` enthält derzeit drei eigenständig prüfbare
-Bausteine: `OutputPort`, `OutputMemoryPath` und `InterruptController`.
+Bausteine: `OutputPort`, `OutputMemoryPath` und `InterruptController`. Die neue
+`CPUIntegrationBoundary` friert zusätzlich die dafür benötigte CPU-seitige
+Daten-, Befehls- und PC-Schnittstelle mit Richtung und Breite ein.
 `TinyCPUSystemMain` beschreibt nur die öffentliche Systemgrenze. Takt, Reset
 und externe Interruptanforderung erreichen inzwischen die jeweils betroffenen
-Bausteine; CPU-Daten-, Befehls- und PC-Steuerpfade sind noch nicht eingefügt.
+Bausteine; die CPU-Implementierung hinter der neuen Grenze und ihre
+Top-Level-Verdrahtung sind noch nicht eingefügt.
 Deshalb
 ist der klassische Interruptcontroller vorläufig eine **Referenzlösung für
 AP 18**, keine unumkehrbare Festlegung der TinyCPU-Architektur.

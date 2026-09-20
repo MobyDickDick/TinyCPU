@@ -9,6 +9,31 @@
   "circuit": "TinyCPU_Peripherals.circ",
   "top_circuit": "TinyCPUSystemMain",
   "components": {
+    "cpu_integration": {
+      "circuit": "CPUIntegrationBoundary",
+      "pins": {
+        "CLK": {"direction": "input", "bits": 1},
+        "RESET": {"direction": "input", "bits": 1},
+        "RAM_READ_VALUE": {"direction": "input", "bits": 16},
+        "RAM_READ_VALID": {"direction": "input", "bits": 1},
+        "READ_VALUE": {"direction": "output", "bits": 16},
+        "READ_VALID": {"direction": "output", "bits": 1},
+        "ADDRESS": {"direction": "output", "bits": 12},
+        "WRITE_VALUE": {"direction": "output", "bits": 16},
+        "WRITE_VALID": {"direction": "output", "bits": 1},
+        "WRITE_ENABLE": {"direction": "output", "bits": 1},
+        "RAM_WRITE_ENABLE": {"direction": "input", "bits": 1},
+        "INSTRUCTION_BOUNDARY": {"direction": "output", "bits": 1},
+        "ENABLE_REQUEST": {"direction": "output", "bits": 1},
+        "DISABLE_REQUEST": {"direction": "output", "bits": 1},
+        "RETURN_REQUEST": {"direction": "output", "bits": 1},
+        "NEXT_PC": {"direction": "output", "bits": 12},
+        "INTERRUPT_ACCEPT": {"direction": "input", "bits": 1},
+        "TARGET_PC": {"direction": "input", "bits": 12},
+        "ILLEGAL_RETURN": {"direction": "input", "bits": 1}
+      },
+      "status": "boundary_only"
+    },
     "output_port": {
       "circuit": "OutputPort",
       "registers": {

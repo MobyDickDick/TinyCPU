@@ -127,6 +127,26 @@ class CircuitVerificationTests(unittest.TestCase):
         self.assertIsNotNone(output)
         self.assertEqual(WIRE_CONTACTS.inspect_circuit(output), [])
 
+    def test_ap18_cpu_integration_boundary_matches_contract(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
+        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
+            'label" val="NEXT_PC"', 'label" val="BROKEN_NEXT_PC"', 1),
+            encoding="utf-8",
+        )
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        original = VERIFY.LOGISIM
+        VERIFY.LOGISIM = temporary / "logisim"
+        self.addCleanup(setattr, VERIFY, "LOGISIM", original)
+        with mock.patch.object(VERIFY, "load_system_profile",
+                               return_value=replace(system, circuit_path=circuit)):
+            with self.assertRaisesRegex(VERIFY.VerificationError,
+                                        "CPU integration boundary differs"):
+                VERIFY.verify_system_circuit()
+
     def test_ap18_output_port_owns_value_and_valid_registers(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"

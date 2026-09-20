@@ -275,6 +275,25 @@ def verify_system_circuit() -> None:
         )
 
     contract = load_json(LOGISIM / "tinycpu-peripherals-16-12-v1.json")
+    cpu_contract = contract.get("components", {}).get("cpu_integration", {})
+    cpu_name = cpu_contract.get("circuit")
+    cpu_boundary = project.find(f"circuit[@name='{cpu_name}']")
+    if cpu_boundary is None:
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: CPU integration boundary is missing"
+        )
+    cpu_pins = {}
+    for component in cpu_boundary.findall("comp[@name='Pin']"):
+        attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
+        cpu_pins[attributes.get("label", "")] = {
+            "direction": attributes.get("type", "input"),
+            "bits": int(attributes.get("width", "1")),
+        }
+    if cpu_pins != cpu_contract.get("pins"):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: CPU integration boundary differs from contract"
+        )
+
     component_contract = contract.get("components", {}).get("output_port", {})
     output_name = component_contract.get("circuit")
     output = project.find(f"circuit[@name='{output_name}']")
