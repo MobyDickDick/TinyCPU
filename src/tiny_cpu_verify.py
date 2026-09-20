@@ -305,6 +305,9 @@ def verify_system_circuit() -> None:
         "ram_read_value_to_cpu_read_value": ("RAM_READ_VALUE", "READ_VALUE"),
         "ram_read_valid_to_cpu_read_valid": ("RAM_READ_VALID", "READ_VALID"),
         "core_address_to_memory_address": ("CORE_ADDRESS", "ADDRESS"),
+        "core_write_value_to_memory_write_value": ("CORE_WRITE_VALUE", "WRITE_VALUE"),
+        "core_write_valid_to_memory_write_valid": ("CORE_WRITE_VALID", "WRITE_VALID"),
+        "core_write_enable_to_memory_write_enable": ("CORE_WRITE_ENABLE", "WRITE_ENABLE"),
     }
     required_cpu_wires = {
         frozenset((cpu_pin_locations[source], cpu_pin_locations[target]))

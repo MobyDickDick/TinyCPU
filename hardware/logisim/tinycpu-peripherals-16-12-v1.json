@@ -17,6 +17,9 @@
         "RAM_READ_VALUE": {"direction": "input", "bits": 16},
         "RAM_READ_VALID": {"direction": "input", "bits": 1},
         "CORE_ADDRESS": {"direction": "input", "bits": 12},
+        "CORE_WRITE_VALUE": {"direction": "input", "bits": 16},
+        "CORE_WRITE_VALID": {"direction": "input", "bits": 1},
+        "CORE_WRITE_ENABLE": {"direction": "input", "bits": 1},
         "READ_VALUE": {"direction": "output", "bits": 16},
         "READ_VALID": {"direction": "output", "bits": 1},
         "ADDRESS": {"direction": "output", "bits": 12},
@@ -37,7 +40,10 @@
       "verified_paths": [
         "ram_read_value_to_cpu_read_value",
         "ram_read_valid_to_cpu_read_valid",
-        "core_address_to_memory_address"
+        "core_address_to_memory_address",
+        "core_write_value_to_memory_write_value",
+        "core_write_valid_to_memory_write_valid",
+        "core_write_enable_to_memory_write_enable"
       ]
     },
     "output_port": {
@@ -106,7 +112,7 @@
       ],
       "disable_on_accept": true,
       "restore_mask_on_return": true,
-      "wiring_sha256": "4250a43130bd1f462a8dd04aef9defbf2ba08da6f3f10408239df52fa44bd647",
+      "wiring_sha256": "70989bbd6f33d94e093aaa16e371013976b1e58707fa8bb6ad235409973184c5",
       "verified_paths": [
         "request_to_level_register",
         "request_level_clock_and_reset",
