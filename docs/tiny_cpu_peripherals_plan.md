@@ -207,7 +207,11 @@ gleichen für jeden Pin Richtung und Breite ab; ein Mutationstest schützt die
 Grenze. Sie ist bewusst noch nicht auf dem Top-Level instanziiert und enthält
 noch keinen CPU-Kern. Als nächster Schritt folgt daher die Implementierung
 hinter dieser Grenze und erst danach ihre direkte Verdrahtung mit
-`OutputMemoryPath` und `InterruptController`.
+`OutputMemoryPath` und `InterruptController`. Als erster funktionaler Pfad
+hinter dieser Grenze werden RAM-Lesewert und zugehörige Gültigkeit nun direkt
+und gemeinsam an die CPU-seitige Leseauswahl weitergereicht. Der
+Offline-Prüfer und ein Mutationstest sichern beide Leitungen; Adress-, Schreib-,
+Befehls- und PC-Steuerpfade bleiben die folgenden Integrationsschritte.
 
 ## Kompatibilitätsfolgen
 

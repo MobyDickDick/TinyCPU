@@ -32,7 +32,11 @@
         "TARGET_PC": {"direction": "input", "bits": 12},
         "ILLEGAL_RETURN": {"direction": "input", "bits": 1}
       },
-      "status": "boundary_only"
+      "status": "read_path_started",
+      "verified_paths": [
+        "ram_read_value_to_cpu_read_value",
+        "ram_read_valid_to_cpu_read_valid"
+      ]
     },
     "output_port": {
       "circuit": "OutputPort",
