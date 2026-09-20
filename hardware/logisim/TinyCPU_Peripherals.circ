@@ -85,9 +85,9 @@
       <a name="label" val="IN_INTERRUPT_HANDLER"/>
       <a name="type" val="output"/>
     </comp>
+    <comp loc="(1040,520)" name="CPUIntegrationBoundary"/>
     <comp loc="(600,130)" name="OutputMemoryPath"/>
     <comp loc="(600,320)" name="InterruptController"/>
-    <comp loc="(1040,520)" name="CPUIntegrationBoundary"/>
     <wire from="(200,250)" to="(260,250)"/>
     <wire from="(200,270)" to="(280,270)"/>
     <wire from="(200,360)" to="(380,360)"/>
@@ -185,7 +185,7 @@
       <a name="label" val="TARGET_PC"/>
       <a name="width" val="12"/>
     </comp>
-    <comp lib="0" loc="(680,180)" name="Pin">
+    <comp lib="0" loc="(680,190)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="READ_VALUE"/>
@@ -218,70 +218,54 @@
       <a name="label" val="WRITE_VALID"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(690,460)" name="Pin">
+    <comp lib="0" loc="(690,420)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="WRITE_ENABLE"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(690,560)" name="Pin">
+    <comp lib="0" loc="(690,450)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="INSTRUCTION_BOUNDARY"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(690,600)" name="Pin">
+    <comp lib="0" loc="(690,480)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="ENABLE_REQUEST"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(690,620)" name="Pin">
+    <comp lib="0" loc="(690,510)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="DISABLE_REQUEST"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(690,650)" name="Pin">
+    <comp lib="0" loc="(690,570)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="RETURN_REQUEST"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(690,720)" name="Pin">
+    <comp lib="0" loc="(690,640)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="NEXT_PC"/>
       <a name="type" val="output"/>
       <a name="width" val="12"/>
     </comp>
-    <wire from="(280,190)" to="(670,190)"/>
+    <wire from="(280,190)" to="(680,190)"/>
     <wire from="(280,230)" to="(690,230)"/>
     <wire from="(280,270)" to="(690,270)"/>
     <wire from="(280,320)" to="(690,320)"/>
-    <wire from="(280,390)" to="(610,390)"/>
-    <wire from="(610,390)" to="(610,460)"/>
-    <wire from="(610,460)" to="(690,460)"/>
-    <wire from="(280,420)" to="(600,420)"/>
-    <wire from="(600,390)" to="(600,420)"/>
-    <wire from="(600,390)" to="(690,390)"/>
-    <wire from="(280,450)" to="(620,450)"/>
-    <wire from="(620,450)" to="(620,560)"/>
-    <wire from="(620,560)" to="(690,560)"/>
-    <wire from="(280,480)" to="(630,480)"/>
-    <wire from="(630,480)" to="(630,600)"/>
-    <wire from="(630,600)" to="(690,600)"/>
-    <wire from="(280,510)" to="(640,510)"/>
-    <wire from="(640,510)" to="(640,620)"/>
-    <wire from="(640,620)" to="(690,620)"/>
-    <wire from="(280,570)" to="(650,570)"/>
-    <wire from="(650,570)" to="(650,650)"/>
-    <wire from="(650,650)" to="(690,650)"/>
-    <wire from="(280,640)" to="(660,640)"/>
-    <wire from="(660,640)" to="(660,720)"/>
-    <wire from="(660,720)" to="(690,720)"/>
-    <wire from="(670,180)" to="(670,190)"/>
-    <wire from="(670,180)" to="(680,180)"/>
+    <wire from="(280,390)" to="(690,390)"/>
+    <wire from="(280,420)" to="(690,420)"/>
+    <wire from="(280,450)" to="(690,450)"/>
+    <wire from="(280,480)" to="(690,480)"/>
+    <wire from="(280,510)" to="(690,510)"/>
+    <wire from="(280,570)" to="(690,570)"/>
+    <wire from="(280,640)" to="(690,640)"/>
   </circuit>
   <circuit name="OutputPort">
     <a name="appearance" val="logisim_evolution"/>
