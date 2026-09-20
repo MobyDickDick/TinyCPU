@@ -171,6 +171,11 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="CORE_RETURN_REQUEST"/>
     </comp>
+    <comp lib="0" loc="(230,490)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_NEXT_PC"/>
+      <a name="width" val="12"/>
+    </comp>
     <comp lib="0" loc="(230,70)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="CLK"/>
@@ -259,6 +264,7 @@
     <wire from="(230,410)" to="(700,410)"/>
     <wire from="(230,430)" to="(700,430)"/>
     <wire from="(230,450)" to="(700,450)"/>
+    <wire from="(230,490)" to="(700,490)"/>
   </circuit>
   <circuit name="OutputPort">
     <a name="appearance" val="logisim_evolution"/>

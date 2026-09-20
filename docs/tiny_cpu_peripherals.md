@@ -17,8 +17,10 @@ RAM-Gültigkeit, der 12-Bit-Adressweg und die drei CPU-seitigen Signale für
 Schreibwert, Schreibgültigkeit und Schreibfreigabe von vorläufigen
 CPU-Kernanschlüssen bis zur Speichergrenze direkt verdrahtet. Auch die
 Instruktionsgrenze und die drei Befehlsimpulse für Aktivierung, Deaktivierung
-und Rückkehr reichen direkt zu den Interruptausgängen. Der PC-Steuerpfad sowie
-die Top-Level-Verdrahtung sind noch nicht eingefügt. Die Prüfung dieser Wege
+und Rückkehr reichen direkt zu den Interruptausgängen. Der Folge-PC wird von
+einem vorläufigen Kernanschluss direkt zur Interruptsteuerung geführt. Damit
+ist der PC-Steuerpfad innerhalb der Grenze ebenfalls vorbereitet; die
+Top-Level-Verdrahtung ist noch nicht eingefügt. Die Prüfung dieser Wege
 folgt den benannten Pins und bleibt dadurch auch nach einer manuellen
 Neuanordnung der Grenze wirksam.
 Deshalb
