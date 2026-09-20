@@ -222,7 +222,13 @@ Ausgang `ADDRESS` der Grenze weiter. Vertrag, Offline-Prüfer und derselbe
 Leitungs-Mutationstest sichern den Pfad anhand der Pinbezeichnungen ab. Damit
 ist der Adresspfad vorbereitet, ohne bereits einen nicht vorhandenen
 ausführbaren CPU-Kern zu behaupten; Schreib-, Befehls- und PC-Steuerpfade
-bleiben offen.
+bleiben offen. Als nächster abgegrenzter Pfad reichen nun auch Schreibwert,
+Schreibgültigkeit und Schreibfreigabe von den drei ausdrücklich benannten,
+vorläufigen Kernanschlüssen direkt zu den entsprechenden Ausgängen der Grenze.
+Vertrag, Offline-Prüfer und Leitungs-Mutationstest sichern die drei Signale
+gemeinsam anhand ihrer Pinbezeichnungen. Damit ist der CPU-seitige Schreibpfad
+bis zur Speichergrenze vollständig vorbereitet; Befehls- und PC-Steuerpfade
+sowie die Top-Level-Verdrahtung bleiben offen.
 
 ## Kompatibilitätsfolgen
 

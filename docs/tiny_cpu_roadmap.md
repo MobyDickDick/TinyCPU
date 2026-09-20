@@ -233,9 +233,11 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   -Gültigkeit direkt und mutationstestgeschützt zur Leseauswahl; seine Prüfung
   folgt auch nach der manuellen Neuanordnung den benannten Pins. Der
   12-Bit-Adresspfad reicht nun ebenfalls vom vorläufigen Kernanschluss direkt
-  zur Speichergrenze und ist mutationstestgeschützt. Schreib-, Befehls- und
-  PC-Steuerpfade, ihre Top-Level-Verdrahtung sowie die anschließende Ausführung
-  der Matrix sind noch umzusetzen.
+  zur Speichergrenze und ist mutationstestgeschützt. Auch Schreibwert,
+  Schreibgültigkeit und Schreibfreigabe reichen nun von benannten vorläufigen
+  Kernanschlüssen direkt und mutationstestgeschützt bis zu den Ausgängen der
+  CPU-Grenze. Befehls- und PC-Steuerpfade, ihre Top-Level-Verdrahtung sowie die
+  anschließende Ausführung der Matrix sind noch umzusetzen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

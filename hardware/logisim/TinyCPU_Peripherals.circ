@@ -142,6 +142,19 @@
       <a name="label" val="CORE_ADDRESS"/>
       <a name="width" val="12"/>
     </comp>
+    <comp lib="0" loc="(230,290)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_WRITE_VALUE"/>
+      <a name="width" val="16"/>
+    </comp>
+    <comp lib="0" loc="(230,340)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_WRITE_VALID"/>
+    </comp>
+    <comp lib="0" loc="(230,360)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_WRITE_ENABLE"/>
+    </comp>
     <comp lib="0" loc="(230,70)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="CLK"/>
@@ -223,6 +236,9 @@
     <wire from="(230,130)" to="(700,130)"/>
     <wire from="(230,170)" to="(700,170)"/>
     <wire from="(230,240)" to="(700,240)"/>
+    <wire from="(230,290)" to="(700,290)"/>
+    <wire from="(230,340)" to="(700,340)"/>
+    <wire from="(230,360)" to="(700,360)"/>
   </circuit>
   <circuit name="OutputPort">
     <a name="appearance" val="logisim_evolution"/>
