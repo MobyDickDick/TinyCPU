@@ -147,6 +147,33 @@ class CircuitVerificationTests(unittest.TestCase):
                                         "CPU integration boundary differs"):
                 VERIFY.verify_system_circuit()
 
+    def test_ap18_cpu_integration_requires_atomic_read_path(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        for wire in (
+            '<wire from="(200,160)" to="(700,160)"/>',
+            '<wire from="(200,180)" to="(700,180)"/>',
+        ):
+            with self.subTest(wire=wire):
+                temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+                shutil.copytree(source, temporary / "logisim")
+                circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
+                circuit.write_text(
+                    circuit.read_text(encoding="utf-8").replace(wire, "", 1),
+                    encoding="utf-8",
+                )
+                system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+                with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+                     mock.patch.object(
+                         VERIFY,
+                         "load_system_profile",
+                         return_value=replace(system, circuit_path=circuit),
+                     ):
+                    with self.assertRaisesRegex(
+                        VERIFY.VerificationError, "CPU integration read path differs"
+                    ):
+                        VERIFY.verify_system_circuit()
+
     def test_ap18_output_port_owns_value_and_valid_registers(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"

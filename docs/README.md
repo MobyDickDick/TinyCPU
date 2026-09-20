@@ -71,9 +71,10 @@ Mutationstest geschützt mit den Trace-Pins verbunden. Takt, Reset und externe
 Interruptanforderung sind nach Kontrolle der beibehaltenen Neuanordnung direkt
 mit den betroffenen Bausteingrenzen verdrahtet. Die CPU-seitigen Daten-,
 Befehls- und PC-Steuerpfade sind nun an einer maschinenlesbar geprüften
-`CPUIntegrationBoundary` vollständig nach Richtung und Breite benannt. Der
-CPU-Kern hinter dieser Grenze, ihre Top-Level-Verdrahtung und die elektrische
-Systemabnahme sind noch offen.
+`CPUIntegrationBoundary` vollständig nach Richtung und Breite benannt. Deren
+erster funktionaler CPU-Pfad reicht RAM-Lesewert und -Gültigkeit gemeinsam und
+mutationstestgeschützt zur Leseauswahl weiter. Die übrigen CPU-Pfade, ihre
+Top-Level-Verdrahtung und die elektrische Systemabnahme sind noch offen.
 Die dafür verbindliche
 elektrische Fallliste ist inzwischen versioniert, mit den übrigen
 Systemverträgen quergeprüft und deckt alle neuen Opcodes und Verhaltensfälle

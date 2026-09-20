@@ -293,6 +293,18 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             f"{display_path(system.circuit_path)}: CPU integration boundary differs from contract"
         )
+    cpu_wires = {(wire.get("from"), wire.get("to")) for wire in cpu_boundary.findall("wire")}
+    required_cpu_wires = {
+        ("(200,160)", "(700,160)"),  # RAM value to selected CPU read value
+        ("(200,180)", "(700,180)"),  # RAM validity to selected CPU read validity
+    }
+    if cpu_contract.get("verified_paths") != [
+        "ram_read_value_to_cpu_read_value",
+        "ram_read_valid_to_cpu_read_valid",
+    ] or not required_cpu_wires <= cpu_wires:
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: CPU integration read path differs from contract"
+        )
 
     component_contract = contract.get("components", {}).get("output_port", {})
     output_name = component_contract.get("circuit")

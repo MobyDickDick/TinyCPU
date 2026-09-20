@@ -215,6 +215,8 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="ILLEGAL_RETURN"/>
     </comp>
+    <wire from="(200,160)" to="(700,160)"/>
+    <wire from="(200,180)" to="(700,180)"/>
   </circuit>
   <circuit name="OutputPort">
     <a name="appearance" val="logisim_evolution"/>

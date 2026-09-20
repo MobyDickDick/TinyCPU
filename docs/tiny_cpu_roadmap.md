@@ -229,9 +229,10 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   beibehaltenen Neuanordnung erreichen auch Takt, Reset und externe
   Interruptanforderung die betroffenen Bausteine. CPU-seitige Daten-, Befehls-
   und PC-Steuerpfade besitzen inzwischen eine maschinenlesbar geprüfte
-  `CPUIntegrationBoundary`; der CPU-Kern hinter dieser Grenze, ihre
-  Top-Level-Verdrahtung sowie die anschließende Ausführung der Matrix sind noch
-  umzusetzen.
+  `CPUIntegrationBoundary`. Der erste CPU-interne Pfad führt RAM-Lesewert und
+  -Gültigkeit direkt und mutationstestgeschützt zur Leseauswahl; die übrigen
+  CPU-Pfade, ihre Top-Level-Verdrahtung sowie die anschließende Ausführung der
+  Matrix sind noch umzusetzen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
