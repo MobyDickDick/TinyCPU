@@ -211,7 +211,11 @@ hinter dieser Grenze und erst danach ihre direkte Verdrahtung mit
 hinter dieser Grenze werden RAM-Lesewert und zugehörige Gültigkeit nun direkt
 und gemeinsam an die CPU-seitige Leseauswahl weitergereicht. Der
 Offline-Prüfer und ein Mutationstest sichern beide Leitungen; Adress-, Schreib-,
-Befehls- und PC-Steuerpfade bleiben die folgenden Integrationsschritte.
+Befehls- und PC-Steuerpfade bleiben die folgenden Integrationsschritte. Nach
+der manuellen Neuanordnung der Grenzpins verfolgt die Regression diese beiden
+Pfade anhand der benannten Anschlüsse statt anhand ihrer Zeichenkoordinaten.
+Damit bleibt die elektrische Aussage erhalten, ohne die vom Schaltungsautor
+gewählte Darstellung zurückzuzeichnen.
 
 ## Kompatibilitätsfolgen
 

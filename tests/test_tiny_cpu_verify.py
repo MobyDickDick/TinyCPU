@@ -150,18 +150,29 @@ class CircuitVerificationTests(unittest.TestCase):
     def test_ap18_cpu_integration_requires_atomic_read_path(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
-        for wire in (
-            '<wire from="(200,160)" to="(700,160)"/>',
-            '<wire from="(200,180)" to="(700,180)"/>',
+        for source_label, target_label in (
+            ("RAM_READ_VALUE", "READ_VALUE"),
+            ("RAM_READ_VALID", "READ_VALID"),
         ):
-            with self.subTest(wire=wire):
+            with self.subTest(path=(source_label, target_label)):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
                 shutil.copytree(source, temporary / "logisim")
                 circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-                circuit.write_text(
-                    circuit.read_text(encoding="utf-8").replace(wire, "", 1),
-                    encoding="utf-8",
-                )
+                project = ET.parse(circuit)
+                boundary = project.getroot().find("circuit[@name='CPUIntegrationBoundary']")
+                self.assertIsNotNone(boundary)
+                locations = {}
+                for component in boundary.findall("comp[@name='Pin']"):
+                    attributes = {
+                        item.get("name"): item.get("val") for item in component.findall("a")
+                    }
+                    locations[attributes.get("label", "")] = component.get("loc")
+                endpoints = {locations[source_label], locations[target_label]}
+                wire = next(item for item in boundary.findall("wire") if {
+                    item.get("from"), item.get("to")
+                } == endpoints)
+                boundary.remove(wire)
+                project.write(circuit, encoding="utf-8", xml_declaration=True)
                 system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
                 with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
                      mock.patch.object(

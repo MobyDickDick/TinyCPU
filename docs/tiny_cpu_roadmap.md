@@ -230,7 +230,8 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Interruptanforderung die betroffenen Bausteine. CPU-seitige Daten-, Befehls-
   und PC-Steuerpfade besitzen inzwischen eine maschinenlesbar geprüfte
   `CPUIntegrationBoundary`. Der erste CPU-interne Pfad führt RAM-Lesewert und
-  -Gültigkeit direkt und mutationstestgeschützt zur Leseauswahl; die übrigen
+  -Gültigkeit direkt und mutationstestgeschützt zur Leseauswahl; seine Prüfung
+  folgt auch nach der manuellen Neuanordnung den benannten Pins. Die übrigen
   CPU-Pfade, ihre Top-Level-Verdrahtung sowie die anschließende Ausführung der
   Matrix sind noch umzusetzen.
 
