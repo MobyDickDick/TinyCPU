@@ -16,6 +16,7 @@ Dieses Verzeichnis enthält ausschließlich Dokumentation zur TinyCPU:
 - [`tiny_cpu_peripherals.md`](tiny_cpu_peripherals.md): sichtbarer Maschinenvertrag und Erklärung der AP-18-Referenzlösung
 - [`tiny_cpu_circuit_debug_plan.md`](tiny_cpu_circuit_debug_plan.md): zehnstufiger Arbeitsplan für die reproduzierbare Fehlersuche in `TinyCPU.circ`
 - [`tiny_cpu_recovery_work_packages.md`](tiny_cpu_recovery_work_packages.md): priorisierte Arbeitspakete zur Wiederherstellung der elektrischen 16/12-CPU
+- [`tiny_cpu_operator_panel_plan.md`](tiny_cpu_operator_panel_plan.md): Bedienbarkeitsbefund und abgegrenzter Vorschlag für ein Operator-Panel
 - [`tiny_cpu_compatibility.md`](tiny_cpu_compatibility.md): Kompatibilitätsregeln
 - [`tiny_cpu_1_0_release_plan.md`](tiny_cpu_1_0_release_plan.md): Releaseplan für TinyCPU 1.0
 - [`tiny_cpu_1_0_release_notes.md`](tiny_cpu_1_0_release_notes.md): Release Notes für TinyCPU 1.0
@@ -93,7 +94,9 @@ zweifach ausgeführten Minimalprogramm aus `LOAD_CONST(3)` und `HALT()` wieder
 abgenommen; die vollständige ISA-, Fehler- und Mutationsregression aus 20.6
 und 20.7 ist ebenfalls abgeschlossen. Das einzige noch aktive Paket 20.8 hat
 die automatischen Gates zuletzt am 20. September 2026 auf dem Kandidaten
-`090183ef04c0b6806f227ce0a45a789096fe460f` zweimal in einem frischen Worktree
-bestanden. Offen bleibt ausschließlich der vorgeschriebene manuelle GUI-Kurztest
-an einem sichtbaren Logisim-Desktop; ohne diesen Nachweis wird der
+`c3fbbe2d68fdae646f5450d98727fa5ba0bbe1ff` zweimal in einem frischen Worktree
+bestanden. Der vorgeschriebene manuelle GUI-Kurztest ist ausdrücklich als
+**nicht durchgeführt** vermerkt: Ein Bedienversuch lieferte undefinierte
+beziehungsweise elektrische Fehlerwerte und damit kein verwertbares
+Testprotokoll. Ohne einen vollständigen späteren Sichtnachweis wird der
 Funktionsstatus nicht endgültig freigegeben.

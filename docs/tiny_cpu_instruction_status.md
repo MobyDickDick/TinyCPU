@@ -17,7 +17,9 @@ Diese Aussage betrifft die ausführbare Schaltung
 `hardware/logisim/TinyCPU.circ` (16/12 Bit), nicht das Python-Referenzmodell.
 Der Kandidat `090183ef04c0b6806f227ce0a45a789096fe460f` hat diese elektrische
 Abnahme am 20. September 2026 in einem frischen Worktree zweimal bestanden.
-Die davon getrennte manuelle GUI-Kurzabnahme ist noch offen; sie ist keine
+Die davon getrennte manuelle GUI-Kurzabnahme ist als **nicht durchgeführt**
+vermerkt. Ein Bedienversuch mit undefinierten beziehungsweise elektrischen
+Fehlerwerten ist kein verwertbarer Testlauf. Die GUI-Kurzabnahme ist keine
 Voraussetzung für die unten einzeln als elektrisch nachgewiesen markierten
 Opcode-Fälle, wohl aber für den Abschluss des gesamten AP 20.8.
 

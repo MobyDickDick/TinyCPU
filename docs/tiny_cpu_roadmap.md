@@ -454,3 +454,13 @@ Topologie- und Verdrahtungstests dauerhaft abgesichert. Weitere Änderungen an
 der Übersichtsseite benötigen deshalb ein neu abgegrenztes Arbeitspaket; aus
 diesem historischen Abschnitt darf kein impliziter Folgeauftrag abgeleitet
 werden.
+
+## Dokumentierter Bedienbarkeitsbefund
+
+Die elektrische Prüfbarkeit von `TinyCPUMain` bedeutet nicht automatisch eine
+verständliche manuelle Bedienung. Der getrennte
+[`Operator-Panel-Vorschlag`](tiny_cpu_operator_panel_plan.md) dokumentiert die
+beobachteten Bedienhürden und grenzt eine mögliche Bedienseite mit Reset,
+Einzelschritt, Laufsteuerung und verständlichen Zustandsanzeigen ab. Er ist
+noch kein umgesetztes oder nummeriertes Arbeitspaket und erteilt insbesondere
+keinen impliziten Auftrag zur Änderung der geprüften Übersichtsseite.
