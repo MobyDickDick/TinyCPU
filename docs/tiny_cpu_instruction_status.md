@@ -15,7 +15,7 @@ löst den erwarteten Fehlerhalt aus.
 
 Diese Aussage betrifft die ausführbare Schaltung
 `hardware/logisim/TinyCPU.circ` (16/12 Bit), nicht das Python-Referenzmodell.
-Der Kandidat `367ecf45f88541af2cccf9f316a34f4551a33368` hat diese elektrische
+Der Kandidat `4f1fec1f99e919c899d575a7c4813d5243fee6c3` hat diese elektrische
 Abnahme am 20. September 2026 in einem frischen Worktree zweimal bestanden.
 Die davon getrennte manuelle GUI-Kurzabnahme ist als **nicht durchgeführt**
 vermerkt. Ein Bedienversuch mit undefinierten beziehungsweise elektrischen
