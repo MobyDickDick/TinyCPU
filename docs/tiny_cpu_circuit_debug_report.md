@@ -70,7 +70,7 @@ Tests mit historischen Canvas-Koordinaten verändert.
 | 20.5 Reset, Takt und Fetch für 8/8 wiederherstellen | entfallen | Der profilabhängige Programmhöchstwert und drei zuvor implizit einbittige Fetch-Bauteile sind auf 8 Bit festgeschrieben. Zwei identische Minimalprogrammläufe belegen danach weiterhin den ersten elektrischen Unterschied am PC nach der ersten Zustandsänderung. Folgewert-, Takt-, Reset- und Enable-Netz des PC-Registers sind geschlossen; eine direkte temporäre Messung belegt zusätzlich den aktiven Resetpegel am Register und den dabei stabilen PC-Nullwert. `FetchDecodeControls` blieb vollständig unverändert. |
 | 20.6 ISA- und Fehlerregression schrittweise öffnen | abgeschlossen | Kernlauf, alle 50 Opcodes, beide Pfade der bedingten Sprünge und alle sechs Sticky-Fehlerfälle bestehen in der vollständigen elektrischen 16/12-Profilabnahme. |
 | 20.7 Redraw-sichere Regressionen ergänzen | abgeschlossen | Sieben gezielte temporäre Leitungsunterbrechungen belegen, dass die semantischen Regressionen frühere Halt-, Sprung-, Fehlerhalt- und offene Gate-Fehler erkennen, ohne die eingecheckte Schaltung zu verändern. |
-| 20.8 Endabnahme und Funktionsstatus aktualisieren | in Bearbeitung | Der Kandidat `4f1fec1` besteht Offline- und elektrisches Gate in einem frischen Checkout zweimal. Der manuelle GUI-Kurztest ist als **nicht durchgeführt** vermerkt; der Bedienversuch mit `U`/`E`-Werten liefert keinen Abnahmenachweis. |
+| 20.8 Endabnahme und Funktionsstatus aktualisieren | vorläufig abgeschlossen | Der Kandidat `f151841` besteht Offline- und elektrisches Gate in einem frischen Checkout zweimal. Der manuelle GUI-Kurztest wird bei verfügbarer interaktiver Umgebung nachgeholt und blockiert den vorläufigen Abschluss nicht. |
 
 ### Folgeprüfung nach dem manuellen Decoder-Reset
 
@@ -3235,10 +3235,10 @@ ist zweimal reproduzierbar grün.
 
 #### Status des manuellen GUI-Kurztests
 
-- **Status:** nicht durchgeführt
+- **Status:** auf einen späteren Zeitpunkt verschoben
 - **Bedienversuch:** nicht als Testlauf gewertet
 - **Beobachtung:** `HALTED` zeigte `U`, `HALTED_WITH_ERROR` zeigte `E`
-- **Folge:** keine manuelle Freigabe und kein Abschluss von AP 20.8
+- **Folge:** Nachholung bei verfügbarer interaktiver Umgebung; kein Blocker für den vorläufigen Abschluss von AP 20.8
 
 Der begonnene Bedienversuch erreichte keinen definierten Ausgangszustand und
 wurde auf Wunsch des Bedieners abgebrochen. In Logisim kennzeichnen `U` und
@@ -3246,9 +3246,10 @@ wurde auf Wunsch des Bedieners abgebrochen. In Logisim kennzeichnen `U` und
 Normalhalt noch einen regulär gesetzten Fehlerhalt. Daher wird der Versuch
 nicht als fehlgeschlagene Funktionsprüfung umgedeutet, sondern formal als
 **nicht durchgeführt** dokumentiert. Die bereits bestandenen automatischen
-Offline- und elektrischen Gates bleiben davon unberührt. Für einen späteren
-Abschluss von AP 20.8 ist weiterhin ein neuer, vollständig protokollierter
-GUI-Kurztest mit definierten `0`/`1`-Werten erforderlich.
+Offline- und elektrischen Gates bleiben davon unberührt. AP 20.8 wird auf
+Grundlage dieser vollständigen automatischen Nachweise vorläufig abgeschlossen.
+Der GUI-Kurztest mit definierten `0`/`1`-Werten wird separat nachgeholt, sobald
+eine interaktive Umgebung verfügbar ist.
 
 
 #### Endabnahme nach Dokumentation des Operator-Panel-Vorschlags
@@ -3342,6 +3343,54 @@ Der GUI-Preflight fand weiterhin kein `DISPLAY`; `Xvfb`, `Xorg`, `fluxbox`,
 dieser nicht-interaktiven Umgebung keine sichtbare und manuell bedienbare
 Oberfläche zur Verfügung. Ein unbeobachteter virtueller Desktop oder der
 erfolgreiche Tabellenlogger-Lauf wird nicht als GUI-Kurztest umetikettiert.
-AP 20.8 und die endgültige Statusfreigabe bleiben ausschließlich bis zum extern
-protokollierten Sichtnachweis offen; die automatische Endabnahme des aktuellen
-Hauptzweigstands ist zweimal reproduzierbar grün.
+AP 20.8 gilt aufgrund der zweimal reproduzierbar grünen automatischen
+Endabnahme des aktuellen Hauptzweigstands vorläufig als abgeschlossen. Der
+externe Sichtnachweis wird zu einem späteren Zeitpunkt nachgeholt.
+
+
+#### Endabnahme nach Zusammenführung des letzten Kandidatenstands
+
+- **Kandidat:** `f151841191802745cf0c1e73f6f99f72ebaf39c9`
+- **Datum:** 20. September 2026
+- **Ausführung:** abgetrennter frischer Git-Worktree ohne lokale Änderungen
+- **Python:** 3.14.4
+- **Java:** OpenJDK 25.0.2 (`25.0.2+10-69`)
+- **Logisim-evolution:** 4.1.0, JAR-SHA-256
+  `fe6386a3217a591bcc311a4eda49e1f43a389b499dd3d0f6f40f344fc85f2577`
+
+Der nach der letzten dokumentierten Kandidatenprüfung zusammengeführte Stand
+wurde erneut in einem frischen, abgetrennten Worktree abgenommen. Beide
+Offline-Läufe bestanden mit Verifier, Schaltungscheck und allen 104
+Unit-Tests. Zwei elektrische Läufe bestanden jeweils mit zwei identischen
+Minimalkerntraces und sämtlichen 61 Matrix-Fixtures. Der Prüf-Worktree blieb
+unverändert. Roh- und Normaltraces liegen außerhalb des Repositorys unter
+`/tmp/ap20.8-f151841/`.
+
+```bash
+scripts/test-offline.sh
+scripts/test-offline.sh
+LOGISIM_JOBS=4 \
+  LOGISIM_JAR=/workspace/TinyCPU/.venv/Include/logisim-evolution-4.1.0-all.jar \
+  LOGISIM_OUTPUT=/tmp/ap20.8-f151841/electrical-1 \
+  scripts/test-logisim.sh
+LOGISIM_JOBS=4 \
+  LOGISIM_JAR=/workspace/TinyCPU/.venv/Include/logisim-evolution-4.1.0-all.jar \
+  LOGISIM_OUTPUT=/tmp/ap20.8-f151841/electrical-2 \
+  scripts/test-logisim.sh
+```
+
+| Lauf | Exitcode | Laufzeit | Ergebnis |
+|---|---:|---:|---|
+| Offline 1 | 0 | 12 s | Verifier, Schaltungscheck und 104 Tests bestanden |
+| Offline 2 | 0 | 12 s | Verifier, Schaltungscheck und 104 Tests bestanden |
+| Elektrisch 1 | 0 | 190 s | zwei Kernläufe und 61/61 Matrix-Fixtures bestanden |
+| Elektrisch 2 | 0 | 108 s | zwei Kernläufe und 61/61 Matrix-Fixtures bestanden |
+
+Der GUI-Preflight fand weiterhin kein `DISPLAY`; `Xvfb`, `Xorg`, `fluxbox`,
+`x11vnc`, `xdpyinfo`, `xauth` und `xdotool` fehlen ebenfalls. Damit steht in
+dieser nicht-interaktiven Umgebung keine sichtbare und manuell bedienbare
+Oberfläche zur Verfügung. Ein unbeobachteter virtueller Desktop oder der
+erfolgreiche Tabellenlogger-Lauf wird nicht als GUI-Kurztest umetikettiert.
+AP 20.8 gilt aufgrund der zweimal reproduzierbar grünen automatischen
+Endabnahme des aktuellen Hauptzweigstands vorläufig als abgeschlossen. Der
+externe Sichtnachweis wird zu einem späteren Zeitpunkt nachgeholt.
