@@ -94,7 +94,7 @@ zweifach ausgeführten Minimalprogramm aus `LOAD_CONST(3)` und `HALT()` wieder
 abgenommen; die vollständige ISA-, Fehler- und Mutationsregression aus 20.6
 und 20.7 ist ebenfalls abgeschlossen. Das einzige noch aktive Paket 20.8 hat
 die automatischen Gates zuletzt am 20. September 2026 auf dem Kandidaten
-`367ecf45f88541af2cccf9f316a34f4551a33368` zweimal in einem frischen Worktree
+`4f1fec1f99e919c899d575a7c4813d5243fee6c3` zweimal in einem frischen Worktree
 bestanden. Der vorgeschriebene manuelle GUI-Kurztest ist ausdrücklich als
 **nicht durchgeführt** vermerkt: Ein Bedienversuch lieferte undefinierte
 beziehungsweise elektrische Fehlerwerte und damit kein verwertbares
