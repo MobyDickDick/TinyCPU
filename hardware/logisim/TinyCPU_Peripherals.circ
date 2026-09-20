@@ -111,112 +111,112 @@
     <a name="circuit" val="CPUIntegrationBoundary"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
     <a name="simulationFrequency" val="1.0"/>
-    <comp lib="0" loc="(200,100)" name="Pin">
+    <comp lib="0" loc="(200,330)" name="Pin">
       <a name="appearance" val="classic"/>
-      <a name="label" val="CLK"/>
+      <a name="label" val="RAM_WRITE_ENABLE"/>
     </comp>
-    <comp lib="0" loc="(200,120)" name="Pin">
+    <comp lib="0" loc="(200,390)" name="Pin">
       <a name="appearance" val="classic"/>
-      <a name="label" val="RESET"/>
+      <a name="label" val="INTERRUPT_ACCEPT"/>
     </comp>
-    <comp lib="0" loc="(200,160)" name="Pin">
+    <comp lib="0" loc="(200,430)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="TARGET_PC"/>
+      <a name="width" val="12"/>
+    </comp>
+    <comp lib="0" loc="(200,480)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="ILLEGAL_RETURN"/>
+    </comp>
+    <comp lib="0" loc="(230,130)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="RAM_READ_VALUE"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="0" loc="(200,180)" name="Pin">
+    <comp lib="0" loc="(230,170)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="RAM_READ_VALID"/>
     </comp>
-    <comp lib="0" loc="(700,160)" name="Pin">
+    <comp lib="0" loc="(230,70)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CLK"/>
+    </comp>
+    <comp lib="0" loc="(230,90)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="RESET"/>
+    </comp>
+    <comp lib="0" loc="(700,130)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="READ_VALUE"/>
       <a name="type" val="output"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="0" loc="(700,180)" name="Pin">
+    <comp lib="0" loc="(700,170)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="READ_VALID"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(700,220)" name="Pin">
+    <comp lib="0" loc="(700,240)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="ADDRESS"/>
       <a name="type" val="output"/>
       <a name="width" val="12"/>
     </comp>
-    <comp lib="0" loc="(700,240)" name="Pin">
+    <comp lib="0" loc="(700,290)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="WRITE_VALUE"/>
       <a name="type" val="output"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="0" loc="(700,260)" name="Pin">
+    <comp lib="0" loc="(700,340)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="WRITE_VALID"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(700,280)" name="Pin">
+    <comp lib="0" loc="(700,360)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="WRITE_ENABLE"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(200,280)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="RAM_WRITE_ENABLE"/>
-    </comp>
-    <comp lib="0" loc="(700,340)" name="Pin">
+    <comp lib="0" loc="(700,390)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="INSTRUCTION_BOUNDARY"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(700,360)" name="Pin">
+    <comp lib="0" loc="(700,410)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="ENABLE_REQUEST"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(700,380)" name="Pin">
+    <comp lib="0" loc="(700,430)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="DISABLE_REQUEST"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(700,400)" name="Pin">
+    <comp lib="0" loc="(700,450)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="RETURN_REQUEST"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(700,420)" name="Pin">
+    <comp lib="0" loc="(700,490)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="NEXT_PC"/>
       <a name="type" val="output"/>
       <a name="width" val="12"/>
     </comp>
-    <comp lib="0" loc="(200,340)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="INTERRUPT_ACCEPT"/>
-    </comp>
-    <comp lib="0" loc="(200,360)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="TARGET_PC"/>
-      <a name="width" val="12"/>
-    </comp>
-    <comp lib="0" loc="(200,380)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="ILLEGAL_RETURN"/>
-    </comp>
-    <wire from="(200,160)" to="(700,160)"/>
-    <wire from="(200,180)" to="(700,180)"/>
+    <wire from="(230,130)" to="(700,130)"/>
+    <wire from="(230,170)" to="(700,170)"/>
   </circuit>
   <circuit name="OutputPort">
     <a name="appearance" val="logisim_evolution"/>
