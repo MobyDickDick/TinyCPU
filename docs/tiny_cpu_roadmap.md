@@ -228,7 +228,9 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Verdrahtung aller öffentlichen Zustandsausgänge begonnen. Nach Kontrolle der
   beibehaltenen Neuanordnung erreichen auch Takt, Reset und externe
   Interruptanforderung die betroffenen Bausteine. CPU-seitige Daten-, Befehls-
-  und PC-Steuerpfade sowie die anschließende Ausführung der Matrix sind noch
+  und PC-Steuerpfade besitzen inzwischen eine maschinenlesbar geprüfte
+  `CPUIntegrationBoundary`; der CPU-Kern hinter dieser Grenze, ihre
+  Top-Level-Verdrahtung sowie die anschließende Ausführung der Matrix sind noch
   umzusetzen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
