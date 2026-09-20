@@ -301,16 +301,19 @@ def verify_system_circuit() -> None:
     for component in cpu_boundary.findall("comp[@name='Pin']"):
         attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
         cpu_pin_locations[attributes.get("label", "")] = component.get("loc")
-    required_cpu_wires = {
-        frozenset((cpu_pin_locations["RAM_READ_VALUE"], cpu_pin_locations["READ_VALUE"])),
-        frozenset((cpu_pin_locations["RAM_READ_VALID"], cpu_pin_locations["READ_VALID"])),
+    required_cpu_paths = {
+        "ram_read_value_to_cpu_read_value": ("RAM_READ_VALUE", "READ_VALUE"),
+        "ram_read_valid_to_cpu_read_valid": ("RAM_READ_VALID", "READ_VALID"),
+        "core_address_to_memory_address": ("CORE_ADDRESS", "ADDRESS"),
     }
-    if cpu_contract.get("verified_paths") != [
-        "ram_read_value_to_cpu_read_value",
-        "ram_read_valid_to_cpu_read_valid",
-    ] or not required_cpu_wires <= cpu_wires:
+    required_cpu_wires = {
+        frozenset((cpu_pin_locations[source], cpu_pin_locations[target]))
+        for source, target in required_cpu_paths.values()
+    }
+    if cpu_contract.get("verified_paths") != list(required_cpu_paths) \
+            or not required_cpu_wires <= cpu_wires:
         raise VerificationError(
-            f"{display_path(system.circuit_path)}: CPU integration read path differs from contract"
+            f"{display_path(system.circuit_path)}: CPU integration data paths differ from contract"
         )
 
     component_contract = contract.get("components", {}).get("output_port", {})

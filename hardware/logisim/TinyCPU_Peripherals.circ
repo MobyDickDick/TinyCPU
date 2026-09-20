@@ -137,6 +137,11 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="RAM_READ_VALID"/>
     </comp>
+    <comp lib="0" loc="(230,240)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_ADDRESS"/>
+      <a name="width" val="12"/>
+    </comp>
     <comp lib="0" loc="(230,70)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="CLK"/>
@@ -217,6 +222,7 @@
     </comp>
     <wire from="(230,130)" to="(700,130)"/>
     <wire from="(230,170)" to="(700,170)"/>
+    <wire from="(230,240)" to="(700,240)"/>
   </circuit>
   <circuit name="OutputPort">
     <a name="appearance" val="logisim_evolution"/>

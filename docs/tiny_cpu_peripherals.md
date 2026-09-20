@@ -12,11 +12,12 @@ Bausteine: `OutputPort`, `OutputMemoryPath` und `InterruptController`. Die neue
 Daten-, Befehls- und PC-Schnittstelle mit Richtung und Breite ein.
 `TinyCPUSystemMain` beschreibt nur die öffentliche Systemgrenze. Takt, Reset
 und externe Interruptanforderung erreichen inzwischen die jeweils betroffenen
-Bausteine. Hinter der neuen Grenze ist der atomare Leseweg aus RAM-Wert und
-RAM-Gültigkeit als erster CPU-Pfad direkt verdrahtet; die übrigen CPU-Pfade
-und ihre Top-Level-Verdrahtung sind noch nicht eingefügt. Die Prüfung dieses
-Lesewegs folgt den benannten Pins und bleibt dadurch auch nach einer manuellen
-Neuanordnung der Grenze wirksam.
+Bausteine. Hinter der neuen Grenze sind der atomare Leseweg aus RAM-Wert und
+RAM-Gültigkeit sowie der 12-Bit-Adressweg vom vorläufigen CPU-Kernanschluss
+bis zur Speichergrenze direkt verdrahtet; die übrigen CPU-Pfade und ihre
+Top-Level-Verdrahtung sind noch nicht eingefügt. Die Prüfung dieser Wege folgt
+den benannten Pins und bleibt dadurch auch nach einer manuellen Neuanordnung
+der Grenze wirksam.
 Deshalb
 ist der klassische Interruptcontroller vorläufig eine **Referenzlösung für
 AP 18**, keine unumkehrbare Festlegung der TinyCPU-Architektur.

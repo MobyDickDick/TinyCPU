@@ -231,9 +231,11 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   und PC-Steuerpfade besitzen inzwischen eine maschinenlesbar geprüfte
   `CPUIntegrationBoundary`. Der erste CPU-interne Pfad führt RAM-Lesewert und
   -Gültigkeit direkt und mutationstestgeschützt zur Leseauswahl; seine Prüfung
-  folgt auch nach der manuellen Neuanordnung den benannten Pins. Die übrigen
-  CPU-Pfade, ihre Top-Level-Verdrahtung sowie die anschließende Ausführung der
-  Matrix sind noch umzusetzen.
+  folgt auch nach der manuellen Neuanordnung den benannten Pins. Der
+  12-Bit-Adresspfad reicht nun ebenfalls vom vorläufigen Kernanschluss direkt
+  zur Speichergrenze und ist mutationstestgeschützt. Schreib-, Befehls- und
+  PC-Steuerpfade, ihre Top-Level-Verdrahtung sowie die anschließende Ausführung
+  der Matrix sind noch umzusetzen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

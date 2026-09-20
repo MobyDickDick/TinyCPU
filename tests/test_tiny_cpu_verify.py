@@ -147,12 +147,13 @@ class CircuitVerificationTests(unittest.TestCase):
                                         "CPU integration boundary differs"):
                 VERIFY.verify_system_circuit()
 
-    def test_ap18_cpu_integration_requires_atomic_read_path(self) -> None:
+    def test_ap18_cpu_integration_requires_declared_data_paths(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
         for source_label, target_label in (
             ("RAM_READ_VALUE", "READ_VALUE"),
             ("RAM_READ_VALID", "READ_VALID"),
+            ("CORE_ADDRESS", "ADDRESS"),
         ):
             with self.subTest(path=(source_label, target_label)):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
@@ -181,7 +182,7 @@ class CircuitVerificationTests(unittest.TestCase):
                          return_value=replace(system, circuit_path=circuit),
                      ):
                     with self.assertRaisesRegex(
-                        VERIFY.VerificationError, "CPU integration read path differs"
+                        VERIFY.VerificationError, "CPU integration data paths differ"
                     ):
                         VERIFY.verify_system_circuit()
 
