@@ -216,6 +216,13 @@ der manuellen Neuanordnung der Grenzpins verfolgt die Regression diese beiden
 Pfade anhand der benannten Anschlüsse statt anhand ihrer Zeichenkoordinaten.
 Damit bleibt die elektrische Aussage erhalten, ohne die vom Schaltungsautor
 gewählte Darstellung zurückzuzeichnen.
+Der anschließende Integrationsschritt reicht nun auch die 12-Bit-Adresse vom
+explizit benannten, vorläufigen Kernanschluss `CORE_ADDRESS` direkt bis zum
+Ausgang `ADDRESS` der Grenze weiter. Vertrag, Offline-Prüfer und derselbe
+Leitungs-Mutationstest sichern den Pfad anhand der Pinbezeichnungen ab. Damit
+ist der Adresspfad vorbereitet, ohne bereits einen nicht vorhandenen
+ausführbaren CPU-Kern zu behaupten; Schreib-, Befehls- und PC-Steuerpfade
+bleiben offen.
 
 ## Kompatibilitätsfolgen
 

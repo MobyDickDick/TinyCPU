@@ -73,9 +73,11 @@ mit den betroffenen Bausteingrenzen verdrahtet. Die CPU-seitigen Daten-,
 Befehls- und PC-Steuerpfade sind nun an einer maschinenlesbar geprüften
 `CPUIntegrationBoundary` vollständig nach Richtung und Breite benannt. Deren
 erster funktionaler CPU-Pfad reicht RAM-Lesewert und -Gültigkeit gemeinsam und
-mutationstestgeschützt zur Leseauswahl weiter. Die Regression verfolgt dabei
-die benannten Pins statt veralteter Zeichenkoordinaten. Die übrigen CPU-Pfade,
-ihre Top-Level-Verdrahtung und die elektrische Systemabnahme sind noch offen.
+mutationstestgeschützt zur Leseauswahl weiter. Der folgende Pfad führt nun auch
+die 12-Bit-Adresse vom vorläufigen Kernanschluss zur Speichergrenze. Die
+Regression verfolgt dabei die benannten Pins statt veralteter
+Zeichenkoordinaten. Schreib-, Befehls- und PC-Steuerpfade, die
+Top-Level-Verdrahtung und die elektrische Systemabnahme sind noch offen.
 Die dafür verbindliche
 elektrische Fallliste ist inzwischen versioniert, mit den übrigen
 Systemverträgen quergeprüft und deckt alle neuen Opcodes und Verhaltensfälle
