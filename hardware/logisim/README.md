@@ -29,6 +29,60 @@ der Host den Zugriff ausdrücklich erlauben. `Xvfb` kann zwar einen virtuellen
 X-Server bereitstellen, ersetzt aber ohne sichtbare und bediente Oberfläche
 nicht den hier verlangten manuellen Sichtnachweis.
 
+#### Ubuntu-/Debian-Container mit sichtbarem VNC-Desktop
+
+Für einen Ubuntu- oder Debian-Container installiert das versionierte
+Hilfsskript Java 21, Xvfb, Fluxbox, x11vnc und die benötigten
+X11-Diagnosewerkzeuge:
+
+```bash
+cd /workspace/TinyCPU
+./gui.sh install
+./gui.sh check
+./gui.sh start
+```
+
+Das Präfix `./` ist erforderlich, weil das aktuelle Verzeichnis unter Linux
+absichtlich nicht automatisch zum Suchpfad für Programme gehört. Der Befehl
+heißt daher **nicht** `gui.sh install` und ebenfalls nicht
+`scripts-setup-logisim-gui.sh install`. Alternativ kann das lange Skript
+explizit an Bash übergeben werden:
+
+```bash
+bash scripts/setup-logisim-gui.sh install
+```
+
+Der Installationsbefehl eignet sich auch als Setup-Skript einer
+Container-Umgebung. Die beiden Folgebefehle werden anschließend im
+interaktiven Terminal ausgeführt, weil beim Image-Aufbau gestartete Prozesse
+nicht dauerhaft weiterlaufen. Der VNC-Server lauscht absichtlich ohne Passwort
+ausschließlich auf `localhost:5900`. Von einem lokalen Rechner wird er deshalb
+nur über einen SSH-Tunnel erreicht:
+
+```bash
+ssh -L 5900:localhost:5900 BENUTZER@HOST
+```
+
+Nach dem Verbinden eines lokalen VNC-Viewers mit `localhost:5900` wird Logisim
+im Container gestartet:
+
+```bash
+./gui.sh run
+```
+
+Der sichtbare Desktop kann danach beendet werden:
+
+```bash
+./gui.sh stop
+```
+
+`TINYCPU_DISPLAY`, `TINYCPU_VNC_PORT` und `LOGISIM_JAR` überschreiben bei
+Bedarf Displaynummer, lokalen VNC-Port und JAR-Pfad. Ein bloß gestartetes, aber
+nicht über VNC betrachtetes und manuell bedientes Xvfb erfüllt die GUI-Abnahme
+weiterhin nicht. Stellt die Container-Plattform weder einen sichtbaren Desktop
+noch einen erreichbaren beziehungsweise tunnelbaren TCP-Port bereit, muss der
+Kurztest auf einem lokalen Desktop ausgeführt werden.
+
 ### Logisim unter Windows/Git Bash starten
 
 Unter Windows wird `DISPLAY` für eine native Java-Anwendung nicht benötigt.
@@ -94,13 +148,18 @@ nicht wörtlich übernommen werden. Liegt die JAR an einer anderen Stelle, muss
 `export DISPLAY=:0` behebt weder ein fehlendes Java noch eine fehlende JAR.
 
 1. `TinyCPU.circ` öffnen, `TinyCPUMain` wählen und mit **Simulation > Reset
-   Simulation** zurücksetzen. `PC_VALUE` muss `0` zeigen, beide Haltausgänge
-   und alle sechs Fehlerausgänge müssen `0` sein.
-2. **Simulation > Ticks Enabled** ausgeschaltet lassen und wiederholt
-   **Simulation > Manual Tick Full Cycle** auslösen. Der PC muss sich pro
-   Befehlsflanke entsprechend dem Countdown-Programm ändern; beim ersten
-   `PRINT` müssen `PRINT_ENABLE=1`, `PRINT_VALID=1` und `PRINT_VALUE=3` sein.
-   Die folgenden Ausgaben sind `2` und `1`.
+   Simulation** zurücksetzen. Anschließend mit dem Poke-Werkzeug den externen
+   Eingang `CLK` auf `0`, `RESET` kurz auf `1` und wieder auf `0` setzen.
+   `PC_VALUE` muss danach `0` zeigen, beide Haltausgänge und alle sechs
+   Fehlerausgänge müssen `0` sein.
+2. **Simulation > Ticks Enabled** ausgeschaltet lassen. `TinyCPUMain` besitzt
+   einen externen `CLK`-Eingang und keinen internen Clock-Baustein; deshalb
+   erzeugt **Simulation > Manual Tick Full Cycle** hier keine CPU-Flanke.
+   Stattdessen mit dem Poke-Werkzeug `CLK` für jeden vollen Einzeltakt einmal
+   von `0` auf `1` und wieder auf `0` schalten. Der PC muss sich pro steigender
+   Flanke entsprechend dem Countdown-Programm ändern; beim ersten `PRINT`
+   müssen `PRINT_ENABLE=1`, `PRINT_VALID=1` und `PRINT_VALUE=3` sein. Die
+   folgenden Ausgaben sind `2` und `1`.
 3. Bis zum normalen Ende weiter takten. Dann muss `HALTED=1` und
    `HALTED_WITH_ERROR=0` sein. Nach einem erneuten Reset müssen PC und beide
    Haltausgänge wieder den Zustand aus Schritt 1 zeigen.
@@ -115,6 +174,44 @@ nicht wörtlich übernommen werden. Liegt die JAR an einer anderen Stelle, muss
 Das Protokoll nennt Datum, getesteten Commit, Logisim-/Java-Version und die
 beobachteten Werte aller vier Schritte. Ein bloßes erfolgreiches Öffnen der
 Datei ist keine GUI-Abnahme.
+
+### `U` oder `E` statt `0`/`1` im GUI-Kurztest
+
+Logisim zeigt einen gesetzten booleschen Ausgang als `1`. Die Anzeige `E` am
+Pin `HALTED_WITH_ERROR` bedeutet daher **nicht**, dass die CPU regulär mit
+Fehler angehalten hat, sondern dass Logisim auf diesem Netz einen elektrischen
+Fehlerwert berechnet. `U` bedeutet einen noch unbekannten beziehungsweise
+undefinierten Wert. Eine Aufnahme mit `U` an `HALTED` und `E` an
+`HALTED_WITH_ERROR` ist deshalb kein erwarteter Fehlerhaltzustand.
+
+In diesem Fall keine weiteren Takte auslösen und die geöffnete Datei nicht
+speichern. Zuerst Logisim schließen, im Repository einen unveränderten Stand
+prüfen und die Eingangsbelegung der eingecheckten Datei tabellarisch laden:
+
+```bash
+git status --short
+JAR='./.venv/Include/logisim-evolution-4.1.0-all.jar'
+java -jar "$JAR" -tty table hardware/logisim/TinyCPU.circ
+```
+
+In der Tabelle müssen für alle vier Kombinationen von `CLK` und `RESET` die
+beiden letzten Spalten `HALTED` und `HALTED_WITH_ERROR` zunächst `0` sein. Ist
+das der Fall, die GUI mit genau derselben JAR erneut öffnen, **Simulation >
+Reset Simulation** ausführen und anschließend den oben beschriebenen
+RESET-Impuls sowie die manuell am Eingangs-Pin erzeugten `CLK`-Flanken
+verwenden. Liefert bereits der Tabellenbefehl `E`, muss vor dem GUI-Kurztest
+eine unveränderte Arbeitskopie des dokumentierten Kandidaten verwendet werden;
+der fehlerhafte Stand darf nicht als AP-20.8-Nachweis protokolliert werden.
+
+## Bedienbarkeit und geplante Bediengrenze
+
+`TinyCPUMain` ist derzeit eine technisch orientierte Integrationsseite und kein
+selbsterklärendes Frontpanel. Die daraus folgenden Bedienhürden sowie
+Bedienelemente, Sicherheitsgrenzen und Abnahmekriterien für ein späteres
+Operator-Panel sind im
+[`Bedienbarkeitsbefund`](../../docs/tiny_cpu_operator_panel_plan.md)
+dokumentiert. Der Vorschlag ist noch nicht umgesetzt und ändert den als nicht
+durchgeführt markierten manuellen AP-20.8-GUI-Kurztest nicht nachträglich.
 
 ## Gemeinsame elektrische Profilabnahme
 
