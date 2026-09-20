@@ -239,8 +239,15 @@ Dieser letzte interne Pfad führt nun den 12-Bit-Folge-PC vom benannten,
 vorläufigen Kernanschluss `CORE_NEXT_PC` direkt zum Ausgang `NEXT_PC` der
 Interruptsteuerung. Vertrag, Offline-Prüfer und Leitungs-Mutationstest sichern
 auch diese Verbindung anhand der Pinbezeichnungen. Damit ist die interne
-CPU-Grenze für Daten-, Befehls- und PC-Steuerpfade vorbereitet; als nächster
-Integrationsschritt folgt ihre Verdrahtung auf `TinyCPUSystemMain`.
+CPU-Grenze für Daten-, Befehls- und PC-Steuerpfade vorbereitet. Der erste
+Top-Level-Schritt ist nun ebenfalls erfolgt: `TinyCPUSystemMain` enthält genau
+eine Instanz der `CPUIntegrationBoundary`; ein gezielter Mutationstest schützt
+diese Systemstruktur. Die vom Schaltungsautor angepasste, geknickte
+RAM-Lesewertleitung innerhalb der Grenze wird dabei anhand ihrer tatsächlichen
+Netzkonnektivität statt einer überholten direkten Linie geprüft. Als nächster
+Integrationsschritt folgt die direkte Verdrahtung der platzierten Grenze mit
+`OutputMemoryPath` und `InterruptController`; bis dahin wird weiterhin kein
+ausführbarer elektrischer Systemkern behauptet.
 
 ## Kompatibilitätsfolgen
 

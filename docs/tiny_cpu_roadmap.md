@@ -240,8 +240,10 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Rückkehrimpuls werden ebenfalls direkt und mutationstestgeschützt
   weitergereicht. Der Folge-PC reicht nun ebenfalls direkt und
   mutationstestgeschützt vom vorläufigen Kernanschluss bis zur
-  Interruptsteuerungsgrenze. Top-Level-Verdrahtung und die anschließende
-  Ausführung der Matrix sind noch umzusetzen.
+  Interruptsteuerungsgrenze. Diese CPU-Grenze ist inzwischen genau einmal auf
+  dem System-Top-Level platziert und ihre Anwesenheit mutationstestgeschützt;
+  die direkte Top-Level-Verdrahtung mit Speicher- und Interruptgrenze sowie die
+  anschließende Ausführung der Matrix sind noch umzusetzen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

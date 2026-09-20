@@ -87,6 +87,7 @@
     </comp>
     <comp loc="(600,130)" name="OutputMemoryPath"/>
     <comp loc="(600,320)" name="InterruptController"/>
+    <comp loc="(1040,520)" name="CPUIntegrationBoundary"/>
     <wire from="(200,250)" to="(260,250)"/>
     <wire from="(200,270)" to="(280,270)"/>
     <wire from="(200,360)" to="(380,360)"/>
@@ -169,9 +170,6 @@
     <comp lib="0" loc="(280,570)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="CORE_RETURN_REQUEST"/>
-    </comp>
-    <comp lib="0" loc="(280,600)" name="Pin">
-      <a name="appearance" val="classic"/>
     </comp>
     <comp lib="0" loc="(280,640)" name="Pin">
       <a name="appearance" val="classic"/>
@@ -261,7 +259,27 @@
     <wire from="(280,230)" to="(690,230)"/>
     <wire from="(280,270)" to="(690,270)"/>
     <wire from="(280,320)" to="(690,320)"/>
-    <wire from="(280,600)" to="(690,600)"/>
+    <wire from="(280,390)" to="(610,390)"/>
+    <wire from="(610,390)" to="(610,460)"/>
+    <wire from="(610,460)" to="(690,460)"/>
+    <wire from="(280,420)" to="(600,420)"/>
+    <wire from="(600,390)" to="(600,420)"/>
+    <wire from="(600,390)" to="(690,390)"/>
+    <wire from="(280,450)" to="(620,450)"/>
+    <wire from="(620,450)" to="(620,560)"/>
+    <wire from="(620,560)" to="(690,560)"/>
+    <wire from="(280,480)" to="(630,480)"/>
+    <wire from="(630,480)" to="(630,600)"/>
+    <wire from="(630,600)" to="(690,600)"/>
+    <wire from="(280,510)" to="(640,510)"/>
+    <wire from="(640,510)" to="(640,620)"/>
+    <wire from="(640,620)" to="(690,620)"/>
+    <wire from="(280,570)" to="(650,570)"/>
+    <wire from="(650,570)" to="(650,650)"/>
+    <wire from="(650,650)" to="(690,650)"/>
+    <wire from="(280,640)" to="(660,640)"/>
+    <wire from="(660,640)" to="(660,720)"/>
+    <wire from="(660,720)" to="(690,720)"/>
     <wire from="(670,180)" to="(670,190)"/>
     <wire from="(670,180)" to="(680,180)"/>
   </circuit>

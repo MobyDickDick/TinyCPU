@@ -244,7 +244,11 @@ def verify_system_circuit() -> None:
     # an electrically empty overview sheet from passing component-only checks.
     top_instances = Counter(component.get("name") for component in circuit.findall("comp")
                             if component.get("lib") is None)
-    if top_instances != Counter({"OutputMemoryPath": 1, "InterruptController": 1}):
+    if top_instances != Counter({
+            "OutputMemoryPath": 1,
+            "InterruptController": 1,
+            "CPUIntegrationBoundary": 1,
+    }):
         raise VerificationError(
             f"{display_path(system.circuit_path)}: system top components differ from contract"
         )
@@ -318,12 +322,28 @@ def verify_system_circuit() -> None:
             "CORE_RETURN_REQUEST", "RETURN_REQUEST"),
         "core_next_pc_to_interrupt_next_pc": ("CORE_NEXT_PC", "NEXT_PC"),
     }
-    required_cpu_wires = {
-        frozenset((cpu_pin_locations[source], cpu_pin_locations[target]))
-        for source, target in required_cpu_paths.values()
+    def connected(start: str, target: str) -> bool:
+        pending = [start]
+        visited = {start}
+        while pending:
+            point = pending.pop()
+            if point == target:
+                return True
+            for edge in cpu_wires:
+                if point not in edge:
+                    continue
+                for neighbour in edge - {point}:
+                    if neighbour not in visited:
+                        visited.add(neighbour)
+                        pending.append(neighbour)
+        return False
+
+    required_cpu_connections = {
+        name: connected(cpu_pin_locations[source], cpu_pin_locations[target])
+        for name, (source, target) in required_cpu_paths.items()
     }
     if cpu_contract.get("verified_paths") != list(required_cpu_paths) \
-            or not required_cpu_wires <= cpu_wires:
+            or not all(required_cpu_connections.values()):
         raise VerificationError(
             f"{display_path(system.circuit_path)}: CPU integration data paths differ from contract"
         )
