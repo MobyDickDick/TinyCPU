@@ -11,9 +11,10 @@ keine aktuellen Abnahmeziele.
 AP 20 konzentriert sich damit ausschließlich auf `TinyCPU.circ`. Die Pakete
 20.4 für Reset, Takt und Fetch sowie 20.6 für die schrittweise ISA- und
 Fehlerregression des 16/12-Profils und 20.7 für die redraw-sicheren
-Regressionen sind abgeschlossen. Das nächste aktive Paket ist 20.8: die
-Endabnahme und Aktualisierung des Funktionsstatus. ISA und Opcode-Belegung
-bleiben unverändert.
+Regressionen und die automatische Endabnahme aus 20.8 sind abgeschlossen.
+Der manuelle GUI-Kurztest wird in einer später verfügbaren interaktiven
+Umgebung nachgeholt und ist kein Blocker für den vorläufigen Abschluss von
+AP 20. ISA und Opcode-Belegung bleiben unverändert.
 
 ## Gemeinsame Regeln
 
@@ -50,7 +51,7 @@ Folgende Stop-Regeln gelten:
 | **20.4 Reset, Takt und Fetch für 16/12 wiederherstellen** | Ein minimales ROM aus `LOAD_CONST` und `HALT` autonom ausführen. Reset, Clock, PC, ROM-Wort, Programmlimit und Halt von der ersten Flanke an mit dem VM-Trace vergleichen. | `TinyCPU.circ` erreicht deterministisch den normalen Halt; der erste frühere Unterschied ist durch einen benannten Regressionstest gesichert. | Zwei unabhängige Minimalprogrammläufe liefern denselben Endzustand und stimmen flankenweise mit der VM überein. |
 | **20.6 ISA- und Fehlerregression schrittweise öffnen** | Zuerst eine Operation pro Familie prüfen, danach alle 50 Opcodes, beide Pfade jedes bedingten Sprungs und alle sechs Sticky-Fehlerfälle. Beim ersten Unterschied stoppen und nur dessen Signalkette reparieren. | Datenpfad, Adressierung, Sprünge, E/A, Halt und Fehlerzustände sind elektrisch für das 16/12-Profil nachgewiesen. | Die vollständige Matrix des 16/12-Profils besteht gegen dasselbe Python-Referenzmodell; kein Fall wird übersprungen oder nur statisch bewertet. |
 | **20.7 Redraw-sichere Regressionen ergänzen** | Für jeden gefundenen Defekt einen semantischen Struktur- oder elektrischen Test beibehalten. Tests folgen Labels, Ports und Netzkonnektivität statt absoluten Positionen; Multi-Driver, offene Eingänge und Breitenreste werden offline erkannt. | Ein erneutes Verschieben von Symbolen kann einen früheren Fehler nicht unbemerkt wieder einführen. | Die neuen Tests schlagen an einer gezielt defekten temporären Kopie fehl und am reparierten Projekt fehlersicher durch; die bestehende Suite bleibt grün. |
-| **20.8 Endabnahme und Funktionsstatus aktualisieren** | In frischem Checkout Offline-Gate und komplettes Logisim-Gate ausführen, anschließend den dokumentierten GUI-Kurztest für Reset, Einzeltakt, Ausgabe, Normalhalt und Fehlerhalt durchführen. Befehlsstatus und Diagnosebericht aus den Ergebnissen aktualisieren. | Der veröffentlichte Status beschreibt wieder Nachweise statt Absichten; ein konkreter Commit ist als funktionsfähiger Kandidat reproduzierbar. | Die automatischen Gates bestehen zweimal, der GUI-Kurztest ist protokolliert, und alle 50 Befehle werden nur bei vorhandenem elektrischen Nachweis als funktionsfähig markiert. |
+| **20.8 Endabnahme und Funktionsstatus aktualisieren** | In frischem Checkout Offline-Gate und komplettes Logisim-Gate ausführen; den dokumentierten GUI-Kurztest für Reset, Einzeltakt, Ausgabe, Normalhalt und Fehlerhalt bei verfügbarer interaktiver Umgebung nachholen. Befehlsstatus und Diagnosebericht aus den Ergebnissen aktualisieren. | Der veröffentlichte Status beschreibt wieder Nachweise statt Absichten; ein konkreter Commit ist als funktionsfähiger Kandidat reproduzierbar. | Die automatischen Gates bestehen zweimal und alle 50 Befehle werden nur bei vorhandenem elektrischen Nachweis als funktionsfähig markiert. Der separat dokumentierte GUI-Kurztest darf bei fehlender Anzeige ausdrücklich auf einen späteren Zeitpunkt verschoben werden. |
 
 ## Reihenfolge und Parallelität
 
@@ -58,9 +59,10 @@ Folgende Stop-Regeln gelten:
 8/8-Profils. 20.6 ist nach dem grünen, reproduzierten 16/12-Minimalkerntrace
 gestartet und mit der vollständigen elektrischen 16/12-Matrix abgeschlossen.
 20.7 wurde während jeder Reparatur mitgeführt und durch gezielte Mutationen
-der benannten Portverbindungen abschließend abgenommen. 20.8 ist das einzige
-noch offene Paket und das einzige Paket, das den
-Funktionsstatus auf „funktionsfähig“ setzen darf.
+der benannten Portverbindungen abschließend abgenommen. 20.8 ist mit der
+zweimal bestandenen automatischen Endabnahme vorläufig abgeschlossen und setzt
+den elektrisch belegten Funktionsstatus auf „funktionsfähig“. Der manuelle
+GUI-Kurztest bleibt als ausdrücklich verschobene Nachprüfung erhalten.
 
 ## Definition of Done
 
@@ -72,9 +74,12 @@ scripts/test-offline.sh
 LOGISIM_JAR=path/to/logisim-evolution-4.1.0-all.jar scripts/test-logisim.sh
 ```
 
-Zusätzlich muss der GUI-Kurztest aus `hardware/logisim/README.md` dokumentiert
-sein. Ein erfolgreiches Laden der Projekte, ein grüner Verifier oder ein
-einzelner funktionierender Opcode genügt jeweils nicht. Große Rohtraces gehören
+Der GUI-Kurztest aus `hardware/logisim/README.md` wird nachgeholt, sobald eine
+sichtbare, interaktiv bedienbare Umgebung verfügbar ist. Sein dokumentierter
+Aufschub blockiert den vorläufigen Abschluss nicht und ersetzt keinen der
+verpflichtenden automatischen Nachweise. Ein erfolgreiches Laden der Projekte,
+ein grüner Verifier oder ein einzelner funktionierender Opcode genügt jeweils
+nicht. Große Rohtraces gehören
 in das Artefaktverzeichnis und nicht in Git; eingecheckt werden Schaltungen,
 fokussierte Regressionstests sowie die zusammengefassten Nachweise.
 

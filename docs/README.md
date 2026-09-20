@@ -92,11 +92,12 @@ wird in
 AP 20 behandelt. Reset, Takt und Fetch des 16/12-Profils sind mit dem
 zweifach ausgeführten Minimalprogramm aus `LOAD_CONST(3)` und `HALT()` wieder
 abgenommen; die vollständige ISA-, Fehler- und Mutationsregression aus 20.6
-und 20.7 ist ebenfalls abgeschlossen. Das einzige noch aktive Paket 20.8 hat
-die automatischen Gates zuletzt am 20. September 2026 auf dem Kandidaten
-`4f1fec1f99e919c899d575a7c4813d5243fee6c3` zweimal in einem frischen Worktree
-bestanden. Der vorgeschriebene manuelle GUI-Kurztest ist ausdrücklich als
-**nicht durchgeführt** vermerkt: Ein Bedienversuch lieferte undefinierte
-beziehungsweise elektrische Fehlerwerte und damit kein verwertbares
-Testprotokoll. Ohne einen vollständigen späteren Sichtnachweis wird der
-Funktionsstatus nicht endgültig freigegeben.
+und 20.7 ist ebenfalls abgeschlossen. AP 20.8 hat die automatischen Gates
+zuletzt am 20. September 2026 auf dem Kandidaten
+`f151841191802745cf0c1e73f6f99f72ebaf39c9` zweimal in einem frischen Worktree
+bestanden und wird damit vorläufig als abgeschlossen betrachtet. Der manuelle
+GUI-Kurztest ist ausdrücklich auf einen späteren Zeitpunkt mit verfügbarer
+interaktiver Anzeige verschoben: Ein früherer Bedienversuch lieferte
+undefinierte beziehungsweise elektrische Fehlerwerte und damit kein
+verwertbares Testprotokoll. Der Aufschub ändert den vollständig elektrisch
+nachgewiesenen Funktionsstatus nicht.

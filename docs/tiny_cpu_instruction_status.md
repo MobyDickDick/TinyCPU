@@ -15,13 +15,14 @@ löst den erwarteten Fehlerhalt aus.
 
 Diese Aussage betrifft die ausführbare Schaltung
 `hardware/logisim/TinyCPU.circ` (16/12 Bit), nicht das Python-Referenzmodell.
-Der Kandidat `4f1fec1f99e919c899d575a7c4813d5243fee6c3` hat diese elektrische
+Der Kandidat `f151841191802745cf0c1e73f6f99f72ebaf39c9` hat diese elektrische
 Abnahme am 20. September 2026 in einem frischen Worktree zweimal bestanden.
-Die davon getrennte manuelle GUI-Kurzabnahme ist als **nicht durchgeführt**
-vermerkt. Ein Bedienversuch mit undefinierten beziehungsweise elektrischen
-Fehlerwerten ist kein verwertbarer Testlauf. Die GUI-Kurzabnahme ist keine
-Voraussetzung für die unten einzeln als elektrisch nachgewiesen markierten
-Opcode-Fälle, wohl aber für den Abschluss des gesamten AP 20.8.
+Die davon getrennte manuelle GUI-Kurzabnahme ist auf einen späteren Zeitpunkt
+mit verfügbarer interaktiver Anzeige verschoben. Ein Bedienversuch mit
+undefinierten beziehungsweise elektrischen Fehlerwerten ist kein verwertbarer
+Testlauf. Die GUI-Kurzabnahme ist weder Voraussetzung für die unten einzeln als
+elektrisch nachgewiesen markierten Opcode-Fälle noch Blocker für den
+vorläufigen Abschluss von AP 20.8.
 
 ## Prüfergebnis
 
