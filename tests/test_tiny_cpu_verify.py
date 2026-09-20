@@ -161,6 +161,7 @@ class CircuitVerificationTests(unittest.TestCase):
             ("CORE_ENABLE_REQUEST", "ENABLE_REQUEST"),
             ("CORE_DISABLE_REQUEST", "DISABLE_REQUEST"),
             ("CORE_RETURN_REQUEST", "RETURN_REQUEST"),
+            ("CORE_NEXT_PC", "NEXT_PC"),
         ):
             with self.subTest(path=(source_label, target_label)):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))

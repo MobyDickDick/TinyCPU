@@ -235,6 +235,12 @@ Kernanschlüssen direkt zu den Interruptausgängen der Grenze. Vertrag,
 Offline-Prüfer und Leitungs-Mutationstest sichern alle vier Signale anhand der
 Pinbezeichnungen. Damit bleibt innerhalb der CPU-Grenze nur noch der
 PC-Steuerpfad offen; die Top-Level-Verdrahtung ist weiterhin nicht eingefügt.
+Dieser letzte interne Pfad führt nun den 12-Bit-Folge-PC vom benannten,
+vorläufigen Kernanschluss `CORE_NEXT_PC` direkt zum Ausgang `NEXT_PC` der
+Interruptsteuerung. Vertrag, Offline-Prüfer und Leitungs-Mutationstest sichern
+auch diese Verbindung anhand der Pinbezeichnungen. Damit ist die interne
+CPU-Grenze für Daten-, Befehls- und PC-Steuerpfade vorbereitet; als nächster
+Integrationsschritt folgt ihre Verdrahtung auf `TinyCPUSystemMain`.
 
 ## Kompatibilitätsfolgen
 

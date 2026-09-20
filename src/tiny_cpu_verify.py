@@ -316,6 +316,7 @@ def verify_system_circuit() -> None:
             "CORE_DISABLE_REQUEST", "DISABLE_REQUEST"),
         "core_return_request_to_interrupt_return_request": (
             "CORE_RETURN_REQUEST", "RETURN_REQUEST"),
+        "core_next_pc_to_interrupt_next_pc": ("CORE_NEXT_PC", "NEXT_PC"),
     }
     required_cpu_wires = {
         frozenset((cpu_pin_locations[source], cpu_pin_locations[target]))

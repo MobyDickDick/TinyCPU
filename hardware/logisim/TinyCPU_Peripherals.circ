@@ -146,7 +146,32 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="CORE_WRITE_VALID"/>
     </comp>
-    <comp lib="0" loc="(280,400)" name="Pin">
+    <comp lib="0" loc="(230,360)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_WRITE_ENABLE"/>
+    </comp>
+    <comp lib="0" loc="(230,390)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_INSTRUCTION_BOUNDARY"/>
+    </comp>
+    <comp lib="0" loc="(230,410)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_ENABLE_REQUEST"/>
+    </comp>
+    <comp lib="0" loc="(230,430)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_DISABLE_REQUEST"/>
+    </comp>
+    <comp lib="0" loc="(230,450)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_RETURN_REQUEST"/>
+    </comp>
+    <comp lib="0" loc="(230,490)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_NEXT_PC"/>
+      <a name="width" val="12"/>
+    </comp>
+    <comp lib="0" loc="(230,70)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="CORE_WRITE_ENABLE"/>
     </comp>
@@ -252,13 +277,14 @@
     <wire from="(230,130)" to="(700,130)"/>
     <wire from="(230,170)" to="(700,170)"/>
     <wire from="(230,240)" to="(700,240)"/>
-    <wire from="(280,300)" to="(700,300)"/>
-    <wire from="(280,370)" to="(700,370)"/>
-    <wire from="(280,400)" to="(700,400)"/>
-    <wire from="(280,460)" to="(700,460)"/>
-    <wire from="(280,490)" to="(700,490)"/>
-    <wire from="(280,520)" to="(700,520)"/>
-    <wire from="(280,550)" to="(700,550)"/>
+    <wire from="(230,290)" to="(700,290)"/>
+    <wire from="(230,340)" to="(700,340)"/>
+    <wire from="(230,360)" to="(700,360)"/>
+    <wire from="(230,390)" to="(700,390)"/>
+    <wire from="(230,410)" to="(700,410)"/>
+    <wire from="(230,430)" to="(700,430)"/>
+    <wire from="(230,450)" to="(700,450)"/>
+    <wire from="(230,490)" to="(700,490)"/>
   </circuit>
   <circuit name="OutputPort">
     <a name="appearance" val="logisim_evolution"/>

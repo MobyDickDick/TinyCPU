@@ -238,7 +238,9 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Kernanschlüssen direkt und mutationstestgeschützt bis zu den Ausgängen der
   CPU-Grenze. Instruktionsgrenze sowie Aktivierungs-, Deaktivierungs- und
   Rückkehrimpuls werden ebenfalls direkt und mutationstestgeschützt
-  weitergereicht. PC-Steuerpfad, Top-Level-Verdrahtung und die anschließende
+  weitergereicht. Der Folge-PC reicht nun ebenfalls direkt und
+  mutationstestgeschützt vom vorläufigen Kernanschluss bis zur
+  Interruptsteuerungsgrenze. Top-Level-Verdrahtung und die anschließende
   Ausführung der Matrix sind noch umzusetzen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss

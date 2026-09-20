@@ -80,8 +80,10 @@ reichen ebenfalls direkt bis zur Speichergrenze. Die Regression verfolgt all
 diese Wege anhand der benannten Pins statt veralteter Zeichenkoordinaten.
 Die Instruktionsgrenze und die drei Befehlsimpulse für Interruptaktivierung,
 -deaktivierung und Rückkehr sind nun ebenfalls direkt und
-mutationstestgeschützt weitergereicht. Der PC-Steuerpfad, die
-Top-Level-Verdrahtung und die elektrische Systemabnahme sind noch offen.
+mutationstestgeschützt weitergereicht. Auch der Folge-PC gelangt von einem
+benannten vorläufigen Kernanschluss direkt und mutationstestgeschützt zur
+Interruptsteuerungsgrenze. Die Top-Level-Verdrahtung und die elektrische
+Systemabnahme sind noch offen.
 Die dafür verbindliche
 elektrische Fallliste ist inzwischen versioniert, mit den übrigen
 Systemverträgen quergeprüft und deckt alle neuen Opcodes und Verhaltensfälle
