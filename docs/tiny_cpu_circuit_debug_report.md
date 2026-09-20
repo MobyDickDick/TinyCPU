@@ -3140,3 +3140,49 @@ weiterhin extern anhand der dokumentierten Bedienfolge protokolliert werden.
 AP 20.8 und die endgültige Statusfreigabe bleiben ausschließlich bis zu diesem
 Sichtnachweis offen; die automatische Endabnahme des aktuellen Kandidaten ist
 zweimal reproduzierbar grün.
+
+#### Endabnahme des zusammengeführten Arbeitsstands
+
+- **Kandidat:** `d9d21af646d73c0eb00ecc46e552fe003edebc06`
+- **Datum:** 20. September 2026
+- **Ausführung:** abgetrennter frischer Git-Worktree ohne lokale Änderungen
+- **Python:** 3.14.4
+- **Java:** OpenJDK 25.0.2 (`25.0.2+10-69`)
+- **Logisim-evolution:** 4.1.0, JAR-SHA-256
+  `fe6386a3217a591bcc311a4eda49e1f43a389b499dd3d0f6f40f344fc85f2577`
+
+Der aktuelle Merge-Stand nach der letzten dokumentierten Kandidatenprüfung
+wurde erneut in einem frischen, abgetrennten Worktree abgenommen. Beide
+Offline-Läufe bestanden mit allen 104 Unit-Tests. Die beiden elektrischen
+Läufe bestanden mit je zwei identischen Minimalkerntraces und sämtlichen 61
+Matrix-Fixtures. Der Prüf-Worktree blieb nach jedem Lauf unverändert.
+
+```bash
+scripts/test-offline.sh
+scripts/test-offline.sh
+LOGISIM_JOBS=4 \
+  LOGISIM_JAR=/workspace/TinyCPU/.venv/Include/logisim-evolution-4.1.0-all.jar \
+  LOGISIM_OUTPUT=/tmp/ap20.8-d9d21af/electrical-1 \
+  scripts/test-logisim.sh
+LOGISIM_JOBS=4 \
+  LOGISIM_JAR=/workspace/TinyCPU/.venv/Include/logisim-evolution-4.1.0-all.jar \
+  LOGISIM_OUTPUT=/tmp/ap20.8-d9d21af/electrical-2 \
+  scripts/test-logisim.sh
+```
+
+| Lauf | Exitcode | Laufzeit | Ergebnis |
+|---|---:|---:|---|
+| Offline 1 | 0 | 13 s | Verifier, Schaltungscheck und 104 Tests bestanden |
+| Offline 2 | 0 | 12 s | Verifier, Schaltungscheck und 104 Tests bestanden |
+| Elektrisch 1 | 0 | 111 s | zwei Kernläufe und 61/61 Matrix-Fixtures bestanden |
+| Elektrisch 2 | 0 | 115 s | zwei Kernläufe und 61/61 Matrix-Fixtures bestanden |
+
+Der GUI-Preflight lieferte weiterhin ein leeres `DISPLAY`; `Xvfb`, `Xorg` und
+`xdotool` sind nicht installiert. Ein sichtbarer und manuell bedienbarer
+Logisim-Desktop steht in dieser Umgebung damit nicht zur Verfügung. Der
+erfolgreiche Tabellenlogger-Lauf wird nicht als GUI-Kurztest gewertet. Reset,
+Einzeltakt, die sichtbaren Ausgaben `3, 2, 1`, Normalhalt und Fehlerhalt müssen
+weiterhin extern anhand der dokumentierten Bedienfolge protokolliert werden.
+AP 20.8 und die endgültige Statusfreigabe bleiben ausschließlich bis zu diesem
+Sichtnachweis offen; die automatische Endabnahme des zusammengeführten
+Arbeitsstands ist zweimal reproduzierbar grün.
