@@ -264,10 +264,15 @@ Grenze erstmals an den abgenommenen Kern gebunden, ohne dessen Schaltbild zu
 kopieren oder umzuzeichnen. Takt und Reset sind nun von den Eingängen der
 Integrationsgrenze direkt mit den beiden Eingängen des vollständigen Kerns
 verbunden. Der Komponentenvertrag, der Offline-Prüfer und ein Mutationstest
-schützen beide Pfade bis an die tatsächlichen Kernanschlüsse. Daten-, Befehls-
-und PC-Pfade zwischen Kern und Adapter sind noch nicht verdrahtet; als nächster
-begrenzter Schritt ersetzt daher zunächst der Lese-Datenpfad die entsprechenden
-vorläufigen Kernanschlüsse.
+schützen beide Pfade bis an die tatsächlichen Kernanschlüsse. Der vom Kern für
+adressierte Ausgaben bereitgestellte Speicherwert und sein Gültigkeitsbit
+erreichen nun direkt die beiden Leseausgänge des Adapters. Der
+Komponentenvertrag und ein Mutationstest schützen beide Leitungen bis zu den
+tatsächlichen Ausgängen des generierten Kernsymbols. Die Rückführung des von
+`OutputMemoryPath` ausgewählten Werts in die internen Operandenpfade des Kerns
+benötigt dagegen eine ausdrückliche, additive Kernschnittstelle und bleibt
+deshalb zusammen mit den Schreib-, Befehls- und PC-Pfaden der nächste
+begrenzte Integrationsschritt.
 
 ## Kompatibilitätsfolgen
 

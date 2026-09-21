@@ -172,10 +172,10 @@ class CircuitVerificationTests(unittest.TestCase):
             ):
                 VERIFY.verify_system_circuit()
 
-    def test_ap18_cpu_integration_requires_core_clock_and_reset(self) -> None:
+    def test_ap18_cpu_integration_requires_declared_core_paths(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
-        for label in ("CLK", "RESET"):
+        for label in ("CLK", "RESET", "READ_VALUE", "READ_VALID"):
             with self.subTest(path=label):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
                 shutil.copytree(source, temporary / "logisim")
@@ -201,7 +201,7 @@ class CircuitVerificationTests(unittest.TestCase):
                          return_value=replace(system, circuit_path=circuit),
                      ):
                     with self.assertRaisesRegex(
-                        VERIFY.VerificationError, "CPU core clock/reset paths differ"
+                        VERIFY.VerificationError, "CPU core integration paths differ"
                     ):
                         VERIFY.verify_system_circuit()
 
@@ -209,8 +209,6 @@ class CircuitVerificationTests(unittest.TestCase):
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
         for source_label, target_label in (
-            ("RAM_READ_VALUE", "READ_VALUE"),
-            ("RAM_READ_VALID", "READ_VALID"),
             ("CORE_ADDRESS", "ADDRESS"),
             ("CORE_WRITE_VALUE", "WRITE_VALUE"),
             ("CORE_WRITE_VALID", "WRITE_VALID"),

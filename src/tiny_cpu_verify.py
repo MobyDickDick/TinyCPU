@@ -363,8 +363,6 @@ def verify_system_circuit() -> None:
         attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
         cpu_pin_locations[attributes.get("label", "")] = component.get("loc")
     required_cpu_paths = {
-        "ram_read_value_to_cpu_read_value": ("RAM_READ_VALUE", "READ_VALUE"),
-        "ram_read_valid_to_cpu_read_valid": ("RAM_READ_VALID", "READ_VALID"),
         "core_address_to_memory_address": ("CORE_ADDRESS", "ADDRESS"),
         "core_write_value_to_memory_write_value": ("CORE_WRITE_VALUE", "WRITE_VALUE"),
         "core_write_valid_to_memory_write_valid": ("CORE_WRITE_VALID", "WRITE_VALID"),
@@ -403,12 +401,18 @@ def verify_system_circuit() -> None:
     required_core_paths = {
         "clock_to_core": ("CLK", f"({core_input_x},{core_y})"),
         "reset_to_core": ("RESET", f"({core_input_x},{core_y + 20})"),
+        # TinyCPUMain exposes the addressed memory value used by
+        # PRINT_ADDRESS as output 13 and its validity as output 12.
+        "core_read_value_to_adapter": (
+            "READ_VALUE", f"({core_x + 220},{core_y + 240})"),
+        "core_read_valid_to_adapter": (
+            "READ_VALID", f"({core_x + 220},{core_y + 220})"),
     }
     if cpu_contract.get("verified_core_paths") != list(required_core_paths) or not all(
             connected(cpu_pin_locations[source], target)
             for source, target in required_core_paths.values()):
         raise VerificationError(
-            f"{display_path(system.circuit_path)}: CPU core clock/reset paths differ from contract"
+            f"{display_path(system.circuit_path)}: CPU core integration paths differ from contract"
         )
 
     required_cpu_connections = {

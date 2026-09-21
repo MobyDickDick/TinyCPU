@@ -25,6 +25,10 @@ Interruptpfaden direkt an `OutputMemoryPath` und `InterruptController`
 angeschlossen. Die Prüfung dieser Wege folgt den benannten Pins und den
 tatsächlichen Anschlüssen der generierten Symbole und bleibt dadurch auch nach
 einer manuellen Neuanordnung der Grenze wirksam.
+Innerhalb der Grenze speisen außerdem der adressierte Speicherwert des
+vollständigen Kerns und dessen Gültigkeitsbit direkt die beiden
+Leseausgänge des Adapters. Die ausgewählte Rückleseseite ist noch nicht in die
+internen Operandenpfade des unveränderten Kerns zurückgeführt.
 Deshalb
 ist der klassische Interruptcontroller vorläufig eine **Referenzlösung für
 AP 18**, keine unumkehrbare Festlegung der TinyCPU-Architektur.
