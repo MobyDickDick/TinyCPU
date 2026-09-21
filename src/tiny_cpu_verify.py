@@ -342,6 +342,7 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             f"{display_path(system.circuit_path)}: full CPU core placement differs from contract"
         )
+    core_instance = core_instances[0]
     cpu_pins = {}
     for component in cpu_boundary.findall("comp[@name='Pin']"):
         attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
@@ -393,6 +394,22 @@ def verify_system_circuit() -> None:
                         visited.add(neighbour)
                         pending.append(neighbour)
         return False
+
+    # TinyCPUMain uses Logisim's generated appearance. Its first two input
+    # ports are CLK and RESET, at these two left-hand terminals relative to
+    # the single, contractually placed core instance.
+    core_x, core_y = map(int, core_instance.get("loc").strip("()").split(","))
+    core_input_x = core_x - 220
+    required_core_paths = {
+        "clock_to_core": ("CLK", f"({core_input_x},{core_y})"),
+        "reset_to_core": ("RESET", f"({core_input_x},{core_y + 20})"),
+    }
+    if cpu_contract.get("verified_core_paths") != list(required_core_paths) or not all(
+            connected(cpu_pin_locations[source], target)
+            for source, target in required_core_paths.values()):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: CPU core clock/reset paths differ from contract"
+        )
 
     required_cpu_connections = {
         name: connected(cpu_pin_locations[source], cpu_pin_locations[target])

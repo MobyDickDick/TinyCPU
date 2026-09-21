@@ -82,7 +82,9 @@ Die Instruktionsgrenze und die drei Befehlsimpulse für Interruptaktivierung,
 -deaktivierung und Rückkehr sind nun ebenfalls direkt und
 mutationstestgeschützt weitergereicht. Auch der Folge-PC gelangt von einem
 benannten vorläufigen Kernanschluss direkt und mutationstestgeschützt zur
-Interruptsteuerungsgrenze. Die Top-Level-Verdrahtung und die elektrische
+Interruptsteuerungsgrenze. Die vollständige CPU ist inzwischen einmalig hinter
+dieser Grenze platziert; ihre Takt- und Resetanschlüsse sind direkt verdrahtet
+und per Mutationstest geschützt. Die übrigen Kernanschlüsse und die elektrische
 Systemabnahme sind noch offen.
 Die dafür verbindliche
 elektrische Fallliste ist inzwischen versioniert, mit den übrigen

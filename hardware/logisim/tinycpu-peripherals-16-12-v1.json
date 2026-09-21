@@ -43,7 +43,11 @@
         "TARGET_PC": {"direction": "input", "bits": 12},
         "ILLEGAL_RETURN": {"direction": "input", "bits": 1}
       },
-      "status": "full_core_placed",
+      "status": "core_clock_reset_connected",
+      "verified_core_paths": [
+        "clock_to_core",
+        "reset_to_core"
+      ],
       "verified_paths": [
         "ram_read_value_to_cpu_read_value",
         "ram_read_valid_to_cpu_read_valid",
