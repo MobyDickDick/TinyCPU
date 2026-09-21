@@ -176,8 +176,7 @@
     <a name="circuit" val="CPUIntegrationBoundary"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
     <a name="simulationFrequency" val="1.0"/>
-    <comp lib="10" loc="(980,900)" name="TinyCPUMain"/>
-    <comp lib="0" loc="(280,120)" name="Pin">
+    <comp lib="0" loc="(280,130)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="CLK"/>
     </comp>
@@ -185,158 +184,155 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="RESET"/>
     </comp>
-    <comp lib="0" loc="(280,190)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="RAM_READ_VALUE"/>
-      <a name="width" val="16"/>
-    </comp>
-    <comp lib="0" loc="(280,230)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="RAM_READ_VALID"/>
-    </comp>
-    <comp lib="0" loc="(280,270)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="CORE_ADDRESS"/>
-      <a name="width" val="12"/>
-    </comp>
-    <comp lib="0" loc="(280,320)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="CORE_WRITE_VALUE"/>
-      <a name="width" val="16"/>
-    </comp>
-    <comp lib="0" loc="(280,360)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="RAM_WRITE_ENABLE"/>
-    </comp>
-    <comp lib="0" loc="(280,390)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="CORE_WRITE_ENABLE"/>
-    </comp>
-    <comp lib="0" loc="(280,420)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="CORE_WRITE_VALID"/>
-    </comp>
-    <comp lib="0" loc="(280,450)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="CORE_INSTRUCTION_BOUNDARY"/>
-    </comp>
-    <comp lib="0" loc="(280,480)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="CORE_ENABLE_REQUEST"/>
-    </comp>
-    <comp lib="0" loc="(280,510)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="CORE_DISABLE_REQUEST"/>
-    </comp>
-    <comp lib="0" loc="(280,540)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="INTERRUPT_ACCEPT"/>
-    </comp>
-    <comp lib="0" loc="(280,570)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="CORE_RETURN_REQUEST"/>
-    </comp>
-    <comp lib="0" loc="(280,640)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="CORE_NEXT_PC"/>
-      <a name="width" val="12"/>
-    </comp>
-    <comp lib="0" loc="(280,680)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="ILLEGAL_RETURN"/>
-    </comp>
-    <comp lib="0" loc="(280,720)" name="Pin">
+    <comp lib="0" loc="(290,1030)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="TARGET_PC"/>
       <a name="width" val="12"/>
     </comp>
-    <comp lib="0" loc="(680,190)" name="Pin">
+    <comp lib="0" loc="(290,500)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="RAM_READ_VALUE"/>
+      <a name="width" val="16"/>
+    </comp>
+    <comp lib="0" loc="(290,540)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="RAM_READ_VALID"/>
+    </comp>
+    <comp lib="0" loc="(290,580)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_ADDRESS"/>
+      <a name="width" val="12"/>
+    </comp>
+    <comp lib="0" loc="(290,630)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_WRITE_VALUE"/>
+      <a name="width" val="16"/>
+    </comp>
+    <comp lib="0" loc="(290,670)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="RAM_WRITE_ENABLE"/>
+    </comp>
+    <comp lib="0" loc="(290,700)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_WRITE_ENABLE"/>
+    </comp>
+    <comp lib="0" loc="(290,730)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_WRITE_VALID"/>
+    </comp>
+    <comp lib="0" loc="(290,760)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_INSTRUCTION_BOUNDARY"/>
+    </comp>
+    <comp lib="0" loc="(290,790)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_ENABLE_REQUEST"/>
+    </comp>
+    <comp lib="0" loc="(290,820)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_DISABLE_REQUEST"/>
+    </comp>
+    <comp lib="0" loc="(290,850)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="INTERRUPT_ACCEPT"/>
+    </comp>
+    <comp lib="0" loc="(290,880)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_RETURN_REQUEST"/>
+    </comp>
+    <comp lib="0" loc="(290,950)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="CORE_NEXT_PC"/>
+      <a name="width" val="12"/>
+    </comp>
+    <comp lib="0" loc="(290,990)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="ILLEGAL_RETURN"/>
+    </comp>
+    <comp lib="0" loc="(370,500)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="READ_VALUE"/>
       <a name="type" val="output"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="0" loc="(690,230)" name="Pin">
+    <comp lib="0" loc="(370,540)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="READ_VALID"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(690,270)" name="Pin">
+    <comp lib="0" loc="(370,580)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="ADDRESS"/>
       <a name="type" val="output"/>
       <a name="width" val="12"/>
     </comp>
-    <comp lib="0" loc="(690,320)" name="Pin">
+    <comp lib="0" loc="(370,630)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="WRITE_VALUE"/>
       <a name="type" val="output"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="0" loc="(690,390)" name="Pin">
+    <comp lib="0" loc="(370,700)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="WRITE_ENABLE"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(690,420)" name="Pin">
+    <comp lib="0" loc="(370,730)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="WRITE_VALID"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(690,450)" name="Pin">
+    <comp lib="0" loc="(370,760)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="INSTRUCTION_BOUNDARY"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(690,480)" name="Pin">
+    <comp lib="0" loc="(370,790)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="ENABLE_REQUEST"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(690,510)" name="Pin">
+    <comp lib="0" loc="(370,820)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="DISABLE_REQUEST"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(690,570)" name="Pin">
+    <comp lib="0" loc="(380,880)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="RETURN_REQUEST"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(690,640)" name="Pin">
+    <comp lib="0" loc="(380,950)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="NEXT_PC"/>
       <a name="type" val="output"/>
       <a name="width" val="12"/>
     </comp>
-    <wire from="(280,120)" to="(740,120)"/>
-    <wire from="(740,120)" to="(740,900)"/>
-    <wire from="(740,900)" to="(760,900)"/>
-    <wire from="(280,150)" to="(720,150)"/>
-    <wire from="(720,150)" to="(720,920)"/>
-    <wire from="(720,920)" to="(760,920)"/>
-    <wire from="(280,190)" to="(680,190)"/>
-    <wire from="(280,230)" to="(690,230)"/>
-    <wire from="(280,270)" to="(690,270)"/>
-    <wire from="(280,320)" to="(690,320)"/>
-    <wire from="(280,390)" to="(690,390)"/>
-    <wire from="(280,420)" to="(690,420)"/>
-    <wire from="(280,450)" to="(690,450)"/>
-    <wire from="(280,480)" to="(690,480)"/>
-    <wire from="(280,510)" to="(690,510)"/>
-    <wire from="(280,570)" to="(690,570)"/>
-    <wire from="(280,640)" to="(690,640)"/>
+    <comp lib="10" loc="(520,130)" name="TinyCPUMain"/>
+    <wire from="(280,130)" to="(300,130)"/>
+    <wire from="(280,150)" to="(300,150)"/>
+    <wire from="(290,500)" to="(370,500)"/>
+    <wire from="(290,540)" to="(370,540)"/>
+    <wire from="(290,580)" to="(370,580)"/>
+    <wire from="(290,630)" to="(370,630)"/>
+    <wire from="(290,700)" to="(370,700)"/>
+    <wire from="(290,730)" to="(370,730)"/>
+    <wire from="(290,760)" to="(370,760)"/>
+    <wire from="(290,790)" to="(370,790)"/>
+    <wire from="(290,820)" to="(370,820)"/>
+    <wire from="(290,880)" to="(380,880)"/>
+    <wire from="(290,950)" to="(380,950)"/>
   </circuit>
   <circuit name="OutputPort">
     <a name="appearance" val="logisim_evolution"/>
