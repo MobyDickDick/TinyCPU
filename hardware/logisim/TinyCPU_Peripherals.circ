@@ -29,146 +29,146 @@
     <a name="circuit" val="TinyCPUSystemMain"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
     <a name="simulationFrequency" val="1.0"/>
-    <comp lib="0" loc="(200,250)" name="Pin">
+    <comp lib="0" loc="(200,470)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="CLK"/>
     </comp>
-    <comp lib="0" loc="(200,270)" name="Pin">
+    <comp lib="0" loc="(200,490)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="RESET"/>
     </comp>
-    <comp lib="0" loc="(200,360)" name="Pin">
+    <comp lib="0" loc="(200,580)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="INTERRUPT_REQUEST"/>
     </comp>
-    <comp lib="0" loc="(790,170)" name="Pin">
+    <comp lib="0" loc="(810,390)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="OUTPUT_PORT_VALUE"/>
       <a name="type" val="output"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="0" loc="(790,210)" name="Pin">
+    <comp lib="0" loc="(810,430)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="OUTPUT_PORT_VALID"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(800,340)" name="Pin">
+    <comp lib="0" loc="(820,560)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="INTERRUPT_PENDING"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(800,360)" name="Pin">
+    <comp lib="0" loc="(820,580)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="INTERRUPT_ENABLED"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(800,400)" name="Pin">
+    <comp lib="0" loc="(820,620)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="RETURN_ADDRESS"/>
       <a name="type" val="output"/>
       <a name="width" val="12"/>
     </comp>
-    <comp lib="0" loc="(800,440)" name="Pin">
+    <comp lib="0" loc="(820,660)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="RETURN_ADDRESS_VALID"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(800,460)" name="Pin">
+    <comp lib="0" loc="(820,680)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="IN_INTERRUPT_HANDLER"/>
       <a name="type" val="output"/>
     </comp>
-    <comp loc="(1040,520)" name="CPUIntegrationBoundary"/>
-    <comp loc="(600,130)" name="OutputMemoryPath"/>
-    <comp loc="(600,320)" name="InterruptController"/>
-    <wire from="(200,250)" to="(260,250)"/>
-    <wire from="(200,270)" to="(280,270)"/>
-    <wire from="(200,360)" to="(380,360)"/>
-    <wire from="(260,250)" to="(260,340)"/>
-    <wire from="(260,250)" to="(380,250)"/>
-    <wire from="(260,340)" to="(380,340)"/>
-    <wire from="(280,270)" to="(280,320)"/>
-    <wire from="(280,270)" to="(380,270)"/>
-    <wire from="(280,320)" to="(380,320)"/>
-    <wire from="(600,170)" to="(790,170)"/>
-    <wire from="(600,190)" to="(770,190)"/>
-    <wire from="(600,340)" to="(800,340)"/>
-    <wire from="(600,360)" to="(800,360)"/>
-    <wire from="(600,400)" to="(800,400)"/>
-    <wire from="(600,440)" to="(800,440)"/>
-    <wire from="(600,460)" to="(800,460)"/>
-    <wire from="(770,190)" to="(770,210)"/>
-    <wire from="(770,210)" to="(790,210)"/>
-    <wire from="(600,130)" to="(620,130)"/>
-    <wire from="(620,130)" to="(620,560)"/>
-    <wire from="(620,560)" to="(800,560)"/>
-    <wire from="(600,150)" to="(630,150)"/>
-    <wire from="(630,150)" to="(630,580)"/>
-    <wire from="(630,580)" to="(800,580)"/>
-    <wire from="(600,210)" to="(640,210)"/>
-    <wire from="(640,210)" to="(640,640)"/>
-    <wire from="(640,640)" to="(800,640)"/>
-    <wire from="(1040,560)" to="(1070,560)"/>
-    <wire from="(1070,560)" to="(1070,100)"/>
-    <wire from="(1070,100)" to="(370,100)"/>
-    <wire from="(370,100)" to="(370,170)"/>
-    <wire from="(370,170)" to="(380,170)"/>
-    <wire from="(1040,580)" to="(1080,580)"/>
-    <wire from="(1080,580)" to="(1080,90)"/>
-    <wire from="(1080,90)" to="(360,90)"/>
-    <wire from="(360,90)" to="(360,190)"/>
-    <wire from="(360,190)" to="(380,190)"/>
-    <wire from="(1040,600)" to="(1090,600)"/>
-    <wire from="(1090,600)" to="(1090,80)"/>
-    <wire from="(1090,80)" to="(350,80)"/>
-    <wire from="(350,80)" to="(350,210)"/>
-    <wire from="(350,210)" to="(380,210)"/>
-    <wire from="(1040,620)" to="(1100,620)"/>
-    <wire from="(1100,620)" to="(1100,70)"/>
-    <wire from="(1100,70)" to="(340,70)"/>
-    <wire from="(340,70)" to="(340,230)"/>
-    <wire from="(340,230)" to="(380,230)"/>
-    <wire from="(1040,640)" to="(1110,640)"/>
-    <wire from="(1110,640)" to="(1110,50)"/>
-    <wire from="(1110,50)" to="(320,50)"/>
-    <wire from="(320,50)" to="(320,380)"/>
-    <wire from="(320,380)" to="(380,380)"/>
-    <wire from="(1040,660)" to="(1120,660)"/>
-    <wire from="(1120,660)" to="(1120,40)"/>
-    <wire from="(1120,40)" to="(310,40)"/>
-    <wire from="(310,40)" to="(310,400)"/>
-    <wire from="(310,400)" to="(380,400)"/>
-    <wire from="(1040,680)" to="(1130,680)"/>
-    <wire from="(1130,680)" to="(1130,30)"/>
-    <wire from="(1130,30)" to="(300,30)"/>
-    <wire from="(300,30)" to="(300,420)"/>
-    <wire from="(300,420)" to="(380,420)"/>
-    <wire from="(1040,700)" to="(1140,700)"/>
-    <wire from="(1140,700)" to="(1140,20)"/>
-    <wire from="(1140,20)" to="(290,20)"/>
-    <wire from="(290,20)" to="(290,440)"/>
-    <wire from="(290,440)" to="(380,440)"/>
-    <wire from="(1040,720)" to="(1150,720)"/>
-    <wire from="(1150,720)" to="(1150,10)"/>
-    <wire from="(1150,10)" to="(280,10)"/>
-    <wire from="(280,10)" to="(280,460)"/>
-    <wire from="(280,460)" to="(380,460)"/>
-    <wire from="(600,320)" to="(650,320)"/>
-    <wire from="(650,320)" to="(650,760)"/>
-    <wire from="(650,760)" to="(800,760)"/>
-    <wire from="(600,380)" to="(660,380)"/>
-    <wire from="(660,380)" to="(660,820)"/>
-    <wire from="(660,820)" to="(800,820)"/>
-    <wire from="(600,420)" to="(670,420)"/>
-    <wire from="(670,420)" to="(670,840)"/>
-    <wire from="(670,840)" to="(800,840)"/>
+    <comp loc="(1040,740)" name="CPUIntegrationBoundary"/>
+    <comp loc="(620,350)" name="OutputMemoryPath"/>
+    <comp loc="(620,540)" name="InterruptController"/>
+    <wire from="(1040,780)" to="(1090,780)"/>
+    <wire from="(1040,800)" to="(1110,800)"/>
+    <wire from="(1040,820)" to="(1130,820)"/>
+    <wire from="(1040,840)" to="(1150,840)"/>
+    <wire from="(1040,860)" to="(1170,860)"/>
+    <wire from="(1040,880)" to="(1190,880)"/>
+    <wire from="(1040,900)" to="(1210,900)"/>
+    <wire from="(1040,920)" to="(1230,920)"/>
+    <wire from="(1040,940)" to="(1250,940)"/>
+    <wire from="(1090,320)" to="(1090,780)"/>
+    <wire from="(1110,300)" to="(1110,800)"/>
+    <wire from="(1130,280)" to="(1130,820)"/>
+    <wire from="(1150,260)" to="(1150,840)"/>
+    <wire from="(1170,240)" to="(1170,860)"/>
+    <wire from="(1190,220)" to="(1190,880)"/>
+    <wire from="(1210,200)" to="(1210,900)"/>
+    <wire from="(1230,180)" to="(1230,920)"/>
+    <wire from="(1250,160)" to="(1250,940)"/>
+    <wire from="(200,470)" to="(370,470)"/>
+    <wire from="(200,490)" to="(390,490)"/>
+    <wire from="(200,580)" to="(400,580)"/>
+    <wire from="(230,160)" to="(1250,160)"/>
+    <wire from="(230,160)" to="(230,680)"/>
+    <wire from="(230,680)" to="(400,680)"/>
+    <wire from="(250,180)" to="(1230,180)"/>
+    <wire from="(250,180)" to="(250,660)"/>
+    <wire from="(250,660)" to="(400,660)"/>
+    <wire from="(270,200)" to="(1210,200)"/>
+    <wire from="(270,200)" to="(270,640)"/>
+    <wire from="(270,640)" to="(400,640)"/>
+    <wire from="(290,220)" to="(1190,220)"/>
+    <wire from="(290,220)" to="(290,620)"/>
+    <wire from="(290,620)" to="(400,620)"/>
+    <wire from="(310,240)" to="(1170,240)"/>
+    <wire from="(310,240)" to="(310,600)"/>
+    <wire from="(310,600)" to="(400,600)"/>
+    <wire from="(330,260)" to="(1150,260)"/>
+    <wire from="(330,260)" to="(330,450)"/>
+    <wire from="(330,450)" to="(400,450)"/>
+    <wire from="(350,280)" to="(1130,280)"/>
+    <wire from="(350,280)" to="(350,430)"/>
+    <wire from="(350,430)" to="(400,430)"/>
+    <wire from="(370,300)" to="(1110,300)"/>
+    <wire from="(370,300)" to="(370,410)"/>
+    <wire from="(370,410)" to="(400,410)"/>
+    <wire from="(370,470)" to="(370,560)"/>
+    <wire from="(370,470)" to="(400,470)"/>
+    <wire from="(370,560)" to="(400,560)"/>
+    <wire from="(390,320)" to="(1090,320)"/>
+    <wire from="(390,320)" to="(390,390)"/>
+    <wire from="(390,390)" to="(400,390)"/>
+    <wire from="(390,490)" to="(390,540)"/>
+    <wire from="(390,490)" to="(400,490)"/>
+    <wire from="(390,540)" to="(400,540)"/>
+    <wire from="(620,350)" to="(770,350)"/>
+    <wire from="(620,370)" to="(750,370)"/>
+    <wire from="(620,390)" to="(810,390)"/>
+    <wire from="(620,410)" to="(790,410)"/>
+    <wire from="(620,430)" to="(730,430)"/>
+    <wire from="(620,540)" to="(710,540)"/>
+    <wire from="(620,560)" to="(820,560)"/>
+    <wire from="(620,580)" to="(820,580)"/>
+    <wire from="(620,600)" to="(680,600)"/>
+    <wire from="(620,620)" to="(820,620)"/>
+    <wire from="(620,640)" to="(650,640)"/>
+    <wire from="(620,660)" to="(820,660)"/>
+    <wire from="(620,680)" to="(820,680)"/>
+    <wire from="(650,1060)" to="(820,1060)"/>
+    <wire from="(650,640)" to="(650,1060)"/>
+    <wire from="(680,1040)" to="(820,1040)"/>
+    <wire from="(680,600)" to="(680,1040)"/>
+    <wire from="(710,540)" to="(710,980)"/>
+    <wire from="(710,980)" to="(820,980)"/>
+    <wire from="(730,430)" to="(730,860)"/>
+    <wire from="(730,860)" to="(820,860)"/>
+    <wire from="(750,370)" to="(750,800)"/>
+    <wire from="(750,800)" to="(820,800)"/>
+    <wire from="(770,350)" to="(770,780)"/>
+    <wire from="(770,780)" to="(820,780)"/>
+    <wire from="(790,410)" to="(790,430)"/>
+    <wire from="(790,430)" to="(810,430)"/>
   </circuit>
   <circuit name="CPUIntegrationBoundary">
     <a name="appearance" val="logisim_evolution"/>
@@ -278,13 +278,13 @@
     <comp lib="0" loc="(690,390)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="label" val="WRITE_VALID"/>
+      <a name="label" val="WRITE_ENABLE"/>
       <a name="type" val="output"/>
     </comp>
     <comp lib="0" loc="(690,420)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="label" val="WRITE_ENABLE"/>
+      <a name="label" val="WRITE_VALID"/>
       <a name="type" val="output"/>
     </comp>
     <comp lib="0" loc="(690,450)" name="Pin">
@@ -322,21 +322,13 @@
     <wire from="(280,230)" to="(690,230)"/>
     <wire from="(280,270)" to="(690,270)"/>
     <wire from="(280,320)" to="(690,320)"/>
+    <wire from="(280,390)" to="(690,390)"/>
+    <wire from="(280,420)" to="(690,420)"/>
     <wire from="(280,450)" to="(690,450)"/>
     <wire from="(280,480)" to="(690,480)"/>
     <wire from="(280,510)" to="(690,510)"/>
     <wire from="(280,570)" to="(690,570)"/>
     <wire from="(280,640)" to="(690,640)"/>
-    <wire from="(280,390)" to="(300,390)"/>
-    <wire from="(300,390)" to="(300,370)"/>
-    <wire from="(300,370)" to="(670,370)"/>
-    <wire from="(670,370)" to="(670,420)"/>
-    <wire from="(670,420)" to="(690,420)"/>
-    <wire from="(280,420)" to="(310,420)"/>
-    <wire from="(310,420)" to="(310,440)"/>
-    <wire from="(310,440)" to="(680,440)"/>
-    <wire from="(680,440)" to="(680,390)"/>
-    <wire from="(680,390)" to="(690,390)"/>
   </circuit>
   <circuit name="OutputPort">
     <a name="appearance" val="logisim_evolution"/>
