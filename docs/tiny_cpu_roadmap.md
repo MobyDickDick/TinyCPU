@@ -242,7 +242,9 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   mutationstestgeschützt vom vorläufigen Kernanschluss bis zur
   Interruptsteuerungsgrenze. Diese CPU-Grenze ist inzwischen genau einmal auf
   dem System-Top-Level platziert und ihre Anwesenheit mutationstestgeschützt;
-  die direkte Top-Level-Verdrahtung mit Speicher- und Interruptgrenze sowie die
+  ihre 15 direkten Top-Level-Pfade zur Speicher- und Interruptgrenze sind nun
+  ebenfalls verdrahtet und durch gezielte Leitungs-Mutationen geschützt. Die
+  Anbindung der vorläufigen Kernanschlüsse an die vollständige CPU und die
   anschließende Ausführung der Matrix sind noch umzusetzen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss

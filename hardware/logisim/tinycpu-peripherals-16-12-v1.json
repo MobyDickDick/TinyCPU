@@ -41,7 +41,7 @@
         "TARGET_PC": {"direction": "input", "bits": 12},
         "ILLEGAL_RETURN": {"direction": "input", "bits": 1}
       },
-      "status": "top_level_placed",
+      "status": "top_level_connected",
       "verified_paths": [
         "ram_read_value_to_cpu_read_value",
         "ram_read_valid_to_cpu_read_valid",
@@ -54,6 +54,23 @@
         "core_disable_request_to_interrupt_disable_request",
         "core_return_request_to_interrupt_return_request",
         "core_next_pc_to_interrupt_next_pc"
+      ],
+      "verified_top_level_paths": [
+        "memory_read_value_to_cpu",
+        "memory_read_valid_to_cpu",
+        "cpu_address_to_memory",
+        "cpu_write_value_to_memory",
+        "cpu_write_valid_to_memory",
+        "cpu_write_enable_to_memory",
+        "memory_ram_write_enable_to_cpu",
+        "cpu_instruction_boundary_to_interrupt",
+        "cpu_enable_request_to_interrupt",
+        "cpu_disable_request_to_interrupt",
+        "cpu_return_request_to_interrupt",
+        "cpu_next_pc_to_interrupt",
+        "interrupt_accept_to_cpu",
+        "interrupt_target_pc_to_cpu",
+        "interrupt_illegal_return_to_cpu"
       ]
     },
     "output_port": {

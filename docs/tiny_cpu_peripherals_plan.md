@@ -245,9 +245,14 @@ eine Instanz der `CPUIntegrationBoundary`; ein gezielter Mutationstest schützt
 diese Systemstruktur. Die vom Schaltungsautor angepasste, geknickte
 RAM-Lesewertleitung innerhalb der Grenze wird dabei anhand ihrer tatsächlichen
 Netzkonnektivität statt einer überholten direkten Linie geprüft. Als nächster
-Integrationsschritt folgt die direkte Verdrahtung der platzierten Grenze mit
-`OutputMemoryPath` und `InterruptController`; bis dahin wird weiterhin kein
-ausführbarer elektrischer Systemkern behauptet.
+Integrationsschritt ist die platzierte Grenze nun direkt mit
+`OutputMemoryPath` und `InterruptController` verdrahtet. Lese-, Schreib- und
+Adresspfad sowie Befehls-, Folge-PC-, Annahme-, Ziel- und Fehlerpfad werden an
+den tatsächlichen Ports der generierten Symbole geprüft; ein Mutationstest
+entfernt dazu einzeln jeden der 15 Endanschlüsse. Ein ausführbarer elektrischer
+Systemkern wird damit noch nicht behauptet: Als nächstes folgt die Anbindung
+der vorläufigen Kernanschlüsse an die vollständige CPU und danach die
+Ausführung der Systemmatrix.
 
 ## Kompatibilitätsfolgen
 

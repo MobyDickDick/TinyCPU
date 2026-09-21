@@ -218,6 +218,36 @@ class CircuitVerificationTests(unittest.TestCase):
             ):
                 VERIFY.verify_system_circuit()
 
+    def test_ap18_top_level_requires_cpu_boundary_hand_offs(self) -> None:
+        # The top-level CPU hand-offs must terminate at the generated-symbol
+        # ports, not merely pass near the three boundary instances.
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        terminals = (
+            "(600,130)", "(600,150)", "(1040,560)", "(1040,580)",
+            "(1040,600)", "(1040,620)", "(600,210)", "(1040,640)",
+            "(1040,660)", "(1040,680)", "(1040,700)", "(1040,720)",
+            "(600,320)", "(600,420)", "(600,380)",
+        )
+        for terminal in terminals:
+            with self.subTest(cpu_hand_off=terminal):
+                temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+                shutil.copytree(source, temporary / "logisim")
+                circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
+                project = ET.parse(circuit)
+                top = project.getroot().find("circuit[@name='TinyCPUSystemMain']")
+                wire = next(item for item in top.findall("wire")
+                            if terminal in {item.get("from"), item.get("to")})
+                top.remove(wire)
+                project.write(circuit, encoding="utf-8", xml_declaration=True)
+                system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+                with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+                     mock.patch.object(VERIFY, "load_system_profile",
+                                       return_value=replace(system, circuit_path=circuit)):
+                    with self.assertRaisesRegex(
+                            VERIFY.VerificationError, "CPU top-level hand-offs differ"):
+                        VERIFY.verify_system_circuit()
+
     def test_ap18_output_port_owns_value_and_valid_registers(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
