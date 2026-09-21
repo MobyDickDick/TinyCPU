@@ -176,27 +176,27 @@
     <a name="circuit" val="CPUIntegrationBoundary"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
     <a name="simulationFrequency" val="1.0"/>
-    <comp lib="0" loc="(280,130)" name="Pin">
+    <comp lib="0" loc="(280,150)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="CLK"/>
     </comp>
-    <comp lib="0" loc="(280,150)" name="Pin">
+    <comp lib="0" loc="(280,170)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="RESET"/>
+    </comp>
+    <comp lib="0" loc="(280,200)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="RAM_READ_VALUE"/>
+      <a name="width" val="16"/>
+    </comp>
+    <comp lib="0" loc="(280,230)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="RAM_READ_VALID"/>
     </comp>
     <comp lib="0" loc="(290,1030)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="TARGET_PC"/>
       <a name="width" val="12"/>
-    </comp>
-    <comp lib="0" loc="(290,500)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="RAM_READ_VALUE"/>
-      <a name="width" val="16"/>
-    </comp>
-    <comp lib="0" loc="(290,540)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="RAM_READ_VALID"/>
     </comp>
     <comp lib="0" loc="(290,580)" name="Pin">
       <a name="appearance" val="classic"/>
@@ -249,19 +249,7 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="ILLEGAL_RETURN"/>
     </comp>
-    <comp lib="0" loc="(370,500)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="READ_VALUE"/>
-      <a name="type" val="output"/>
-      <a name="width" val="16"/>
-    </comp>
-    <comp lib="0" loc="(370,540)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="READ_VALID"/>
-      <a name="type" val="output"/>
-    </comp>
+    <comp lib="0" loc="(340,240)" name="Constant"/>
     <comp lib="0" loc="(370,580)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
@@ -319,24 +307,26 @@
       <a name="type" val="output"/>
       <a name="width" val="12"/>
     </comp>
-    <comp lib="10" loc="(520,130)" name="TinyCPUMain"/>
-    <comp lib="0" loc="(270,210)" name="Constant">
-      <a name="value" val="0x1"/>
+    <comp lib="0" loc="(740,160)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="READ_VALUE"/>
+      <a name="type" val="output"/>
+      <a name="width" val="16"/>
     </comp>
-    <wire from="(280,130)" to="(300,130)"/>
-    <wire from="(280,150)" to="(300,150)"/>
-    <wire from="(290,500)" to="(300,500)"/>
-    <wire from="(300,170)" to="(300,500)"/>
-    <wire from="(290,540)" to="(320,540)"/>
-    <wire from="(320,190)" to="(320,540)"/>
-    <wire from="(300,190)" to="(320,190)"/>
-    <wire from="(270,210)" to="(300,210)"/>
-    <wire from="(370,500)" to="(760,500)"/>
-    <wire from="(760,370)" to="(760,500)"/>
-    <wire from="(740,370)" to="(760,370)"/>
-    <wire from="(370,540)" to="(780,540)"/>
-    <wire from="(780,350)" to="(780,540)"/>
-    <wire from="(740,350)" to="(780,350)"/>
+    <comp lib="0" loc="(740,220)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="READ_VALID"/>
+      <a name="type" val="output"/>
+    </comp>
+    <comp lib="10" loc="(630,160)" name="TinyCPUMain"/>
+    <wire from="(280,150)" to="(410,150)"/>
+    <wire from="(280,170)" to="(400,170)"/>
+    <wire from="(280,200)" to="(410,200)"/>
+    <wire from="(280,230)" to="(290,230)"/>
+    <wire from="(290,220)" to="(290,230)"/>
+    <wire from="(290,220)" to="(410,220)"/>
     <wire from="(290,580)" to="(370,580)"/>
     <wire from="(290,630)" to="(370,630)"/>
     <wire from="(290,700)" to="(370,700)"/>
@@ -346,6 +336,12 @@
     <wire from="(290,820)" to="(370,820)"/>
     <wire from="(290,880)" to="(380,880)"/>
     <wire from="(290,950)" to="(380,950)"/>
+    <wire from="(340,240)" to="(410,240)"/>
+    <wire from="(400,170)" to="(400,180)"/>
+    <wire from="(400,180)" to="(410,180)"/>
+    <wire from="(410,150)" to="(410,160)"/>
+    <wire from="(630,160)" to="(740,160)"/>
+    <wire from="(630,220)" to="(740,220)"/>
   </circuit>
   <circuit name="OutputPort">
     <a name="appearance" val="logisim_evolution"/>
