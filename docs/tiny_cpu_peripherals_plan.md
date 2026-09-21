@@ -261,10 +261,13 @@ Schaltungsnamen; der Offline-Prüfer und ein Mutationstest verhindern, dass die
 Instanz oder ihre eindeutige Bibliothekszuordnung unbemerkt verloren geht.
 Damit ist die bisher ausschließlich aus vorläufigen Anschlüssen bestehende
 Grenze erstmals an den abgenommenen Kern gebunden, ohne dessen Schaltbild zu
-kopieren oder umzuzeichnen. Noch sind weder Takt und Reset noch Daten-,
-Befehls- und PC-Pfade zwischen Kern und Adapter verdrahtet. Als nächster
-begrenzter Schritt werden daher zunächst Takt und Reset direkt angeschlossen;
-erst die folgenden Pfade ersetzen anschließend die vorläufigen Kernanschlüsse.
+kopieren oder umzuzeichnen. Takt und Reset sind nun von den Eingängen der
+Integrationsgrenze direkt mit den beiden Eingängen des vollständigen Kerns
+verbunden. Der Komponentenvertrag, der Offline-Prüfer und ein Mutationstest
+schützen beide Pfade bis an die tatsächlichen Kernanschlüsse. Daten-, Befehls-
+und PC-Pfade zwischen Kern und Adapter sind noch nicht verdrahtet; als nächster
+begrenzter Schritt ersetzt daher zunächst der Lese-Datenpfad die entsprechenden
+vorläufigen Kernanschlüsse.
 
 ## Kompatibilitätsfolgen
 

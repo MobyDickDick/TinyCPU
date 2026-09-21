@@ -320,6 +320,12 @@
       <a name="type" val="output"/>
       <a name="width" val="12"/>
     </comp>
+    <wire from="(280,120)" to="(740,120)"/>
+    <wire from="(740,120)" to="(740,900)"/>
+    <wire from="(740,900)" to="(760,900)"/>
+    <wire from="(280,150)" to="(720,150)"/>
+    <wire from="(720,150)" to="(720,920)"/>
+    <wire from="(720,920)" to="(760,920)"/>
     <wire from="(280,190)" to="(680,190)"/>
     <wire from="(280,230)" to="(690,230)"/>
     <wire from="(280,270)" to="(690,270)"/>
