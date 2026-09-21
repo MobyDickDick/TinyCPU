@@ -27,8 +27,10 @@ tatsächlichen Anschlüssen der generierten Symbole und bleibt dadurch auch nach
 einer manuellen Neuanordnung der Grenze wirksam.
 Innerhalb der Grenze speisen außerdem der adressierte Speicherwert des
 vollständigen Kerns und dessen Gültigkeitsbit direkt die beiden
-Leseausgänge des Adapters. Die ausgewählte Rückleseseite ist noch nicht in die
-internen Operandenpfade des unveränderten Kerns zurückgeführt.
+Leseausgänge des Adapters. Die ausgewählte Rückleseseite erreicht nun die neue
+additive Kernschnittstelle aus Wert, Gültigkeit und Aktivierung. Ihre interne
+Auswahl anstelle des bisherigen RAM-Pfads ist noch nicht verdrahtet; deshalb
+behält das eigenständige 1.0-Profil unverändert seinen bisherigen Speicherweg.
 Deshalb
 ist der klassische Interruptcontroller vorläufig eine **Referenzlösung für
 AP 18**, keine unumkehrbare Festlegung der TinyCPU-Architektur.

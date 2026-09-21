@@ -268,11 +268,14 @@ schützen beide Pfade bis an die tatsächlichen Kernanschlüsse. Der vom Kern f�
 adressierte Ausgaben bereitgestellte Speicherwert und sein Gültigkeitsbit
 erreichen nun direkt die beiden Leseausgänge des Adapters. Der
 Komponentenvertrag und ein Mutationstest schützen beide Leitungen bis zu den
-tatsächlichen Ausgängen des generierten Kernsymbols. Die Rückführung des von
-`OutputMemoryPath` ausgewählten Werts in die internen Operandenpfade des Kerns
-benötigt dagegen eine ausdrückliche, additive Kernschnittstelle und bleibt
-deshalb zusammen mit den Schreib-, Befehls- und PC-Pfaden der nächste
-begrenzte Integrationsschritt.
+tatsächlichen Ausgängen des generierten Kernsymbols. Als additive
+Kernschnittstelle sind nun `EXTERNAL_MEMORY_VALUE`, `EXTERNAL_MEMORY_VALID`
+und `USE_EXTERNAL_MEMORY` ergänzt. Die Systemgrenze führt ausgewählten Wert
+und Gültigkeit direkt an diese neuen Eingänge und aktiviert die Schnittstelle;
+Komponentenvertrag, Offline-Prüfer und Mutationstest schützen beide
+Datenleitungen bis zum Kern. Die interne Auswahl zwischen diesen Eingängen und
+dem bisherigen RAM-Pfad bleibt zusammen mit den Schreib-, Befehls- und
+PC-Pfaden des vollständigen Kerns der nächste begrenzte Integrationsschritt.
 
 ## Kompatibilitätsfolgen
 

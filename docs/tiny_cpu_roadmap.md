@@ -249,9 +249,11 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   und Mutationstest sichern Quelle und Instanz, ohne den Kern zu kopieren oder
   umzuzeichnen. Takt und Reset sowie Speicherlesewert und -gültigkeit vom Kern
   zu den Adapterausgängen sind inzwischen direkt und mutationstestgeschützt
-  verbunden. Als Nächstes folgen die Rückführung des ausgewählten Lesewerts
-  und danach die bislang vorläufigen Schreib-, Befehls- und PC-Anschlüsse;
-  anschließend ist die Matrix auszuführen.
+  verbunden. Der ausgewählte Lesewert und seine Gültigkeit erreichen nun die
+  additive, an der Systemgrenze aktivierte externe Speicherschnittstelle des
+  Kerns. Als Nächstes folgen deren interne Auswahl gegenüber dem bisherigen
+  RAM-Pfad und danach die bislang vorläufigen Schreib-, Befehls- und
+  PC-Anschlüsse; anschließend ist die Matrix auszuführen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

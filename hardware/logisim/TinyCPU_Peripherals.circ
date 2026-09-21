@@ -320,8 +320,17 @@
       <a name="width" val="12"/>
     </comp>
     <comp lib="10" loc="(520,130)" name="TinyCPUMain"/>
+    <comp lib="0" loc="(270,210)" name="Constant">
+      <a name="value" val="0x1"/>
+    </comp>
     <wire from="(280,130)" to="(300,130)"/>
     <wire from="(280,150)" to="(300,150)"/>
+    <wire from="(290,500)" to="(300,500)"/>
+    <wire from="(300,170)" to="(300,500)"/>
+    <wire from="(290,540)" to="(320,540)"/>
+    <wire from="(320,190)" to="(320,540)"/>
+    <wire from="(300,190)" to="(320,190)"/>
+    <wire from="(270,210)" to="(300,210)"/>
     <wire from="(370,500)" to="(760,500)"/>
     <wire from="(760,370)" to="(760,500)"/>
     <wire from="(740,370)" to="(760,370)"/>

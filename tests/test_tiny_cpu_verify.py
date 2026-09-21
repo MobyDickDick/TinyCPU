@@ -172,10 +172,39 @@ class CircuitVerificationTests(unittest.TestCase):
             ):
                 VERIFY.verify_system_circuit()
 
+    def test_ap18_cpu_integration_requires_external_memory_interface(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        core = temporary / "logisim" / "TinyCPU.circ"
+        core.write_text(core.read_text(encoding="utf-8").replace(
+            'label" val="EXTERNAL_MEMORY_VALUE"',
+            'label" val="BROKEN_EXTERNAL_MEMORY_VALUE"',
+            1,
+        ), encoding="utf-8")
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+             mock.patch.object(
+                 VERIFY,
+                 "load_system_profile",
+                 return_value=replace(
+                     system,
+                     circuit_path=temporary / "logisim" / "TinyCPU_Peripherals.circ",
+                 ),
+             ):
+            with self.assertRaisesRegex(
+                VERIFY.VerificationError, "external-memory interface differs"
+            ):
+                VERIFY.verify_system_circuit()
+
     def test_ap18_cpu_integration_requires_declared_core_paths(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
-        for label in ("CLK", "RESET", "READ_VALUE", "READ_VALID"):
+        for label in (
+            "CLK", "RESET", "RAM_READ_VALUE", "RAM_READ_VALID",
+            "READ_VALUE", "READ_VALID",
+        ):
             with self.subTest(path=label):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
                 shutil.copytree(source, temporary / "logisim")
