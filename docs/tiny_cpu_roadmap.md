@@ -244,8 +244,12 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   dem System-Top-Level platziert und ihre Anwesenheit mutationstestgeschützt;
   ihre 15 direkten Top-Level-Pfade zur Speicher- und Interruptgrenze sind nun
   ebenfalls verdrahtet und durch gezielte Leitungs-Mutationen geschützt. Die
-  Anbindung der vorläufigen Kernanschlüsse an die vollständige CPU und die
-  anschließende Ausführung der Matrix sind noch umzusetzen.
+  unveränderte vollständige `TinyCPUMain`-CPU ist jetzt außerdem genau einmal
+  als externe Projektbibliothek innerhalb der CPU-Grenze platziert; Vertrag
+  und Mutationstest sichern Quelle und Instanz, ohne den Kern zu kopieren oder
+  umzuzeichnen. Als Nächstes werden Takt und Reset und danach die bislang
+  vorläufigen Daten-, Befehls- und PC-Anschlüsse mit diesem Kern verbunden;
+  anschließend ist die Matrix auszuführen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

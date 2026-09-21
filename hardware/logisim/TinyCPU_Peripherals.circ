@@ -16,6 +16,7 @@
   <lib desc="#TTL" name="7"/>
   <lib desc="#TCL" name="8"/>
   <lib desc="#Base" name="9"/>
+  <lib desc="file#TinyCPU.circ" name="10"/>
   <main name="TinyCPUSystemMain"/>
   <options>
     <a name="gateUndefined" val="ignore"/>
@@ -175,6 +176,7 @@
     <a name="circuit" val="CPUIntegrationBoundary"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
     <a name="simulationFrequency" val="1.0"/>
+    <comp lib="10" loc="(980,900)" name="TinyCPUMain"/>
     <comp lib="0" loc="(280,120)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="CLK"/>

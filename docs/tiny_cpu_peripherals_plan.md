@@ -254,6 +254,18 @@ Systemkern wird damit noch nicht behauptet: Als nächstes folgt die Anbindung
 der vorläufigen Kernanschlüsse an die vollständige CPU und danach die
 Ausführung der Systemmatrix.
 
+Die vollständige, unveränderte `TinyCPUMain`-CPU ist dafür nun als externe
+Projektbibliothek genau einmal innerhalb der `CPUIntegrationBoundary`
+platziert. Der Komponentenvertrag benennt sowohl die Quelldatei als auch den
+Schaltungsnamen; der Offline-Prüfer und ein Mutationstest verhindern, dass die
+Instanz oder ihre eindeutige Bibliothekszuordnung unbemerkt verloren geht.
+Damit ist die bisher ausschließlich aus vorläufigen Anschlüssen bestehende
+Grenze erstmals an den abgenommenen Kern gebunden, ohne dessen Schaltbild zu
+kopieren oder umzuzeichnen. Noch sind weder Takt und Reset noch Daten-,
+Befehls- und PC-Pfade zwischen Kern und Adapter verdrahtet. Als nächster
+begrenzter Schritt werden daher zunächst Takt und Reset direkt angeschlossen;
+erst die folgenden Pfade ersetzen anschließend die vorläufigen Kernanschlüsse.
+
 ## Kompatibilitätsfolgen
 
 1. TinyCPU 1.0, `tinycpu-machine-v1` und beide vorhandenen Hardwareprofile

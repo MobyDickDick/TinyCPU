@@ -255,8 +255,7 @@ def verify_system_circuit() -> None:
     top_wires = {(wire.get("from"), wire.get("to")) for wire in circuit.findall("wire")}
     required_top_wires = {
         ("(620,390)", "(810,390)"),  # output-port value state
-        ("(620,410)", "(790,410)"),  # output-port validity state
-        ("(790,410)", "(790,430)"),
+        ("(790,410)", "(790,430)"),  # output-port validity state
         ("(790,430)", "(810,430)"),
         ("(620,560)", "(820,560)"),  # pending state
         ("(620,580)", "(820,580)"),  # mask state
@@ -326,6 +325,22 @@ def verify_system_circuit() -> None:
     if cpu_boundary is None:
         raise VerificationError(
             f"{display_path(system.circuit_path)}: CPU integration boundary is missing"
+        )
+    core_library = cpu_contract.get("core_library")
+    core_circuit = cpu_contract.get("core_circuit")
+    external_libraries = [
+        library for library in project.findall("lib")
+        if library.get("desc") == f"file#{core_library}"
+    ]
+    core_instances = [
+        component for component in cpu_boundary.findall("comp")
+        if component.get("name") == core_circuit
+        and any(component.get("lib") == library.get("name")
+                for library in external_libraries)
+    ]
+    if len(external_libraries) != 1 or len(core_instances) != 1:
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: full CPU core placement differs from contract"
         )
     cpu_pins = {}
     for component in cpu_boundary.findall("comp[@name='Pin']"):

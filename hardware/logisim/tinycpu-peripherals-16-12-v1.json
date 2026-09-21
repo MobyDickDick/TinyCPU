@@ -11,6 +11,8 @@
   "components": {
     "cpu_integration": {
       "circuit": "CPUIntegrationBoundary",
+      "core_library": "TinyCPU.circ",
+      "core_circuit": "TinyCPUMain",
       "pins": {
         "CLK": {"direction": "input", "bits": 1},
         "RESET": {"direction": "input", "bits": 1},
@@ -41,7 +43,7 @@
         "TARGET_PC": {"direction": "input", "bits": 12},
         "ILLEGAL_RETURN": {"direction": "input", "bits": 1}
       },
-      "status": "top_level_connected",
+      "status": "full_core_placed",
       "verified_paths": [
         "ram_read_value_to_cpu_read_value",
         "ram_read_valid_to_cpu_read_valid",
