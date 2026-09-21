@@ -20,9 +20,11 @@ Instruktionsgrenze und die drei Befehlsimpulse für Aktivierung, Deaktivierung
 und Rückkehr reichen direkt zu den Interruptausgängen. Der Folge-PC wird von
 einem vorläufigen Kernanschluss direkt zur Interruptsteuerung geführt. Damit
 ist der PC-Steuerpfad innerhalb der Grenze ebenfalls vorbereitet; die
-Top-Level-Verdrahtung ist noch nicht eingefügt. Die Prüfung dieser Wege
-folgt den benannten Pins und bleibt dadurch auch nach einer manuellen
-Neuanordnung der Grenze wirksam.
+Top-Level-Grenze ist nun mit allen 15 Daten-, Adress-, Schreib-, Befehls- und
+Interruptpfaden direkt an `OutputMemoryPath` und `InterruptController`
+angeschlossen. Die Prüfung dieser Wege folgt den benannten Pins und den
+tatsächlichen Anschlüssen der generierten Symbole und bleibt dadurch auch nach
+einer manuellen Neuanordnung der Grenze wirksam.
 Deshalb
 ist der klassische Interruptcontroller vorläufig eine **Referenzlösung für
 AP 18**, keine unumkehrbare Festlegung der TinyCPU-Architektur.

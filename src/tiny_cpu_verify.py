@@ -280,6 +280,47 @@ def verify_system_circuit() -> None:
 
     contract = load_json(LOGISIM / "tinycpu-peripherals-16-12-v1.json")
     cpu_contract = contract.get("components", {}).get("cpu_integration", {})
+    top_graph = {frozenset(edge) for edge in top_wires}
+
+    def top_connected(start: str, target: str) -> bool:
+        pending = [start]
+        visited = {start}
+        while pending:
+            point = pending.pop()
+            if point == target:
+                return True
+            for edge in top_graph:
+                if point not in edge:
+                    continue
+                for neighbour in edge - {point}:
+                    if neighbour not in visited:
+                        visited.add(neighbour)
+                        pending.append(neighbour)
+        return False
+
+    required_top_paths = {
+        "memory_read_value_to_cpu": ("(600,130)", "(800,560)"),
+        "memory_read_valid_to_cpu": ("(600,150)", "(800,580)"),
+        "cpu_address_to_memory": ("(1040,560)", "(380,170)"),
+        "cpu_write_value_to_memory": ("(1040,580)", "(380,190)"),
+        "cpu_write_valid_to_memory": ("(1040,600)", "(380,210)"),
+        "cpu_write_enable_to_memory": ("(1040,620)", "(380,230)"),
+        "memory_ram_write_enable_to_cpu": ("(600,210)", "(800,640)"),
+        "cpu_instruction_boundary_to_interrupt": ("(1040,640)", "(380,380)"),
+        "cpu_enable_request_to_interrupt": ("(1040,660)", "(380,400)"),
+        "cpu_disable_request_to_interrupt": ("(1040,680)", "(380,420)"),
+        "cpu_return_request_to_interrupt": ("(1040,700)", "(380,440)"),
+        "cpu_next_pc_to_interrupt": ("(1040,720)", "(380,460)"),
+        "interrupt_accept_to_cpu": ("(600,320)", "(800,760)"),
+        "interrupt_target_pc_to_cpu": ("(600,420)", "(800,840)"),
+        "interrupt_illegal_return_to_cpu": ("(600,380)", "(800,820)"),
+    }
+    if cpu_contract.get("verified_top_level_paths") != list(required_top_paths) or not all(
+            top_connected(*terminals) for terminals in required_top_paths.values()):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: CPU top-level hand-offs differ from contract"
+        )
+
     cpu_name = cpu_contract.get("circuit")
     cpu_boundary = project.find(f"circuit[@name='{cpu_name}']")
     if cpu_boundary is None:
