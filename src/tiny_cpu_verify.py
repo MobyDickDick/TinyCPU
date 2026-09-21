@@ -343,6 +343,25 @@ def verify_system_circuit() -> None:
             f"{display_path(system.circuit_path)}: full CPU core placement differs from contract"
         )
     core_instance = core_instances[0]
+    core_project = ET.parse(LOGISIM / str(core_library)).getroot()
+    core_definition = core_project.find(f"circuit[@name='{core_circuit}']")
+    if core_definition is None:
+        raise VerificationError("AP-18 CPU core definition is missing")
+    core_public_pins = {}
+    for component in core_definition.findall("comp[@name='Pin']"):
+        attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
+        core_public_pins[attributes.get("label", "")] = {
+            "direction": attributes.get("type", "input"),
+            "bits": int(attributes.get("width", "1")),
+        }
+    expected_external_memory_pins = {
+        "EXTERNAL_MEMORY_VALUE": {"direction": "input", "bits": 16},
+        "EXTERNAL_MEMORY_VALID": {"direction": "input", "bits": 1},
+        "USE_EXTERNAL_MEMORY": {"direction": "input", "bits": 1},
+    }
+    if any(core_public_pins.get(label) != definition
+           for label, definition in expected_external_memory_pins.items()):
+        raise VerificationError("AP-18 CPU external-memory interface differs from contract")
     cpu_pins = {}
     for component in cpu_boundary.findall("comp[@name='Pin']"):
         attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
@@ -401,6 +420,10 @@ def verify_system_circuit() -> None:
     required_core_paths = {
         "clock_to_core": ("CLK", f"({core_input_x},{core_y})"),
         "reset_to_core": ("RESET", f"({core_input_x},{core_y + 20})"),
+        "adapter_read_value_to_core": (
+            "RAM_READ_VALUE", f"({core_input_x},{core_y + 40})"),
+        "adapter_read_valid_to_core": (
+            "RAM_READ_VALID", f"({core_input_x},{core_y + 60})"),
         # TinyCPUMain exposes the addressed memory value used by
         # PRINT_ADDRESS as output 13 and its validity as output 12.
         "core_read_value_to_adapter": (
@@ -413,6 +436,10 @@ def verify_system_circuit() -> None:
             for source, target in required_core_paths.values()):
         raise VerificationError(
             f"{display_path(system.circuit_path)}: CPU core integration paths differ from contract"
+        )
+    if not connected("(270,210)", f"({core_input_x},{core_y + 80})"):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: CPU external-memory selection is inactive"
         )
 
     required_cpu_connections = {

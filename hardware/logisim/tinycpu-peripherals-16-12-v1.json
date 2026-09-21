@@ -43,10 +43,12 @@
         "TARGET_PC": {"direction": "input", "bits": 12},
         "ILLEGAL_RETURN": {"direction": "input", "bits": 1}
       },
-      "status": "core_read_outputs_connected",
+      "status": "core_read_inputs_connected",
       "verified_core_paths": [
         "clock_to_core",
         "reset_to_core",
+        "adapter_read_value_to_core",
+        "adapter_read_valid_to_core",
         "core_read_value_to_adapter",
         "core_read_valid_to_adapter"
       ],

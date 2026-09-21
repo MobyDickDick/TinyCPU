@@ -159,6 +159,19 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="RESET"/>
     </comp>
+    <comp lib="0" loc="(330,550)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="EXTERNAL_MEMORY_VALUE"/>
+      <a name="width" val="16"/>
+    </comp>
+    <comp lib="0" loc="(330,570)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="EXTERNAL_MEMORY_VALID"/>
+    </comp>
+    <comp lib="0" loc="(330,590)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="USE_EXTERNAL_MEMORY"/>
+    </comp>
     <comp lib="0" loc="(3450,270)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>

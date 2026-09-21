@@ -67,11 +67,13 @@ def autonomous_project(
         attributes = _attributes(component)
         label = attributes.get("label")
         if label is None or label.get("val") not in {
-            "CLK", "RESET", "HALTED", "HALTED_WITH_ERROR"
+            "CLK", "RESET", "HALTED", "HALTED_WITH_ERROR",
+            "EXTERNAL_MEMORY_VALUE", "EXTERNAL_MEMORY_VALID", "USE_EXTERNAL_MEMORY",
         }:
             continue
         name = label.get("val", "")
-        found.add(name)
+        if name in {"CLK", "RESET", "HALTED", "HALTED_WITH_ERROR"}:
+            found.add(name)
         if name == "CLK":
             component.set("lib", "0")
             component.set("name", "Clock")
@@ -102,6 +104,17 @@ def autonomous_project(
                 "wire",
                 {"from": f"({x - 40},{y})", "to": f"({x - 20},{y})"},
             )
+        elif name.startswith("EXTERNAL_MEMORY_") or name == "USE_EXTERNAL_MEMORY":
+            # The additive AP-18 interface is inactive in every autonomous
+            # TinyCPU 1.0 fixture.  Drive it explicitly instead of relying on
+            # a simulator-specific value for an otherwise floating input pin.
+            width = attributes.get("width")
+            component.set("lib", "0")
+            component.set("name", "Constant")
+            for item in list(component):
+                component.remove(item)
+            if width is not None:
+                ET.SubElement(component, "a", {"name": "width", "val": width.get("val", "1")})
         elif name == halt_output:
             # Logisim's table,halt mode stops on an asserted output named halt.
             label.set("val", "halt")
