@@ -247,8 +247,10 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   unveränderte vollständige `TinyCPUMain`-CPU ist jetzt außerdem genau einmal
   als externe Projektbibliothek innerhalb der CPU-Grenze platziert; Vertrag
   und Mutationstest sichern Quelle und Instanz, ohne den Kern zu kopieren oder
-  umzuzeichnen. Als Nächstes werden Takt und Reset und danach die bislang
-  vorläufigen Daten-, Befehls- und PC-Anschlüsse mit diesem Kern verbunden;
+  umzuzeichnen. Takt und Reset sowie Speicherlesewert und -gültigkeit vom Kern
+  zu den Adapterausgängen sind inzwischen direkt und mutationstestgeschützt
+  verbunden. Als Nächstes folgen die Rückführung des ausgewählten Lesewerts
+  und danach die bislang vorläufigen Schreib-, Befehls- und PC-Anschlüsse;
   anschließend ist die Matrix auszuführen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
