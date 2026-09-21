@@ -154,5 +154,9 @@ gilt:
 3. normale Instruktionsverarbeitung.
 
 Diese Regeln sind die Grundlage für Softwaremodell, Verträge und spätere
-elektrische Systemtests. Die eigenständigen Bausteine allein sind noch kein
-Nachweis einer vollständigen CPU-Integration.
+elektrische Systemtests. Die Systemschaltung bindet inzwischen die
+unveränderte `TinyCPUMain`-CPU als externe Projektbibliothek in ihre
+Integrationsgrenze ein. Die noch ausstehende elektrische Verbindung des Kerns
+mit den vorbereiteten Daten-, Befehls- und PC-Pfaden bedeutet jedoch weiterhin,
+dass die eigenständigen Bausteine noch kein Nachweis einer vollständigen
+CPU-Integration sind.
