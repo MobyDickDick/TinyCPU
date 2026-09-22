@@ -41,6 +41,13 @@ class _Driver:
     label: str
 
 
+@dataclass(frozen=True)
+class _WidthConstraint:
+    point: Point
+    width: int
+    label: str
+
+
 def _subcircuit_outputs(definition: ET.Element, instance: ET.Element) -> list[_Driver]:
     """Return generated-box output terminals for a subcircuit instance.
 
@@ -65,6 +72,94 @@ def _subcircuit_outputs(definition: ET.Element, instance: ET.Element) -> list[_D
             f"{_attributes(instance).get('label', instance.get('name', 'subcircuit'))}",
         ))
     return outputs
+
+
+def _width_constraints(
+        circuit: ET.Element,
+        definitions: dict[str, ET.Element] | None = None) -> list[_WidthConstraint]:
+    """Return widths declared at contacts whose locations are unambiguous.
+
+    A circuit ``Pin`` contact is always at its ``loc``.  For generated
+    subcircuit boxes the output contacts use the same ordering already used by
+    :func:`_subcircuit_outputs`.  Limiting this check to those contacts avoids
+    guessing the geometry of configurable primitive inputs while still
+    catching a data bus connected to a one-bit public output.
+    """
+    constraints = []
+    for component in circuit.findall("comp"):
+        kind = component.get("name", "")
+        attributes = _attributes(component)
+        if kind == "Pin":
+            constraints.append(_WidthConstraint(
+                _point(component.get("loc", "")),
+                int(attributes.get("width", "1")),
+                attributes.get("label") or f"Pin@{component.get('loc')}",
+            ))
+        elif definitions and kind in definitions:
+            outputs = [pin for pin in definitions[kind].findall("comp")
+                       if pin.get("name") == "Pin"
+                       and _attributes(pin).get("type") == "output"]
+            outputs.sort(key=lambda pin: (_point(pin.get("loc", ""))[1],
+                                          _point(pin.get("loc", ""))[0]))
+            anchor_x, anchor_y = _point(component.get("loc", ""))
+            instance_label = attributes.get("label", kind)
+            for index, pin in enumerate(outputs):
+                pin_attributes = _attributes(pin)
+                constraints.append(_WidthConstraint(
+                    (anchor_x, anchor_y + 20 * index),
+                    int(pin_attributes.get("width", "1")),
+                    f"{pin_attributes.get('label', 'output')} of {instance_label}",
+                ))
+    return constraints
+
+
+def _width_mismatch_issues(
+        circuit: ET.Element,
+        definitions: dict[str, ET.Element] | None = None) -> list[CircuitIssue]:
+    """Find connected contacts that declare incompatible bit widths."""
+    segments = [(_point(w.get("from", "")), _point(w.get("to", "")))
+                for w in circuit.findall("wire")]
+    constraints = _width_constraints(circuit, definitions)
+    points = ({point for segment in segments for point in segment}
+              | {constraint.point for constraint in constraints})
+    parent = {point: point for point in points}
+
+    def find(point: Point) -> Point:
+        while parent[point] != point:
+            parent[point] = parent[parent[point]]
+            point = parent[point]
+        return point
+
+    def union(left: Point, right: Point) -> None:
+        left, right = find(left), find(right)
+        if left != right:
+            parent[right] = left
+
+    for left, right in segments:
+        union(left, right)
+    for point in points:
+        for segment in segments:
+            if _on_segment(point, segment):
+                union(point, segment[0])
+
+    nets: dict[Point, list[_WidthConstraint]] = {}
+    for constraint in constraints:
+        # An isolated component contact is not a network fault.
+        if any(_on_segment(constraint.point, segment) for segment in segments):
+            nets.setdefault(find(constraint.point), []).append(constraint)
+
+    issues = []
+    for net in nets.values():
+        if len({constraint.width for constraint in net}) > 1:
+            details = ", ".join(sorted(
+                f"{constraint.label} ({constraint.width}-bit)"
+                for constraint in net
+            ))
+            issues.append(CircuitIssue(
+                circuit.get("name", "<unnamed>"),
+                f"incompatible widths share one net: {details}",
+            ))
+    return issues
 
 
 def _drivers(circuit: ET.Element,
@@ -236,13 +331,14 @@ def _net_drivers(circuit: ET.Element,
 
 def inspect_circuit(circuit: ET.Element,
                     definitions: dict[str, ET.Element] | None = None) -> list[CircuitIssue]:
-    """Find nets driven by multiple primitive or subcircuit outputs."""
+    """Find driver collisions, width mismatches, and incomplete wiring."""
     name = circuit.get("name", "<unnamed>")
     issues = []
     for drivers in _net_drivers(circuit, definitions).values():
         if len(drivers) > 1:
             labels = sorted(driver.label for driver in drivers)
             issues.append(CircuitIssue(name, "outputs share one net: " + ", ".join(labels)))
+    issues.extend(_width_mismatch_issues(circuit, definitions))
     issues.extend(_undriven_gate_input_issues(circuit, definitions))
     issues.extend(_unwired_multiplexer_input_issues(circuit))
     return issues
