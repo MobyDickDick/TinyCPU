@@ -202,8 +202,8 @@ class CircuitVerificationTests(unittest.TestCase):
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
         for endpoint in (
-            "(1120,630)", "(1120,650)", "(1140,660)", "(1160,640)",
-            "(1120,750)", "(1120,770)", "(1140,780)", "(1160,760)",
+            "(1130,630)", "(1130,650)", "(1140,660)", "(1160,640)",
+            "(1130,750)", "(1130,770)", "(1140,780)", "(1160,760)",
         ):
             with self.subTest(endpoint=endpoint):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))

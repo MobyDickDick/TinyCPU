@@ -1431,6 +1431,16 @@ colliding drivers into singly-driven nets; ambiguous nets remain reported and
 are never guessed away.  The maintained top-level routes have been separated
 into independent corridors so the checker now exits successfully.
 
+The checker also validates the two invariant data terminals of every
+east-facing multiplexer.  This closes a separate blind spot in the graph-only
+driver check: a route that stopped at `x=1120` beside the two external-memory
+multiplexers looked connected at normal zoom, but the actual classic-symbol
+terminals are at `x=1130`.  Because such a route never enters the electrical
+graph, counting drivers could not report it.  `TinyCPUMain` now routes the
+internal and external value/valid signals to the exact `x=1130` terminals and
+keeps `USE_EXTERNAL_MEMORY` on a separate detour to both select inputs, without
+crossing either data lane.
+
 Confirmed visual stubs can additionally be annotated in the XML with
 `tinycpu-dangling="true"` and removed with `--fix --prune-dangling`.  Before
 deleting such a wire, the checker still requires one loose end and a real

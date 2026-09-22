@@ -179,6 +179,22 @@ class CircuitCheckTests(unittest.TestCase):
             "COMPACT input at (170, 110) has an undriven wire ending at (700, 180)"
         ])
 
+    def test_detects_wire_stopping_before_multiplexer_terminals(self):
+        circuit = ET.fromstring("""
+          <circuit name="Broken">
+            <comp lib="2" loc="(200,120)" name="Multiplexer">
+              <a name="label" val="MEMORY_SELECT"/>
+            </comp>
+            <wire from="(100,100)" to="(160,100)"/>
+            <wire from="(100,140)" to="(160,140)"/>
+          </circuit>
+        """)
+        messages = [issue.message for issue in inspect_circuit(circuit)]
+        self.assertEqual(messages, [
+            "MEMORY_SELECT input at (170, 110) is not wired",
+            "MEMORY_SELECT input at (170, 130) is not wired",
+        ])
+
     def test_detects_and_repairs_subcircuit_output_bridge(self):
         project = """<?xml version='1.0'?>
           <project>
