@@ -29,8 +29,10 @@ Innerhalb der Grenze speisen außerdem der adressierte Speicherwert des
 vollständigen Kerns und dessen Gültigkeitsbit direkt die beiden
 Leseausgänge des Adapters. Die ausgewählte Rückleseseite erreicht nun die neue
 additive Kernschnittstelle aus Wert, Gültigkeit und Aktivierung. Ihre interne
-Auswahl anstelle des bisherigen RAM-Pfads ist noch nicht verdrahtet; deshalb
-behält das eigenständige 1.0-Profil unverändert seinen bisherigen Speicherweg.
+Auswahl ist nun für Wert und Gültigkeit jeweils über einen eigenen Multiplexer
+verdrahtet. `USE_EXTERNAL_MEMORY` schaltet beide Pfade gemeinsam auf die
+Systemrückleseseite; ohne diese additive Aktivierung bleibt der bisherige
+RAM-Pfad des eigenständigen 1.0-Profils unverändert ausgewählt.
 Deshalb
 ist der klassische Interruptcontroller vorläufig eine **Referenzlösung für
 AP 18**, keine unumkehrbare Festlegung der TinyCPU-Architektur.

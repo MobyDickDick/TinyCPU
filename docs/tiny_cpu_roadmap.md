@@ -251,9 +251,11 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   zu den Adapterausgängen sind inzwischen direkt und mutationstestgeschützt
   verbunden. Der ausgewählte Lesewert und seine Gültigkeit erreichen nun die
   additive, an der Systemgrenze aktivierte externe Speicherschnittstelle des
-  Kerns. Als Nächstes folgen deren interne Auswahl gegenüber dem bisherigen
-  RAM-Pfad und danach die bislang vorläufigen Schreib-, Befehls- und
-  PC-Anschlüsse; anschließend ist die Matrix auszuführen.
+  Kerns. Zwei gemeinsam gesteuerte Multiplexer wählen dort inzwischen Wert und
+  Gültigkeit gegenüber dem bisherigen RAM-Pfad aus; ohne Aktivierung bleibt
+  das 1.0-Verhalten erhalten. Als Nächstes folgen die bislang vorläufigen
+  Schreib-, Befehls- und PC-Anschlüsse; anschließend ist die Matrix
+  auszuführen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

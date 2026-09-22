@@ -362,6 +362,67 @@ def verify_system_circuit() -> None:
     if any(core_public_pins.get(label) != definition
            for label, definition in expected_external_memory_pins.items()):
         raise VerificationError("AP-18 CPU external-memory interface differs from contract")
+    core_wires = {
+        frozenset((wire.get("from"), wire.get("to")))
+        for wire in core_definition.findall("wire")
+    }
+    core_pin_locations = {}
+    for component in core_definition.findall("comp[@name='Pin']"):
+        attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
+        core_pin_locations[attributes.get("label", "")] = component.get("loc")
+    memory_selectors = {}
+    for component in core_definition.findall("comp[@name='Multiplexer']"):
+        attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
+        label = attributes.get("label", "")
+        if label in {"EXTERNAL_MEMORY_VALUE_SELECT", "EXTERNAL_MEMORY_VALID_SELECT"}:
+            memory_selectors[label] = component
+
+    def core_connected(start: str, target: str) -> bool:
+        pending = [start]
+        visited = {start}
+        while pending:
+            point = pending.pop()
+            if point == target:
+                return True
+            for edge in core_wires:
+                if point not in edge:
+                    continue
+                for neighbour in edge - {point}:
+                    if neighbour not in visited:
+                        visited.add(neighbour)
+                        pending.append(neighbour)
+        return False
+
+    expected_selector_widths = {
+        "EXTERNAL_MEMORY_VALUE_SELECT": "16",
+        "EXTERNAL_MEMORY_VALID_SELECT": "1",
+    }
+    if set(memory_selectors) != set(expected_selector_widths) or any(
+        {item.get("name"): item.get("val") for item in selector.findall("a")}.get(
+            "width", "1"
+        ) != expected_selector_widths[label]
+        for label, selector in memory_selectors.items()
+    ):
+        raise VerificationError("AP-18 CPU external-memory selectors differ from contract")
+    selector_paths = []
+    for label, external_pin, memory_output, consumer in (
+        ("EXTERNAL_MEMORY_VALUE_SELECT", "EXTERNAL_MEMORY_VALUE", "(1020,700)", "(2610,700)"),
+        ("EXTERNAL_MEMORY_VALID_SELECT", "EXTERNAL_MEMORY_VALID", "(1020,720)", "(2500,720)"),
+    ):
+        selector = memory_selectors[label]
+        selector_x, selector_y = map(int, selector.get("loc").strip("()").split(","))
+        default_input = f"({selector_x - 40},{selector_y - 10})"
+        external_input = f"({selector_x - 40},{selector_y + 10})"
+        select_input = f"({selector_x - 20},{selector_y + 20})"
+        output = selector.get("loc")
+        selector_paths.extend((
+            core_connected(memory_output, default_input),
+            core_connected(core_pin_locations[external_pin], external_input),
+            core_connected(core_pin_locations["USE_EXTERNAL_MEMORY"], select_input),
+            core_connected(output, consumer),
+        ))
+    if not all(selector_paths):
+        raise VerificationError("AP-18 CPU external-memory selection paths differ from contract")
     cpu_pins = {}
     for component in cpu_boundary.findall("comp[@name='Pin']"):
         attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
@@ -424,12 +485,14 @@ def verify_system_circuit() -> None:
             "RAM_READ_VALUE", f"({core_input_x},{core_y + 40})"),
         "adapter_read_valid_to_core": (
             "RAM_READ_VALID", f"({core_input_x},{core_y + 60})"),
+        # With the generated appearance anchored at its output edge,
         # TinyCPUMain exposes the addressed memory value used by
-        # PRINT_ADDRESS as output 13 and its validity as output 12.
+        # PRINT_ADDRESS at the instance x coordinate and its validity 60
+        # pixels below it.
         "core_read_value_to_adapter": (
-            "READ_VALUE", f"({core_x + 220},{core_y + 240})"),
+            "READ_VALUE", f"({core_x},{core_y})"),
         "core_read_valid_to_adapter": (
-            "READ_VALID", f"({core_x + 220},{core_y + 220})"),
+            "READ_VALID", f"({core_x},{core_y + 60})"),
     }
     if cpu_contract.get("verified_core_paths") != list(required_core_paths) or not all(
             connected(cpu_pin_locations[source], target)
@@ -437,7 +500,13 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             f"{display_path(system.circuit_path)}: CPU core integration paths differ from contract"
         )
-    if not connected("(270,210)", f"({core_input_x},{core_y + 80})"):
+    external_memory_enable = cpu_boundary.find("comp[@name='Constant'][@loc='(340,240)']")
+    enable_attributes = {
+        item.get("name"): item.get("val") for item in external_memory_enable.findall("a")
+    } if external_memory_enable is not None else {}
+    if enable_attributes.get("value") != "0x1" or not connected(
+        "(340,240)", f"({core_input_x},{core_y + 80})"
+    ):
         raise VerificationError(
             f"{display_path(system.circuit_path)}: CPU external-memory selection is inactive"
         )

@@ -272,6 +272,29 @@ class LogisimLauncherTests(unittest.TestCase):
                     run_trace(project, Path("logisim.jar"), "java", output, 1)
             self.assertEqual(output.read_bytes(), b"partial\n")
 
+    def test_timeout_preserves_and_reports_the_trace_tail(self):
+        source = ROOT / "hardware/logisim/TinyCPU.circ"
+        rows = b"".join(f"pc-{index}\n".encode() for index in range(105))
+        timed_out = subprocess.TimeoutExpired([], 1, output=rows)
+        diagnostic_timeout = subprocess.TimeoutExpired([], 1, output=b"")
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory) / "autonomous.circ"
+            autonomous_project(source, project, "TinyCPUMain")
+            output = Path(directory) / "trace.tsv"
+            with patch(
+                "tiny_cpu_logisim.subprocess.run",
+                side_effect=[timed_out, diagnostic_timeout],
+            ):
+                with self.assertRaises(LogisimError) as raised:
+                    run_trace(project, Path("logisim.jar"), "java", output, 1)
+            message = str(raised.exception)
+            self.assertIn(f"partial trace preserved at {output}", message)
+            self.assertIn("last observed PC/control state", message)
+            self.assertNotIn("pc-4\n", message)
+            self.assertIn("pc-5\n", message)
+            self.assertTrue(message.endswith("pc-104"))
+            self.assertEqual(output.read_bytes(), rows)
+
     def test_default_cli_profile_is_a_loadable_profile_name(self):
         args = parse_args(["--trace-output", "trace.tsv"])
         profile = load_profile(args.profile)
