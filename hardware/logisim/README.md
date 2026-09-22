@@ -203,6 +203,31 @@ verwenden. Liefert bereits der Tabellenbefehl `E`, muss vor dem GUI-Kurztest
 eine unveränderte Arbeitskopie des dokumentierten Kandidaten verwendet werden;
 der fehlerhafte Stand darf nicht als AP-20.8-Nachweis protokolliert werden.
 
+### Leitungsfarben sind kein Verdrahtungsnachweis
+
+Die Farben einer laufenden Simulation dürfen nicht mit offenen oder falsch
+verbundenen Leitungen verwechselt werden. Insbesondere zeigen die breiten
+Daten- und Adressbusse je nach aktuellem Mehrbitwert schwarz oder orange; die
+einbittigen Steuersignale erscheinen dagegen grün. Ein orangefarbener Bus ist
+daher für sich allein **kein** elektrischer Fehler. Maßgeblich sind `E` an
+einem Ausgang, ein rotes Konfliktnetz oder eine fehlgeschlagene elektrische
+Abnahme.
+
+Die eingecheckte Verdrahtung wird ohne Bedienzustand der GUI vollständig mit
+dem echten Logisim-Simulator geprüft:
+
+```bash
+scripts/test-logisim.sh
+```
+
+Der Lauf führt das Countdown-Programm zweimal aus und prüft anschließend alle
+50 Opcodes sowie sechs Sticky-Fehlerfälle. Erst ein Fehler dieses Laufs ist ein
+reproduzierbarer Funktionsbefund. Bleibt nur die sichtbare Integrationsseite
+nach dem Öffnen stehen, ist das erwartbar: `TinyCPUMain` besitzt einen externen
+`CLK`-Pin. Nach **Simulation > Reset Simulation** müssen deshalb zuerst der
+oben beschriebene RESET-Impuls und anschließend manuelle `CLK`-Flanken erzeugt
+werden; **Manual Tick Full Cycle** treibt diesen externen Pin nicht.
+
 ## Bedienbarkeit und geplante Bediengrenze
 
 `TinyCPUMain` ist derzeit eine technisch orientierte Integrationsseite und kein
