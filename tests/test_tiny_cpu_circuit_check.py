@@ -82,8 +82,8 @@ class CircuitCheckTests(unittest.TestCase):
         wires = {(wire.get("from"), wire.get("to"))
                  for wire in main.findall("wire")}
         self.assertIn((("(1400,1600)"), ("(1710,1600)")), wires)
-        self.assertIn((("(1710,190)"), ("(1710,1600)")), wires)
-        self.assertNotIn((("(1710,190)"), ("(1710,1680)")), wires)
+        self.assertIn((("(1710,180)"), ("(1710,1600)")), wires)
+        self.assertNotIn((("(1710,180)"), ("(1710,1680)")), wires)
 
     def test_standalone_fetch_decoder_uses_visible_wires(self):
         path = (
@@ -279,11 +279,11 @@ class CircuitCheckTests(unittest.TestCase):
                     if circuit.get("name") == "TinyCPUMain")
         wires = {(wire.get("from"), wire.get("to"))
                  for wire in main.findall("wire")}
-        self.assertIn(("(1110,630)", "(1150,630)"), wires)
-        self.assertIn(("(1090,650)", "(1150,650)"), wires)
-        self.assertIn(("(1070,750)", "(1150,750)"), wires)
-        self.assertIn(("(1070,770)", "(1150,770)"), wires)
-        self.assertIn(("(280,860)", "(1070,860)"), wires)
+        self.assertIn(("(1010,730)", "(1090,730)"), wires)
+        self.assertIn(("(330,750)", "(1090,750)"), wires)
+        self.assertIn(("(1030,790)", "(1120,790)"), wires)
+        self.assertIn(("(330,810)", "(1120,810)"), wires)
+        self.assertIn(("(330,830)", "(1100,830)"), wires)
 
     def test_detects_and_repairs_subcircuit_output_bridge(self):
         project = """<?xml version='1.0'?>
