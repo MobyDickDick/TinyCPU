@@ -406,8 +406,8 @@ def verify_system_circuit() -> None:
         raise VerificationError("AP-18 CPU external-memory selectors differ from contract")
     selector_paths = []
     for label, external_pin, memory_output, consumer in (
-        ("EXTERNAL_MEMORY_VALUE_SELECT", "EXTERNAL_MEMORY_VALUE", "(1020,700)", "(2610,700)"),
-        ("EXTERNAL_MEMORY_VALID_SELECT", "EXTERNAL_MEMORY_VALID", "(1020,720)", "(2500,720)"),
+        ("EXTERNAL_MEMORY_VALUE_SELECT", "EXTERNAL_MEMORY_VALUE", "(1020,720)", "(2610,700)"),
+        ("EXTERNAL_MEMORY_VALID_SELECT", "EXTERNAL_MEMORY_VALID", "(1020,700)", "(2500,720)"),
     ):
         selector = memory_selectors[label]
         selector_x, selector_y = map(int, selector.get("loc").strip("()").split(","))
