@@ -233,6 +233,38 @@ class CircuitVerificationTests(unittest.TestCase):
                     ):
                         VERIFY.verify_system_circuit()
 
+    def test_ap18_cpu_integration_keeps_operation_validity_inputs_separate(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        core = temporary / "logisim" / "TinyCPU.circ"
+        text = core.read_text(encoding="utf-8")
+        text = text.replace(
+            '<wire from="(2380,1040)" to="(2650,1040)"/>',
+            '<wire from="(2400,1040)" to="(2650,1040)"/>',
+            1,
+        ).replace(
+            '<wire from="(2380,530)" to="(2380,1040)"/>',
+            '<wire from="(2400,760)" to="(2400,1040)"/>',
+            1,
+        )
+        core.write_text(text, encoding="utf-8")
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+             mock.patch.object(
+                 VERIFY,
+                 "load_system_profile",
+                 return_value=replace(
+                     system,
+                     circuit_path=temporary / "logisim" / "TinyCPU_Peripherals.circ",
+                 ),
+             ):
+            with self.assertRaisesRegex(
+                VERIFY.VerificationError, "validity inputs are crossed"
+            ):
+                VERIFY.verify_system_circuit()
+
     def test_ap18_cpu_integration_requires_declared_core_paths(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
