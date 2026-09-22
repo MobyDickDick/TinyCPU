@@ -72,11 +72,16 @@ def _drivers(circuit: ET.Element,
     gate_kinds = {
         "AND Gate", "OR Gate", "XOR Gate", "NAND Gate", "NOR Gate", "NOT Gate",
     }
+    # A multiplexer drives its ``loc`` contact just like a gate.  It must not
+    # be mistaken for a passive routing component: connecting that contact to
+    # another output creates electrical contention even when both wires have
+    # different colours in Logisim's drawing.
+    output_at_location_kinds = gate_kinds | {"Multiplexer"}
     result = []
     for component in circuit.findall("comp"):
         kind = component.get("name", "")
         attributes = _attributes(component)
-        if kind in gate_kinds:
+        if kind in output_at_location_kinds:
             result.append(_Driver(
                 _point(component.get("loc", "")),
                 attributes.get("label") or f"{kind}@{component.get('loc')}",

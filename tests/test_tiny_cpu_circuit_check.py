@@ -148,6 +148,33 @@ class CircuitCheckTests(unittest.TestCase):
         messages = [issue.message for issue in inspect_circuit(circuit)]
         self.assertIn("outputs share one net: FIRST, SECOND", messages)
 
+    def test_detects_multiplexer_output_joined_to_subcircuit_output(self):
+        producer = ET.fromstring("""
+          <circuit name="Producer">
+            <comp lib="0" loc="(100,100)" name="Pin">
+              <a name="label" val="VALID"/><a name="type" val="output"/>
+            </comp>
+          </circuit>
+        """)
+        circuit = ET.fromstring("""
+          <circuit name="Broken">
+            <comp loc="(200,100)" name="Producer"><a name="label" val="SOURCE"/></comp>
+            <comp lib="2" loc="(100,200)" name="Multiplexer">
+              <a name="label" val="SELECTED_VALID"/>
+            </comp>
+            <wire from="(200,100)" to="(300,100)"/>
+            <wire from="(100,200)" to="(300,200)"/>
+            <wire from="(300,100)" to="(300,200)"/>
+          </circuit>
+        """)
+        messages = [issue.message for issue in inspect_circuit(
+            circuit, {"Producer": producer}
+        )]
+        self.assertIn(
+            "outputs share one net: SELECTED_VALID, VALID of SOURCE",
+            messages,
+        )
+
     def test_detects_undriven_gate_input_with_dangling_wire(self):
         circuit = ET.fromstring("""
           <circuit name="Broken">
