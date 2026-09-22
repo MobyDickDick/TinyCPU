@@ -175,6 +175,47 @@ class CircuitCheckTests(unittest.TestCase):
             messages,
         )
 
+    def test_detects_16_bit_bus_connected_to_one_bit_output(self):
+        producer = ET.fromstring("""
+          <circuit name="Producer">
+            <comp lib="0" loc="(100,100)" name="Pin">
+              <a name="label" val="DATA"/><a name="type" val="output"/>
+              <a name="width" val="16"/>
+            </comp>
+          </circuit>
+        """)
+        circuit = ET.fromstring("""
+          <circuit name="Broken">
+            <comp loc="(200,100)" name="Producer"><a name="label" val="SOURCE"/></comp>
+            <comp lib="0" loc="(400,100)" name="Pin">
+              <a name="label" val="VALID"/><a name="type" val="output"/>
+            </comp>
+            <wire from="(200,100)" to="(400,100)"/>
+          </circuit>
+        """)
+        messages = [issue.message for issue in inspect_circuit(
+            circuit, {"Producer": producer}
+        )]
+        self.assertIn(
+            "incompatible widths share one net: DATA of SOURCE (16-bit), VALID (1-bit)",
+            messages,
+        )
+
+    def test_accepts_matching_bus_widths(self):
+        circuit = ET.fromstring("""
+          <circuit name="Connected">
+            <comp lib="0" loc="(100,100)" name="Pin">
+              <a name="label" val="INPUT"/><a name="width" val="16"/>
+            </comp>
+            <comp lib="0" loc="(300,100)" name="Pin">
+              <a name="label" val="OUTPUT"/><a name="type" val="output"/>
+              <a name="width" val="16"/>
+            </comp>
+            <wire from="(100,100)" to="(300,100)"/>
+          </circuit>
+        """)
+        self.assertEqual(inspect_circuit(circuit), [])
+
     def test_detects_undriven_gate_input_with_dangling_wire(self):
         circuit = ET.fromstring("""
           <circuit name="Broken">
