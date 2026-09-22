@@ -102,16 +102,16 @@ def _gate_inputs(component: ET.Element) -> list[Point]:
 def _multiplexer_inputs(component: ET.Element) -> list[Point]:
     """Return data contacts for an east-facing classic multiplexer.
 
-    Logisim locates the electrical contacts 40 pixels left of the output.  The
-    sloped symbol begins 30 pixels left of the output, but that outline is not
-    a terminal.
+    Logisim locates the electrical contacts 30 pixels left of the output.  A
+    wire ending 40 pixels left only appears to touch the symbol at common zoom
+    levels; electrically, it still leaves a one-grid-point gap.
     """
     attributes = _attributes(component)
     if attributes.get("facing", "east") != "east":
         return []
     count = 1 << int(attributes.get("select", "1"))
     x, y = _point(component.get("loc", ""))
-    return [(x - 40, y + 20 * index - 10 * (count - 1))
+    return [(x - 30, y + 20 * index - 10 * (count - 1))
             for index in range(count)]
 
 

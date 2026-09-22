@@ -185,25 +185,37 @@ class CircuitCheckTests(unittest.TestCase):
             <comp lib="2" loc="(200,120)" name="Multiplexer">
               <a name="label" val="MEMORY_SELECT"/>
             </comp>
-            <wire from="(100,110)" to="(150,110)"/>
-            <wire from="(100,130)" to="(150,130)"/>
+            <wire from="(100,110)" to="(160,110)"/>
+            <wire from="(100,130)" to="(160,130)"/>
           </circuit>
         """)
         messages = [issue.message for issue in inspect_circuit(circuit)]
         self.assertEqual(messages, [
-            "MEMORY_SELECT input at (160, 110) is not wired",
-            "MEMORY_SELECT input at (160, 130) is not wired",
+            "MEMORY_SELECT input at (170, 110) is not wired",
+            "MEMORY_SELECT input at (170, 130) is not wired",
         ])
 
     def test_accepts_wires_at_classic_multiplexer_contacts(self):
         circuit = ET.fromstring("""
           <circuit name="Connected">
             <comp lib="2" loc="(200,120)" name="Multiplexer"/>
-            <wire from="(100,110)" to="(160,110)"/>
-            <wire from="(100,130)" to="(160,130)"/>
+            <wire from="(100,110)" to="(170,110)"/>
+            <wire from="(100,130)" to="(170,130)"/>
           </circuit>
         """)
         self.assertEqual(inspect_circuit(circuit), [])
+
+    def test_main_external_memory_multiplexers_reach_their_contacts(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        main = next(circuit for circuit in root.findall("circuit")
+                    if circuit.get("name") == "TinyCPUMain")
+        wires = {(wire.get("from"), wire.get("to"))
+                 for wire in main.findall("wire")}
+        self.assertIn(("(1100,630)", "(1130,630)"), wires)
+        self.assertIn(("(1080,650)", "(1130,650)"), wires)
+        self.assertIn(("(1060,750)", "(1130,750)"), wires)
+        self.assertIn(("(1130,770)", "(1130,860)"), wires)
+        self.assertIn(("(280,860)", "(1130,860)"), wires)
 
     def test_detects_and_repairs_subcircuit_output_bridge(self):
         project = """<?xml version='1.0'?>
