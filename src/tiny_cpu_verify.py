@@ -411,10 +411,8 @@ def verify_system_circuit() -> None:
     ):
         selector = memory_selectors[label]
         selector_x, selector_y = map(int, selector.get("loc").strip("()").split(","))
-        # The classic multiplexer data terminals are 30 pixels left of its
-        # output.  x-40 is only the symbol outline and is not a contact.
-        default_input = f"({selector_x - 30},{selector_y - 10})"
-        external_input = f"({selector_x - 30},{selector_y + 10})"
+        default_input = f"({selector_x - 40},{selector_y - 10})"
+        external_input = f"({selector_x - 40},{selector_y + 10})"
         select_input = f"({selector_x - 20},{selector_y + 20})"
         output = selector.get("loc")
         selector_paths.extend((
