@@ -273,9 +273,14 @@ Kernschnittstelle sind nun `EXTERNAL_MEMORY_VALUE`, `EXTERNAL_MEMORY_VALID`
 und `USE_EXTERNAL_MEMORY` ergänzt. Die Systemgrenze führt ausgewählten Wert
 und Gültigkeit direkt an diese neuen Eingänge und aktiviert die Schnittstelle;
 Komponentenvertrag, Offline-Prüfer und Mutationstest schützen beide
-Datenleitungen bis zum Kern. Die interne Auswahl zwischen diesen Eingängen und
-dem bisherigen RAM-Pfad bleibt zusammen mit den Schreib-, Befehls- und
-PC-Pfaden des vollständigen Kerns der nächste begrenzte Integrationsschritt.
+Datenleitungen bis zum Kern. Im vollständigen Kern wählen nun zwei getrennte,
+gleichzeitig von `USE_EXTERNAL_MEMORY` gesteuerte Multiplexer zwischen diesen
+Eingängen und dem bisherigen RAM-Wert samt Gültigkeit. Die ausgewählten
+Signale speisen alle bisherigen Speicherleseverbraucher; ein Leitungs-
+Mutationstest schützt interne und externe Eingänge, Auswahl und Ausgänge. Ohne
+Aktivierung bleibt der bisherige RAM-Pfad erhalten. Die Schreib-, Befehls- und
+PC-Pfade des vollständigen Kerns bilden den nächsten begrenzten
+Integrationsschritt.
 
 ## Kompatibilitätsfolgen
 

@@ -249,7 +249,9 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="ILLEGAL_RETURN"/>
     </comp>
-    <comp lib="0" loc="(340,240)" name="Constant"/>
+    <comp lib="0" loc="(340,240)" name="Constant">
+      <a name="value" val="0x1"/>
+    </comp>
     <comp lib="0" loc="(370,580)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
