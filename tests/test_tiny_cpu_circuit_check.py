@@ -279,11 +279,11 @@ class CircuitCheckTests(unittest.TestCase):
                     if circuit.get("name") == "TinyCPUMain")
         wires = {(wire.get("from"), wire.get("to"))
                  for wire in main.findall("wire")}
-        self.assertIn(("(1100,630)", "(1130,630)"), wires)
-        self.assertIn(("(1080,650)", "(1130,650)"), wires)
-        self.assertIn(("(1060,750)", "(1130,750)"), wires)
-        self.assertIn(("(1130,770)", "(1130,860)"), wires)
-        self.assertIn(("(280,860)", "(1130,860)"), wires)
+        self.assertIn(("(1110,630)", "(1150,630)"), wires)
+        self.assertIn(("(1090,650)", "(1150,650)"), wires)
+        self.assertIn(("(1070,750)", "(1150,750)"), wires)
+        self.assertIn(("(1070,770)", "(1150,770)"), wires)
+        self.assertIn(("(280,860)", "(1070,860)"), wires)
 
     def test_detects_and_repairs_subcircuit_output_bridge(self):
         project = """<?xml version='1.0'?>
