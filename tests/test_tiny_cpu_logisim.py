@@ -163,7 +163,7 @@ class LogisimLauncherTests(unittest.TestCase):
             (
                 "memory write gate input",
                 "TinyCPUMain",
-                lambda tree: "(530,700)",
+                lambda tree: "(530,600)",
                 self.test_visible_top_level_memory_or_gate_has_every_input_connected,
             ),
         )
@@ -315,25 +315,25 @@ class LogisimLauncherTests(unittest.TestCase):
             root = ET.parse(target).getroot()
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             parts = {(c.get("name"), c.get("loc")) for c in main.findall("comp")}
-            self.assertIn(("Clock", "(330,430)"), parts)
-            self.assertIn(("NOT Gate", "(330,490)"), parts)
-            self.assertIn(("Clock", "(290,490)"), parts)
-            self.assertNotIn(("POR", "(330,490)"), parts)
-            self.assertNotIn(("PowerOnReset", "(330,490)"), parts)
+            self.assertIn(("Clock", "(330,340)"), parts)
+            self.assertIn(("NOT Gate", "(330,360)"), parts)
+            self.assertIn(("Clock", "(290,360)"), parts)
+            self.assertNotIn(("POR", "(330,360)"), parts)
+            self.assertNotIn(("PowerOnReset", "(330,360)"), parts)
             clocks = {
                 component.get("loc"): _attributes(component)
                 for component in main.findall("comp")
                 if component.get("name") == "Clock"
             }
-            self.assertEqual(clocks["(330,430)"]["highDuration"], "2")
-            self.assertEqual(clocks["(330,430)"]["lowDuration"], "2")
-            self.assertEqual(clocks["(290,490)"]["highDuration"], "100")
-            self.assertEqual(clocks["(290,490)"]["lowDuration"], "2")
+            self.assertEqual(clocks["(330,340)"]["highDuration"], "2")
+            self.assertEqual(clocks["(330,340)"]["lowDuration"], "2")
+            self.assertEqual(clocks["(290,360)"]["highDuration"], "100")
+            self.assertEqual(clocks["(290,360)"]["lowDuration"], "2")
             wires = {
                 (wire.get("from"), wire.get("to"))
                 for wire in main.findall("wire")
             }
-            self.assertIn(("(290,490)", "(310,490)"), wires)
+            self.assertIn(("(290,360)", "(310,360)"), wires)
             labels = [a.get("val") for a in main.findall("comp/a") if a.get("name") == "label"]
             self.assertIn("halt", labels)
             self.assertIn("HALTED_WITH_ERROR", labels)
@@ -365,7 +365,7 @@ class LogisimLauncherTests(unittest.TestCase):
             root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             wires = {(w.get("from"), w.get("to")) for w in main.findall("wire")}
-            expected = (("(2440,1460)", "(2660,1460)") if name == "TinyCPU.circ"
+            expected = (("(2430,1460)", "(2660,1460)") if name == "TinyCPU.circ"
                         else ("(2720,1760)", "(2940,1760)"))
             self.assertIn(
                 expected, wires,
@@ -565,7 +565,7 @@ class LogisimLauncherTests(unittest.TestCase):
         # highlighted on the integration sheet.  Keep the count explicit so a
         # redraw cannot silently leave an input at its default/floating value.
         expected_inputs = {
-            "MEMORY_WRITE_REQUEST": {"(530,700)", "(530,720)", "(530,740)"},
+            "MEMORY_WRITE_REQUEST": {"(530,600)", "(530,620)", "(530,640)"},
         }
         wire_endpoints = {
             endpoint
@@ -734,8 +734,8 @@ class LogisimLauncherTests(unittest.TestCase):
                 _wire_path_exists(main, source, f"(4140,{y})"),
                 f"{source} does not reach its JumpBox input",
             )
-        self.assertTrue(_wire_path_exists(main, "(4360,450)", "(670,510)"))
-        self.assertTrue(_wire_path_exists(main, "(4360,470)", "(650,530)"))
+        self.assertTrue(_wire_path_exists(main, "(4360,450)", "(670,380)"))
+        self.assertTrue(_wire_path_exists(main, "(4360,470)", "(650,400)"))
 
     def test_jump_box_gates_zero_conditions_with_the_matching_controls(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()

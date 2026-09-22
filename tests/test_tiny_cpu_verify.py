@@ -202,8 +202,8 @@ class CircuitVerificationTests(unittest.TestCase):
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
         for endpoint in (
-            "(1150,630)", "(1150,650)", "(1160,660)", "(1180,640)",
-            "(1150,750)", "(1150,770)", "(1160,780)", "(1180,760)",
+            "(1090,730)", "(1090,750)", "(1100,760)", "(1120,740)",
+            "(1120,790)", "(1120,810)", "(1130,820)", "(1150,800)",
         ):
             with self.subTest(endpoint=endpoint):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
@@ -241,12 +241,12 @@ class CircuitVerificationTests(unittest.TestCase):
         core = temporary / "logisim" / "TinyCPU.circ"
         text = core.read_text(encoding="utf-8")
         text = text.replace(
-            '<wire from="(2380,1040)" to="(2650,1040)"/>',
-            '<wire from="(2400,1040)" to="(2650,1040)"/>',
+            '<wire from="(2120,1040)" to="(2650,1040)"/>',
+            '<wire from="(2120,1040)" to="(2650,1020)"/>',
             1,
         ).replace(
-            '<wire from="(2380,530)" to="(2380,1040)"/>',
-            '<wire from="(2400,760)" to="(2400,1040)"/>',
+            '<wire from="(2610,1020)" to="(2650,1020)"/>',
+            '<wire from="(2610,1020)" to="(2650,1040)"/>',
             1,
         )
         core.write_text(text, encoding="utf-8")

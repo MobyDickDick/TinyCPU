@@ -292,9 +292,12 @@
       <a name="label" val="MEMORY_WRITE_REQUEST"/>
     </comp>
     <comp lib="2" loc="(1120,740)" name="Multiplexer">
+      <a name="label" val="EXTERNAL_MEMORY_VALUE_SELECT"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="2" loc="(1150,800)" name="Multiplexer"/>
+    <comp lib="2" loc="(1150,800)" name="Multiplexer">
+      <a name="label" val="EXTERNAL_MEMORY_VALID_SELECT"/>
+    </comp>
     <comp lib="2" loc="(2550,930)" name="Multiplexer">
       <a name="width" val="16"/>
     </comp>
