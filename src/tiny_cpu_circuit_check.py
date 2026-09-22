@@ -100,28 +100,19 @@ def _gate_inputs(component: ET.Element) -> list[Point]:
 
 
 def _multiplexer_inputs(component: ET.Element) -> list[Point]:
-    """Return data terminals for an east-facing multiplexer.
+    """Return data contacts for an east-facing classic multiplexer.
 
-    The classic two-input multiplexer has two data inputs 30 pixels left of
-    its output.  A wire that merely reaches the outline (the previous x=1120
-    routes in ``TinyCPUMain`` did exactly that) is not electrically connected.
-    The select pin position varies with Logisim's rendered size, so this
-    conservative check intentionally limits itself to the invariant data pins.
+    Logisim locates the electrical contacts 40 pixels left of the output.  The
+    sloped symbol begins 30 pixels left of the output, but that outline is not
+    a terminal.
     """
     attributes = _attributes(component)
     if attributes.get("facing", "east") != "east":
         return []
-    select = int(attributes.get("select", "1"))
-    count = 1 << select
+    count = 1 << int(attributes.get("select", "1"))
     x, y = _point(component.get("loc", ""))
-    return [(x - 30, y + 20 * index - 10 * (count - 1))
+    return [(x - 40, y + 20 * index - 10 * (count - 1))
             for index in range(count)]
-
-
-def _required_inputs(component: ET.Element) -> list[Point]:
-    if component.get("name", "") == "Multiplexer":
-        return _multiplexer_inputs(component)
-    return _gate_inputs(component)
 
 
 def _undriven_gate_input_issues(
@@ -183,13 +174,8 @@ def _undriven_gate_input_issues(
     return issues
 
 
-def _unwired_component_input_issues(circuit: ET.Element) -> list[CircuitIssue]:
-    """Report required terminals that no wire reaches at all.
-
-    This complements the net-driver audit: no graph exists for a wire ending
-    one grid point before a terminal, so driver counting alone cannot expose
-    that common visual wiring error.
-    """
+def _unwired_multiplexer_input_issues(circuit: ET.Element) -> list[CircuitIssue]:
+    """Report multiplexer data contacts that no wire reaches."""
     segments = [(_point(w.get("from", "")), _point(w.get("to", "")))
                 for w in circuit.findall("wire")]
     issues = []
@@ -198,7 +184,7 @@ def _unwired_component_input_issues(circuit: ET.Element) -> list[CircuitIssue]:
             continue
         label = (_attributes(component).get("label")
                  or f"Multiplexer@{component.get('loc')}")
-        for terminal in _required_inputs(component):
+        for terminal in _multiplexer_inputs(component):
             if not any(_on_segment(terminal, segment) for segment in segments):
                 issues.append(CircuitIssue(
                     circuit.get("name", "<unnamed>"),
@@ -253,7 +239,7 @@ def inspect_circuit(circuit: ET.Element,
             labels = sorted(driver.label for driver in drivers)
             issues.append(CircuitIssue(name, "outputs share one net: " + ", ".join(labels)))
     issues.extend(_undriven_gate_input_issues(circuit, definitions))
-    issues.extend(_unwired_component_input_issues(circuit))
+    issues.extend(_unwired_multiplexer_input_issues(circuit))
     return issues
 
 
