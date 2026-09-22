@@ -423,6 +423,19 @@ def verify_system_circuit() -> None:
         ))
     if not all(selector_paths):
         raise VerificationError("AP-18 CPU external-memory selection paths differ from contract")
+    memory_valid_output = memory_selectors["EXTERNAL_MEMORY_VALID_SELECT"].get("loc")
+    operations_memory_valid = "(2650,1020)"
+    datapath_acc_valid = "(2080,530)"
+    operations_acc_valid = "(2650,1040)"
+    if (
+        not core_connected(memory_valid_output, operations_memory_valid)
+        or not core_connected(datapath_acc_valid, operations_acc_valid)
+        or core_connected(memory_valid_output, operations_acc_valid)
+        or core_connected(datapath_acc_valid, operations_memory_valid)
+    ):
+        raise VerificationError(
+            "AP-18 Operations validity inputs are crossed, disconnected, or shorted"
+        )
     cpu_pins = {}
     for component in cpu_boundary.findall("comp[@name='Pin']"):
         attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
