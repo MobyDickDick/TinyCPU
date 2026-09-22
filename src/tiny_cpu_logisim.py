@@ -187,7 +187,8 @@ def run_trace(project: Path, jar: Path, java: str, output: Path, timeout: int) -
     try:
         result = subprocess.run(command, capture_output=True, timeout=timeout, check=False)
     except subprocess.TimeoutExpired as exc:
-        output.write_bytes(exc.stdout or b"")
+        partial = exc.stdout or b""
+        output.write_bytes(partial)
         # The retry is diagnostic only and must not double the gate's timeout.
         unexpected = _unexpected_halt_reached(project, jar, java, min(timeout, 10))
         if unexpected:
@@ -195,7 +196,13 @@ def run_trace(project: Path, jar: Path, java: str, output: Path, timeout: int) -
                 "Logisim reached the non-selected halt output instead of the "
                 f"expected halt within {timeout} seconds"
             ) from exc
-        raise LogisimError(f"Logisim trace did not halt within {timeout} seconds") from exc
+        rows = partial.decode("utf-8", errors="replace").splitlines()
+        tail = "\n".join(rows[-100:]) if rows else "<no trace rows observed>"
+        raise LogisimError(
+            f"Logisim trace did not halt within {timeout} seconds\n"
+            f"partial trace preserved at {output}\n"
+            f"last observed PC/control state (up to 100 rows):\n{tail}"
+        ) from exc
     output.write_bytes(result.stdout)
     diagnostics = result.stderr.decode("utf-8", errors="replace").strip()
     if result.returncode:
