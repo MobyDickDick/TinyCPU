@@ -211,11 +211,6 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="INTERRUPT_ACCEPT"/>
     </comp>
-    <comp lib="0" loc="(290,950)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="CORE_NEXT_PC"/>
-      <a name="width" val="12"/>
-    </comp>
     <comp lib="0" loc="(290,990)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="ILLEGAL_RETURN"/>
@@ -301,7 +296,6 @@
     <wire from="(290,220)" to="(290,230)"/>
     <wire from="(290,220)" to="(410,220)"/>
     <wire from="(290,580)" to="(370,580)"/>
-    <wire from="(290,950)" to="(380,950)"/>
     <wire from="(340,240)" to="(410,240)"/>
     <wire from="(400,170)" to="(400,180)"/>
     <wire from="(400,180)" to="(410,180)"/>
@@ -323,6 +317,9 @@
     <wire from="(630,410)" to="(880,410)"/>
     <wire from="(880,410)" to="(880,880)"/>
     <wire from="(380,880)" to="(880,880)"/>
+    <wire from="(630,430)" to="(900,430)"/>
+    <wire from="(900,430)" to="(900,950)"/>
+    <wire from="(380,950)" to="(900,950)"/>
     <wire from="(370,630)" to="(760,630)"/>
     <wire from="(760,280)" to="(760,630)"/>
     <wire from="(370,730)" to="(780,730)"/>
