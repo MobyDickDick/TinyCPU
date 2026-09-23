@@ -420,9 +420,9 @@ def verify_system_circuit() -> None:
     # FetchDecodeControls block.  Follow the generated FetchDecode output
     # terminals here; do not require the removed duplicate top-level decoder.
     interrupt_command_sources = {
-        "ENABLE_INTERRUPTS_REQUEST": "(1410,1930)",
-        "DISABLE_INTERRUPTS_REQUEST": "(1410,1950)",
-        "RETURN_FROM_INTERRUPT_REQUEST": "(1410,1970)",
+        "ENABLE_INTERRUPTS_REQUEST": "(1400,1920)",
+        "DISABLE_INTERRUPTS_REQUEST": "(1400,1940)",
+        "RETURN_FROM_INTERRUPT_REQUEST": "(1400,1960)",
     }
     instruction_boundary = core_pin_locations["INSTRUCTION_BOUNDARY"]
     boundary_constants = [
@@ -454,19 +454,9 @@ def verify_system_circuit() -> None:
         for label, definition in expected_next_pc_pin.items()
     ):
         raise VerificationError("AP-18 CPU next-PC interface differs from contract")
-    next_pc_tunnels = []
-    for component in core_definition.findall("comp[@name='Tunnel']"):
-        attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
-        if attributes.get("label") == "CORE_NEXT_PC":
-            next_pc_tunnels.append((component.get("loc"), attributes))
     if (
-        len(next_pc_tunnels) != 2
-        or any(attributes.get("width") != "12" for _, attributes in next_pc_tunnels)
-        or not any(location == "(1130,390)" for location, _ in next_pc_tunnels)
-        or not any(
-            core_connected(location, core_pin_locations["NEXT_PC"])
-            for location, _ in next_pc_tunnels
-        )
+        any(component.get("name") == "Tunnel" for component in core_definition.findall("comp"))
+        or not core_connected("(1130,390)", core_pin_locations["NEXT_PC"])
     ):
         raise VerificationError("AP-18 CPU next-PC path differs from contract")
 
@@ -509,7 +499,7 @@ def verify_system_circuit() -> None:
     selector_paths = []
     for label, external_pin, memory_output, consumer in (
         ("EXTERNAL_MEMORY_VALUE_SELECT", "EXTERNAL_MEMORY_VALUE", "(990,620)", "(2490,740)"),
-        ("EXTERNAL_MEMORY_VALID_SELECT", "EXTERNAL_MEMORY_VALID", "(990,600)", "(2600,800)"),
+        ("EXTERNAL_MEMORY_VALID_SELECT", "EXTERNAL_MEMORY_VALID", "(990,600)", "(2610,800)"),
     ):
         selector = memory_selectors[label]
         selector_x, selector_y = map(int, selector.get("loc").strip("()").split(","))
@@ -526,9 +516,9 @@ def verify_system_circuit() -> None:
     if not all(selector_paths):
         raise VerificationError("AP-18 CPU external-memory selection paths differ from contract")
     memory_valid_output = memory_selectors["EXTERNAL_MEMORY_VALID_SELECT"].get("loc")
-    operations_memory_valid = "(2650,1030)"
+    operations_memory_valid = "(2650,1020)"
     datapath_acc_valid = "(2080,530)"
-    operations_acc_valid = "(2650,1050)"
+    operations_acc_valid = "(2650,1040)"
     if (
         not core_connected(memory_valid_output, operations_memory_valid)
         or not core_connected(datapath_acc_valid, operations_acc_valid)

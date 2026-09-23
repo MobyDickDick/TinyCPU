@@ -334,10 +334,12 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         core = temporary / "logisim" / "TinyCPU.circ"
-        text = core.read_text(encoding="utf-8").replace(
-            '<wire from="(3770,1010)" to="(3800,1010)"/>', "", 1
-        )
-        core.write_text(text, encoding="utf-8")
+        project = ET.parse(core)
+        main = project.getroot().find("circuit[@name='TinyCPUMain']")
+        wire = next(item for item in main.findall("wire")
+                    if "(3800,1010)" in {item.get("from"), item.get("to")})
+        main.remove(wire)
+        project.write(core, encoding="utf-8", xml_declaration=True)
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
              mock.patch.object(
@@ -357,16 +359,11 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         core = temporary / "logisim" / "TinyCPU.circ"
-        text = core.read_text(encoding="utf-8").replace(
-            '<comp lib="0" loc="(3530,930)" name="Constant">',
-            '<comp lib="0" loc="(3300,930)" name="Constant">',
-            1,
-        ).replace(
-            '<wire from="(3530,930)" to="(3560,930)"/>',
-            '<wire from="(3300,930)" to="(3560,930)"/>',
-            1,
-        )
-        core.write_text(text, encoding="utf-8")
+        project = ET.parse(core)
+        main = project.getroot().find("circuit[@name='TinyCPUMain']")
+        ET.SubElement(main, "wire", {"from": "(3450,930)", "to": "(3300,930)"})
+        ET.SubElement(main, "wire", {"from": "(3300,930)", "to": "(3300,390)"})
+        project.write(core, encoding="utf-8", xml_declaration=True)
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
              mock.patch.object(
@@ -411,17 +408,17 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         core = temporary / "logisim" / "TinyCPU.circ"
-        text = core.read_text(encoding="utf-8")
-        text = text.replace(
-            '<wire from="(2390,1050)" to="(2650,1050)"/>',
-            '<wire from="(2390,1050)" to="(2650,1030)"/>',
-            1,
-        ).replace(
-            '<wire from="(2600,1030)" to="(2650,1030)"/>',
-            '<wire from="(2600,1030)" to="(2650,1050)"/>',
-            1,
-        )
-        core.write_text(text, encoding="utf-8")
+        project = ET.parse(core)
+        main = project.getroot().find("circuit[@name='TinyCPUMain']")
+        swaps = {
+            frozenset(("(2380,1040)", "(2650,1040)")): "(2650,1020)",
+            frozenset(("(2610,1020)", "(2650,1020)")): "(2650,1040)",
+        }
+        for wire in main.findall("wire"):
+            replacement = swaps.get(frozenset((wire.get("from"), wire.get("to"))))
+            if replacement is not None:
+                wire.set("to", replacement)
+        project.write(core, encoding="utf-8", xml_declaration=True)
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
              mock.patch.object(
