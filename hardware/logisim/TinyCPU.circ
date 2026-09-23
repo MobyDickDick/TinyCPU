@@ -301,6 +301,36 @@
       <a name="label" val="EXTERNAL_WRITE_ENABLE"/>
       <a name="type" val="output"/>
     </comp>
+    <comp lib="0" loc="(3480,930)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="INSTRUCTION_BOUNDARY"/>
+      <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(3480,950)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="ENABLE_INTERRUPTS_REQUEST"/>
+      <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(3480,970)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="DISABLE_INTERRUPTS_REQUEST"/>
+      <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(3480,990)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="RETURN_FROM_INTERRUPT_REQUEST"/>
+      <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(3450,930)" name="Constant">
+      <a name="value" val="0x1"/>
+    </comp>
+    <comp lib="2" loc="(3150,1520)" name="Decoder">
+      <a name="select" val="6"/>
+    </comp>
     <comp lib="0" loc="(790,420)" name="Constant">
       <a name="value" val="0xfff"/>
       <a name="width" val="12"/>
@@ -347,6 +377,22 @@
     <comp loc="(990,600)" name="Memory">
       <a name="label" val="MEMORY_INSTANCE"/>
     </comp>
+    <wire from="(1020,420)" to="(1050,420)"/>
+    <wire from="(1020,420)" to="(1020,1550)"/>
+    <wire from="(1020,1550)" to="(3150,1550)"/>
+    <wire from="(3150,1520)" to="(3150,1550)"/>
+    <wire from="(3170,1440)" to="(3350,1440)"/>
+    <wire from="(3350,950)" to="(3350,1440)"/>
+    <wire from="(3350,950)" to="(3480,950)"/>
+    <wire from="(3170,1450)" to="(3200,1450)"/>
+    <wire from="(3200,1430)" to="(3200,1450)"/>
+    <wire from="(3200,1430)" to="(3370,1430)"/>
+    <wire from="(3370,970)" to="(3370,1430)"/>
+    <wire from="(3370,970)" to="(3480,970)"/>
+    <wire from="(3170,1460)" to="(3390,1460)"/>
+    <wire from="(3390,990)" to="(3390,1460)"/>
+    <wire from="(3390,990)" to="(3480,990)"/>
+    <wire from="(3450,930)" to="(3480,930)"/>
     <wire from="(1010,620)" to="(1010,730)"/>
     <wire from="(1010,730)" to="(1090,730)"/>
     <wire from="(1030,340)" to="(1150,340)"/>

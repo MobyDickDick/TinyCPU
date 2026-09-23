@@ -88,8 +88,12 @@ und per Mutationstest geschützt. Der vollständige Kern exportiert nun
 zusätzlich die gemeinsam zum bisherigen RAM geführten Signale für Schreibwert,
 Schreibgültigkeit und Schreibfreigabe; Richtung, Breite und elektrische
 Verbindung jedes dieser Pfade sind durch Mutationstests geschützt. Ihre
-Verbindung zur Systemgrenze sowie die übrigen Befehls- und PC-Anschlüsse und
-die elektrische Systemabnahme sind noch offen.
+Verbindung zur Systemgrenze ist abgeschlossen. Ein eigener Systemopcode-
+Decoder im vollständigen Kern exportiert inzwischen auch Instruktionsgrenze,
+Interruptaktivierung, -deaktivierung und Rückkehr; diese vier Signale ersetzen
+die vorläufigen Befehlseingänge der Integrationsgrenze und sind durch einen
+gezielten Mutationstest geschützt. Der PC-Anschluss und die elektrische
+Systemabnahme sind noch offen.
 Die dafür verbindliche
 elektrische Fallliste ist inzwischen versioniert, mit den übrigen
 Systemverträgen quergeprüft und deckt alle neuen Opcodes und Verhaltensfälle

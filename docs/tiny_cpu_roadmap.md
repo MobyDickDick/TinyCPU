@@ -255,8 +255,12 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Gültigkeit gegenüber dem bisherigen RAM-Pfad aus; ohne Aktivierung bleibt
   das 1.0-Verhalten erhalten. Die drei Schreibsignale sind inzwischen direkt
   von den bestehenden RAM-Eingangsnetzen als Kernschnittstelle herausgeführt
-  und mutationstestgeschützt. Als Nächstes werden sie mit der Systemgrenze
-  verbunden, bevor Befehls- und PC-Pfade sowie die Matrix folgen.
+  und mutationstestgeschützt sowie mit der Systemgrenze verbunden. Ein eigener
+  Systemopcode-Decoder exportiert jetzt auch Instruktionsgrenze,
+  Interruptaktivierung, -deaktivierung und Rückkehr aus dem vollständigen Kern;
+  die vier vorläufigen Adaptereingänge sind durch direkte, mutationstestgeschützte
+  Kernpfade ersetzt. Als Nächstes folgt der PC-Steuerpfad, bevor die Matrix
+  ausgeführt wird.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

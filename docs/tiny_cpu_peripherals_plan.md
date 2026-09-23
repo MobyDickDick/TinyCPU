@@ -292,8 +292,16 @@ und Freigabe laufen direkt von den tatsächlichen Kernausgängen zu den
 Ausgängen der Integrationsgrenze. Der Offline-Prüfer und ein Mutationstest
 verfolgen diese Pfade anhand der benannten Kern- und Adapterports, sodass eine
 manuelle Verschiebung der Pins nicht durch alte Canvas-Koordinaten
-zurückgespielt wird. Die Befehls- und PC-Pfade bilden den nächsten begrenzten
-Integrationsschritt.
+zurückgespielt wird. Als nächster begrenzter Integrationsschritt sind nun auch
+die Befehlswege eingefügt. Ein eigener 6-Bit-Decoder des vollständigen Kerns
+erzeugt aus den Systemopcodes 56, 57 und 58 die Impulse für Aktivierung,
+Deaktivierung und Rückkehr; die bei jeder Kerninstruktion aktive
+Instruktionsgrenze wird getrennt herausgeführt. Die vier vorläufigen
+Befehlseingänge der `CPUIntegrationBoundary` wurden entfernt und durch direkte
+Leitungen von den tatsächlichen Kernausgängen ersetzt. Vertrag, Offline-Prüfer
+und Mutationstest sichern Opcode-Zuführung, Decoder-Ausgänge, öffentliche
+Kernpins und Adapterpfade gemeinsam. Als nächster abgegrenzter Schritt bleibt
+damit der PC-Steuerpfad vom vollständigen Kern zur Interruptsteuerung.
 
 ## Kompatibilitätsfolgen
 
