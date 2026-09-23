@@ -324,6 +324,10 @@ class CircuitVerificationTests(unittest.TestCase):
                     ):
                         VERIFY.verify_system_circuit()
 
+    def test_ap18_interrupt_decoder_may_move_without_changing_its_contract(self) -> None:
+        """Visual layout must not be frozen into the electrical verifier."""
+        VERIFY.verify_system_circuit()
+
     def test_ap18_interrupt_command_paths_reject_bus_contention(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
