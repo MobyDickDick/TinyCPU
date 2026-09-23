@@ -19,10 +19,6 @@
         "RAM_READ_VALUE": {"direction": "input", "bits": 16},
         "RAM_READ_VALID": {"direction": "input", "bits": 1},
         "CORE_ADDRESS": {"direction": "input", "bits": 12},
-        "CORE_INSTRUCTION_BOUNDARY": {"direction": "input", "bits": 1},
-        "CORE_ENABLE_REQUEST": {"direction": "input", "bits": 1},
-        "CORE_DISABLE_REQUEST": {"direction": "input", "bits": 1},
-        "CORE_RETURN_REQUEST": {"direction": "input", "bits": 1},
         "CORE_NEXT_PC": {"direction": "input", "bits": 12},
         "READ_VALUE": {"direction": "output", "bits": 16},
         "READ_VALID": {"direction": "output", "bits": 1},
@@ -40,11 +36,17 @@
         "TARGET_PC": {"direction": "input", "bits": 12},
         "ILLEGAL_RETURN": {"direction": "input", "bits": 1}
       },
-      "status": "core_write_outputs_integrated",
+      "status": "core_interrupt_commands_integrated",
       "core_external_write_pins": {
         "EXTERNAL_WRITE_VALUE": {"direction": "output", "bits": 16},
         "EXTERNAL_WRITE_VALID": {"direction": "output", "bits": 1},
         "EXTERNAL_WRITE_ENABLE": {"direction": "output", "bits": 1}
+      },
+      "core_interrupt_command_pins": {
+        "INSTRUCTION_BOUNDARY": {"direction": "output", "bits": 1},
+        "ENABLE_INTERRUPTS_REQUEST": {"direction": "output", "bits": 1},
+        "DISABLE_INTERRUPTS_REQUEST": {"direction": "output", "bits": 1},
+        "RETURN_FROM_INTERRUPT_REQUEST": {"direction": "output", "bits": 1}
       },
       "verified_core_paths": [
         "clock_to_core",
@@ -55,14 +57,14 @@
         "core_read_valid_to_adapter",
         "core_write_value_to_adapter",
         "core_write_valid_to_adapter",
-        "core_write_enable_to_adapter"
+        "core_write_enable_to_adapter",
+        "core_instruction_boundary_to_adapter",
+        "core_enable_request_to_adapter",
+        "core_disable_request_to_adapter",
+        "core_return_request_to_adapter"
       ],
       "verified_paths": [
         "core_address_to_memory_address",
-        "core_instruction_boundary_to_interrupt_boundary",
-        "core_enable_request_to_interrupt_enable_request",
-        "core_disable_request_to_interrupt_disable_request",
-        "core_return_request_to_interrupt_return_request",
         "core_next_pc_to_interrupt_next_pc"
       ],
       "verified_top_level_paths": [

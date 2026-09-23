@@ -278,6 +278,52 @@ class CircuitVerificationTests(unittest.TestCase):
                     ):
                         VERIFY.verify_system_circuit()
 
+    def test_ap18_cpu_integration_requires_interrupt_command_paths(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        for label in (
+            "INSTRUCTION_BOUNDARY",
+            "ENABLE_INTERRUPTS_REQUEST",
+            "DISABLE_INTERRUPTS_REQUEST",
+            "RETURN_FROM_INTERRUPT_REQUEST",
+        ):
+            with self.subTest(label=label):
+                temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+                shutil.copytree(source, temporary / "logisim")
+                core = temporary / "logisim" / "TinyCPU.circ"
+                project = ET.parse(core)
+                main = project.getroot().find("circuit[@name='TinyCPUMain']")
+                self.assertIsNotNone(main)
+                pin = next(
+                    component for component in main.findall("comp[@name='Pin']")
+                    if any(
+                        attribute.get("name") == "label"
+                        and attribute.get("val") == label
+                        for attribute in component.findall("a")
+                    )
+                )
+                endpoint = pin.get("loc")
+                wire = next(
+                    item for item in main.findall("wire")
+                    if endpoint in {item.get("from"), item.get("to")}
+                )
+                main.remove(wire)
+                project.write(core, encoding="utf-8", xml_declaration=True)
+                system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+                with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+                     mock.patch.object(
+                         VERIFY,
+                         "load_system_profile",
+                         return_value=replace(
+                             system,
+                             circuit_path=temporary / "logisim" / "TinyCPU_Peripherals.circ",
+                         ),
+                     ):
+                    with self.assertRaisesRegex(
+                        VERIFY.VerificationError, "interrupt-command paths differ"
+                    ):
+                        VERIFY.verify_system_circuit()
+
     def test_ap18_cpu_integration_accepts_unrendered_selector_labels(self) -> None:
         """A normal Logisim save may discard labels absent from the appearance."""
         root = MODULE_PATH.parents[1]
@@ -339,7 +385,8 @@ class CircuitVerificationTests(unittest.TestCase):
         for label in (
             "CLK", "RESET", "RAM_READ_VALUE", "RAM_READ_VALID",
             "READ_VALUE", "READ_VALID", "WRITE_VALUE", "WRITE_VALID",
-            "WRITE_ENABLE",
+            "WRITE_ENABLE", "INSTRUCTION_BOUNDARY", "ENABLE_REQUEST",
+            "DISABLE_REQUEST", "RETURN_REQUEST",
         ):
             with self.subTest(path=label):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
@@ -375,10 +422,6 @@ class CircuitVerificationTests(unittest.TestCase):
         source = root / "hardware" / "logisim"
         for source_label, target_label in (
             ("CORE_ADDRESS", "ADDRESS"),
-            ("CORE_INSTRUCTION_BOUNDARY", "INSTRUCTION_BOUNDARY"),
-            ("CORE_ENABLE_REQUEST", "ENABLE_REQUEST"),
-            ("CORE_DISABLE_REQUEST", "DISABLE_REQUEST"),
-            ("CORE_RETURN_REQUEST", "RETURN_REQUEST"),
             ("CORE_NEXT_PC", "NEXT_PC"),
         ):
             with self.subTest(path=(source_label, target_label)):

@@ -406,6 +406,41 @@ def verify_system_circuit() -> None:
     ):
         raise VerificationError("AP-18 CPU external-write paths differ from contract")
 
+    expected_interrupt_command_pins = cpu_contract.get(
+        "core_interrupt_command_pins", {}
+    )
+    if not expected_interrupt_command_pins or any(
+        core_public_pins.get(label) != definition
+        for label, definition in expected_interrupt_command_pins.items()
+    ):
+        raise VerificationError(
+            "AP-18 CPU interrupt-command interface differs from contract"
+        )
+    interrupt_decoder = core_definition.find(
+        "comp[@name='Decoder'][@loc='(3150,1520)']"
+    )
+    decoder_attributes = {
+        item.get("name"): item.get("val")
+        for item in interrupt_decoder.findall("a")
+    } if interrupt_decoder is not None else {}
+    interrupt_command_sources = {
+        "ENABLE_INTERRUPTS_REQUEST": "(3170,1440)",
+        "DISABLE_INTERRUPTS_REQUEST": "(3170,1450)",
+        "RETURN_FROM_INTERRUPT_REQUEST": "(3170,1460)",
+    }
+    if (
+        decoder_attributes.get("select") != "6"
+        or not core_connected("(1050,420)", "(3150,1550)")
+        or not core_connected("(3300,930)", core_pin_locations["INSTRUCTION_BOUNDARY"])
+        or any(
+            not core_connected(source, core_pin_locations[label])
+            for label, source in interrupt_command_sources.items()
+        )
+    ):
+        raise VerificationError(
+            "AP-18 CPU interrupt-command paths differ from contract"
+        )
+
     expected_selector_widths = {
         "EXTERNAL_MEMORY_VALUE_SELECT": "16",
         "EXTERNAL_MEMORY_VALID_SELECT": "1",
@@ -495,14 +530,6 @@ def verify_system_circuit() -> None:
         cpu_pin_locations[attributes.get("label", "")] = component.get("loc")
     required_cpu_paths = {
         "core_address_to_memory_address": ("CORE_ADDRESS", "ADDRESS"),
-        "core_instruction_boundary_to_interrupt_boundary": (
-            "CORE_INSTRUCTION_BOUNDARY", "INSTRUCTION_BOUNDARY"),
-        "core_enable_request_to_interrupt_enable_request": (
-            "CORE_ENABLE_REQUEST", "ENABLE_REQUEST"),
-        "core_disable_request_to_interrupt_disable_request": (
-            "CORE_DISABLE_REQUEST", "DISABLE_REQUEST"),
-        "core_return_request_to_interrupt_return_request": (
-            "CORE_RETURN_REQUEST", "RETURN_REQUEST"),
         "core_next_pc_to_interrupt_next_pc": ("CORE_NEXT_PC", "NEXT_PC"),
     }
     def connected(start: str, target: str) -> bool:
@@ -547,6 +574,14 @@ def verify_system_circuit() -> None:
             "WRITE_VALID", f"({core_x},{core_y + 150})"),
         "core_write_enable_to_adapter": (
             "WRITE_ENABLE", f"({core_x},{core_y + 170})"),
+        "core_instruction_boundary_to_adapter": (
+            "INSTRUCTION_BOUNDARY", f"({core_x},{core_y + 190})"),
+        "core_enable_request_to_adapter": (
+            "ENABLE_REQUEST", f"({core_x},{core_y + 210})"),
+        "core_disable_request_to_adapter": (
+            "DISABLE_REQUEST", f"({core_x},{core_y + 230})"),
+        "core_return_request_to_adapter": (
+            "RETURN_REQUEST", f"({core_x},{core_y + 250})"),
     }
     if cpu_contract.get("verified_core_paths") != list(required_core_paths) or not all(
             connected(cpu_pin_locations[source], target)
