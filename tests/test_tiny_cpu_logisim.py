@@ -623,6 +623,40 @@ class LogisimLauncherTests(unittest.TestCase):
                 f"{name} still routes ADD_OPERAND to the LOAD_CONST monitor",
             )
 
+    def test_effective_address_monitors_do_not_cross_address_range_box(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
+
+        # The generated AddressRangeFBox occupies x=3060..3280 and
+        # y=1370..1530.  The old direct monitor routes crossed its face,
+        # obscuring port names and making unrelated nets look connected.
+        box_left, box_right = 3060, 3280
+        box_top, box_bottom = 1370, 1530
+        for wire in main.findall("wire"):
+            (x1, y1), (x2, y2) = (
+                tuple(map(int, wire.get(endpoint).strip("()").split(",")))
+                for endpoint in ("from", "to")
+            )
+            horizontal_crossing = (
+                y1 == y2
+                and box_top < y1 < box_bottom
+                and min(x1, x2) < box_right
+                and max(x1, x2) > box_left
+            )
+            self.assertFalse(
+                horizontal_crossing,
+                f"wire {wire.get('from')}..{wire.get('to')} crosses AddressRangeFBox",
+            )
+
+        self.assertTrue(
+            _wire_path_exists(main, "(2880,1380)", "(3480,1380)"),
+            "effective-register monitor was disconnected by the visual reroute",
+        )
+        self.assertTrue(
+            _wire_path_exists(main, "(2880,1420)", "(3480,1420)"),
+            "effective-address monitor was disconnected by the visual reroute",
+        )
+
     def test_print_control_reaches_public_enable_pin(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")

@@ -416,21 +416,26 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             "AP-18 CPU interrupt-command interface differs from contract"
         )
-    interrupt_decoder = core_definition.find(
-        "comp[@name='Decoder'][@loc='(3150,1520)']"
+    interrupt_decoders = core_definition.findall("comp[@name='Decoder']")
+    interrupt_decoder = (
+        interrupt_decoders[0] if len(interrupt_decoders) == 1 else None
     )
     decoder_attributes = {
         item.get("name"): item.get("val")
         for item in interrupt_decoder.findall("a")
     } if interrupt_decoder is not None else {}
+    decoder_x, decoder_y = (
+        map(int, interrupt_decoder.get("loc").strip("()").split(","))
+        if interrupt_decoder is not None else (0, 0)
+    )
     interrupt_command_sources = {
-        "ENABLE_INTERRUPTS_REQUEST": "(3170,1440)",
-        "DISABLE_INTERRUPTS_REQUEST": "(3170,1450)",
-        "RETURN_FROM_INTERRUPT_REQUEST": "(3170,1460)",
+        "ENABLE_INTERRUPTS_REQUEST": f"({decoder_x + 20},{decoder_y - 80})",
+        "DISABLE_INTERRUPTS_REQUEST": f"({decoder_x + 20},{decoder_y - 70})",
+        "RETURN_FROM_INTERRUPT_REQUEST": f"({decoder_x + 20},{decoder_y - 60})",
     }
     if (
         decoder_attributes.get("select") != "6"
-        or not core_connected("(1050,420)", "(3150,1550)")
+        or not core_connected("(1050,420)", f"({decoder_x},{decoder_y + 30})")
         or not core_connected("(3450,930)", core_pin_locations["INSTRUCTION_BOUNDARY"])
         or any(
             not core_connected(source, core_pin_locations[label])
@@ -441,7 +446,10 @@ def verify_system_circuit() -> None:
         # outputs touched the address-error rail.
         or core_connected("(1050,420)", "(1070,420)")
         or core_connected("(3450,930)", "(3300,390)")
-        or core_connected("(3170,1450)", "(3280,1450)")
+        or core_connected(
+            interrupt_command_sources["DISABLE_INTERRUPTS_REQUEST"],
+            "(3280,1450)",
+        )
     ):
         raise VerificationError(
             "AP-18 CPU interrupt-command paths differ from contract"

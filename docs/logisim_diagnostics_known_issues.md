@@ -57,6 +57,17 @@ functionally equivalent. Copying back the old drawing appeared to be the
 easier way to make the tests pass—and that is precisely what repeatedly
 displaced the user's change.
 
+The top-level sheet also accumulated two long monitor routes that ran directly
+through the generated `AddressRangeFBox` symbol. The later interrupt-command
+integration then placed its decoder on top of the same box and routed three
+decoder outputs across it. These were not electrical shorts: Logisim treats a
+crossing without a junction as separate nets. They were a review failure
+caused by checking connectivity and wire contacts without checking whether a
+route or component obscured another component. The monitor nets now detour
+above the box, the decoder has its own space to the right, and a layout
+regression test rejects another horizontal route through the symbol while also
+proving that both monitors remain connected.
+
 Commit `28d49cb` is therefore explicitly the baseline for the current repair.
 The components and layout of that version remain intact; only faulty networks,
 bus taps, and the corresponding diagnostic fixtures were corrected. Tests now
