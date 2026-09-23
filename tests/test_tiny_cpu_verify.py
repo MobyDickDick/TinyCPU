@@ -233,6 +233,29 @@ class CircuitVerificationTests(unittest.TestCase):
                     ):
                         VERIFY.verify_system_circuit()
 
+    def test_ap18_cpu_integration_accepts_unrendered_selector_labels(self) -> None:
+        """A normal Logisim save may discard labels absent from the appearance."""
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        core = temporary / "logisim" / "TinyCPU.circ"
+        text = core.read_text(encoding="utf-8")
+        for label in ("EXTERNAL_MEMORY_VALUE_SELECT", "EXTERNAL_MEMORY_VALID_SELECT"):
+            text = text.replace(f'      <a name="label" val="{label}"/>\n', "", 1)
+        core.write_text(text, encoding="utf-8")
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+             mock.patch.object(
+                 VERIFY,
+                 "load_system_profile",
+                 return_value=replace(
+                     system,
+                     circuit_path=temporary / "logisim" / "TinyCPU_Peripherals.circ",
+                 ),
+             ):
+            VERIFY.verify_system_circuit()
+
     def test_ap18_cpu_integration_keeps_operation_validity_inputs_separate(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"

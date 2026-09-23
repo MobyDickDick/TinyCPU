@@ -370,13 +370,6 @@ def verify_system_circuit() -> None:
     for component in core_definition.findall("comp[@name='Pin']"):
         attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
         core_pin_locations[attributes.get("label", "")] = component.get("loc")
-    memory_selectors = {}
-    for component in core_definition.findall("comp[@name='Multiplexer']"):
-        attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
-        label = attributes.get("label", "")
-        if label in {"EXTERNAL_MEMORY_VALUE_SELECT", "EXTERNAL_MEMORY_VALID_SELECT"}:
-            memory_selectors[label] = component
-
     def core_connected(start: str, target: str) -> bool:
         pending = [start]
         visited = {start}
@@ -397,13 +390,38 @@ def verify_system_circuit() -> None:
         "EXTERNAL_MEMORY_VALUE_SELECT": "16",
         "EXTERNAL_MEMORY_VALID_SELECT": "1",
     }
-    if set(memory_selectors) != set(expected_selector_widths) or any(
-        {item.get("name"): item.get("val") for item in selector.findall("a")}.get(
-            "width", "1"
-        ) != expected_selector_widths[label]
-        for label, selector in memory_selectors.items()
+    # Logisim drops labels which are not rendered by the generated appearance
+    # when a hand-edited circuit is saved.  Identify these two multiplexers by
+    # their contractually named inputs and their electrical connectivity rather
+    # than treating such a cosmetic save as a circuit change.
+    memory_selectors = {}
+    for label, external_pin in (
+        ("EXTERNAL_MEMORY_VALUE_SELECT", "EXTERNAL_MEMORY_VALUE"),
+        ("EXTERNAL_MEMORY_VALID_SELECT", "EXTERNAL_MEMORY_VALID"),
     ):
-        raise VerificationError("AP-18 CPU external-memory selectors differ from contract")
+        candidates = []
+        for component in core_definition.findall("comp[@name='Multiplexer']"):
+            attributes = {
+                item.get("name"): item.get("val") for item in component.findall("a")
+            }
+            if attributes.get("width", "1") != expected_selector_widths[label]:
+                continue
+            selector_x, selector_y = map(
+                int, component.get("loc").strip("()").split(",")
+            )
+            external_input = f"({selector_x - 30},{selector_y + 10})"
+            select_input = f"({selector_x - 20},{selector_y + 20})"
+            if (
+                core_connected(core_pin_locations[external_pin], external_input)
+                and core_connected(
+                    core_pin_locations["USE_EXTERNAL_MEMORY"], select_input
+                )
+            ):
+                candidates.append(component)
+        if len(candidates) == 1:
+            memory_selectors[label] = candidates[0]
+    if set(memory_selectors) != set(expected_selector_widths):
+        raise VerificationError("AP-18 CPU external-memory selection paths differ from contract")
     selector_paths = []
     for label, external_pin, memory_output, consumer in (
         ("EXTERNAL_MEMORY_VALUE_SELECT", "EXTERNAL_MEMORY_VALUE", "(990,620)", "(2490,740)"),
