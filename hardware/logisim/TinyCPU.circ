@@ -276,6 +276,25 @@
       <a name="label" val="PRINT_ADDRESS_VALID"/>
       <a name="type" val="output"/>
     </comp>
+    <comp lib="0" loc="(3480,840)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="EXTERNAL_WRITE_VALUE"/>
+      <a name="type" val="output"/>
+      <a name="width" val="16"/>
+    </comp>
+    <comp lib="0" loc="(3480,860)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="EXTERNAL_WRITE_VALID"/>
+      <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(3480,880)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="EXTERNAL_WRITE_ENABLE"/>
+      <a name="type" val="output"/>
+    </comp>
     <comp lib="0" loc="(3480,820)" name="Probe">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
@@ -329,6 +348,24 @@
       <a name="label" val="MEMORY_INSTANCE"/>
     </comp>
     <wire from="(1010,620)" to="(1010,730)"/>
+    <wire from="(580,620)" to="(580,630)"/>
+    <wire from="(300,630)" to="(580,630)"/>
+    <wire from="(300,630)" to="(300,2200)"/>
+    <wire from="(300,2200)" to="(3520,2200)"/>
+    <wire from="(3520,880)" to="(3520,2200)"/>
+    <wire from="(3480,880)" to="(3520,880)"/>
+    <wire from="(710,660)" to="(710,670)"/>
+    <wire from="(280,670)" to="(710,670)"/>
+    <wire from="(280,670)" to="(280,2220)"/>
+    <wire from="(280,2220)" to="(3540,2220)"/>
+    <wire from="(3540,860)" to="(3540,2220)"/>
+    <wire from="(3480,860)" to="(3540,860)"/>
+    <wire from="(690,680)" to="(690,690)"/>
+    <wire from="(260,690)" to="(690,690)"/>
+    <wire from="(260,690)" to="(260,2240)"/>
+    <wire from="(260,2240)" to="(3560,2240)"/>
+    <wire from="(3560,840)" to="(3560,2240)"/>
+    <wire from="(3480,840)" to="(3560,840)"/>
     <wire from="(1010,730)" to="(1090,730)"/>
     <wire from="(1030,340)" to="(1150,340)"/>
     <wire from="(1030,360)" to="(1150,360)"/>

@@ -386,6 +386,26 @@ def verify_system_circuit() -> None:
                         pending.append(neighbour)
         return False
 
+    expected_external_write_pins = cpu_contract.get("core_external_write_pins", {})
+    if not expected_external_write_pins or any(
+        core_public_pins.get(label) != definition
+        for label, definition in expected_external_write_pins.items()
+    ):
+        raise VerificationError("AP-18 CPU external-write interface differs from contract")
+    # These are the three signals which already drive the value, validity and
+    # write-enable inputs of the core's private RAM.  Exporting those exact
+    # nets keeps the system adapter atomic and avoids a second write decoder.
+    external_write_sources = {
+        "EXTERNAL_WRITE_VALUE": "(690,680)",
+        "EXTERNAL_WRITE_VALID": "(710,660)",
+        "EXTERNAL_WRITE_ENABLE": "(580,620)",
+    }
+    if any(
+        not core_connected(source, core_pin_locations[label])
+        for label, source in external_write_sources.items()
+    ):
+        raise VerificationError("AP-18 CPU external-write paths differ from contract")
+
     expected_selector_widths = {
         "EXTERNAL_MEMORY_VALUE_SELECT": "16",
         "EXTERNAL_MEMORY_VALID_SELECT": "1",

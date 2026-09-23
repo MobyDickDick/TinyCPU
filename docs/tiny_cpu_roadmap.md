@@ -253,9 +253,10 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   additive, an der Systemgrenze aktivierte externe Speicherschnittstelle des
   Kerns. Zwei gemeinsam gesteuerte Multiplexer wählen dort inzwischen Wert und
   Gültigkeit gegenüber dem bisherigen RAM-Pfad aus; ohne Aktivierung bleibt
-  das 1.0-Verhalten erhalten. Als Nächstes folgen die bislang vorläufigen
-  Schreib-, Befehls- und PC-Anschlüsse; anschließend ist die Matrix
-  auszuführen.
+  das 1.0-Verhalten erhalten. Die drei Schreibsignale sind inzwischen direkt
+  von den bestehenden RAM-Eingangsnetzen als Kernschnittstelle herausgeführt
+  und mutationstestgeschützt. Als Nächstes werden sie mit der Systemgrenze
+  verbunden, bevor Befehls- und PC-Pfade sowie die Matrix folgen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
