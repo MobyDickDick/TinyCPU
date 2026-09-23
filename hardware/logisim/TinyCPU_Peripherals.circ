@@ -203,22 +203,9 @@
       <a name="label" val="CORE_ADDRESS"/>
       <a name="width" val="12"/>
     </comp>
-    <comp lib="0" loc="(290,630)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="CORE_WRITE_VALUE"/>
-      <a name="width" val="16"/>
-    </comp>
     <comp lib="0" loc="(290,670)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="RAM_WRITE_ENABLE"/>
-    </comp>
-    <comp lib="0" loc="(290,700)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="CORE_WRITE_ENABLE"/>
-    </comp>
-    <comp lib="0" loc="(290,730)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="CORE_WRITE_VALID"/>
     </comp>
     <comp lib="0" loc="(290,760)" name="Pin">
       <a name="appearance" val="classic"/>
@@ -330,9 +317,6 @@
     <wire from="(290,220)" to="(290,230)"/>
     <wire from="(290,220)" to="(410,220)"/>
     <wire from="(290,580)" to="(370,580)"/>
-    <wire from="(290,630)" to="(370,630)"/>
-    <wire from="(290,700)" to="(370,700)"/>
-    <wire from="(290,730)" to="(370,730)"/>
     <wire from="(290,760)" to="(370,760)"/>
     <wire from="(290,790)" to="(370,790)"/>
     <wire from="(290,820)" to="(370,820)"/>
@@ -344,6 +328,15 @@
     <wire from="(410,150)" to="(410,160)"/>
     <wire from="(630,160)" to="(740,160)"/>
     <wire from="(630,220)" to="(740,220)"/>
+    <wire from="(630,280)" to="(760,280)"/>
+    <wire from="(630,310)" to="(780,310)"/>
+    <wire from="(630,330)" to="(800,330)"/>
+    <wire from="(370,630)" to="(760,630)"/>
+    <wire from="(760,280)" to="(760,630)"/>
+    <wire from="(370,730)" to="(780,730)"/>
+    <wire from="(780,310)" to="(780,730)"/>
+    <wire from="(370,700)" to="(800,700)"/>
+    <wire from="(800,330)" to="(800,700)"/>
   </circuit>
   <circuit name="OutputPort">
     <a name="appearance" val="logisim_evolution"/>

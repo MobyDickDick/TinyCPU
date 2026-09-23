@@ -236,14 +236,27 @@ class CircuitVerificationTests(unittest.TestCase):
     def test_ap18_cpu_integration_requires_external_write_paths(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
-        for endpoint in ("(3480,840)", "(3480,860)", "(3480,880)"):
-            with self.subTest(endpoint=endpoint):
+        for label in (
+            "EXTERNAL_WRITE_VALUE",
+            "EXTERNAL_WRITE_VALID",
+            "EXTERNAL_WRITE_ENABLE",
+        ):
+            with self.subTest(label=label):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
                 shutil.copytree(source, temporary / "logisim")
                 core = temporary / "logisim" / "TinyCPU.circ"
                 project = ET.parse(core)
                 main = project.getroot().find("circuit[@name='TinyCPUMain']")
                 self.assertIsNotNone(main)
+                pin = next(
+                    component for component in main.findall("comp[@name='Pin']")
+                    if any(
+                        attribute.get("name") == "label"
+                        and attribute.get("val") == label
+                        for attribute in component.findall("a")
+                    )
+                )
+                endpoint = pin.get("loc")
                 wire = next(
                     item for item in main.findall("wire")
                     if endpoint in {item.get("from"), item.get("to")}
@@ -325,7 +338,8 @@ class CircuitVerificationTests(unittest.TestCase):
         source = root / "hardware" / "logisim"
         for label in (
             "CLK", "RESET", "RAM_READ_VALUE", "RAM_READ_VALID",
-            "READ_VALUE", "READ_VALID",
+            "READ_VALUE", "READ_VALID", "WRITE_VALUE", "WRITE_VALID",
+            "WRITE_ENABLE",
         ):
             with self.subTest(path=label):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
@@ -361,9 +375,6 @@ class CircuitVerificationTests(unittest.TestCase):
         source = root / "hardware" / "logisim"
         for source_label, target_label in (
             ("CORE_ADDRESS", "ADDRESS"),
-            ("CORE_WRITE_VALUE", "WRITE_VALUE"),
-            ("CORE_WRITE_VALID", "WRITE_VALID"),
-            ("CORE_WRITE_ENABLE", "WRITE_ENABLE"),
             ("CORE_INSTRUCTION_BOUNDARY", "INSTRUCTION_BOUNDARY"),
             ("CORE_ENABLE_REQUEST", "ENABLE_REQUEST"),
             ("CORE_DISABLE_REQUEST", "DISABLE_REQUEST"),

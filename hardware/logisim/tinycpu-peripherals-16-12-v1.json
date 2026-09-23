@@ -19,9 +19,6 @@
         "RAM_READ_VALUE": {"direction": "input", "bits": 16},
         "RAM_READ_VALID": {"direction": "input", "bits": 1},
         "CORE_ADDRESS": {"direction": "input", "bits": 12},
-        "CORE_WRITE_VALUE": {"direction": "input", "bits": 16},
-        "CORE_WRITE_VALID": {"direction": "input", "bits": 1},
-        "CORE_WRITE_ENABLE": {"direction": "input", "bits": 1},
         "CORE_INSTRUCTION_BOUNDARY": {"direction": "input", "bits": 1},
         "CORE_ENABLE_REQUEST": {"direction": "input", "bits": 1},
         "CORE_DISABLE_REQUEST": {"direction": "input", "bits": 1},
@@ -43,7 +40,7 @@
         "TARGET_PC": {"direction": "input", "bits": 12},
         "ILLEGAL_RETURN": {"direction": "input", "bits": 1}
       },
-      "status": "core_write_outputs_exposed",
+      "status": "core_write_outputs_integrated",
       "core_external_write_pins": {
         "EXTERNAL_WRITE_VALUE": {"direction": "output", "bits": 16},
         "EXTERNAL_WRITE_VALID": {"direction": "output", "bits": 1},
@@ -55,13 +52,13 @@
         "adapter_read_value_to_core",
         "adapter_read_valid_to_core",
         "core_read_value_to_adapter",
-        "core_read_valid_to_adapter"
+        "core_read_valid_to_adapter",
+        "core_write_value_to_adapter",
+        "core_write_valid_to_adapter",
+        "core_write_enable_to_adapter"
       ],
       "verified_paths": [
         "core_address_to_memory_address",
-        "core_write_value_to_memory_write_value",
-        "core_write_valid_to_memory_write_valid",
-        "core_write_enable_to_memory_write_enable",
         "core_instruction_boundary_to_interrupt_boundary",
         "core_enable_request_to_interrupt_enable_request",
         "core_disable_request_to_interrupt_disable_request",

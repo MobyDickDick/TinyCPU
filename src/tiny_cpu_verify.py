@@ -495,9 +495,6 @@ def verify_system_circuit() -> None:
         cpu_pin_locations[attributes.get("label", "")] = component.get("loc")
     required_cpu_paths = {
         "core_address_to_memory_address": ("CORE_ADDRESS", "ADDRESS"),
-        "core_write_value_to_memory_write_value": ("CORE_WRITE_VALUE", "WRITE_VALUE"),
-        "core_write_valid_to_memory_write_valid": ("CORE_WRITE_VALID", "WRITE_VALID"),
-        "core_write_enable_to_memory_write_enable": ("CORE_WRITE_ENABLE", "WRITE_ENABLE"),
         "core_instruction_boundary_to_interrupt_boundary": (
             "CORE_INSTRUCTION_BOUNDARY", "INSTRUCTION_BOUNDARY"),
         "core_enable_request_to_interrupt_enable_request": (
@@ -544,6 +541,12 @@ def verify_system_circuit() -> None:
             "READ_VALUE", f"({core_x},{core_y})"),
         "core_read_valid_to_adapter": (
             "READ_VALID", f"({core_x},{core_y + 60})"),
+        "core_write_value_to_adapter": (
+            "WRITE_VALUE", f"({core_x},{core_y + 120})"),
+        "core_write_valid_to_adapter": (
+            "WRITE_VALID", f"({core_x},{core_y + 150})"),
+        "core_write_enable_to_adapter": (
+            "WRITE_ENABLE", f"({core_x},{core_y + 170})"),
     }
     if cpu_contract.get("verified_core_paths") != list(required_core_paths) or not all(
             connected(cpu_pin_locations[source], target)
