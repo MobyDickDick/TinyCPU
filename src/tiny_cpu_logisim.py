@@ -61,7 +61,10 @@ def autonomous_project(
         raise LogisimError(f"{source}: top circuit {top!r} is missing")
 
     found: set[str] = set()
-    for component in circuit.findall("comp"):
+    for component in list(circuit.findall("comp")):
+        if component.get("name") in {"POR", "PowerOnReset"}:
+            circuit.remove(component)
+            continue
         if component.get("name") != "Pin":
             continue
         attributes = _attributes(component)
@@ -76,6 +79,7 @@ def autonomous_project(
             found.add(name)
         if name == "CLK":
             component.set("lib", "0")
+            component.set("loc", "(330,340)")
             component.set("name", "Clock")
             for item in list(component):
                 component.remove(item)
@@ -95,14 +99,14 @@ def autonomous_project(
             reset_clock = ET.SubElement(
                 circuit,
                 "comp",
-                {"lib": "0", "loc": f"({x - 40},{y})", "name": "Clock"},
+                {"lib": "0", "loc": "(290,360)", "name": "Clock"},
             )
             ET.SubElement(reset_clock, "a", {"name": "highDuration", "val": "100"})
             ET.SubElement(reset_clock, "a", {"name": "lowDuration", "val": "2"})
             ET.SubElement(
                 circuit,
                 "wire",
-                {"from": f"({x - 40},{y})", "to": f"({x - 20},{y})"},
+                {"from": "(290,360)", "to": "(310,360)"},
             )
         elif name.startswith("EXTERNAL_MEMORY_") or name == "USE_EXTERNAL_MEMORY":
             # The additive AP-18 interface is inactive in every autonomous

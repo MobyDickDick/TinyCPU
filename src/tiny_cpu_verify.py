@@ -416,27 +416,21 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             "AP-18 CPU interrupt-command interface differs from contract"
         )
-    interrupt_decoders = core_definition.findall("comp[@name='Decoder']")
-    interrupt_decoder = (
-        interrupt_decoders[0] if len(interrupt_decoders) == 1 else None
-    )
-    decoder_attributes = {
-        item.get("name"): item.get("val")
-        for item in interrupt_decoder.findall("a")
-    } if interrupt_decoder is not None else {}
-    decoder_x, decoder_y = (
-        map(int, interrupt_decoder.get("loc").strip("()").split(","))
-        if interrupt_decoder is not None else (0, 0)
-    )
+    # The redraw moved the three system-opcode decodes into the existing
+    # FetchDecodeControls block.  Follow the generated FetchDecode output
+    # terminals here; do not require the removed duplicate top-level decoder.
     interrupt_command_sources = {
-        "ENABLE_INTERRUPTS_REQUEST": f"({decoder_x + 20},{decoder_y - 80})",
-        "DISABLE_INTERRUPTS_REQUEST": f"({decoder_x + 20},{decoder_y - 70})",
-        "RETURN_FROM_INTERRUPT_REQUEST": f"({decoder_x + 20},{decoder_y - 60})",
+        "ENABLE_INTERRUPTS_REQUEST": "(1400,1920)",
+        "DISABLE_INTERRUPTS_REQUEST": "(1400,1940)",
+        "RETURN_FROM_INTERRUPT_REQUEST": "(1400,1960)",
     }
+    instruction_boundary = core_pin_locations["INSTRUCTION_BOUNDARY"]
+    boundary_constants = [
+        component for component in core_definition.findall("comp[@name='Constant']")
+        if core_connected(component.get("loc"), instruction_boundary)
+    ]
     if (
-        decoder_attributes.get("select") != "6"
-        or not core_connected("(1050,420)", f"({decoder_x},{decoder_y + 30})")
-        or not core_connected("(3450,930)", core_pin_locations["INSTRUCTION_BOUNDARY"])
+        len(boundary_constants) != 1
         or any(
             not core_connected(source, core_pin_locations[label])
             for label, source in interrupt_command_sources.items()
@@ -444,8 +438,7 @@ def verify_system_circuit() -> None:
         # Reject the accidental contacts from the first integration attempt:
         # the opcode feed touched an operand-control branch, while command
         # outputs touched the address-error rail.
-        or core_connected("(1050,420)", "(1070,420)")
-        or core_connected("(3450,930)", "(3300,390)")
+        or core_connected(boundary_constants[0].get("loc"), "(3300,390)")
         or core_connected(
             interrupt_command_sources["DISABLE_INTERRUPTS_REQUEST"],
             "(3280,1450)",
@@ -454,6 +447,18 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             "AP-18 CPU interrupt-command paths differ from contract"
         )
+
+    expected_next_pc_pin = cpu_contract.get("core_next_pc_pin", {})
+    if not expected_next_pc_pin or any(
+        core_public_pins.get(label) != definition
+        for label, definition in expected_next_pc_pin.items()
+    ):
+        raise VerificationError("AP-18 CPU next-PC interface differs from contract")
+    if (
+        any(component.get("name") == "Tunnel" for component in core_definition.findall("comp"))
+        or not core_connected("(1130,390)", core_pin_locations["NEXT_PC"])
+    ):
+        raise VerificationError("AP-18 CPU next-PC path differs from contract")
 
     expected_selector_widths = {
         "EXTERNAL_MEMORY_VALUE_SELECT": "16",
@@ -544,7 +549,6 @@ def verify_system_circuit() -> None:
         cpu_pin_locations[attributes.get("label", "")] = component.get("loc")
     required_cpu_paths = {
         "core_address_to_memory_address": ("CORE_ADDRESS", "ADDRESS"),
-        "core_next_pc_to_interrupt_next_pc": ("CORE_NEXT_PC", "NEXT_PC"),
     }
     def connected(start: str, target: str) -> bool:
         pending = [start]
@@ -596,6 +600,8 @@ def verify_system_circuit() -> None:
             "DISABLE_REQUEST", f"({core_x},{core_y + 230})"),
         "core_return_request_to_adapter": (
             "RETURN_REQUEST", f"({core_x},{core_y + 250})"),
+        "core_next_pc_to_adapter": (
+            "NEXT_PC", f"({core_x},{core_y + 270})"),
     }
     if cpu_contract.get("verified_core_paths") != list(required_core_paths) or not all(
             connected(cpu_pin_locations[source], target)

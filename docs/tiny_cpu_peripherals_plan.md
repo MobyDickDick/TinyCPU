@@ -301,7 +301,18 @@ Befehlseingänge der `CPUIntegrationBoundary` wurden entfernt und durch direkte
 Leitungen von den tatsächlichen Kernausgängen ersetzt. Vertrag, Offline-Prüfer
 und Mutationstest sichern Opcode-Zuführung, Decoder-Ausgänge, öffentliche
 Kernpins und Adapterpfade gemeinsam. Als nächster abgegrenzter Schritt bleibt
-damit der PC-Steuerpfad vom vollständigen Kern zur Interruptsteuerung.
+damit der PC-Steuerpfad vom vollständigen Kern zur Interruptsteuerung. Nach der
+manuellen Neuanordnung wurde zunächst der Prüfer an die tatsächlich in
+`FetchDecodeControls` liegenden Befehlsdekodierungen und die verschobenen
+Speicherselektoren angepasst; die entfernte, doppelte Top-Level-Dekodierung
+wird ausdrücklich nicht wiederhergestellt. Der vollständige Kern exportiert
+nun außerdem seinen bereits vorhandenen Folge-PC als 12-Bit-Ausgang
+`NEXT_PC`. `CPUIntegrationBoundary` führt diesen tatsächlichen Kernausgang
+anstelle des bisherigen vorläufigen Eingangs direkt zur Interruptsteuerung.
+Vertrag, Offline-Prüfer und zwei gezielte Leitungs-Mutationstests schützen den
+Kern- und Adapterpfad. Als nächster abgegrenzter Schritt folgen damit die
+Eingänge für Interruptannahme und Interruptziel, die den PC des Kerns
+prioritätsgerecht steuern.
 
 ## Kompatibilitätsfolgen
 
