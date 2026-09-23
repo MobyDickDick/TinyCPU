@@ -324,6 +324,37 @@ class CircuitVerificationTests(unittest.TestCase):
                     ):
                         VERIFY.verify_system_circuit()
 
+    def test_ap18_interrupt_command_paths_reject_bus_contention(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        core = temporary / "logisim" / "TinyCPU.circ"
+        text = core.read_text(encoding="utf-8").replace(
+            '<comp lib="0" loc="(3450,930)" name="Constant">',
+            '<comp lib="0" loc="(3300,930)" name="Constant">',
+            1,
+        ).replace(
+            '<wire from="(3450,930)" to="(3480,930)"/>',
+            '<wire from="(3300,930)" to="(3480,930)"/>',
+            1,
+        )
+        core.write_text(text, encoding="utf-8")
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+             mock.patch.object(
+                 VERIFY,
+                 "load_system_profile",
+                 return_value=replace(
+                     system,
+                     circuit_path=temporary / "logisim" / "TinyCPU_Peripherals.circ",
+                 ),
+             ):
+            with self.assertRaisesRegex(
+                VERIFY.VerificationError, "interrupt-command paths differ"
+            ):
+                VERIFY.verify_system_circuit()
+
     def test_ap18_cpu_integration_accepts_unrendered_selector_labels(self) -> None:
         """A normal Logisim save may discard labels absent from the appearance."""
         root = MODULE_PATH.parents[1]

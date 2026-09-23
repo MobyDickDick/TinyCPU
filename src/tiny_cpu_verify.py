@@ -431,11 +431,17 @@ def verify_system_circuit() -> None:
     if (
         decoder_attributes.get("select") != "6"
         or not core_connected("(1050,420)", "(3150,1550)")
-        or not core_connected("(3300,930)", core_pin_locations["INSTRUCTION_BOUNDARY"])
+        or not core_connected("(3450,930)", core_pin_locations["INSTRUCTION_BOUNDARY"])
         or any(
             not core_connected(source, core_pin_locations[label])
             for label, source in interrupt_command_sources.items()
         )
+        # Reject the accidental contacts from the first integration attempt:
+        # the opcode feed touched an operand-control branch, while command
+        # outputs touched the address-error rail.
+        or core_connected("(1050,420)", "(1070,420)")
+        or core_connected("(3450,930)", "(3300,390)")
+        or core_connected("(3170,1450)", "(3280,1450)")
     ):
         raise VerificationError(
             "AP-18 CPU interrupt-command paths differ from contract"

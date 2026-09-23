@@ -325,7 +325,7 @@
       <a name="label" val="RETURN_FROM_INTERRUPT_REQUEST"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(3300,930)" name="Constant">
+    <comp lib="0" loc="(3450,930)" name="Constant">
       <a name="value" val="0x1"/>
     </comp>
     <comp lib="2" loc="(3150,1520)" name="Decoder">
@@ -377,19 +377,22 @@
     <comp loc="(990,600)" name="Memory">
       <a name="label" val="MEMORY_INSTANCE"/>
     </comp>
-    <wire from="(1050,420)" to="(3150,420)"/>
-    <wire from="(3150,420)" to="(3150,1550)"/>
+    <wire from="(1020,420)" to="(1050,420)"/>
+    <wire from="(1020,420)" to="(1020,1550)"/>
+    <wire from="(1020,1550)" to="(3150,1550)"/>
     <wire from="(3150,1520)" to="(3150,1550)"/>
     <wire from="(3170,1440)" to="(3350,1440)"/>
     <wire from="(3350,950)" to="(3350,1440)"/>
     <wire from="(3350,950)" to="(3480,950)"/>
-    <wire from="(3170,1450)" to="(3370,1450)"/>
-    <wire from="(3370,970)" to="(3370,1450)"/>
+    <wire from="(3170,1450)" to="(3200,1450)"/>
+    <wire from="(3200,1430)" to="(3200,1450)"/>
+    <wire from="(3200,1430)" to="(3370,1430)"/>
+    <wire from="(3370,970)" to="(3370,1430)"/>
     <wire from="(3370,970)" to="(3480,970)"/>
     <wire from="(3170,1460)" to="(3390,1460)"/>
     <wire from="(3390,990)" to="(3390,1460)"/>
     <wire from="(3390,990)" to="(3480,990)"/>
-    <wire from="(3300,930)" to="(3480,930)"/>
+    <wire from="(3450,930)" to="(3480,930)"/>
     <wire from="(1010,620)" to="(1010,730)"/>
     <wire from="(1010,730)" to="(1090,730)"/>
     <wire from="(1030,340)" to="(1150,340)"/>
