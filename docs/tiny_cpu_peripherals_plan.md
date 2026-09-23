@@ -286,8 +286,13 @@ RAM-Eingänge, sodass die spätere Speicherweiche Wert und Gültigkeit nicht
 voneinander trennen und keine zweite Schreibdekodierung einführen kann. Der
 Komponentenvertrag prüft Richtung und Breite; ein Leitungs-Mutationstest
 schützt jeden der drei Pfade bis zum öffentlichen Kernanschluss. Ihre
-Verbindung mit den vorbereiteten Anschlüssen der `CPUIntegrationBoundary`
-sowie die Befehls- und PC-Pfade bilden den nächsten begrenzten
+Verbindung mit der `CPUIntegrationBoundary` ist nun ebenfalls abgeschlossen:
+Die drei vorläufigen Eingabepins wurden entfernt, und Schreibwert, Gültigkeit
+und Freigabe laufen direkt von den tatsächlichen Kernausgängen zu den
+Ausgängen der Integrationsgrenze. Der Offline-Prüfer und ein Mutationstest
+verfolgen diese Pfade anhand der benannten Kern- und Adapterports, sodass eine
+manuelle Verschiebung der Pins nicht durch alte Canvas-Koordinaten
+zurückgespielt wird. Die Befehls- und PC-Pfade bilden den nächsten begrenzten
 Integrationsschritt.
 
 ## Kompatibilitätsfolgen
