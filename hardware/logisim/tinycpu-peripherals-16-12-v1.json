@@ -43,7 +43,12 @@
         "TARGET_PC": {"direction": "input", "bits": 12},
         "ILLEGAL_RETURN": {"direction": "input", "bits": 1}
       },
-      "status": "core_read_inputs_connected",
+      "status": "core_write_outputs_exposed",
+      "core_external_write_pins": {
+        "EXTERNAL_WRITE_VALUE": {"direction": "output", "bits": 16},
+        "EXTERNAL_WRITE_VALID": {"direction": "output", "bits": 1},
+        "EXTERNAL_WRITE_ENABLE": {"direction": "output", "bits": 1}
+      },
       "verified_core_paths": [
         "clock_to_core",
         "reset_to_core",

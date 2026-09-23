@@ -278,8 +278,16 @@ gleichzeitig von `USE_EXTERNAL_MEMORY` gesteuerte Multiplexer zwischen diesen
 Eingängen und dem bisherigen RAM-Wert samt Gültigkeit. Die ausgewählten
 Signale speisen alle bisherigen Speicherleseverbraucher; ein Leitungs-
 Mutationstest schützt interne und externe Eingänge, Auswahl und Ausgänge. Ohne
-Aktivierung bleibt der bisherige RAM-Pfad erhalten. Die Schreib-, Befehls- und
-PC-Pfade des vollständigen Kerns bilden den nächsten begrenzten
+Aktivierung bleibt der bisherige RAM-Pfad erhalten. Als erster Teil der
+übrigen Kernanschlüsse stellt `TinyCPUMain` nun auch genau die drei Signale
+bereit, die seinen bisherigen RAM-Schreibpfad treiben: Schreibwert,
+Gültigkeit und Freigabe. Die Ausgänge hängen direkt an denselben Netzen wie die
+RAM-Eingänge, sodass die spätere Speicherweiche Wert und Gültigkeit nicht
+voneinander trennen und keine zweite Schreibdekodierung einführen kann. Der
+Komponentenvertrag prüft Richtung und Breite; ein Leitungs-Mutationstest
+schützt jeden der drei Pfade bis zum öffentlichen Kernanschluss. Ihre
+Verbindung mit den vorbereiteten Anschlüssen der `CPUIntegrationBoundary`
+sowie die Befehls- und PC-Pfade bilden den nächsten begrenzten
 Integrationsschritt.
 
 ## Kompatibilitätsfolgen

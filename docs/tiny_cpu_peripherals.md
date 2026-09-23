@@ -164,7 +164,9 @@ gilt:
 Diese Regeln sind die Grundlage für Softwaremodell, Verträge und spätere
 elektrische Systemtests. Die Systemschaltung bindet inzwischen die
 unveränderte `TinyCPUMain`-CPU als externe Projektbibliothek in ihre
-Integrationsgrenze ein. Die noch ausstehende elektrische Verbindung des Kerns
-mit den vorbereiteten Daten-, Befehls- und PC-Pfaden bedeutet jedoch weiterhin,
-dass die eigenständigen Bausteine noch kein Nachweis einer vollständigen
-CPU-Integration sind.
+Integrationsgrenze ein. Der Kern exportiert inzwischen Schreibwert,
+Schreibgültigkeit und Schreibfreigabe direkt von den drei Netzen, die auch
+seinen bisherigen RAM-Schreibpfad speisen. Die noch ausstehende elektrische
+Verbindung dieser Ausgänge und der vorbereiteten Befehls- und PC-Pfade bedeutet
+jedoch weiterhin, dass die eigenständigen Bausteine noch kein Nachweis einer
+vollständigen CPU-Integration sind.

@@ -84,8 +84,12 @@ mutationstestgeschützt weitergereicht. Auch der Folge-PC gelangt von einem
 benannten vorläufigen Kernanschluss direkt und mutationstestgeschützt zur
 Interruptsteuerungsgrenze. Die vollständige CPU ist inzwischen einmalig hinter
 dieser Grenze platziert; ihre Takt- und Resetanschlüsse sind direkt verdrahtet
-und per Mutationstest geschützt. Die übrigen Kernanschlüsse und die elektrische
-Systemabnahme sind noch offen.
+und per Mutationstest geschützt. Der vollständige Kern exportiert nun
+zusätzlich die gemeinsam zum bisherigen RAM geführten Signale für Schreibwert,
+Schreibgültigkeit und Schreibfreigabe; Richtung, Breite und elektrische
+Verbindung jedes dieser Pfade sind durch Mutationstests geschützt. Ihre
+Verbindung zur Systemgrenze sowie die übrigen Befehls- und PC-Anschlüsse und
+die elektrische Systemabnahme sind noch offen.
 Die dafür verbindliche
 elektrische Fallliste ist inzwischen versioniert, mit den übrigen
 Systemverträgen quergeprüft und deckt alle neuen Opcodes und Verhaltensfälle
