@@ -185,7 +185,9 @@
       <a name="label" val="INTERRUPT_TARGET_PC"/>
       <a name="width" val="12"/>
     </comp>
-    <comp lib="0" loc="(3550,910)" name="Constant"/>
+    <comp lib="0" loc="(3550,910)" name="Constant">
+      <a name="value" val="0x1"/>
+    </comp>
     <comp lib="0" loc="(3570,1010)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
