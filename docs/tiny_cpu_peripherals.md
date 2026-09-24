@@ -166,13 +166,10 @@ elektrische Systemtests. Die Systemschaltung bindet inzwischen die
 unveränderte `TinyCPUMain`-CPU als externe Projektbibliothek in ihre
 Integrationsgrenze ein. Der Kern exportiert inzwischen Schreibwert,
 Schreibgültigkeit und Schreibfreigabe direkt von den drei Netzen, die auch
-seinen bisherigen RAM-Schreibpfad speisen. Die noch ausstehende elektrische
-Verbindung dieser Ausgänge und der vorbereiteten Befehls- und PC-Pfade bedeutet
-jedoch weiterhin, dass die eigenständigen Bausteine noch kein Nachweis einer
-vollständigen CPU-Integration sind. Insbesondere sind `CORE_ADDRESS`,
-`RAM_WRITE_ENABLE`, `INTERRUPT_ACCEPT`, `TARGET_PC` und `ILLEGAL_RETURN`
-innerhalb der `CPUIntegrationBoundary` noch vorläufige, nicht mit dem Kern
-verbundene Eingänge. Die dadurch im Systembild blau dargestellten
-undefinierten Netze sind daher ein bekannter Integrationsfehler und dürfen
-nicht als fertige oder elektrisch abgenommene Peripherieschaltung verstanden
-werden.
+seinen bisherigen RAM-Schreibpfad speisen. Die Interrupt-Rückkopplung ist nun vollständig elektrisch angebunden:
+`INTERRUPT_ACCEPT` wählt im Fetchpfad mit Vorrang `TARGET_PC` als nächsten
+Programmzähler, und `ILLEGAL_RETURN` setzt das vorhandene Sticky-Flag
+`ERROR_ILL`. Damit enden die drei Rückleitungen nicht mehr unverbunden an der
+Integrationsgrenze. `CORE_ADDRESS` und `RAM_WRITE_ENABLE` bleiben dagegen
+vorläufige Adaptereingänge; die eigenständigen Bausteine sind deshalb noch
+kein Nachweis einer vollständigen CPU-Integration.

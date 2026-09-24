@@ -14,41 +14,125 @@
       "core_library": "TinyCPU.circ",
       "core_circuit": "TinyCPUMain",
       "pins": {
-        "CLK": {"direction": "input", "bits": 1},
-        "RESET": {"direction": "input", "bits": 1},
-        "RAM_READ_VALUE": {"direction": "input", "bits": 16},
-        "RAM_READ_VALID": {"direction": "input", "bits": 1},
-        "CORE_ADDRESS": {"direction": "input", "bits": 12},
-        "READ_VALUE": {"direction": "output", "bits": 16},
-        "READ_VALID": {"direction": "output", "bits": 1},
-        "ADDRESS": {"direction": "output", "bits": 12},
-        "WRITE_VALUE": {"direction": "output", "bits": 16},
-        "WRITE_VALID": {"direction": "output", "bits": 1},
-        "WRITE_ENABLE": {"direction": "output", "bits": 1},
-        "RAM_WRITE_ENABLE": {"direction": "input", "bits": 1},
-        "INSTRUCTION_BOUNDARY": {"direction": "output", "bits": 1},
-        "ENABLE_REQUEST": {"direction": "output", "bits": 1},
-        "DISABLE_REQUEST": {"direction": "output", "bits": 1},
-        "RETURN_REQUEST": {"direction": "output", "bits": 1},
-        "NEXT_PC": {"direction": "output", "bits": 12},
-        "INTERRUPT_ACCEPT": {"direction": "input", "bits": 1},
-        "TARGET_PC": {"direction": "input", "bits": 12},
-        "ILLEGAL_RETURN": {"direction": "input", "bits": 1}
+        "CLK": {
+          "direction": "input",
+          "bits": 1
+        },
+        "RESET": {
+          "direction": "input",
+          "bits": 1
+        },
+        "RAM_READ_VALUE": {
+          "direction": "input",
+          "bits": 16
+        },
+        "RAM_READ_VALID": {
+          "direction": "input",
+          "bits": 1
+        },
+        "CORE_ADDRESS": {
+          "direction": "input",
+          "bits": 12
+        },
+        "READ_VALUE": {
+          "direction": "output",
+          "bits": 16
+        },
+        "READ_VALID": {
+          "direction": "output",
+          "bits": 1
+        },
+        "ADDRESS": {
+          "direction": "output",
+          "bits": 12
+        },
+        "WRITE_VALUE": {
+          "direction": "output",
+          "bits": 16
+        },
+        "WRITE_VALID": {
+          "direction": "output",
+          "bits": 1
+        },
+        "WRITE_ENABLE": {
+          "direction": "output",
+          "bits": 1
+        },
+        "RAM_WRITE_ENABLE": {
+          "direction": "input",
+          "bits": 1
+        },
+        "INSTRUCTION_BOUNDARY": {
+          "direction": "output",
+          "bits": 1
+        },
+        "ENABLE_REQUEST": {
+          "direction": "output",
+          "bits": 1
+        },
+        "DISABLE_REQUEST": {
+          "direction": "output",
+          "bits": 1
+        },
+        "RETURN_REQUEST": {
+          "direction": "output",
+          "bits": 1
+        },
+        "NEXT_PC": {
+          "direction": "output",
+          "bits": 12
+        },
+        "INTERRUPT_ACCEPT": {
+          "direction": "input",
+          "bits": 1
+        },
+        "TARGET_PC": {
+          "direction": "input",
+          "bits": 12
+        },
+        "ILLEGAL_RETURN": {
+          "direction": "input",
+          "bits": 1
+        }
       },
-      "status": "core_next_pc_integrated",
+      "status": "interrupt_feedback_integrated",
       "core_external_write_pins": {
-        "EXTERNAL_WRITE_VALUE": {"direction": "output", "bits": 16},
-        "EXTERNAL_WRITE_VALID": {"direction": "output", "bits": 1},
-        "EXTERNAL_WRITE_ENABLE": {"direction": "output", "bits": 1}
+        "EXTERNAL_WRITE_VALUE": {
+          "direction": "output",
+          "bits": 16
+        },
+        "EXTERNAL_WRITE_VALID": {
+          "direction": "output",
+          "bits": 1
+        },
+        "EXTERNAL_WRITE_ENABLE": {
+          "direction": "output",
+          "bits": 1
+        }
       },
       "core_interrupt_command_pins": {
-        "INSTRUCTION_BOUNDARY": {"direction": "output", "bits": 1},
-        "ENABLE_INTERRUPTS_REQUEST": {"direction": "output", "bits": 1},
-        "DISABLE_INTERRUPTS_REQUEST": {"direction": "output", "bits": 1},
-        "RETURN_FROM_INTERRUPT_REQUEST": {"direction": "output", "bits": 1}
+        "INSTRUCTION_BOUNDARY": {
+          "direction": "output",
+          "bits": 1
+        },
+        "ENABLE_INTERRUPTS_REQUEST": {
+          "direction": "output",
+          "bits": 1
+        },
+        "DISABLE_INTERRUPTS_REQUEST": {
+          "direction": "output",
+          "bits": 1
+        },
+        "RETURN_FROM_INTERRUPT_REQUEST": {
+          "direction": "output",
+          "bits": 1
+        }
       },
       "core_next_pc_pin": {
-        "NEXT_PC": {"direction": "output", "bits": 12}
+        "NEXT_PC": {
+          "direction": "output",
+          "bits": 12
+        }
       },
       "verified_core_paths": [
         "clock_to_core",
@@ -64,7 +148,10 @@
         "core_enable_request_to_adapter",
         "core_disable_request_to_adapter",
         "core_return_request_to_adapter",
-        "core_next_pc_to_adapter"
+        "core_next_pc_to_adapter",
+        "interrupt_accept_to_core",
+        "interrupt_target_pc_to_core",
+        "illegal_return_to_core"
       ],
       "verified_paths": [
         "core_address_to_memory_address"
@@ -85,7 +172,21 @@
         "interrupt_accept_to_cpu",
         "interrupt_target_pc_to_cpu",
         "interrupt_illegal_return_to_cpu"
-      ]
+      ],
+      "core_interrupt_feedback_pins": {
+        "INTERRUPT_ACCEPT": {
+          "direction": "input",
+          "bits": 1
+        },
+        "INTERRUPT_TARGET_PC": {
+          "direction": "input",
+          "bits": 12
+        },
+        "ILLEGAL_RETURN": {
+          "direction": "input",
+          "bits": 1
+        }
+      }
     },
     "output_port": {
       "circuit": "OutputPort",

@@ -72,6 +72,7 @@ def autonomous_project(
         if label is None or label.get("val") not in {
             "CLK", "RESET", "HALTED", "HALTED_WITH_ERROR",
             "EXTERNAL_MEMORY_VALUE", "EXTERNAL_MEMORY_VALID", "USE_EXTERNAL_MEMORY",
+            "INTERRUPT_ACCEPT", "INTERRUPT_TARGET_PC", "ILLEGAL_RETURN",
         }:
             continue
         name = label.get("val", "")
@@ -109,10 +110,12 @@ def autonomous_project(
                 "wire",
                 {"from": reset_clock_location, "to": reset_clock_output},
             )
-        elif name.startswith("EXTERNAL_MEMORY_") or name == "USE_EXTERNAL_MEMORY":
-            # The additive AP-18 interface is inactive in every autonomous
-            # TinyCPU 1.0 fixture.  Drive it explicitly instead of relying on
-            # a simulator-specific value for an otherwise floating input pin.
+        elif (name.startswith("EXTERNAL_MEMORY_")
+              or name in {"USE_EXTERNAL_MEMORY", "INTERRUPT_ACCEPT",
+                          "INTERRUPT_TARGET_PC", "ILLEGAL_RETURN"}):
+            # The additive AP-18 interfaces are inactive in every autonomous
+            # TinyCPU 1.0 fixture.  Drive them explicitly instead of relying on
+            # a simulator-specific value for otherwise floating input pins.
             width = attributes.get("width")
             component.set("lib", "0")
             component.set("name", "Constant")

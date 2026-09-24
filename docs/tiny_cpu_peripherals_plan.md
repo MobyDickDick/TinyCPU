@@ -310,17 +310,18 @@ nun außerdem seinen bereits vorhandenen Folge-PC als 12-Bit-Ausgang
 `NEXT_PC`. `CPUIntegrationBoundary` führt diesen tatsächlichen Kernausgang
 anstelle des bisherigen vorläufigen Eingangs direkt zur Interruptsteuerung.
 Vertrag, Offline-Prüfer und zwei gezielte Leitungs-Mutationstests schützen den
-Kern- und Adapterpfad. Als nächster abgegrenzter Schritt folgen damit die
-Eingänge für Interruptannahme und Interruptziel, die den PC des Kerns
-prioritätsgerecht steuern.
+Kern- und Adapterpfad. Die Eingänge für Interruptannahme und Interruptziel steuern den PC des Kerns
+nun prioritätsgerecht: Ein angenommener Interrupt wählt `TARGET_PC` über einen
+zusätzlichen 12-Bit-Multiplexer, während `ILLEGAL_RETURN` den vorhandenen
+Sticky-Fehlerpfad für illegale Operationen speist. Dieselben drei
+Rückkopplungen sind in Integrationsgrenze, Kern und eigenständigem
+`FetchDecode`-Diagnoseblatt durchgehend verdrahtet und werden vom Offline-Prüfer
+sowie den Leitungs-Mutationstests geschützt.
 
-Die aktuelle Zeichnung macht außerdem eine noch offene Altlast sichtbar: Der
-Adresspfad beginnt weiterhin am ungetriebenen Platzhalter `CORE_ADDRESS`, und
-`RAM_WRITE_ENABLE` sowie `ILLEGAL_RETURN` enden innerhalb der Grenze. Diese
-blauen Netze sind keine bloße Darstellungsfrage. Vor einem elektrischen
-Systemtest müssen daher zuerst die echte Kernadresse exportiert, der private
-RAM-Schreibpfad von `RAM_WRITE_ENABLE` gesteuert und `ILLEGAL_RETURN` in den
-Sticky-Fehlerpfad aufgenommen werden.
+Als offene Altlast bleiben der ungetriebene Platzhalter `CORE_ADDRESS` und der
+noch nicht in den privaten RAM-Schreibpfad geführte Eingang
+`RAM_WRITE_ENABLE`. Vor einem vollständigen elektrischen Systemtest müssen
+auch diese beiden Adapterpfade mit dem Kern verbunden werden.
 
 ## Kompatibilitätsfolgen
 
