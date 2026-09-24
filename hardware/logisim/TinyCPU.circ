@@ -353,6 +353,7 @@
     </comp>
     <comp lib="1" loc="(2370,570)" name="OR Gate">
       <a name="label" val="ILLEGAL_RETURN_OR"/>
+      <a name="labelloc" val="north"/>
     </comp>
     <comp lib="2" loc="(1120,740)" name="Multiplexer">
       <a name="width" val="16"/>
