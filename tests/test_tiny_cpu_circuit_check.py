@@ -75,15 +75,25 @@ class CircuitCheckTests(unittest.TestCase):
         ))
         self.assertGreater(len(decoder.findall("wire")), 0)
 
+        main = next(
+            circuit for circuit in root.findall("circuit")
+            if circuit.get("name") == "TinyCPUMain"
+        )
+        wires = {
+            frozenset((wire.get("from"), wire.get("to")))
+            for wire in main.findall("wire")
+        }
+        self.assertIn(frozenset(("(1020,420)", "(1050,420)")), wires)
+
     def test_memory_write_or_third_input_is_driven_by_store_reg_offset(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(circuit for circuit in root.findall("circuit")
                     if circuit.get("name") == "TinyCPUMain")
         wires = {(wire.get("from"), wire.get("to"))
                  for wire in main.findall("wire")}
-        self.assertIn((("(1400,1600)"), ("(1710,1600)")), wires)
-        self.assertIn((("(1710,180)"), ("(1710,1600)")), wires)
-        self.assertNotIn((("(1710,180)"), ("(1710,1680)")), wires)
+        self.assertIn((("(1400,1610)"), ("(1680,1610)")), wires)
+        self.assertIn((("(1680,140)"), ("(1680,1610)")), wires)
+        self.assertNotIn((("(1680,140)"), ("(1680,1680)")), wires)
 
     def test_standalone_fetch_decoder_uses_visible_wires(self):
         path = (

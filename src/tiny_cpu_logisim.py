@@ -79,7 +79,6 @@ def autonomous_project(
             found.add(name)
         if name == "CLK":
             component.set("lib", "0")
-            component.set("loc", "(330,340)")
             component.set("name", "Clock")
             for item in list(component):
                 component.remove(item)
@@ -96,17 +95,19 @@ def autonomous_project(
             for item in list(component):
                 component.remove(item)
             x, y = (int(value) for value in component.get("loc", "")[1:-1].split(","))
+            reset_clock_location = f"({x - 40},{y})"
+            reset_clock_output = f"({x - 20},{y})"
             reset_clock = ET.SubElement(
                 circuit,
                 "comp",
-                {"lib": "0", "loc": "(290,360)", "name": "Clock"},
+                {"lib": "0", "loc": reset_clock_location, "name": "Clock"},
             )
             ET.SubElement(reset_clock, "a", {"name": "highDuration", "val": "100"})
             ET.SubElement(reset_clock, "a", {"name": "lowDuration", "val": "2"})
             ET.SubElement(
                 circuit,
                 "wire",
-                {"from": "(290,360)", "to": "(310,360)"},
+                {"from": reset_clock_location, "to": reset_clock_output},
             )
         elif name.startswith("EXTERNAL_MEMORY_") or name == "USE_EXTERNAL_MEMORY":
             # The additive AP-18 interface is inactive in every autonomous
