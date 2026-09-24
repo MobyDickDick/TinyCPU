@@ -77,6 +77,16 @@ def _pin_location(circuit, label):
 
 class LogisimLauncherTests(unittest.TestCase):
 
+    def test_interrupt_feedback_inputs_stay_on_left_side_of_main_sheet(self):
+        """Keep both operator-facing interrupt inputs aligned on the left."""
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        main = root.find("circuit[@name='TinyCPUMain']")
+        self.assertIsNotNone(main)
+        self.assertEqual(_pin_location(main, "INTERRUPT_ACCEPT"), "(340,440)")
+        self.assertEqual(_pin_location(main, "INTERRUPT_TARGET_PC"), "(340,480)")
+        self.assertTrue(_wire_path_exists(main, "(340,440)", "(810,460)"))
+        self.assertTrue(_wire_path_exists(main, "(340,480)", "(810,480)"))
+
     def test_interrupt_pc_override_preserves_sequential_pc_when_inactive(self):
         """Select zero must keep the normal next-PC path, not the IRQ target."""
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
