@@ -193,7 +193,7 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="RAM_READ_VALID"/>
     </comp>
-    <comp lib="0" loc="(290,1030)" name="Pin">
+    <comp lib="0" loc="(350,280)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="TARGET_PC"/>
       <a name="width" val="12"/>
@@ -207,11 +207,11 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="RAM_WRITE_ENABLE"/>
     </comp>
-    <comp lib="0" loc="(290,850)" name="Pin">
+    <comp lib="0" loc="(350,260)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="INTERRUPT_ACCEPT"/>
     </comp>
-    <comp lib="0" loc="(290,990)" name="Pin">
+    <comp lib="0" loc="(350,300)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="ILLEGAL_RETURN"/>
     </comp>
@@ -297,6 +297,9 @@
     <wire from="(290,220)" to="(410,220)"/>
     <wire from="(290,580)" to="(370,580)"/>
     <wire from="(340,240)" to="(410,240)"/>
+    <wire from="(350,260)" to="(410,260)"/>
+    <wire from="(350,280)" to="(410,280)"/>
+    <wire from="(350,300)" to="(410,300)"/>
     <wire from="(400,170)" to="(400,180)"/>
     <wire from="(400,180)" to="(410,180)"/>
     <wire from="(410,150)" to="(410,160)"/>

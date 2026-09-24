@@ -448,6 +448,23 @@ def verify_system_circuit() -> None:
             "AP-18 CPU interrupt-command paths differ from contract"
         )
 
+    expected_feedback_pins = cpu_contract.get("core_interrupt_feedback_pins", {})
+    if not expected_feedback_pins or any(
+        core_public_pins.get(label) != definition
+        for label, definition in expected_feedback_pins.items()
+    ):
+        raise VerificationError("AP-18 CPU interrupt-feedback interface differs from contract")
+    feedback_targets = {
+        "INTERRUPT_ACCEPT": "(810,460)",
+        "INTERRUPT_TARGET_PC": "(810,480)",
+        "ILLEGAL_RETURN": "(2400,570)",
+    }
+    if any(
+        not core_connected(core_pin_locations[label], target)
+        for label, target in feedback_targets.items()
+    ):
+        raise VerificationError("AP-18 CPU interrupt-feedback paths differ from contract")
+
     expected_next_pc_pin = cpu_contract.get("core_next_pc_pin", {})
     if not expected_next_pc_pin or any(
         core_public_pins.get(label) != definition
@@ -602,6 +619,12 @@ def verify_system_circuit() -> None:
             "RETURN_REQUEST", f"({core_x},{core_y + 250})"),
         "core_next_pc_to_adapter": (
             "NEXT_PC", f"({core_x},{core_y + 270})"),
+        "interrupt_accept_to_core": (
+            "INTERRUPT_ACCEPT", f"({core_input_x},{core_y + 100})"),
+        "interrupt_target_pc_to_core": (
+            "TARGET_PC", f"({core_input_x},{core_y + 120})"),
+        "illegal_return_to_core": (
+            "ILLEGAL_RETURN", f"({core_input_x},{core_y + 140})"),
     }
     if cpu_contract.get("verified_core_paths") != list(required_core_paths) or not all(
             connected(cpu_pin_locations[source], target)

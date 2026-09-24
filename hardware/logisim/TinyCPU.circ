@@ -172,6 +172,19 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="USE_EXTERNAL_MEMORY"/>
     </comp>
+    <comp lib="0" loc="(800,460)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="INTERRUPT_ACCEPT"/>
+    </comp>
+    <comp lib="0" loc="(800,480)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="INTERRUPT_TARGET_PC"/>
+      <a name="width" val="12"/>
+    </comp>
+    <comp lib="0" loc="(2350,570)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="ILLEGAL_RETURN"/>
+    </comp>
     <comp lib="0" loc="(3570,930)" name="Constant">
       <a name="value" val="0x1"/>
     </comp>
@@ -668,6 +681,9 @@
     <wire from="(330,750)" to="(1090,750)"/>
     <wire from="(330,810)" to="(1120,810)"/>
     <wire from="(330,830)" to="(1100,830)"/>
+    <wire from="(800,460)" to="(810,460)"/>
+    <wire from="(800,480)" to="(810,480)"/>
+    <wire from="(2350,570)" to="(2400,570)"/>
     <wire from="(3300,970)" to="(3300,1700)"/>
     <wire from="(3300,970)" to="(3590,970)"/>
     <wire from="(3320,990)" to="(3320,1720)"/>
@@ -1457,6 +1473,15 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="DEC_HALT_ERROR"/>
     </comp>
+    <comp lib="0" loc="(500,450)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="INTERRUPT_ACCEPT"/>
+    </comp>
+    <comp lib="0" loc="(500,470)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="INTERRUPT_TARGET_PC"/>
+      <a name="width" val="12"/>
+    </comp>
     <comp lib="0" loc="(540,240)" name="Constant"/>
     <comp lib="0" loc="(710,240)" name="Constant">
       <a name="width" val="12"/>
@@ -1483,6 +1508,10 @@
       <a name="label" val="ERROR_HALT"/>
     </comp>
     <comp lib="2" loc="(870,240)" name="Multiplexer">
+      <a name="width" val="12"/>
+    </comp>
+    <comp lib="2" loc="(980,240)" name="Multiplexer">
+      <a name="label" val="INTERRUPT_PC_OVERRIDE"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="3" loc="(740,390)" name="Comparator">
@@ -1523,7 +1552,7 @@
     <wire from="(500,400)" to="(700,400)"/>
     <wire from="(500,430)" to="(930,430)"/>
     <wire from="(530,140)" to="(530,220)"/>
-    <wire from="(530,140)" to="(890,140)"/>
+    <wire from="(530,140)" to="(990,140)"/>
     <wire from="(530,220)" to="(550,220)"/>
     <wire from="(540,240)" to="(550,240)"/>
     <wire from="(580,280)" to="(580,290)"/>
@@ -1546,10 +1575,18 @@
     <wire from="(810,250)" to="(840,250)"/>
     <wire from="(850,260)" to="(850,340)"/>
     <wire from="(850,340)" to="(1140,340)"/>
-    <wire from="(870,240)" to="(890,240)"/>
+    <wire from="(870,240)" to="(930,240)"/>
+    <wire from="(930,230)" to="(930,240)"/>
+    <wire from="(930,230)" to="(950,230)"/>
+    <wire from="(500,470)" to="(920,470)"/>
+    <wire from="(920,250)" to="(920,470)"/>
+    <wire from="(920,250)" to="(950,250)"/>
+    <wire from="(500,450)" to="(960,450)"/>
+    <wire from="(960,260)" to="(960,450)"/>
+    <wire from="(980,240)" to="(990,240)"/>
+    <wire from="(990,140)" to="(990,240)"/>
     <wire from="(880,380)" to="(880,390)"/>
     <wire from="(880,390)" to="(930,390)"/>
-    <wire from="(890,140)" to="(890,240)"/>
     <wire from="(980,410)" to="(1140,410)"/>
   </circuit>
   <circuit name="FetchDecodeControls">
