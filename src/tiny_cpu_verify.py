@@ -429,8 +429,20 @@ def verify_system_circuit() -> None:
         component for component in core_definition.findall("comp[@name='Constant']")
         if core_connected(component.get("loc"), instruction_boundary)
     ]
+    boundary_constant_value = (
+        {
+            attribute.get("name"): attribute.get("val")
+            for attribute in boundary_constants[0].findall("a")
+        }.get("value", "0x0")
+        if len(boundary_constants) == 1
+        else None
+    )
     if (
         len(boundary_constants) != 1
+        # INSTRUCTION_BOUNDARY is deliberately asserted permanently.  An
+        # omitted Constant value defaults to zero in Logisim, which silently
+        # disables interrupt acceptance even though the net remains wired.
+        or boundary_constant_value != "0x1"
         or any(
             not core_connected(source, core_pin_locations[label])
             for label, source in interrupt_command_sources.items()
