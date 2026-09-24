@@ -469,12 +469,26 @@ def verify_system_circuit() -> None:
     feedback_targets = {
         "INTERRUPT_ACCEPT": "(810,460)",
         "INTERRUPT_TARGET_PC": "(810,480)",
-        "ILL_RET": "(2400,570)",
+        "ILL_RET": "(2340,560)",
     }
+    illegal_return_or = next(
+        (
+            component
+            for component in core_definition.findall("comp[@name='OR Gate']")
+            if {
+                attribute.get("name"): attribute.get("val")
+                for attribute in component.findall("a")
+            }.get("label") == "ILLEGAL_RETURN_OR"
+        ),
+        None,
+    )
     if any(
         not core_connected(core_pin_locations[label], target)
         for label, target in feedback_targets.items()
-    ):
+    ) or illegal_return_or is None or not all((
+        core_connected("(1400,1750)", "(2340,580)"),
+        core_connected(illegal_return_or.get("loc"), "(2400,570)"),
+    )):
         raise VerificationError("AP-18 CPU interrupt-feedback paths differ from contract")
 
     expected_next_pc_pin = cpu_contract.get("core_next_pc_pin", {})

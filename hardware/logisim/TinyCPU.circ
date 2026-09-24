@@ -181,7 +181,7 @@
       <a name="label" val="INTERRUPT_TARGET_PC"/>
       <a name="width" val="12"/>
     </comp>
-    <comp lib="0" loc="(2350,570)" name="Pin">
+    <comp lib="0" loc="(2200,560)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="ILL_RET"/>
     </comp>
@@ -350,6 +350,9 @@
     <comp lib="1" loc="(580,620)" name="OR Gate">
       <a name="inputs" val="3"/>
       <a name="label" val="MEMORY_WRITE_REQUEST"/>
+    </comp>
+    <comp lib="1" loc="(2370,570)" name="OR Gate">
+      <a name="label" val="ILLEGAL_RETURN_OR"/>
     </comp>
     <comp lib="2" loc="(1120,740)" name="Multiplexer">
       <a name="width" val="16"/>
@@ -683,7 +686,11 @@
     <wire from="(330,830)" to="(1100,830)"/>
     <wire from="(800,460)" to="(810,460)"/>
     <wire from="(800,480)" to="(810,480)"/>
-    <wire from="(2350,570)" to="(2400,570)"/>
+    <wire from="(1400,1750)" to="(1800,1750)"/>
+    <wire from="(1800,580)" to="(1800,1750)"/>
+    <wire from="(1800,580)" to="(2340,580)"/>
+    <wire from="(2200,560)" to="(2340,560)"/>
+    <wire from="(2370,570)" to="(2400,570)"/>
     <wire from="(3300,970)" to="(3300,1700)"/>
     <wire from="(3300,970)" to="(3590,970)"/>
     <wire from="(3320,990)" to="(3320,1720)"/>
@@ -1576,11 +1583,13 @@
     <wire from="(850,260)" to="(850,340)"/>
     <wire from="(850,340)" to="(1140,340)"/>
     <wire from="(870,240)" to="(930,240)"/>
-    <wire from="(930,230)" to="(930,240)"/>
-    <wire from="(930,230)" to="(950,230)"/>
-    <wire from="(500,470)" to="(920,470)"/>
-    <wire from="(920,250)" to="(920,470)"/>
-    <wire from="(920,250)" to="(950,250)"/>
+    <wire from="(930,240)" to="(930,250)"/>
+    <wire from="(930,250)" to="(950,250)"/>
+    <wire from="(500,470)" to="(620,470)"/>
+    <wire from="(620,470)" to="(620,490)"/>
+    <wire from="(620,490)" to="(920,490)"/>
+    <wire from="(920,230)" to="(920,490)"/>
+    <wire from="(920,230)" to="(950,230)"/>
     <wire from="(500,450)" to="(960,450)"/>
     <wire from="(960,260)" to="(960,450)"/>
     <wire from="(980,240)" to="(990,240)"/>

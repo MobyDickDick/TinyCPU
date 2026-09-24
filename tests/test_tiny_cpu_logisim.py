@@ -77,6 +77,31 @@ def _pin_location(circuit, label):
 
 class LogisimLauncherTests(unittest.TestCase):
 
+    def test_interrupt_pc_override_preserves_sequential_pc_when_inactive(self):
+        """Select zero must keep the normal next-PC path, not the IRQ target."""
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        fetch = root.find("circuit[@name='FetchDecode']")
+        self.assertIsNotNone(fetch)
+        override = _component_by_label(fetch, "INTERRUPT_PC_OVERRIDE")
+        # A classic two-input mux selects its lower data contact for select 0.
+        default_input = _point_offset(override, x=-30, y=10)
+        interrupt_input = _point_offset(override, x=-30, y=-10)
+        self.assertTrue(_wire_path_exists(fetch, "(870,240)", default_input))
+        self.assertTrue(
+            _wire_path_exists(
+                fetch,
+                _pin_location(fetch, "INTERRUPT_TARGET_PC"),
+                interrupt_input,
+            )
+        )
+        self.assertFalse(
+            _wire_path_exists(
+                fetch,
+                _pin_location(fetch, "INTERRUPT_TARGET_PC"),
+                default_input,
+            )
+        )
+
     def test_recovery_topology_regressions_reject_named_port_mutations(self):
         """Prove AP 20 repairs are guarded independently of canvas layout."""
         source = ROOT / "hardware/logisim/TinyCPU.circ"
