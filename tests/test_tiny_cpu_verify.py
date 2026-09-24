@@ -110,7 +110,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(620,680)" to="(820,680)"/>', "", 1), encoding="utf-8")
+            '<wire from="(650,680)" to="(820,680)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -128,7 +128,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(200,580)" to="(400,580)"/>', "", 1), encoding="utf-8")
+            '<wire from="(200,580)" to="(430,580)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -595,10 +595,10 @@ class CircuitVerificationTests(unittest.TestCase):
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
         terminals = (
-            "(620,350)", "(620,370)", "(1040,780)", "(1040,800)",
-            "(1040,820)", "(1040,840)", "(620,430)", "(1040,860)",
+            "(650,350)", "(650,370)", "(1040,780)", "(1040,800)",
+            "(1040,820)", "(1040,840)", "(650,430)", "(1040,860)",
             "(1040,880)", "(1040,900)", "(1040,920)", "(1040,940)",
-            "(620,540)", "(620,640)", "(620,600)",
+            "(650,540)", "(650,640)", "(650,600)",
         )
         for terminal in terminals:
             with self.subTest(cpu_hand_off=terminal):

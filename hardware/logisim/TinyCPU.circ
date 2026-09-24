@@ -350,6 +350,7 @@
     <comp lib="1" loc="(2180,400)" name="OR Gate">
       <a name="inputs" val="4"/>
       <a name="label" val="ILLEGAL_RETURN_OR"/>
+      <a name="labelloc" val="north"/>
     </comp>
     <comp lib="1" loc="(580,620)" name="OR Gate">
       <a name="inputs" val="3"/>
