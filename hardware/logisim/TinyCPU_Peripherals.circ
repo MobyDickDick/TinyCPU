@@ -176,159 +176,145 @@
     <a name="circuit" val="CPUIntegrationBoundary"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
     <a name="simulationFrequency" val="1.0"/>
-    <comp lib="0" loc="(280,150)" name="Pin">
+    <comp lib="0" loc="(310,160)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="CLK"/>
     </comp>
-    <comp lib="0" loc="(280,170)" name="Pin">
+    <comp lib="0" loc="(310,180)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="RESET"/>
     </comp>
-    <comp lib="0" loc="(280,200)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="RAM_READ_VALUE"/>
-      <a name="width" val="16"/>
-    </comp>
-    <comp lib="0" loc="(280,230)" name="Pin">
+    <comp lib="0" loc="(310,200)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="RAM_READ_VALID"/>
     </comp>
-    <comp lib="0" loc="(350,280)" name="Pin">
+    <comp lib="0" loc="(310,230)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="TARGET_PC"/>
       <a name="width" val="12"/>
     </comp>
-    <comp lib="0" loc="(290,580)" name="Pin">
+    <comp lib="0" loc="(310,260)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="ILL_RET"/>
+    </comp>
+    <comp lib="0" loc="(310,290)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="RAM_READ_VALUE"/>
+      <a name="width" val="16"/>
+    </comp>
+    <comp lib="0" loc="(310,320)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="INTERRUPT_ACCEPT"/>
+    </comp>
+    <comp lib="0" loc="(310,340)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="RAM_WRITE_ENABLE"/>
+    </comp>
+    <comp lib="0" loc="(310,580)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="CORE_ADDRESS"/>
       <a name="width" val="12"/>
     </comp>
-    <comp lib="0" loc="(290,670)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="RAM_WRITE_ENABLE"/>
-    </comp>
-    <comp lib="0" loc="(350,260)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="INTERRUPT_ACCEPT"/>
-    </comp>
-    <comp lib="0" loc="(350,300)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="ILL_RET"/>
-    </comp>
-    <comp lib="0" loc="(340,240)" name="Constant">
-      <a name="value" val="0x1"/>
-    </comp>
-    <comp lib="0" loc="(950,580)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="ADDRESS"/>
-      <a name="type" val="output"/>
-      <a name="width" val="12"/>
-    </comp>
-    <comp lib="0" loc="(950,630)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="WRITE_VALUE"/>
-      <a name="type" val="output"/>
-      <a name="width" val="16"/>
-    </comp>
-    <comp lib="0" loc="(950,700)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="WRITE_ENABLE"/>
-      <a name="type" val="output"/>
-    </comp>
-    <comp lib="0" loc="(950,730)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="WRITE_VALID"/>
-      <a name="type" val="output"/>
-    </comp>
-    <comp lib="0" loc="(950,760)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="INSTRUCTION_BOUNDARY"/>
-      <a name="type" val="output"/>
-    </comp>
-    <comp lib="0" loc="(950,790)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="ENABLE_REQUEST"/>
-      <a name="type" val="output"/>
-    </comp>
-    <comp lib="0" loc="(950,820)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="DISABLE_REQUEST"/>
-      <a name="type" val="output"/>
-    </comp>
-    <comp lib="0" loc="(950,880)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="RETURN_REQUEST"/>
-      <a name="type" val="output"/>
-    </comp>
-    <comp lib="0" loc="(950,950)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="NEXT_PC"/>
-      <a name="type" val="output"/>
-      <a name="width" val="12"/>
-    </comp>
-    <comp lib="0" loc="(950,160)" name="Pin">
+    <comp lib="0" loc="(670,160)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="READ_VALUE"/>
       <a name="type" val="output"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="0" loc="(950,220)" name="Pin">
+    <comp lib="0" loc="(670,220)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="WRITE_VALUE"/>
+      <a name="type" val="output"/>
+      <a name="width" val="16"/>
+    </comp>
+    <comp lib="0" loc="(670,280)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="READ_VALID"/>
       <a name="type" val="output"/>
     </comp>
+    <comp lib="0" loc="(670,300)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="WRITE_VALID"/>
+      <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(670,320)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="WRITE_ENABLE"/>
+      <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(670,340)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="INSTRUCTION_BOUNDARY"/>
+      <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(670,360)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="ENABLE_REQUEST"/>
+      <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(670,380)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="DISABLE_REQUEST"/>
+      <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(670,400)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="RETURN_REQUEST"/>
+      <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(670,480)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="NEXT_PC"/>
+      <a name="type" val="output"/>
+      <a name="width" val="12"/>
+    </comp>
+    <comp lib="0" loc="(670,580)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="ADDRESS"/>
+      <a name="type" val="output"/>
+      <a name="width" val="12"/>
+    </comp>
     <comp lib="10" loc="(630,160)" name="TinyCPUMain"/>
-    <wire from="(280,150)" to="(410,150)"/>
-    <wire from="(280,170)" to="(400,170)"/>
-    <wire from="(280,200)" to="(410,200)"/>
-    <wire from="(280,230)" to="(290,230)"/>
-    <wire from="(290,220)" to="(290,230)"/>
-    <wire from="(290,220)" to="(410,220)"/>
-    <wire from="(290,580)" to="(950,580)"/>
+    <wire from="(310,160)" to="(410,160)"/>
+    <wire from="(310,180)" to="(410,180)"/>
+    <wire from="(310,200)" to="(410,200)"/>
+    <wire from="(310,230)" to="(320,230)"/>
+    <wire from="(310,260)" to="(340,260)"/>
+    <wire from="(310,290)" to="(360,290)"/>
+    <wire from="(310,320)" to="(380,320)"/>
+    <wire from="(310,340)" to="(400,340)"/>
+    <wire from="(310,580)" to="(670,580)"/>
+    <wire from="(320,220)" to="(320,230)"/>
+    <wire from="(320,220)" to="(410,220)"/>
+    <wire from="(340,240)" to="(340,260)"/>
     <wire from="(340,240)" to="(410,240)"/>
-    <wire from="(350,260)" to="(410,260)"/>
-    <wire from="(350,280)" to="(410,280)"/>
-    <wire from="(350,300)" to="(410,300)"/>
-    <wire from="(400,170)" to="(400,180)"/>
-    <wire from="(400,180)" to="(410,180)"/>
-    <wire from="(410,150)" to="(410,160)"/>
-    <wire from="(630,160)" to="(950,160)"/>
-    <wire from="(630,220)" to="(950,220)"/>
-    <wire from="(630,280)" to="(760,280)"/>
-    <wire from="(630,310)" to="(780,310)"/>
-    <wire from="(630,330)" to="(800,330)"/>
-    <wire from="(630,350)" to="(820,350)"/>
-    <wire from="(820,350)" to="(820,760)"/>
-    <wire from="(950,760)" to="(820,760)"/>
-    <wire from="(630,370)" to="(840,370)"/>
-    <wire from="(840,370)" to="(840,790)"/>
-    <wire from="(950,790)" to="(840,790)"/>
-    <wire from="(630,390)" to="(860,390)"/>
-    <wire from="(860,390)" to="(860,820)"/>
-    <wire from="(950,820)" to="(860,820)"/>
-    <wire from="(630,410)" to="(880,410)"/>
-    <wire from="(880,410)" to="(880,880)"/>
-    <wire from="(950,880)" to="(880,880)"/>
-    <wire from="(630,430)" to="(900,430)"/>
-    <wire from="(900,430)" to="(900,950)"/>
-    <wire from="(950,950)" to="(900,950)"/>
-    <wire from="(950,630)" to="(760,630)"/>
-    <wire from="(760,280)" to="(760,630)"/>
-    <wire from="(950,730)" to="(780,730)"/>
-    <wire from="(780,310)" to="(780,730)"/>
-    <wire from="(950,700)" to="(800,700)"/>
-    <wire from="(800,330)" to="(800,700)"/>
+    <wire from="(360,260)" to="(360,290)"/>
+    <wire from="(360,260)" to="(410,260)"/>
+    <wire from="(380,280)" to="(380,320)"/>
+    <wire from="(380,280)" to="(410,280)"/>
+    <wire from="(400,300)" to="(400,340)"/>
+    <wire from="(400,300)" to="(410,300)"/>
+    <wire from="(630,160)" to="(670,160)"/>
+    <wire from="(630,220)" to="(670,220)"/>
+    <wire from="(630,280)" to="(670,280)"/>
+    <wire from="(630,300)" to="(670,300)"/>
+    <wire from="(630,320)" to="(670,320)"/>
+    <wire from="(630,340)" to="(670,340)"/>
+    <wire from="(630,360)" to="(670,360)"/>
+    <wire from="(630,380)" to="(670,380)"/>
+    <wire from="(630,400)" to="(670,400)"/>
+    <wire from="(630,480)" to="(670,480)"/>
   </circuit>
   <circuit name="OutputPort">
     <a name="appearance" val="logisim_evolution"/>
