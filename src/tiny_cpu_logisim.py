@@ -72,7 +72,7 @@ def autonomous_project(
         if label is None or label.get("val") not in {
             "CLK", "RESET", "HALTED", "HALTED_WITH_ERROR",
             "EXTERNAL_MEMORY_VALUE", "EXTERNAL_MEMORY_VALID", "USE_EXTERNAL_MEMORY",
-            "INTERRUPT_ACCEPT", "INTERRUPT_TARGET_PC", "ILLEGAL_RETURN",
+            "INTERRUPT_ACCEPT", "INTERRUPT_TARGET_PC", "ILL_RET",
         }:
             continue
         name = label.get("val", "")
@@ -112,7 +112,7 @@ def autonomous_project(
             )
         elif (name.startswith("EXTERNAL_MEMORY_")
               or name in {"USE_EXTERNAL_MEMORY", "INTERRUPT_ACCEPT",
-                          "INTERRUPT_TARGET_PC", "ILLEGAL_RETURN"}):
+                          "INTERRUPT_TARGET_PC", "ILL_RET"}):
             # The additive AP-18 interfaces are inactive in every autonomous
             # TinyCPU 1.0 fixture.  Drive them explicitly instead of relying on
             # a simulator-specific value for otherwise floating input pins.

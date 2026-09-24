@@ -185,6 +185,48 @@ class CircuitCheckTests(unittest.TestCase):
             messages,
         )
 
+    def test_detects_dangling_subcircuit_output_wire(self):
+        producer = ET.fromstring("""
+          <circuit name="Producer">
+            <comp lib="0" loc="(100,100)" name="Pin">
+              <a name="label" val="RESULT"/><a name="type" val="output"/>
+            </comp>
+          </circuit>
+        """)
+        circuit = ET.fromstring("""
+          <circuit name="Broken">
+            <comp loc="(200,100)" name="Producer"><a name="label" val="ALU"/></comp>
+            <wire from="(200,100)" to="(300,100)"/>
+          </circuit>
+        """)
+        messages = [issue.message for issue in inspect_circuit(
+            circuit, {"Producer": producer}
+        )]
+        self.assertEqual(
+            messages,
+            ["RESULT of ALU has a dangling output wire ending at (300, 100)"],
+        )
+
+    def test_accepts_subcircuit_output_wire_continued_at_a_bend(self):
+        producer = ET.fromstring("""
+          <circuit name="Producer">
+            <comp lib="0" loc="(100,100)" name="Pin">
+              <a name="label" val="RESULT"/><a name="type" val="output"/>
+            </comp>
+          </circuit>
+        """)
+        circuit = ET.fromstring("""
+          <circuit name="Connected">
+            <comp loc="(200,100)" name="Producer"/>
+            <comp lib="0" loc="(300,200)" name="Pin">
+              <a name="label" val="RESULT_OUT"/><a name="type" val="output"/>
+            </comp>
+            <wire from="(200,100)" to="(300,100)"/>
+            <wire from="(300,100)" to="(300,200)"/>
+          </circuit>
+        """)
+        self.assertEqual(inspect_circuit(circuit, {"Producer": producer}), [])
+
     def test_detects_16_bit_bus_connected_to_one_bit_output(self):
         producer = ET.fromstring("""
           <circuit name="Producer">
@@ -306,6 +348,12 @@ class CircuitCheckTests(unittest.TestCase):
             <circuit name="Top">
               <comp loc="(100,100)" name="Producer"><a name="label" val="LEFT"/></comp>
               <comp loc="(300,100)" name="Producer"><a name="label" val="RIGHT"/></comp>
+              <comp lib="0" loc="(200,100)" name="Pin">
+                <a name="label" val="LEFT_OUT"/><a name="type" val="output"/>
+              </comp>
+              <comp lib="0" loc="(300,140)" name="Pin">
+                <a name="label" val="RIGHT_OUT"/><a name="type" val="output"/>
+              </comp>
               <wire from="(100,100)" to="(200,100)"/>
               <wire from="(300,100)" to="(300,140)"/>
               <wire from="(200,100)" to="(300,100)"/>

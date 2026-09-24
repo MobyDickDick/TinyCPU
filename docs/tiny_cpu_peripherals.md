@@ -90,8 +90,8 @@ INTERRUPT_ACCEPT =
 Bei der Annahme führt die Maschine semantisch folgende Pseudo-Instruktion aus:
 
 ```text
-RETURN_ADDRESS       := NEXT_PC
-RETURN_ADDRESS_VALID := 1
+RET_ADDR       := NEXT_PC
+RET_ADDR_VALID := 1
 IN_INTERRUPT_HANDLER := 1
 INTERRUPT_ENABLED    := 0
 INTERRUPT_PENDING    := 0
@@ -110,20 +110,20 @@ Eine Rückkehr ist nur gültig, wenn alle drei Bedingungen erfüllt sind:
 VALID_RETURN =
     RETURN_REQUEST
     AND IN_INTERRUPT_HANDLER
-    AND RETURN_ADDRESS_VALID
+    AND RET_ADDR_VALID
 ```
 
 Bei einer gültigen Rückkehr gilt:
 
 ```text
-TARGET_PC            := RETURN_ADDRESS
-RETURN_ADDRESS_VALID := 0
+TARGET_PC            := RET_ADDR
+RET_ADDR_VALID := 0
 IN_INTERRUPT_HANDLER := 0
 INTERRUPT_ENABLED    := 1
 ```
 
 Ein `RETURN_REQUEST` außerhalb eines aktiven Handlers oder ohne gültige
-Rückkehradresse setzt `ILLEGAL_RETURN`. Verschachtelte Interrupts sind in dieser
+Rückkehradresse setzt `ILL_RET`. Verschachtelte Interrupts sind in dieser
 Referenzlösung ausdrücklich nicht vorgesehen.
 
 Kurz gesagt:
@@ -145,7 +145,7 @@ Systemprofil und der Debug-Trace machen sie ausdrücklich sichtbar:
 - `OUTPUT_PORT_VALUE` und `OUTPUT_PORT_VALID`;
 - `INTERRUPT_ENABLED` und `INTERRUPT_PENDING`;
 - `IN_INTERRUPT_HANDLER`;
-- `RETURN_ADDRESS` und `RETURN_ADDRESS_VALID`.
+- `RET_ADDR` und `RET_ADDR_VALID`.
 
 Diese Sichtbarkeit ist eine didaktische Anforderung: Ein Trace muss erklären
 können, warum die Referenzmaschine einen Interrupt annimmt, nach `0xff0`
@@ -168,7 +168,7 @@ Integrationsgrenze ein. Der Kern exportiert inzwischen Schreibwert,
 Schreibgültigkeit und Schreibfreigabe direkt von den drei Netzen, die auch
 seinen bisherigen RAM-Schreibpfad speisen. Die Interrupt-Rückkopplung ist nun vollständig elektrisch angebunden:
 `INTERRUPT_ACCEPT` wählt im Fetchpfad mit Vorrang `TARGET_PC` als nächsten
-Programmzähler, und `ILLEGAL_RETURN` setzt das vorhandene Sticky-Flag
+Programmzähler, und `ILL_RET` setzt das vorhandene Sticky-Flag
 `ERROR_ILL`. Damit enden die drei Rückleitungen nicht mehr unverbunden an der
 Integrationsgrenze. `CORE_ADDRESS` und `RAM_WRITE_ENABLE` bleiben dagegen
 vorläufige Adaptereingänge; die eigenständigen Bausteine sind deshalb noch

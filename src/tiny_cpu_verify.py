@@ -457,7 +457,7 @@ def verify_system_circuit() -> None:
     feedback_targets = {
         "INTERRUPT_ACCEPT": "(810,460)",
         "INTERRUPT_TARGET_PC": "(810,480)",
-        "ILLEGAL_RETURN": "(2400,570)",
+        "ILL_RET": "(2400,570)",
     }
     if any(
         not core_connected(core_pin_locations[label], target)
@@ -624,7 +624,7 @@ def verify_system_circuit() -> None:
         "interrupt_target_pc_to_core": (
             "TARGET_PC", f"({core_input_x},{core_y + 120})"),
         "illegal_return_to_core": (
-            "ILLEGAL_RETURN", f"({core_input_x},{core_y + 140})"),
+            "ILL_RET", f"({core_input_x},{core_y + 140})"),
     }
     if cpu_contract.get("verified_core_paths") != list(required_core_paths) or not all(
             connected(cpu_pin_locations[source], target)
@@ -878,9 +878,9 @@ def verify_system_circuit() -> None:
         "INTERRUPT_ENABLED": {"direction": "output", "bits": 1},
         "INTERRUPT_PENDING": {"direction": "output", "bits": 1},
         "IN_INTERRUPT_HANDLER": {"direction": "output", "bits": 1},
-        "RETURN_ADDRESS": {"direction": "output", "bits": address_bits},
-        "RETURN_ADDRESS_VALID": {"direction": "output", "bits": 1},
-        "ILLEGAL_RETURN": {"direction": "output", "bits": 1},
+        "RET_ADDR": {"direction": "output", "bits": address_bits},
+        "RET_ADDR_VALID": {"direction": "output", "bits": 1},
+        "ILL_RET": {"direction": "output", "bits": 1},
     }
     if interrupt_pins != expected_interrupt_pins:
         raise VerificationError(
@@ -900,7 +900,7 @@ def verify_system_circuit() -> None:
         for item in component.findall("a[@name='label']")
     }
     required_interrupt_labels = {
-        "RISING_EDGE_DETECT", "INTERRUPT_ACCEPT_GATE", "ILLEGAL_RETURN_GATE",
+        "RISING_EDGE_DETECT", "INTERRUPT_ACCEPT_GATE", "ILL_RET_GATE",
         "PENDING_SET_OR_HOLD", "PENDING_HOLD_UNTIL_ACCEPT",
         "MASK_HOLD", "MASK_NEXT", "VALID_RETURN_GATE",
         "RETURN_VALID_HOLD", "RETURN_VALID_NEXT", "HANDLER_HOLD",
