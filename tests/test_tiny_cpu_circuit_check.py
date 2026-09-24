@@ -35,6 +35,13 @@ class CircuitCheckTests(unittest.TestCase):
         """)
         self.assertEqual(inspect_wire_contacts(circuit), [])
 
+    def test_integrated_fetch_decoder_has_no_implicit_wire_contacts(self):
+        """Keep interrupt feedback away from the live PC feedback net."""
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        fetch = root.find("circuit[@name='FetchDecode']")
+        self.assertIsNotNone(fetch)
+        self.assertEqual(inspect_wire_contacts(fetch), [])
+
     def test_all_projects_have_no_static_gate_wiring_faults(self):
         projects = sorted((ROOT / "hardware/logisim").rglob("*.circ"))
         self.assertGreater(len(projects), 1)
