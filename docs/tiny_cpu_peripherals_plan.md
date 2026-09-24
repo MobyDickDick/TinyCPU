@@ -314,6 +314,14 @@ Kern- und Adapterpfad. Als nächster abgegrenzter Schritt folgen damit die
 Eingänge für Interruptannahme und Interruptziel, die den PC des Kerns
 prioritätsgerecht steuern.
 
+Die aktuelle Zeichnung macht außerdem eine noch offene Altlast sichtbar: Der
+Adresspfad beginnt weiterhin am ungetriebenen Platzhalter `CORE_ADDRESS`, und
+`RAM_WRITE_ENABLE` sowie `ILLEGAL_RETURN` enden innerhalb der Grenze. Diese
+blauen Netze sind keine bloße Darstellungsfrage. Vor einem elektrischen
+Systemtest müssen daher zuerst die echte Kernadresse exportiert, der private
+RAM-Schreibpfad von `RAM_WRITE_ENABLE` gesteuert und `ILLEGAL_RETURN` in den
+Sticky-Fehlerpfad aufgenommen werden.
+
 ## Kompatibilitätsfolgen
 
 1. TinyCPU 1.0, `tinycpu-machine-v1` und beide vorhandenen Hardwareprofile
