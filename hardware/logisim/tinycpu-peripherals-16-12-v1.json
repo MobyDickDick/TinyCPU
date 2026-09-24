@@ -90,7 +90,7 @@
           "direction": "input",
           "bits": 12
         },
-        "ILLEGAL_RETURN": {
+        "ILL_RET": {
           "direction": "input",
           "bits": 1
         }
@@ -182,7 +182,7 @@
           "direction": "input",
           "bits": 12
         },
-        "ILLEGAL_RETURN": {
+        "ILL_RET": {
           "direction": "input",
           "bits": 1
         }
@@ -320,11 +320,11 @@
       "direction": "output",
       "bits": 1
     },
-    "RETURN_ADDRESS": {
+    "RET_ADDR": {
       "direction": "output",
       "bits": 12
     },
-    "RETURN_ADDRESS_VALID": {
+    "RET_ADDR_VALID": {
       "direction": "output",
       "bits": 1
     }

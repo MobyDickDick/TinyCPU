@@ -442,7 +442,7 @@ class CircuitVerificationTests(unittest.TestCase):
             "READ_VALUE", "READ_VALID", "WRITE_VALUE", "WRITE_VALID",
             "WRITE_ENABLE", "INSTRUCTION_BOUNDARY", "ENABLE_REQUEST",
             "DISABLE_REQUEST", "RETURN_REQUEST", "NEXT_PC",
-            "INTERRUPT_ACCEPT", "TARGET_PC", "ILLEGAL_RETURN",
+            "INTERRUPT_ACCEPT", "TARGET_PC", "ILL_RET",
         ):
             with self.subTest(path=label):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))

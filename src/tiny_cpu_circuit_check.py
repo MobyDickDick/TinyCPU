@@ -293,6 +293,57 @@ def _unwired_multiplexer_input_issues(circuit: ET.Element) -> list[CircuitIssue]
     return issues
 
 
+def _dangling_subcircuit_output_issues(
+        circuit: ET.Element,
+        definitions: dict[str, ET.Element] | None = None) -> list[CircuitIssue]:
+    """Report a wire that leaves a generated-box output and ends in free space.
+
+    This deliberately checks only a single, direct wire.  Once a route has a
+    bend or a junction, deciding whether its far end is a primitive contact
+    requires the component-specific geometry which this conservative audit
+    intentionally does not guess.  The common drawing error this catches is
+    nevertheless important: dragging a short wire from a subcircuit output
+    and forgetting to connect it to its consumer.
+    """
+    if not definitions:
+        return []
+    wires = [(_point(wire.get("from", "")), _point(wire.get("to", "")))
+             for wire in circuit.findall("wire")]
+    component_locations = {
+        _point(component.get("loc", "")) for component in circuit.findall("comp")
+    }
+    output_labels = {}
+    for component in circuit.findall("comp"):
+        definition = definitions.get(component.get("name", ""))
+        if definition is None:
+            continue
+        drivers = _subcircuit_outputs(definition, component)
+        # Generated boxes with several ports use label-dependent spacing.  Do
+        # not pretend their terminal geometry is the uniform 20-pixel layout;
+        # the one-output case is exact and covers small FBoxes reliably.
+        if len(drivers) == 1:
+            output_labels[drivers[0].point] = drivers[0].label
+    net_drivers = _net_drivers(circuit, definitions)
+    issues = []
+    for start, end in wires:
+        for output, loose in ((start, end), (end, start)):
+            if output not in output_labels or loose in component_locations:
+                continue
+            if any(len(drivers) > 1 and any(
+                    driver.point == output for driver in drivers)
+                   for drivers in net_drivers.values()):
+                continue
+            # A continuation, branch, or crossing at the far end means that it
+            # is not dangling, even if no component itself is located there.
+            if sum(_on_segment(loose, wire) for wire in wires) != 1:
+                continue
+            issues.append(CircuitIssue(
+                circuit.get("name", "<unnamed>"),
+                f"{output_labels[output]} has a dangling output wire ending at {loose}",
+            ))
+    return issues
+
+
 def _net_drivers(circuit: ET.Element,
                  definitions: dict[str, ET.Element] | None = None,
                  omitted_wire: ET.Element | None = None) -> dict[Point, list[_Driver]]:
@@ -341,6 +392,7 @@ def inspect_circuit(circuit: ET.Element,
     issues.extend(_width_mismatch_issues(circuit, definitions))
     issues.extend(_undriven_gate_input_issues(circuit, definitions))
     issues.extend(_unwired_multiplexer_input_issues(circuit))
+    issues.extend(_dangling_subcircuit_output_issues(circuit, definitions))
     return issues
 
 

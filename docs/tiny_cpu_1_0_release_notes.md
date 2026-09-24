@@ -10,6 +10,10 @@ and offline verification tools. The release tag is `tinycpu-v1.0.0`.
   environment.
 - The stable 1.x boundary comprises the hardware profile, machine format,
   top-level `TinyCPUMain` pins, opcode table, and documented CLI entry points.
+- The TinyCPU 1.x instruction set and CPU feature set are complete. Further
+  1.x work is restricted to defect corrections, verification, documentation,
+  and compatibility maintenance; new instructions, registers, execution
+  modes, or CPU peripherals are explicitly out of scope.
 - The source and simulator archives list every payload byte in
   `tinycpu-inventory-v1.json`; the simulator archive retains the passed AP-12
   evidence and can be checked without a repository or network connection.

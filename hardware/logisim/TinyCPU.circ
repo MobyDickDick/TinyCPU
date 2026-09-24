@@ -183,7 +183,7 @@
     </comp>
     <comp lib="0" loc="(2350,570)" name="Pin">
       <a name="appearance" val="classic"/>
-      <a name="label" val="ILLEGAL_RETURN"/>
+      <a name="label" val="ILL_RET"/>
     </comp>
     <comp lib="0" loc="(3570,930)" name="Constant">
       <a name="value" val="0x1"/>

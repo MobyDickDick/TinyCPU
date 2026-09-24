@@ -312,7 +312,7 @@ anstelle des bisherigen vorläufigen Eingangs direkt zur Interruptsteuerung.
 Vertrag, Offline-Prüfer und zwei gezielte Leitungs-Mutationstests schützen den
 Kern- und Adapterpfad. Die Eingänge für Interruptannahme und Interruptziel steuern den PC des Kerns
 nun prioritätsgerecht: Ein angenommener Interrupt wählt `TARGET_PC` über einen
-zusätzlichen 12-Bit-Multiplexer, während `ILLEGAL_RETURN` den vorhandenen
+zusätzlichen 12-Bit-Multiplexer, während `ILL_RET` den vorhandenen
 Sticky-Fehlerpfad für illegale Operationen speist. Dieselben drei
 Rückkopplungen sind in Integrationsgrenze, Kern und eigenständigem
 `FetchDecode`-Diagnoseblatt durchgehend verdrahtet und werden vom Offline-Prüfer
