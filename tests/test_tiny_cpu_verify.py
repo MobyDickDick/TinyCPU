@@ -83,6 +83,26 @@ class CircuitVerificationTests(unittest.TestCase):
         ).getroot()
         self.assertEqual(project.findall(".//comp[@name='Tunnel']"), [])
 
+    def test_ap18_illegal_return_gate_label_does_not_cover_its_output(self) -> None:
+        project = VERIFY.ET.parse(
+            MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU.circ"
+        ).getroot()
+        main = project.find("circuit[@name='TinyCPUMain']")
+        self.assertIsNotNone(main)
+        illegal_return_or = next(
+            component
+            for component in main.findall("comp[@name='OR Gate']")
+            if {
+                attribute.get("name"): attribute.get("val")
+                for attribute in component.findall("a")
+            }.get("label") == "ILLEGAL_RETURN_OR"
+        )
+        attributes = {
+            attribute.get("name"): attribute.get("val")
+            for attribute in illegal_return_or.findall("a")
+        }
+        self.assertEqual(attributes.get("labelloc"), "north")
+
     def test_ap18_system_top_requires_public_state_wiring(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
