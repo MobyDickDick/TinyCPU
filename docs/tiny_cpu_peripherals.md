@@ -169,4 +169,10 @@ Schreibgültigkeit und Schreibfreigabe direkt von den drei Netzen, die auch
 seinen bisherigen RAM-Schreibpfad speisen. Die noch ausstehende elektrische
 Verbindung dieser Ausgänge und der vorbereiteten Befehls- und PC-Pfade bedeutet
 jedoch weiterhin, dass die eigenständigen Bausteine noch kein Nachweis einer
-vollständigen CPU-Integration sind.
+vollständigen CPU-Integration sind. Insbesondere sind `CORE_ADDRESS`,
+`RAM_WRITE_ENABLE`, `INTERRUPT_ACCEPT`, `TARGET_PC` und `ILLEGAL_RETURN`
+innerhalb der `CPUIntegrationBoundary` noch vorläufige, nicht mit dem Kern
+verbundene Eingänge. Die dadurch im Systembild blau dargestellten
+undefinierten Netze sind daher ein bekannter Integrationsfehler und dürfen
+nicht als fertige oder elektrisch abgenommene Peripherieschaltung verstanden
+werden.
