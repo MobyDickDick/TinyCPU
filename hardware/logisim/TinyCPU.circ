@@ -172,9 +172,7 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="USE_EXTERNAL_MEMORY"/>
     </comp>
-    <comp lib="0" loc="(3570,930)" name="Constant">
-      <a name="value" val="0x1"/>
-    </comp>
+    <comp lib="0" loc="(3570,930)" name="Constant"/>
     <comp lib="0" loc="(3590,1010)" name="Probe">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
@@ -217,7 +215,7 @@
       <a name="label" val="ERROR_INPUT"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(3590,1170)" name="Pin">
+    <comp lib="0" loc="(3590,1160)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="NEXT_PC"/>
@@ -627,8 +625,8 @@
     <wire from="(2760,240)" to="(2760,1300)"/>
     <wire from="(2780,740)" to="(2780,770)"/>
     <wire from="(2780,770)" to="(3590,770)"/>
-    <wire from="(2940,1170)" to="(3590,1170)"/>
-    <wire from="(2940,630)" to="(2940,1170)"/>
+    <wire from="(2940,1160)" to="(3590,1160)"/>
+    <wire from="(2940,630)" to="(2940,1160)"/>
     <wire from="(2950,1350)" to="(2960,1350)"/>
     <wire from="(2960,390)" to="(2960,1350)"/>
     <wire from="(2980,1130)" to="(3590,1130)"/>
