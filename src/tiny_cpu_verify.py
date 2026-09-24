@@ -254,23 +254,23 @@ def verify_system_circuit() -> None:
         )
     top_wires = {(wire.get("from"), wire.get("to")) for wire in circuit.findall("wire")}
     required_top_wires = {
-        ("(650,390)", "(810,390)"),  # output-port value state
+        ("(620,390)", "(810,390)"),  # output-port value state
         ("(790,410)", "(790,430)"),  # output-port validity state
         ("(790,430)", "(810,430)"),
-        ("(650,560)", "(820,560)"),  # pending state
-        ("(650,580)", "(820,580)"),  # mask state
-        ("(650,620)", "(820,620)"),  # return address
-        ("(650,660)", "(820,660)"),  # return-address validity
-        ("(650,680)", "(820,680)"),  # handler state
+        ("(620,560)", "(820,560)"),  # pending state
+        ("(620,580)", "(820,580)"),  # mask state
+        ("(620,620)", "(820,620)"),  # return address
+        ("(620,660)", "(820,660)"),  # return-address validity
+        ("(620,680)", "(820,680)"),  # handler state
         ("(200,470)", "(370,470)"),  # clock distribution
-        ("(370,470)", "(430,470)"),
+        ("(370,470)", "(400,470)"),
         ("(370,470)", "(370,560)"),
-        ("(370,560)", "(430,560)"),
+        ("(370,560)", "(400,560)"),
         ("(200,490)", "(390,490)"),  # reset distribution
-        ("(390,490)", "(430,490)"),
+        ("(390,490)", "(400,490)"),
         ("(390,490)", "(390,540)"),
-        ("(390,540)", "(430,540)"),
-        ("(200,580)", "(430,580)"),  # interrupt request
+        ("(390,540)", "(400,540)"),
+        ("(200,580)", "(400,580)"),  # interrupt request
     }
     if not required_top_wires <= top_wires:
         raise VerificationError(
@@ -298,21 +298,21 @@ def verify_system_circuit() -> None:
         return False
 
     required_top_paths = {
-        "memory_read_value_to_cpu": ("(650,350)", "(820,780)"),
-        "memory_read_valid_to_cpu": ("(650,370)", "(820,800)"),
-        "cpu_address_to_memory": ("(1040,780)", "(430,390)"),
-        "cpu_write_value_to_memory": ("(1040,800)", "(430,410)"),
-        "cpu_write_valid_to_memory": ("(1040,820)", "(430,430)"),
-        "cpu_write_enable_to_memory": ("(1040,840)", "(430,450)"),
-        "memory_ram_write_enable_to_cpu": ("(650,430)", "(820,860)"),
-        "cpu_instruction_boundary_to_interrupt": ("(1040,860)", "(430,600)"),
-        "cpu_enable_request_to_interrupt": ("(1040,880)", "(430,620)"),
-        "cpu_disable_request_to_interrupt": ("(1040,900)", "(430,640)"),
-        "cpu_return_request_to_interrupt": ("(1040,920)", "(430,660)"),
-        "cpu_next_pc_to_interrupt": ("(1040,940)", "(430,680)"),
-        "interrupt_accept_to_cpu": ("(650,540)", "(820,980)"),
-        "interrupt_target_pc_to_cpu": ("(650,640)", "(820,1060)"),
-        "interrupt_illegal_return_to_cpu": ("(650,600)", "(820,1040)"),
+        "memory_read_value_to_cpu": ("(620,350)", "(820,780)"),
+        "memory_read_valid_to_cpu": ("(620,370)", "(820,800)"),
+        "cpu_address_to_memory": ("(1040,780)", "(400,390)"),
+        "cpu_write_value_to_memory": ("(1040,800)", "(400,410)"),
+        "cpu_write_valid_to_memory": ("(1040,820)", "(400,430)"),
+        "cpu_write_enable_to_memory": ("(1040,840)", "(400,450)"),
+        "memory_ram_write_enable_to_cpu": ("(620,430)", "(820,860)"),
+        "cpu_instruction_boundary_to_interrupt": ("(1040,860)", "(400,600)"),
+        "cpu_enable_request_to_interrupt": ("(1040,880)", "(400,620)"),
+        "cpu_disable_request_to_interrupt": ("(1040,900)", "(400,640)"),
+        "cpu_return_request_to_interrupt": ("(1040,920)", "(400,660)"),
+        "cpu_next_pc_to_interrupt": ("(1040,940)", "(400,680)"),
+        "interrupt_accept_to_cpu": ("(620,540)", "(820,980)"),
+        "interrupt_target_pc_to_cpu": ("(620,640)", "(820,1060)"),
+        "interrupt_illegal_return_to_cpu": ("(620,600)", "(820,1040)"),
     }
     if cpu_contract.get("verified_top_level_paths") != list(required_top_paths) or not all(
             top_connected(*terminals) for terminals in required_top_paths.values()):
@@ -420,9 +420,9 @@ def verify_system_circuit() -> None:
     # FetchDecodeControls block.  Follow the generated FetchDecode output
     # terminals here; do not require the removed duplicate top-level decoder.
     interrupt_command_sources = {
-        "ENABLE_INTERRUPTS_REQUEST": "(1400,1910)",
-        "DISABLE_INTERRUPTS_REQUEST": "(1400,1930)",
-        "RETURN_FROM_INTERRUPT_REQUEST": "(1400,1950)",
+        "ENABLE_INTERRUPTS_REQUEST": "(1400,1930)",
+        "DISABLE_INTERRUPTS_REQUEST": "(1400,1950)",
+        "RETURN_FROM_INTERRUPT_REQUEST": "(1400,1970)",
     }
     instruction_boundary = core_pin_locations["INSTRUCTION_BOUNDARY"]
     boundary_constants = [
@@ -487,16 +487,16 @@ def verify_system_circuit() -> None:
         int, illegal_return_or.get("loc").strip("()").split(",")
     )
     illegal_return_inputs = (
-        f"({gate_x - 50},{gate_y - 10})",
-        f"({gate_x - 50},{gate_y + 10})",
+        f"({gate_x - 30},{gate_y - 10})",
+        f"({gate_x - 30},{gate_y + 10})",
     )
     if any(
         not core_connected(core_pin_locations[label], target)
         for label, target in feedback_targets.items()
     ) or not all((
         core_connected(core_pin_locations["ILL_RET"], illegal_return_inputs[0]),
-        core_connected("(1400,1730)", illegal_return_inputs[1]),
-        core_connected(illegal_return_or.get("loc"), "(2380,530)"),
+        core_connected("(1400,1750)", illegal_return_inputs[1]),
+        core_connected(illegal_return_or.get("loc"), "(2400,570)"),
     )):
         raise VerificationError("AP-18 CPU interrupt-feedback paths differ from contract")
 
@@ -550,8 +550,8 @@ def verify_system_circuit() -> None:
         raise VerificationError("AP-18 CPU external-memory selection paths differ from contract")
     selector_paths = []
     for label, external_pin, memory_output, consumer in (
-        ("EXTERNAL_MEMORY_VALUE_SELECT", "EXTERNAL_MEMORY_VALUE", "(990,620)", "(2390,990)"),
-        ("EXTERNAL_MEMORY_VALID_SELECT", "EXTERNAL_MEMORY_VALID", "(990,600)", "(2390,1010)"),
+        ("EXTERNAL_MEMORY_VALUE_SELECT", "EXTERNAL_MEMORY_VALUE", "(990,620)", "(2240,740)"),
+        ("EXTERNAL_MEMORY_VALID_SELECT", "EXTERNAL_MEMORY_VALID", "(990,600)", "(2360,800)"),
     ):
         selector = memory_selectors[label]
         selector_x, selector_y = map(int, selector.get("loc").strip("()").split(","))
@@ -568,9 +568,9 @@ def verify_system_circuit() -> None:
     if not all(selector_paths):
         raise VerificationError("AP-18 CPU external-memory selection paths differ from contract")
     memory_valid_output = memory_selectors["EXTERNAL_MEMORY_VALID_SELECT"].get("loc")
-    operations_memory_valid = "(2390,1010)"
+    operations_memory_valid = "(2410,1030)"
     datapath_acc_valid = "(2000,530)"
-    operations_acc_valid = "(2390,1030)"
+    operations_acc_valid = "(2410,1050)"
     if (
         not core_connected(memory_valid_output, operations_memory_valid)
         or not core_connected(datapath_acc_valid, operations_acc_valid)
@@ -748,7 +748,7 @@ def verify_system_circuit() -> None:
         ("(200,230)", "(290,230)"),
         ("(200,270)", "(310,270)"),
         ("(200,320)", "(480,320)"),
-        ("(200,350)", "(530,350)"),
+        ("(200,380)", "(530,380)"),
         ("(290,230)", "(290,250)"),
         ("(290,230)", "(560,230)"),
         ("(290,250)", "(310,250)"),
@@ -761,7 +761,7 @@ def verify_system_circuit() -> None:
         ("(480,280)", "(480,320)"),
         ("(480,280)", "(580,280)"),
         ("(530,190)", "(530,310)"),
-        ("(530,310)", "(530,350)"),
+        ("(530,310)", "(530,380)"),
         ("(530,310)", "(610,310)"),
         ("(560,130)", "(730,130)"),
         ("(560,230)", "(560,240)"),
