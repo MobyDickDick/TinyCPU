@@ -92,8 +92,9 @@ Verbindung zur Systemgrenze ist abgeschlossen. Ein eigener Systemopcode-
 Decoder im vollständigen Kern exportiert inzwischen auch Instruktionsgrenze,
 Interruptaktivierung, -deaktivierung und Rückkehr; diese vier Signale ersetzen
 die vorläufigen Befehlseingänge der Integrationsgrenze und sind durch einen
-gezielten Mutationstest geschützt. Der PC-Anschluss und die elektrische
-Systemabnahme sind noch offen.
+gezielten Mutationstest geschützt. Der Folge-PC des vollständigen Kerns ist ebenfalls direkt und
+mutationstestgeschützt an die Interruptsteuerung angebunden. Offen bleibt damit
+nur noch die elektrische Systemabnahme.
 Die dafür verbindliche
 elektrische Fallliste ist inzwischen versioniert, mit den übrigen
 Systemverträgen quergeprüft und deckt alle neuen Opcodes und Verhaltensfälle

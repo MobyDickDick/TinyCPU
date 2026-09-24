@@ -3394,3 +3394,24 @@ erfolgreiche Tabellenlogger-Lauf wird nicht als GUI-Kurztest umetikettiert.
 AP 20.8 gilt aufgrund der zweimal reproduzierbar grünen automatischen
 Endabnahme des aktuellen Hauptzweigstands vorläufig als abgeschlossen. Der
 externe Sichtnachweis wird zu einem späteren Zeitpunkt nachgeholt.
+
+
+#### Verdrahtungsprüfung nach der manuellen Neuanordnung
+
+- **Ausgangsstand:** `230a183763ac68685d9dccd8dd45d9ace7399690`
+- **Datum:** 23. September 2026
+
+Die manuelle Neuanordnung von `TinyCPUMain` wurde ohne Verschieben der
+Bauteile geprüft. Die sichtbaren Leitungen bilden die bisherigen Netze an den neuen
+Bausteinpositionen bis auf eine Unterbrechung weiterhin ab: Zwischen dem
+Befehlssplitter und `FetchDecodeControls` fehlte das kurze Teilstück von
+`(1020,420)` nach `(1050,420)`. Nur dieses Teilstück wurde ergänzt; kein
+Bauteil wurde verschoben. Außerdem war die versetzte Konstante für
+`INSTRUCTION_BOUNDARY` ohne ihren Wert `1` gespeichert worden und trieb dadurch
+`0`. Ihr Wert wurde am vorhandenen Standort wiederhergestellt. Der elektrische
+Prüfaufbau übernimmt die Position des beschrifteten `CLK`-Pins nun dynamisch,
+statt den früheren Ort `(330,340)` wieder in das temporäre Projekt einzusetzen.
+Die Mutationstests verfolgen nun die
+neuen Leitungsendpunkte für Sprünge, Halt, Operanden, Gültigkeit, Folge-PC und
+Interruptbefehle. Die nächste AP-18-Aufgabe ist damit nicht mehr der bereits
+verdrahtete Folge-PC, sondern die noch offene elektrische Systemabnahme.

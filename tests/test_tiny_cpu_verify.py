@@ -337,7 +337,7 @@ class CircuitVerificationTests(unittest.TestCase):
         project = ET.parse(core)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
         wire = next(item for item in main.findall("wire")
-                    if "(3800,1010)" in {item.get("from"), item.get("to")})
+                    if "(3590,1170)" in {item.get("from"), item.get("to")})
         main.remove(wire)
         project.write(core, encoding="utf-8", xml_declaration=True)
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
@@ -361,8 +361,8 @@ class CircuitVerificationTests(unittest.TestCase):
         core = temporary / "logisim" / "TinyCPU.circ"
         project = ET.parse(core)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
-        ET.SubElement(main, "wire", {"from": "(3450,930)", "to": "(3300,930)"})
-        ET.SubElement(main, "wire", {"from": "(3300,930)", "to": "(3300,390)"})
+        ET.SubElement(main, "wire", {"from": "(3570,930)", "to": "(2960,930)"})
+        ET.SubElement(main, "wire", {"from": "(2960,930)", "to": "(2960,390)"})
         project.write(core, encoding="utf-8", xml_declaration=True)
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
@@ -411,8 +411,8 @@ class CircuitVerificationTests(unittest.TestCase):
         project = ET.parse(core)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
         swaps = {
-            frozenset(("(2380,1040)", "(2650,1040)")): "(2650,1020)",
-            frozenset(("(2610,1020)", "(2650,1020)")): "(2650,1040)",
+            frozenset(("(2120,1050)", "(2410,1050)")): "(2410,1030)",
+            frozenset(("(2360,1030)", "(2410,1030)")): "(2410,1050)",
         }
         for wire in main.findall("wire"):
             replacement = swaps.get(frozenset((wire.get("from"), wire.get("to"))))

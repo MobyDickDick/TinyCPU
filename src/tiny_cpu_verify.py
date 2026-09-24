@@ -420,9 +420,9 @@ def verify_system_circuit() -> None:
     # FetchDecodeControls block.  Follow the generated FetchDecode output
     # terminals here; do not require the removed duplicate top-level decoder.
     interrupt_command_sources = {
-        "ENABLE_INTERRUPTS_REQUEST": "(1400,1920)",
-        "DISABLE_INTERRUPTS_REQUEST": "(1400,1940)",
-        "RETURN_FROM_INTERRUPT_REQUEST": "(1400,1960)",
+        "ENABLE_INTERRUPTS_REQUEST": "(1400,1930)",
+        "DISABLE_INTERRUPTS_REQUEST": "(1400,1950)",
+        "RETURN_FROM_INTERRUPT_REQUEST": "(1400,1970)",
     }
     instruction_boundary = core_pin_locations["INSTRUCTION_BOUNDARY"]
     boundary_constants = [
@@ -438,10 +438,10 @@ def verify_system_circuit() -> None:
         # Reject the accidental contacts from the first integration attempt:
         # the opcode feed touched an operand-control branch, while command
         # outputs touched the address-error rail.
-        or core_connected(boundary_constants[0].get("loc"), "(3300,390)")
+        or core_connected(boundary_constants[0].get("loc"), "(2960,390)")
         or core_connected(
             interrupt_command_sources["DISABLE_INTERRUPTS_REQUEST"],
-            "(3280,1450)",
+            "(2950,1350)",
         )
     ):
         raise VerificationError(
@@ -498,8 +498,8 @@ def verify_system_circuit() -> None:
         raise VerificationError("AP-18 CPU external-memory selection paths differ from contract")
     selector_paths = []
     for label, external_pin, memory_output, consumer in (
-        ("EXTERNAL_MEMORY_VALUE_SELECT", "EXTERNAL_MEMORY_VALUE", "(990,620)", "(2490,740)"),
-        ("EXTERNAL_MEMORY_VALID_SELECT", "EXTERNAL_MEMORY_VALID", "(990,600)", "(2610,800)"),
+        ("EXTERNAL_MEMORY_VALUE_SELECT", "EXTERNAL_MEMORY_VALUE", "(990,620)", "(2240,740)"),
+        ("EXTERNAL_MEMORY_VALID_SELECT", "EXTERNAL_MEMORY_VALID", "(990,600)", "(2360,800)"),
     ):
         selector = memory_selectors[label]
         selector_x, selector_y = map(int, selector.get("loc").strip("()").split(","))
@@ -516,9 +516,9 @@ def verify_system_circuit() -> None:
     if not all(selector_paths):
         raise VerificationError("AP-18 CPU external-memory selection paths differ from contract")
     memory_valid_output = memory_selectors["EXTERNAL_MEMORY_VALID_SELECT"].get("loc")
-    operations_memory_valid = "(2650,1020)"
-    datapath_acc_valid = "(2080,530)"
-    operations_acc_valid = "(2650,1040)"
+    operations_memory_valid = "(2410,1030)"
+    datapath_acc_valid = "(2000,530)"
+    operations_acc_valid = "(2410,1050)"
     if (
         not core_connected(memory_valid_output, operations_memory_valid)
         or not core_connected(datapath_acc_valid, operations_acc_valid)
