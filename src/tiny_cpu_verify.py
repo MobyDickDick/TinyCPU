@@ -469,7 +469,6 @@ def verify_system_circuit() -> None:
     feedback_targets = {
         "INTERRUPT_ACCEPT": "(810,460)",
         "INTERRUPT_TARGET_PC": "(810,480)",
-        "ILL_RET": "(2340,560)",
     }
     illegal_return_or = next(
         (
@@ -482,11 +481,21 @@ def verify_system_circuit() -> None:
         ),
         None,
     )
+    if illegal_return_or is None:
+        raise VerificationError("AP-18 CPU interrupt-feedback paths differ from contract")
+    gate_x, gate_y = map(
+        int, illegal_return_or.get("loc").strip("()").split(",")
+    )
+    illegal_return_inputs = (
+        f"({gate_x - 30},{gate_y - 10})",
+        f"({gate_x - 30},{gate_y + 10})",
+    )
     if any(
         not core_connected(core_pin_locations[label], target)
         for label, target in feedback_targets.items()
-    ) or illegal_return_or is None or not all((
-        core_connected("(1400,1750)", "(2340,580)"),
+    ) or not all((
+        core_connected(core_pin_locations["ILL_RET"], illegal_return_inputs[0]),
+        core_connected("(1400,1750)", illegal_return_inputs[1]),
         core_connected(illegal_return_or.get("loc"), "(2400,570)"),
     )):
         raise VerificationError("AP-18 CPU interrupt-feedback paths differ from contract")
