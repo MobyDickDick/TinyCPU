@@ -262,14 +262,10 @@ def verify_system_circuit() -> None:
         ("(650,620)", "(820,620)"),  # return address
         ("(650,660)", "(820,660)"),  # return-address validity
         ("(650,680)", "(820,680)"),  # handler state
-        ("(200,470)", "(370,470)"),  # clock distribution
-        ("(370,470)", "(430,470)"),
-        ("(370,470)", "(370,560)"),
-        ("(370,560)", "(430,560)"),
-        ("(200,490)", "(390,490)"),  # reset distribution
-        ("(390,490)", "(430,490)"),
-        ("(390,490)", "(390,540)"),
-        ("(390,540)", "(430,540)"),
+        ("(180,510)", "(430,510)"),  # memory-path clock
+        ("(180,560)", "(430,560)"),  # interrupt-controller clock
+        ("(190,530)", "(430,530)"),  # memory-path reset
+        ("(190,540)", "(430,540)"),  # interrupt-controller reset
         ("(200,580)", "(430,580)"),  # interrupt request
     }
     if not required_top_wires <= top_wires:
@@ -297,22 +293,28 @@ def verify_system_circuit() -> None:
                         pending.append(neighbour)
         return False
 
+    # Contacts are ordered by the pins' authored Y positions in each generated
+    # Logisim-evolution box.  Keeping these coordinates in the electrical
+    # contract catches a wire that merely reaches a box but lands on the wrong
+    # named port (the failure that originally produced red E/U rails here).
     required_top_paths = {
-        "memory_read_value_to_cpu": ("(650,350)", "(820,780)"),
-        "memory_read_valid_to_cpu": ("(650,370)", "(820,800)"),
-        "cpu_address_to_memory": ("(1040,780)", "(430,390)"),
-        "cpu_write_value_to_memory": ("(1040,800)", "(430,410)"),
-        "cpu_write_valid_to_memory": ("(1040,820)", "(430,430)"),
-        "cpu_write_enable_to_memory": ("(1040,840)", "(430,450)"),
-        "memory_ram_write_enable_to_cpu": ("(650,430)", "(820,860)"),
-        "cpu_instruction_boundary_to_interrupt": ("(1040,860)", "(430,600)"),
-        "cpu_enable_request_to_interrupt": ("(1040,880)", "(430,620)"),
-        "cpu_disable_request_to_interrupt": ("(1040,900)", "(430,640)"),
-        "cpu_return_request_to_interrupt": ("(1040,920)", "(430,660)"),
-        "cpu_next_pc_to_interrupt": ("(1040,940)", "(430,680)"),
-        "interrupt_accept_to_cpu": ("(650,540)", "(820,980)"),
-        "interrupt_target_pc_to_cpu": ("(650,640)", "(820,1060)"),
-        "interrupt_illegal_return_to_cpu": ("(650,600)", "(820,1040)"),
+        "clock_to_cpu": ("(200,470)", "(820,780)"),
+        "reset_to_cpu": ("(200,490)", "(820,800)"),
+        "memory_read_value_to_cpu": ("(650,350)", "(820,820)"),
+        "memory_read_valid_to_cpu": ("(650,370)", "(820,840)"),
+        "cpu_address_to_memory": ("(1040,820)", "(430,430)"),
+        "cpu_write_value_to_memory": ("(1040,840)", "(430,450)"),
+        "cpu_write_valid_to_memory": ("(1040,860)", "(430,470)"),
+        "cpu_write_enable_to_memory": ("(1040,880)", "(430,490)"),
+        "memory_ram_write_enable_to_cpu": ("(650,430)", "(820,940)"),
+        "cpu_instruction_boundary_to_interrupt": ("(1040,900)", "(430,600)"),
+        "cpu_enable_request_to_interrupt": ("(1040,920)", "(430,620)"),
+        "cpu_disable_request_to_interrupt": ("(1040,940)", "(430,640)"),
+        "cpu_return_request_to_interrupt": ("(1040,960)", "(430,660)"),
+        "cpu_next_pc_to_interrupt": ("(1040,980)", "(430,680)"),
+        "interrupt_accept_to_cpu": ("(650,540)", "(820,860)"),
+        "interrupt_target_pc_to_cpu": ("(650,640)", "(820,880)"),
+        "interrupt_illegal_return_to_cpu": ("(650,600)", "(820,900)"),
     }
     if cpu_contract.get("verified_top_level_paths") != list(required_top_paths) or not all(
             top_connected(*terminals) for terminals in required_top_paths.values()):

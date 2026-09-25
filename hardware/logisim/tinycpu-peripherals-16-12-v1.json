@@ -157,6 +157,8 @@
         "core_address_to_memory_address"
       ],
       "verified_top_level_paths": [
+        "clock_to_cpu",
+        "reset_to_cpu",
         "memory_read_value_to_cpu",
         "memory_read_valid_to_cpu",
         "cpu_address_to_memory",
