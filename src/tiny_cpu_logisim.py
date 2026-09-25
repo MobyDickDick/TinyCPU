@@ -123,6 +123,15 @@ def autonomous_project(
                 component.remove(item)
             if width is not None:
                 ET.SubElement(component, "a", {"name": "width", "val": width.get("val", "1")})
+            # Pin replacement must preserve the current circuit's explicit
+            # inactive levels.  In particular, Logisim's one-bit Constant
+            # defaults to one: that is required by the active-low adapter
+            # selects, but it falsely asserts the active-high ILL_RET input
+            # and makes JUMP_ERROR take its error branch in clean runs.
+            inactive_value = "0x0" if name == "ILL_RET" else "0x1"
+            ET.SubElement(
+                component, "a", {"name": "value", "val": inactive_value}
+            )
         elif name == halt_output:
             # Logisim's table,halt mode stops on an asserted output named halt.
             label.set("val", "halt")

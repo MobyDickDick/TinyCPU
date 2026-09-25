@@ -390,6 +390,41 @@ class LogisimLauncherTests(unittest.TestCase):
             self.assertIn("HALTED_WITH_ERROR", labels)
             self.assertNotIn("HALTED", labels)
 
+    def test_autonomous_project_drives_optional_inputs_inactive(self):
+        source = ROOT / "hardware/logisim/TinyCPU.circ"
+        inactive = {
+            "EXTERNAL_MEMORY_VALUE", "EXTERNAL_MEMORY_VALID",
+            "USE_EXTERNAL_MEMORY", "INTERRUPT_ACCEPT",
+            "INTERRUPT_TARGET_PC", "ILL_RET",
+        }
+        source_main = ET.parse(source).getroot().find("circuit[@name='TinyCPUMain']")
+        self.assertIsNotNone(source_main)
+        locations = {
+            component.get("loc"): _attributes(component).get("label")
+            for component in source_main.findall("comp[@name='Pin']")
+            if _attributes(component).get("label") in inactive
+        }
+        self.assertEqual(set(locations.values()), inactive)
+
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / source.name
+            autonomous_project(source, target, "TinyCPUMain")
+            generated_main = ET.parse(target).getroot().find(
+                "circuit[@name='TinyCPUMain']"
+            )
+            self.assertIsNotNone(generated_main)
+            constants = {
+                component.get("loc"): _attributes(component)
+                for component in generated_main.findall("comp[@name='Constant']")
+                if component.get("loc") in locations
+            }
+            self.assertEqual(set(constants), set(locations))
+            for location, attributes in constants.items():
+                name = locations[location]
+                with self.subTest(input=name):
+                    expected = "0x0" if name == "ILL_RET" else "0x1"
+                    self.assertEqual(attributes.get("value"), expected)
+
     def test_autonomous_project_can_stop_on_error_halt(self):
         source = ROOT / "hardware/logisim/TinyCPU.circ"
         with tempfile.TemporaryDirectory() as directory:
