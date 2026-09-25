@@ -434,36 +434,47 @@ def verify_system_circuit() -> None:
             "AP-18 CPU interrupt-command source contract differs from circuit interface"
         )
     instruction_boundary = core_pin_locations["INSTRUCTION_BOUNDARY"]
-    boundary_constants = [
-        component for component in core_definition.findall("comp[@name='Constant']")
-        if core_connected(component.get("loc"), instruction_boundary)
-    ]
-    boundary_constant_value = (
-        {
+    expected_boundary_source = {"location": "(3570,930)", "value": "0x1"}
+    boundary_source = cpu_contract.get("instruction_boundary_source", {})
+    if boundary_source != expected_boundary_source:
+        raise VerificationError(
+            "AP-18 instruction-boundary source contract differs from circuit interface"
+        )
+    boundary_constant = next(
+        (
+            component for component in core_definition.findall("comp[@name='Constant']")
+            if component.get("loc") == boundary_source["location"]
+        ),
+        None,
+    )
+    boundary_constant_value = None
+    if boundary_constant is not None:
+        boundary_constant_value = {
             attribute.get("name"): attribute.get("val")
-            for attribute in boundary_constants[0].findall("a")
+            for attribute in boundary_constant.findall("a")
         }.get("value", "0x0")
-        if len(boundary_constants) == 1
-        else None
+    boundary_source_connected = (
+        boundary_constant is not None
+        and core_connected(boundary_source["location"], instruction_boundary)
     )
     missing_interrupt_commands = [
         label for label, source in interrupt_command_sources.items()
         if not core_connected(source, core_pin_locations[label])
     ]
     boundary_touches_operand_control = (
-        len(boundary_constants) == 1
-        and core_connected(boundary_constants[0].get("loc"), "(2960,390)")
+        boundary_constant is not None
+        and core_connected(boundary_source["location"], "(2960,390)")
     )
     disable_touches_address_error = core_connected(
         interrupt_command_sources["DISABLE_INTERRUPTS_REQUEST"],
         "(2950,1350)",
     )
     if (
-        len(boundary_constants) != 1
+        not boundary_source_connected
         # INSTRUCTION_BOUNDARY is deliberately asserted permanently.  An
         # omitted Constant value defaults to zero in Logisim, which silently
         # disables interrupt acceptance even though the net remains wired.
-        or boundary_constant_value != "0x1"
+        or boundary_constant_value != boundary_source["value"]
         or missing_interrupt_commands
         # Reject the accidental contacts from the first integration attempt:
         # the opcode feed touched an operand-control branch, while command
@@ -472,10 +483,15 @@ def verify_system_circuit() -> None:
         or disable_touches_address_error
     ):
         details = []
-        if len(boundary_constants) != 1:
-            details.append(f"boundary constants={len(boundary_constants)}")
-        elif boundary_constant_value != "0x1":
-            details.append(f"boundary constant={boundary_constant_value}")
+        if boundary_constant is None:
+            details.append("boundary source missing")
+        elif not boundary_source_connected:
+            details.append("boundary source disconnected")
+        elif boundary_constant_value != boundary_source["value"]:
+            details.append(
+                f"boundary constant={boundary_constant_value}, "
+                f"expected={boundary_source['value']}"
+            )
         if missing_interrupt_commands:
             details.append("missing=" + ",".join(missing_interrupt_commands))
         if boundary_touches_operand_control:

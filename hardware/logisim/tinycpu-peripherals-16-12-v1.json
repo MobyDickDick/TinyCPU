@@ -133,6 +133,10 @@
         "DISABLE_INTERRUPTS_REQUEST": "(1400,1950)",
         "RETURN_FROM_INTERRUPT_REQUEST": "(1400,1970)"
       },
+      "instruction_boundary_source": {
+        "location": "(3570,930)",
+        "value": "0x1"
+      },
       "core_next_pc_pin": {
         "NEXT_PC": {
           "direction": "output",
