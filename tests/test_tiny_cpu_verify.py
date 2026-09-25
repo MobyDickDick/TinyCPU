@@ -344,6 +344,33 @@ class CircuitVerificationTests(unittest.TestCase):
                     ):
                         VERIFY.verify_system_circuit()
 
+    def test_ap18_interrupt_command_sources_belong_to_contract(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        contract_path = temporary / "logisim" / "tinycpu-peripherals-16-12-v1.json"
+        contract = json.loads(contract_path.read_text(encoding="utf-8"))
+        contract["components"]["cpu_integration"][
+            "core_interrupt_command_sources"
+        ]["ENABLE_INTERRUPTS_REQUEST"] = "(0,0)"
+        contract_path.write_text(json.dumps(contract), encoding="utf-8")
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+             mock.patch.object(
+                 VERIFY,
+                 "load_system_profile",
+                 return_value=replace(
+                     system,
+                     circuit_path=temporary / "logisim" / "TinyCPU_Peripherals.circ",
+                 ),
+             ):
+            with self.assertRaisesRegex(
+                VERIFY.VerificationError,
+                "interrupt-command source contract differs",
+            ):
+                VERIFY.verify_system_circuit()
+
     def test_ap18_interrupt_decoder_may_move_without_changing_its_contract(self) -> None:
         """The redrawn FetchDecode command paths remain electrically valid."""
         VERIFY.verify_system_circuit()

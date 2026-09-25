@@ -421,11 +421,18 @@ def verify_system_circuit() -> None:
     # The redraw moved the three system-opcode decodes into the existing
     # FetchDecodeControls block.  Follow the generated FetchDecode output
     # terminals here; do not require the removed duplicate top-level decoder.
-    interrupt_command_sources = {
+    expected_interrupt_command_sources = {
         "ENABLE_INTERRUPTS_REQUEST": "(1400,1930)",
         "DISABLE_INTERRUPTS_REQUEST": "(1400,1950)",
         "RETURN_FROM_INTERRUPT_REQUEST": "(1400,1970)",
     }
+    interrupt_command_sources = cpu_contract.get(
+        "core_interrupt_command_sources", {}
+    )
+    if interrupt_command_sources != expected_interrupt_command_sources:
+        raise VerificationError(
+            "AP-18 CPU interrupt-command source contract differs from circuit interface"
+        )
     instruction_boundary = core_pin_locations["INSTRUCTION_BOUNDARY"]
     boundary_constants = [
         component for component in core_definition.findall("comp[@name='Constant']")
@@ -439,27 +446,45 @@ def verify_system_circuit() -> None:
         if len(boundary_constants) == 1
         else None
     )
+    missing_interrupt_commands = [
+        label for label, source in interrupt_command_sources.items()
+        if not core_connected(source, core_pin_locations[label])
+    ]
+    boundary_touches_operand_control = (
+        len(boundary_constants) == 1
+        and core_connected(boundary_constants[0].get("loc"), "(2960,390)")
+    )
+    disable_touches_address_error = core_connected(
+        interrupt_command_sources["DISABLE_INTERRUPTS_REQUEST"],
+        "(2950,1350)",
+    )
     if (
         len(boundary_constants) != 1
         # INSTRUCTION_BOUNDARY is deliberately asserted permanently.  An
         # omitted Constant value defaults to zero in Logisim, which silently
         # disables interrupt acceptance even though the net remains wired.
         or boundary_constant_value != "0x1"
-        or any(
-            not core_connected(source, core_pin_locations[label])
-            for label, source in interrupt_command_sources.items()
-        )
+        or missing_interrupt_commands
         # Reject the accidental contacts from the first integration attempt:
         # the opcode feed touched an operand-control branch, while command
         # outputs touched the address-error rail.
-        or core_connected(boundary_constants[0].get("loc"), "(2960,390)")
-        or core_connected(
-            interrupt_command_sources["DISABLE_INTERRUPTS_REQUEST"],
-            "(2950,1350)",
-        )
+        or boundary_touches_operand_control
+        or disable_touches_address_error
     ):
+        details = []
+        if len(boundary_constants) != 1:
+            details.append(f"boundary constants={len(boundary_constants)}")
+        elif boundary_constant_value != "0x1":
+            details.append(f"boundary constant={boundary_constant_value}")
+        if missing_interrupt_commands:
+            details.append("missing=" + ",".join(missing_interrupt_commands))
+        if boundary_touches_operand_control:
+            details.append("boundary touches operand control")
+        if disable_touches_address_error:
+            details.append("disable touches address-error rail")
         raise VerificationError(
-            "AP-18 CPU interrupt-command paths differ from contract"
+            "AP-18 CPU interrupt-command paths differ from contract: "
+            + "; ".join(details)
         )
 
     expected_feedback_pins = cpu_contract.get("core_interrupt_feedback_pins", {})

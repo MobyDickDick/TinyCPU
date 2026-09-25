@@ -128,6 +128,11 @@
           "bits": 1
         }
       },
+      "core_interrupt_command_sources": {
+        "ENABLE_INTERRUPTS_REQUEST": "(1400,1930)",
+        "DISABLE_INTERRUPTS_REQUEST": "(1400,1950)",
+        "RETURN_FROM_INTERRUPT_REQUEST": "(1400,1970)"
+      },
       "core_next_pc_pin": {
         "NEXT_PC": {
           "direction": "output",
