@@ -30,10 +30,6 @@
           "direction": "input",
           "bits": 1
         },
-        "CORE_ADDRESS": {
-          "direction": "input",
-          "bits": 12
-        },
         "READ_VALUE": {
           "direction": "output",
           "bits": 16
@@ -56,10 +52,6 @@
         },
         "WRITE_ENABLE": {
           "direction": "output",
-          "bits": 1
-        },
-        "RAM_WRITE_ENABLE": {
-          "direction": "input",
           "bits": 1
         },
         "INSTRUCTION_BOUNDARY": {
@@ -151,11 +143,10 @@
         "core_next_pc_to_adapter",
         "interrupt_accept_to_core",
         "interrupt_target_pc_to_core",
-        "illegal_return_to_core"
+        "illegal_return_to_core",
+        "core_address_to_adapter"
       ],
-      "verified_paths": [
-        "core_address_to_memory_address"
-      ],
+      "verified_paths": [],
       "verified_top_level_paths": [
         "memory_read_value_to_cpu",
         "memory_read_valid_to_cpu",
@@ -163,7 +154,6 @@
         "cpu_write_value_to_memory",
         "cpu_write_valid_to_memory",
         "cpu_write_enable_to_memory",
-        "memory_ram_write_enable_to_cpu",
         "cpu_instruction_boundary_to_interrupt",
         "cpu_enable_request_to_interrupt",
         "cpu_disable_request_to_interrupt",
@@ -185,6 +175,12 @@
         "ILL_RET": {
           "direction": "input",
           "bits": 1
+        }
+      },
+      "core_address_pin": {
+        "EXTERNAL_ADDRESS": {
+          "direction": "output",
+          "bits": 16
         }
       }
     },

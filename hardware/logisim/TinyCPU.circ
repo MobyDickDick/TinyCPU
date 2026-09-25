@@ -156,7 +156,9 @@
       <a name="label" val="EXTERNAL_MEMORY_VALUE"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="0" loc="(3490,910)" name="Constant"/>
+    <comp lib="0" loc="(3490,910)" name="Constant">
+      <a name="value" val="0x1"/>
+    </comp>
     <comp lib="0" loc="(3510,1010)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
@@ -235,6 +237,13 @@
       <a name="facing" val="west"/>
       <a name="label" val="HALTED_WITH_ERROR"/>
       <a name="type" val="output"/>
+    </comp>
+    <comp lib="0" loc="(3510,1850)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="EXTERNAL_ADDRESS"/>
+      <a name="type" val="output"/>
+      <a name="width" val="16"/>
     </comp>
     <comp lib="0" loc="(3510,200)" name="Pin">
       <a name="appearance" val="classic"/>
@@ -759,6 +768,9 @@
     <wire from="(860,640)" to="(880,640)"/>
     <wire from="(900,420)" to="(920,420)"/>
     <wire from="(910,440)" to="(920,440)"/>
+    <wire from="(2740,220)" to="(3600,220)"/>
+    <wire from="(3600,220)" to="(3600,1850)"/>
+    <wire from="(3510,1850)" to="(3600,1850)"/>
   </circuit>
   <circuit name="EffectiveAddress">
     <a name="appearance" val="logisim_evolution"/>

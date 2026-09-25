@@ -298,21 +298,20 @@ def verify_system_circuit() -> None:
         return False
 
     required_top_paths = {
-        "memory_read_value_to_cpu": ("(650,350)", "(820,780)"),
-        "memory_read_valid_to_cpu": ("(650,370)", "(820,800)"),
-        "cpu_address_to_memory": ("(1040,780)", "(430,390)"),
-        "cpu_write_value_to_memory": ("(1040,800)", "(430,410)"),
-        "cpu_write_valid_to_memory": ("(1040,820)", "(430,430)"),
-        "cpu_write_enable_to_memory": ("(1040,840)", "(430,450)"),
-        "memory_ram_write_enable_to_cpu": ("(650,430)", "(820,860)"),
-        "cpu_instruction_boundary_to_interrupt": ("(1040,860)", "(430,600)"),
-        "cpu_enable_request_to_interrupt": ("(1040,880)", "(430,620)"),
-        "cpu_disable_request_to_interrupt": ("(1040,900)", "(430,640)"),
-        "cpu_return_request_to_interrupt": ("(1040,920)", "(430,660)"),
-        "cpu_next_pc_to_interrupt": ("(1040,940)", "(430,680)"),
-        "interrupt_accept_to_cpu": ("(650,540)", "(820,980)"),
-        "interrupt_target_pc_to_cpu": ("(650,640)", "(820,1060)"),
-        "interrupt_illegal_return_to_cpu": ("(650,600)", "(820,1040)"),
+        "memory_read_value_to_cpu": ("(650,350)", "(820,840)"),
+        "memory_read_valid_to_cpu": ("(650,370)", "(820,860)"),
+        "cpu_address_to_memory": ("(1040,940)", "(430,390)"),
+        "cpu_write_value_to_memory": ("(1040,760)", "(430,410)"),
+        "cpu_write_valid_to_memory": ("(1040,800)", "(430,430)"),
+        "cpu_write_enable_to_memory": ("(1040,820)", "(430,450)"),
+        "cpu_instruction_boundary_to_interrupt": ("(1040,840)", "(430,600)"),
+        "cpu_enable_request_to_interrupt": ("(1040,860)", "(430,620)"),
+        "cpu_disable_request_to_interrupt": ("(1040,880)", "(430,640)"),
+        "cpu_return_request_to_interrupt": ("(1040,900)", "(430,660)"),
+        "cpu_next_pc_to_interrupt": ("(1040,920)", "(430,680)"),
+        "interrupt_accept_to_cpu": ("(650,540)", "(820,800)"),
+        "interrupt_target_pc_to_cpu": ("(650,640)", "(820,820)"),
+        "interrupt_illegal_return_to_cpu": ("(650,600)", "(820,780)"),
     }
     if cpu_contract.get("verified_top_level_paths") != list(required_top_paths) or not all(
             top_connected(*terminals) for terminals in required_top_paths.values()):
@@ -359,8 +358,12 @@ def verify_system_circuit() -> None:
         "EXTERNAL_MEMORY_VALID": {"direction": "input", "bits": 1},
         "USE_EXTERNAL_MEMORY": {"direction": "input", "bits": 1},
     }
-    if any(core_public_pins.get(label) != definition
-           for label, definition in expected_external_memory_pins.items()):
+    expected_address_pin = cpu_contract.get("core_address_pin", {})
+    if (any(core_public_pins.get(label) != definition
+            for label, definition in expected_external_memory_pins.items())
+            or not expected_address_pin
+            or any(core_public_pins.get(label) != definition
+                   for label, definition in expected_address_pin.items())):
         raise VerificationError("AP-18 CPU external-memory interface differs from contract")
     core_wires = {
         frozenset((wire.get("from"), wire.get("to")))
@@ -396,9 +399,9 @@ def verify_system_circuit() -> None:
     # write-enable inputs of the core's private RAM.  Exporting those exact
     # nets keeps the system adapter atomic and avoids a second write decoder.
     external_write_sources = {
-        "EXTERNAL_WRITE_VALUE": "(690,680)",
-        "EXTERNAL_WRITE_VALID": "(710,660)",
-        "EXTERNAL_WRITE_ENABLE": "(580,620)",
+        "EXTERNAL_WRITE_VALUE": "(800,680)",
+        "EXTERNAL_WRITE_VALID": "(820,660)",
+        "EXTERNAL_WRITE_ENABLE": "(690,620)",
     }
     if any(
         not core_connected(source, core_pin_locations[label])
@@ -467,8 +470,8 @@ def verify_system_circuit() -> None:
     ):
         raise VerificationError("AP-18 CPU interrupt-feedback interface differs from contract")
     feedback_targets = {
-        "INTERRUPT_ACCEPT": "(810,460)",
-        "INTERRUPT_TARGET_PC": "(810,480)",
+        "INTERRUPT_ACCEPT": "(920,460)",
+        "INTERRUPT_TARGET_PC": "(920,480)",
     }
     illegal_return_or = next(
         (
@@ -483,13 +486,7 @@ def verify_system_circuit() -> None:
     )
     if illegal_return_or is None:
         raise VerificationError("AP-18 CPU interrupt-feedback paths differ from contract")
-    gate_x, gate_y = map(
-        int, illegal_return_or.get("loc").strip("()").split(",")
-    )
-    illegal_return_inputs = (
-        f"({gate_x - 50},{gate_y - 10})",
-        f"({gate_x - 50},{gate_y + 10})",
-    )
+    illegal_return_inputs = ("(2130,390)", "(2130,410)")
     if any(
         not core_connected(core_pin_locations[label], target)
         for label, target in feedback_targets.items()
@@ -508,7 +505,7 @@ def verify_system_circuit() -> None:
         raise VerificationError("AP-18 CPU next-PC interface differs from contract")
     if (
         any(component.get("name") == "Tunnel" for component in core_definition.findall("comp"))
-        or not core_connected("(1130,390)", core_pin_locations["NEXT_PC"])
+        or not core_connected("(1240,390)", core_pin_locations["NEXT_PC"])
     ):
         raise VerificationError("AP-18 CPU next-PC path differs from contract")
 
@@ -550,8 +547,8 @@ def verify_system_circuit() -> None:
         raise VerificationError("AP-18 CPU external-memory selection paths differ from contract")
     selector_paths = []
     for label, external_pin, memory_output, consumer in (
-        ("EXTERNAL_MEMORY_VALUE_SELECT", "EXTERNAL_MEMORY_VALUE", "(990,620)", "(2390,990)"),
-        ("EXTERNAL_MEMORY_VALID_SELECT", "EXTERNAL_MEMORY_VALID", "(990,600)", "(2390,1010)"),
+        ("EXTERNAL_MEMORY_VALUE_SELECT", "EXTERNAL_MEMORY_VALUE", "(1100,620)", "(2390,990)"),
+        ("EXTERNAL_MEMORY_VALID_SELECT", "EXTERNAL_MEMORY_VALID", "(1100,600)", "(2390,1010)"),
     ):
         selector = memory_selectors[label]
         selector_x, selector_y = map(int, selector.get("loc").strip("()").split(","))
@@ -599,9 +596,7 @@ def verify_system_circuit() -> None:
     for component in cpu_boundary.findall("comp[@name='Pin']"):
         attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
         cpu_pin_locations[attributes.get("label", "")] = component.get("loc")
-    required_cpu_paths = {
-        "core_address_to_memory_address": ("CORE_ADDRESS", "ADDRESS"),
-    }
+    required_cpu_paths = {}
     def connected(start: str, target: str) -> bool:
         pending = [start]
         visited = {start}
@@ -627,9 +622,9 @@ def verify_system_circuit() -> None:
         "clock_to_core": ("CLK", f"({core_input_x},{core_y})"),
         "reset_to_core": ("RESET", f"({core_input_x},{core_y + 20})"),
         "adapter_read_value_to_core": (
-            "RAM_READ_VALUE", f"({core_input_x},{core_y + 40})"),
+            "RAM_READ_VALUE", f"({core_input_x},{core_y + 100})"),
         "adapter_read_valid_to_core": (
-            "RAM_READ_VALID", f"({core_input_x},{core_y + 60})"),
+            "RAM_READ_VALID", f"({core_input_x},{core_y + 120})"),
         # With the generated appearance anchored at its output edge,
         # TinyCPUMain exposes the addressed memory value used by
         # PRINT_ADDRESS at the instance x coordinate and its validity 60
@@ -637,42 +632,49 @@ def verify_system_circuit() -> None:
         "core_read_value_to_adapter": (
             "READ_VALUE", f"({core_x},{core_y})"),
         "core_read_valid_to_adapter": (
-            "READ_VALID", f"({core_x},{core_y + 60})"),
+            "READ_VALID", f"({core_x},{core_y + 40})"),
         "core_write_value_to_adapter": (
-            "WRITE_VALUE", f"({core_x},{core_y + 120})"),
+            "WRITE_VALUE", f"({core_x},{core_y + 60})"),
         "core_write_valid_to_adapter": (
-            "WRITE_VALID", f"({core_x},{core_y + 150})"),
+            "WRITE_VALID", f"({core_x},{core_y + 80})"),
         "core_write_enable_to_adapter": (
-            "WRITE_ENABLE", f"({core_x},{core_y + 170})"),
+            "WRITE_ENABLE", f"({core_x},{core_y + 100})"),
         "core_instruction_boundary_to_adapter": (
-            "INSTRUCTION_BOUNDARY", f"({core_x},{core_y + 190})"),
+            "INSTRUCTION_BOUNDARY", f"({core_x},{core_y + 120})"),
         "core_enable_request_to_adapter": (
-            "ENABLE_REQUEST", f"({core_x},{core_y + 210})"),
+            "ENABLE_REQUEST", f"({core_x},{core_y + 140})"),
         "core_disable_request_to_adapter": (
-            "DISABLE_REQUEST", f"({core_x},{core_y + 230})"),
+            "DISABLE_REQUEST", f"({core_x},{core_y + 160})"),
         "core_return_request_to_adapter": (
-            "RETURN_REQUEST", f"({core_x},{core_y + 250})"),
+            "RETURN_REQUEST", f"({core_x},{core_y + 180})"),
         "core_next_pc_to_adapter": (
-            "NEXT_PC", f"({core_x},{core_y + 270})"),
+            "NEXT_PC", f"({core_x},{core_y + 320})"),
+
         "interrupt_accept_to_core": (
-            "INTERRUPT_ACCEPT", f"({core_input_x},{core_y + 100})"),
+            "INTERRUPT_ACCEPT", f"({core_input_x},{core_y + 60})"),
         "interrupt_target_pc_to_core": (
-            "TARGET_PC", f"({core_input_x},{core_y + 120})"),
+            "TARGET_PC", f"({core_input_x},{core_y + 80})"),
         "illegal_return_to_core": (
-            "ILL_RET", f"({core_input_x},{core_y + 140})"),
+            "ILL_RET", f"({core_input_x},{core_y + 40})"),
     }
-    if cpu_contract.get("verified_core_paths") != list(required_core_paths) or not all(
-            connected(cpu_pin_locations[source], target)
-            for source, target in required_core_paths.values()):
+    address_path_valid = (
+        connected(f"({core_x},{core_y + 420})", "(700,580)")
+        and connected("(720,560)", cpu_pin_locations["ADDRESS"])
+    )
+    verified_core_paths = list(required_core_paths) + ["core_address_to_adapter"]
+    if (cpu_contract.get("verified_core_paths") != verified_core_paths
+            or not address_path_valid or not all(
+                connected(cpu_pin_locations[source], target)
+                for source, target in required_core_paths.values())):
         raise VerificationError(
             f"{display_path(system.circuit_path)}: CPU core integration paths differ from contract"
         )
-    external_memory_enable = cpu_boundary.find("comp[@name='Constant'][@loc='(340,240)']")
+    external_memory_enable = cpu_boundary.find("comp[@name='Constant'][@loc='(380,300)']")
     enable_attributes = {
         item.get("name"): item.get("val") for item in external_memory_enable.findall("a")
     } if external_memory_enable is not None else {}
     if enable_attributes.get("value") != "0x1" or not connected(
-        "(340,240)", f"({core_input_x},{core_y + 80})"
+        "(380,300)", f"({core_input_x},{core_y + 140})"
     ):
         raise VerificationError(
             f"{display_path(system.circuit_path)}: CPU external-memory selection is inactive"
