@@ -486,9 +486,14 @@ def verify_system_circuit() -> None:
     gate_x, gate_y = map(
         int, illegal_return_or.get("loc").strip("()").split(",")
     )
+    gate_attributes = {
+        attribute.get("name"): attribute.get("val")
+        for attribute in illegal_return_or.findall("a")
+    }
+    gate_size = int(gate_attributes.get("size", "50"))
     illegal_return_inputs = (
-        f"({gate_x - 30},{gate_y - 10})",
-        f"({gate_x - 30},{gate_y + 10})",
+        f"({gate_x - gate_size},{gate_y - 10})",
+        f"({gate_x - gate_size},{gate_y + 10})",
     )
     if any(
         not core_connected(core_pin_locations[label], target)
