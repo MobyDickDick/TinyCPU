@@ -185,7 +185,11 @@
       <a name="label" val="INTERRUPT_TARGET_PC"/>
       <a name="width" val="12"/>
     </comp>
-    <comp lib="0" loc="(3560,930)" name="Constant"/>
+    <comp lib="0" loc="(3560,930)" name="Constant">
+      <a name="label" val="INSTRUCTION_BOUNDARY_ASSERTED"/>
+      <a name="value" val="0x1"/>
+      <a name="width" val="1"/>
+    </comp>
     <comp lib="0" loc="(3590,1010)" name="Probe">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
@@ -348,6 +352,7 @@
     <comp lib="1" loc="(2190,430)" name="OR Gate">
       <a name="inputs" val="4"/>
       <a name="label" val="ILLEGAL_RETURN_OR"/>
+      <a name="labelloc" val="north"/>
     </comp>
     <comp lib="1" loc="(580,620)" name="OR Gate">
       <a name="inputs" val="3"/>
@@ -1530,6 +1535,7 @@
       <a name="width" val="12"/>
     </comp>
     <comp lib="2" loc="(980,240)" name="Multiplexer">
+      <a name="label" val="INTERRUPT_PC_OVERRIDE"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="3" loc="(740,390)" name="Comparator">
