@@ -344,6 +344,33 @@ class CircuitVerificationTests(unittest.TestCase):
                     ):
                         VERIFY.verify_system_circuit()
 
+    def test_ap18_interrupt_command_sources_belong_to_contract(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        contract_path = temporary / "logisim" / "tinycpu-peripherals-16-12-v1.json"
+        contract = json.loads(contract_path.read_text(encoding="utf-8"))
+        contract["components"]["cpu_integration"][
+            "core_interrupt_command_sources"
+        ]["ENABLE_INTERRUPTS_REQUEST"] = "(0,0)"
+        contract_path.write_text(json.dumps(contract), encoding="utf-8")
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+             mock.patch.object(
+                 VERIFY,
+                 "load_system_profile",
+                 return_value=replace(
+                     system,
+                     circuit_path=temporary / "logisim" / "TinyCPU_Peripherals.circ",
+                 ),
+             ):
+            with self.assertRaisesRegex(
+                VERIFY.VerificationError,
+                "interrupt-command source contract differs",
+            ):
+                VERIFY.verify_system_circuit()
+
     def test_ap18_interrupt_decoder_may_move_without_changing_its_contract(self) -> None:
         """The redrawn FetchDecode command paths remain electrically valid."""
         VERIFY.verify_system_circuit()
@@ -360,7 +387,7 @@ class CircuitVerificationTests(unittest.TestCase):
         self.assertIsNotNone(main)
         constant = next(
             component for component in main.findall("comp[@name='Constant']")
-            if component.get("loc") == "(3570,930)"
+            if component.get("loc") == "(3560,930)"
         )
         value = next(
             attribute for attribute in constant.findall("a")
@@ -416,7 +443,7 @@ class CircuitVerificationTests(unittest.TestCase):
         core = temporary / "logisim" / "TinyCPU.circ"
         project = ET.parse(core)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
-        ET.SubElement(main, "wire", {"from": "(3570,930)", "to": "(2960,930)"})
+        ET.SubElement(main, "wire", {"from": "(3560,930)", "to": "(2960,930)"})
         ET.SubElement(main, "wire", {"from": "(2960,930)", "to": "(2960,390)"})
         project.write(core, encoding="utf-8", xml_declaration=True)
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
@@ -595,9 +622,10 @@ class CircuitVerificationTests(unittest.TestCase):
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
         terminals = (
-            "(650,350)", "(650,370)", "(1040,780)", "(1040,800)",
+            "(820,780)", "(820,800)", "(650,350)", "(650,370)",
             "(1040,820)", "(1040,840)", "(650,430)", "(1040,860)",
             "(1040,880)", "(1040,900)", "(1040,920)", "(1040,940)",
+            "(1040,960)", "(1040,980)",
             "(650,540)", "(650,640)", "(650,600)",
         )
         for terminal in terminals:

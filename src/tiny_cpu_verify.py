@@ -262,14 +262,10 @@ def verify_system_circuit() -> None:
         ("(650,620)", "(820,620)"),  # return address
         ("(650,660)", "(820,660)"),  # return-address validity
         ("(650,680)", "(820,680)"),  # handler state
-        ("(200,470)", "(370,470)"),  # clock distribution
-        ("(370,470)", "(430,470)"),
-        ("(370,470)", "(370,560)"),
-        ("(370,560)", "(430,560)"),
-        ("(200,490)", "(390,490)"),  # reset distribution
-        ("(390,490)", "(430,490)"),
-        ("(390,490)", "(390,540)"),
-        ("(390,540)", "(430,540)"),
+        ("(180,510)", "(430,510)"),  # memory-path clock
+        ("(180,560)", "(430,560)"),  # interrupt-controller clock
+        ("(190,530)", "(430,530)"),  # memory-path reset
+        ("(190,540)", "(430,540)"),  # interrupt-controller reset
         ("(200,580)", "(430,580)"),  # interrupt request
     }
     if not required_top_wires <= top_wires:
@@ -297,22 +293,28 @@ def verify_system_circuit() -> None:
                         pending.append(neighbour)
         return False
 
+    # Contacts are ordered by the pins' authored Y positions in each generated
+    # Logisim-evolution box.  Keeping these coordinates in the electrical
+    # contract catches a wire that merely reaches a box but lands on the wrong
+    # named port (the failure that originally produced red E/U rails here).
     required_top_paths = {
-        "memory_read_value_to_cpu": ("(650,350)", "(820,780)"),
-        "memory_read_valid_to_cpu": ("(650,370)", "(820,800)"),
-        "cpu_address_to_memory": ("(1040,780)", "(430,390)"),
-        "cpu_write_value_to_memory": ("(1040,800)", "(430,410)"),
-        "cpu_write_valid_to_memory": ("(1040,820)", "(430,430)"),
-        "cpu_write_enable_to_memory": ("(1040,840)", "(430,450)"),
-        "memory_ram_write_enable_to_cpu": ("(650,430)", "(820,860)"),
-        "cpu_instruction_boundary_to_interrupt": ("(1040,860)", "(430,600)"),
-        "cpu_enable_request_to_interrupt": ("(1040,880)", "(430,620)"),
-        "cpu_disable_request_to_interrupt": ("(1040,900)", "(430,640)"),
-        "cpu_return_request_to_interrupt": ("(1040,920)", "(430,660)"),
-        "cpu_next_pc_to_interrupt": ("(1040,940)", "(430,680)"),
-        "interrupt_accept_to_cpu": ("(650,540)", "(820,980)"),
-        "interrupt_target_pc_to_cpu": ("(650,640)", "(820,1060)"),
-        "interrupt_illegal_return_to_cpu": ("(650,600)", "(820,1040)"),
+        "clock_to_cpu": ("(200,470)", "(820,780)"),
+        "reset_to_cpu": ("(200,490)", "(820,800)"),
+        "memory_read_value_to_cpu": ("(650,350)", "(820,820)"),
+        "memory_read_valid_to_cpu": ("(650,370)", "(820,840)"),
+        "cpu_address_to_memory": ("(1040,820)", "(430,430)"),
+        "cpu_write_value_to_memory": ("(1040,840)", "(430,450)"),
+        "cpu_write_valid_to_memory": ("(1040,860)", "(430,470)"),
+        "cpu_write_enable_to_memory": ("(1040,880)", "(430,490)"),
+        "memory_ram_write_enable_to_cpu": ("(650,430)", "(820,940)"),
+        "cpu_instruction_boundary_to_interrupt": ("(1040,900)", "(430,600)"),
+        "cpu_enable_request_to_interrupt": ("(1040,920)", "(430,620)"),
+        "cpu_disable_request_to_interrupt": ("(1040,940)", "(430,640)"),
+        "cpu_return_request_to_interrupt": ("(1040,960)", "(430,660)"),
+        "cpu_next_pc_to_interrupt": ("(1040,980)", "(430,680)"),
+        "interrupt_accept_to_cpu": ("(650,540)", "(820,860)"),
+        "interrupt_target_pc_to_cpu": ("(650,640)", "(820,880)"),
+        "interrupt_illegal_return_to_cpu": ("(650,600)", "(820,900)"),
     }
     if cpu_contract.get("verified_top_level_paths") != list(required_top_paths) or not all(
             top_connected(*terminals) for terminals in required_top_paths.values()):
@@ -419,45 +421,98 @@ def verify_system_circuit() -> None:
     # The redraw moved the three system-opcode decodes into the existing
     # FetchDecodeControls block.  Follow the generated FetchDecode output
     # terminals here; do not require the removed duplicate top-level decoder.
-    interrupt_command_sources = {
+    expected_interrupt_command_sources = {
         "ENABLE_INTERRUPTS_REQUEST": "(1400,1930)",
         "DISABLE_INTERRUPTS_REQUEST": "(1400,1950)",
         "RETURN_FROM_INTERRUPT_REQUEST": "(1400,1970)",
     }
+    interrupt_command_sources = cpu_contract.get(
+        "core_interrupt_command_sources", {}
+    )
+    if interrupt_command_sources != expected_interrupt_command_sources:
+        raise VerificationError(
+            "AP-18 CPU interrupt-command source contract differs from circuit interface"
+        )
     instruction_boundary = core_pin_locations["INSTRUCTION_BOUNDARY"]
-    boundary_constants = [
-        component for component in core_definition.findall("comp[@name='Constant']")
-        if core_connected(component.get("loc"), instruction_boundary)
-    ]
-    boundary_constant_value = (
-        {
+    expected_boundary_source = {
+        "location": "(3560,930)",
+        "value": "0x1",
+        "label": "INSTRUCTION_BOUNDARY_ASSERTED",
+    }
+    boundary_source = cpu_contract.get("instruction_boundary_source", {})
+    if boundary_source != expected_boundary_source:
+        raise VerificationError(
+            "AP-18 instruction-boundary source contract differs from circuit interface"
+        )
+    boundary_constant = next(
+        (
+            component for component in core_definition.findall("comp[@name='Constant']")
+            if component.get("loc") == boundary_source["location"]
+        ),
+        None,
+    )
+    boundary_constant_attributes = {}
+    if boundary_constant is not None:
+        boundary_constant_attributes = {
             attribute.get("name"): attribute.get("val")
-            for attribute in boundary_constants[0].findall("a")
-        }.get("value", "0x0")
-        if len(boundary_constants) == 1
-        else None
+            for attribute in boundary_constant.findall("a")
+        }
+    boundary_constant_value = boundary_constant_attributes.get("value", "0x0")
+    boundary_constant_label = boundary_constant_attributes.get("label")
+    boundary_source_connected = (
+        boundary_constant is not None
+        and core_connected(boundary_source["location"], instruction_boundary)
+    )
+    missing_interrupt_commands = [
+        label for label, source in interrupt_command_sources.items()
+        if not core_connected(source, core_pin_locations[label])
+    ]
+    boundary_touches_operand_control = (
+        boundary_constant is not None
+        and core_connected(boundary_source["location"], "(2960,390)")
+    )
+    disable_touches_address_error = core_connected(
+        interrupt_command_sources["DISABLE_INTERRUPTS_REQUEST"],
+        "(2950,1350)",
     )
     if (
-        len(boundary_constants) != 1
+        not boundary_source_connected
         # INSTRUCTION_BOUNDARY is deliberately asserted permanently.  An
         # omitted Constant value defaults to zero in Logisim, which silently
         # disables interrupt acceptance even though the net remains wired.
-        or boundary_constant_value != "0x1"
-        or any(
-            not core_connected(source, core_pin_locations[label])
-            for label, source in interrupt_command_sources.items()
-        )
+        or boundary_constant_value != boundary_source["value"]
+        or boundary_constant_label != boundary_source["label"]
+        or missing_interrupt_commands
         # Reject the accidental contacts from the first integration attempt:
         # the opcode feed touched an operand-control branch, while command
         # outputs touched the address-error rail.
-        or core_connected(boundary_constants[0].get("loc"), "(2960,390)")
-        or core_connected(
-            interrupt_command_sources["DISABLE_INTERRUPTS_REQUEST"],
-            "(2950,1350)",
-        )
+        or boundary_touches_operand_control
+        or disable_touches_address_error
     ):
+        details = []
+        if boundary_constant is None:
+            details.append("boundary source missing")
+        elif not boundary_source_connected:
+            details.append("boundary source disconnected")
+        elif boundary_constant_value != boundary_source["value"]:
+            details.append(
+                f"boundary constant={boundary_constant_value}, "
+                f"expected={boundary_source['value']}"
+            )
+        elif boundary_constant_label != boundary_source["label"]:
+            details.append(
+                f"boundary label={boundary_constant_label}, "
+                f"expected={boundary_source['label']}"
+            )
+        if missing_interrupt_commands:
+            details.append("missing=" + ",".join(missing_interrupt_commands))
+        if boundary_touches_operand_control:
+            details.append("boundary touches operand control")
+        if disable_touches_address_error:
+            details.append("disable touches address-error rail")
         raise VerificationError(
-            "AP-18 CPU interrupt-command paths differ from contract"
+            "AP-18 CPU interrupt-command paths differ from contract: "
+            + "; ".join(details)
         )
 
     expected_feedback_pins = cpu_contract.get("core_interrupt_feedback_pins", {})
