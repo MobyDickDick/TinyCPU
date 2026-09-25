@@ -213,6 +213,32 @@ daher für sich allein **kein** elektrischer Fehler. Maßgeblich sind `E` an
 einem Ausgang, ein rotes Konfliktnetz oder eine fehlgeschlagene elektrische
 Abnahme.
 
+### Wiederherstellung nach einer fehlerhaften Verdrahtungsänderung
+
+Die Integrationsseiten müssen **nicht von Hand neu verdrahtet** werden. Wenn
+eine Änderung entfernte Leitungen wieder eingefügt oder die drei erzeugten
+Bausteinsymbole gegen alte Koordinaten verdrahtet hat, Logisim ohne Speichern
+schließen und die beiden betroffenen Projektdateien aus dem letzten
+nachweislich guten Commit wiederherstellen:
+
+```bash
+git status --short
+git restore --source=<GUTER_COMMIT> -- \
+  hardware/logisim/TinyCPU.circ \
+  hardware/logisim/TinyCPU_Peripherals.circ
+scripts/test-offline.sh
+scripts/test-logisim.sh
+```
+
+`<GUTER_COMMIT>` ist dabei der geprüfte Stand vor der fehlerhaften Änderung,
+nicht irgendeine ältere Schaltungskopie. Anschließend zeigt `git diff` exakt,
+welche Änderung zurückgenommen wird. Ein bloßes Nachzeichnen anhand eines
+Screenshots oder veralteter Koordinaten ist nicht zulässig: Die erzeugten
+Symbolkontakte hängen von der aktuellen Pin-Reihenfolge ab und eine optisch
+anliegende Leitung kann deshalb am falschen Port enden. Erst wenn die
+Wiederherstellung beide Gates besteht, darf die Datei wieder in der GUI
+geöffnet werden.
+
 Die eingecheckte Verdrahtung wird ohne Bedienzustand der GUI vollständig mit
 dem echten Logisim-Simulator geprüft:
 

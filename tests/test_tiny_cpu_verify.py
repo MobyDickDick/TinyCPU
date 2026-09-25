@@ -83,6 +83,38 @@ class CircuitVerificationTests(unittest.TestCase):
         ).getroot()
         self.assertEqual(project.findall(".//comp[@name='Tunnel']"), [])
 
+    def test_ap18_authored_integration_layout_is_not_rebuilt_from_stale_coordinates(self) -> None:
+        """Keep removed pre-redraw routing from being presented as a repair."""
+        project = VERIFY.ET.parse(
+            MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU_Peripherals.circ"
+        ).getroot()
+        top = project.find("circuit[@name='TinyCPUSystemMain']")
+        boundary = project.find("circuit[@name='CPUIntegrationBoundary']")
+        self.assertIsNotNone(top)
+        self.assertIsNotNone(boundary)
+
+        top_instances = {
+            component.get("name"): component.get("loc")
+            for component in top.findall("comp")
+            if component.get("lib") is None
+        }
+        self.assertEqual(top_instances, {
+            "CPUIntegrationBoundary": "(1190,750)",
+            "OutputMemoryPath": "(800,360)",
+            "InterruptController": "(800,550)",
+        })
+        core = boundary.find("comp[@name='TinyCPUMain']")
+        self.assertIsNotNone(core)
+        self.assertEqual(core.get("loc"), "(630,160)")
+
+        wires = {(wire.get("from"), wire.get("to")) for wire in top.findall("wire")}
+        stale_reconstruction = {
+            ("(1190,830)", "(1270,830)"),
+            ("(1270,830)", "(1270,150)"),
+            ("(1270,150)", "(410,150)"),
+        }
+        self.assertFalse(stale_reconstruction <= wires)
+
     def test_ap18_illegal_return_gate_label_does_not_cover_its_output(self) -> None:
         project = VERIFY.ET.parse(
             MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU.circ"
@@ -110,7 +142,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(800,690)" to="(970,690)"/>', "", 1), encoding="utf-8")
+            '<wire from="(650,680)" to="(820,680)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -128,7 +160,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(350,590)" to="(580,590)"/>', "", 1), encoding="utf-8")
+            '<wire from="(200,580)" to="(430,580)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -622,11 +654,11 @@ class CircuitVerificationTests(unittest.TestCase):
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
         terminals = (
-            "(970,790)", "(970,810)", "(800,360)", "(800,380)",
-            "(1190,830)", "(1190,850)", "(800,440)", "(1190,870)",
-            "(1190,890)", "(1190,910)", "(1190,930)", "(1190,950)",
-            "(1190,970)", "(1190,990)",
-            "(800,550)", "(800,650)", "(800,610)",
+            "(820,780)", "(820,800)", "(650,350)", "(650,370)",
+            "(1040,820)", "(1040,840)", "(650,430)", "(1040,860)",
+            "(1040,880)", "(1040,900)", "(1040,920)", "(1040,940)",
+            "(1040,960)", "(1040,980)",
+            "(650,540)", "(650,640)", "(650,600)",
         )
         for terminal in terminals:
             with self.subTest(cpu_hand_off=terminal):
