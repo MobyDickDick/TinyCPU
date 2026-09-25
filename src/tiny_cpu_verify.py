@@ -434,7 +434,11 @@ def verify_system_circuit() -> None:
             "AP-18 CPU interrupt-command source contract differs from circuit interface"
         )
     instruction_boundary = core_pin_locations["INSTRUCTION_BOUNDARY"]
-    expected_boundary_source = {"location": "(3570,930)", "value": "0x1"}
+    expected_boundary_source = {
+        "location": "(3560,930)",
+        "value": "0x1",
+        "label": "INSTRUCTION_BOUNDARY_ASSERTED",
+    }
     boundary_source = cpu_contract.get("instruction_boundary_source", {})
     if boundary_source != expected_boundary_source:
         raise VerificationError(
@@ -447,12 +451,14 @@ def verify_system_circuit() -> None:
         ),
         None,
     )
-    boundary_constant_value = None
+    boundary_constant_attributes = {}
     if boundary_constant is not None:
-        boundary_constant_value = {
+        boundary_constant_attributes = {
             attribute.get("name"): attribute.get("val")
             for attribute in boundary_constant.findall("a")
-        }.get("value", "0x0")
+        }
+    boundary_constant_value = boundary_constant_attributes.get("value", "0x0")
+    boundary_constant_label = boundary_constant_attributes.get("label")
     boundary_source_connected = (
         boundary_constant is not None
         and core_connected(boundary_source["location"], instruction_boundary)
@@ -475,6 +481,7 @@ def verify_system_circuit() -> None:
         # omitted Constant value defaults to zero in Logisim, which silently
         # disables interrupt acceptance even though the net remains wired.
         or boundary_constant_value != boundary_source["value"]
+        or boundary_constant_label != boundary_source["label"]
         or missing_interrupt_commands
         # Reject the accidental contacts from the first integration attempt:
         # the opcode feed touched an operand-control branch, while command
@@ -491,6 +498,11 @@ def verify_system_circuit() -> None:
             details.append(
                 f"boundary constant={boundary_constant_value}, "
                 f"expected={boundary_source['value']}"
+            )
+        elif boundary_constant_label != boundary_source["label"]:
+            details.append(
+                f"boundary label={boundary_constant_label}, "
+                f"expected={boundary_source['label']}"
             )
         if missing_interrupt_commands:
             details.append("missing=" + ",".join(missing_interrupt_commands))

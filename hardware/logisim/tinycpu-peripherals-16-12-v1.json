@@ -134,8 +134,9 @@
         "RETURN_FROM_INTERRUPT_REQUEST": "(1400,1970)"
       },
       "instruction_boundary_source": {
-        "location": "(3570,930)",
-        "value": "0x1"
+        "location": "(3560,930)",
+        "value": "0x1",
+        "label": "INSTRUCTION_BOUNDARY_ASSERTED"
       },
       "core_next_pc_pin": {
         "NEXT_PC": {

@@ -387,7 +387,7 @@ class CircuitVerificationTests(unittest.TestCase):
         self.assertIsNotNone(main)
         constant = next(
             component for component in main.findall("comp[@name='Constant']")
-            if component.get("loc") == "(3570,930)"
+            if component.get("loc") == "(3560,930)"
         )
         value = next(
             attribute for attribute in constant.findall("a")
@@ -443,7 +443,7 @@ class CircuitVerificationTests(unittest.TestCase):
         core = temporary / "logisim" / "TinyCPU.circ"
         project = ET.parse(core)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
-        ET.SubElement(main, "wire", {"from": "(3570,930)", "to": "(2960,930)"})
+        ET.SubElement(main, "wire", {"from": "(3560,930)", "to": "(2960,930)"})
         ET.SubElement(main, "wire", {"from": "(2960,930)", "to": "(2960,390)"})
         project.write(core, encoding="utf-8", xml_declaration=True)
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")

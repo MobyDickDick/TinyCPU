@@ -185,8 +185,10 @@
       <a name="label" val="INTERRUPT_TARGET_PC"/>
       <a name="width" val="12"/>
     </comp>
-    <comp lib="0" loc="(3570,930)" name="Constant">
+    <comp lib="0" loc="(3560,930)" name="Constant">
+      <a name="label" val="INSTRUCTION_BOUNDARY_ASSERTED"/>
       <a name="value" val="0x1"/>
+      <a name="width" val="1"/>
     </comp>
     <comp lib="0" loc="(3590,1010)" name="Probe">
       <a name="appearance" val="classic"/>
@@ -712,7 +714,7 @@
     <wire from="(3540,470)" to="(3570,470)"/>
     <wire from="(3550,120)" to="(3550,450)"/>
     <wire from="(3570,100)" to="(3570,470)"/>
-    <wire from="(3570,930)" to="(3590,930)"/>
+    <wire from="(3560,930)" to="(3590,930)"/>
     <wire from="(3580,1300)" to="(3580,1330)"/>
     <wire from="(3580,1330)" to="(3590,1330)"/>
     <wire from="(360,440)" to="(360,460)"/>
