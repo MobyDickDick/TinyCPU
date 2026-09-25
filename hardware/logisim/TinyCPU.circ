@@ -350,8 +350,8 @@
     </comp>
     <comp lib="0" loc="(800,440)" name="Constant"/>
     <comp lib="1" loc="(2250,440)" name="OR Gate">
+      <a name="inputs" val="4"/>
       <a name="label" val="ILLEGAL_RETURN_OR"/>
-      <a name="labelloc" val="north"/>
     </comp>
     <comp lib="1" loc="(580,620)" name="OR Gate">
       <a name="inputs" val="3"/>
@@ -526,6 +526,8 @@
     <wire from="(1770,470)" to="(1780,470)"/>
     <wire from="(1770,490)" to="(1780,490)"/>
     <wire from="(1800,580)" to="(1800,1750)"/>
+    <wire from="(1800,580)" to="(2100,580)"/>
+    <wire from="(1960,420)" to="(2060,420)"/>
     <wire from="(2000,1430)" to="(2000,1660)"/>
     <wire from="(2000,1660)" to="(3260,1660)"/>
     <wire from="(2000,470)" to="(2140,470)"/>
@@ -538,6 +540,8 @@
     <wire from="(2040,1620)" to="(3220,1620)"/>
     <wire from="(2060,1370)" to="(2060,1600)"/>
     <wire from="(2060,1600)" to="(3200,1600)"/>
+    <wire from="(2060,420)" to="(2060,430)"/>
+    <wire from="(2060,430)" to="(2200,430)"/>
     <wire from="(2080,1230)" to="(2080,1350)"/>
     <wire from="(2080,1230)" to="(2410,1230)"/>
     <wire from="(2080,1350)" to="(2080,1580)"/>
@@ -545,6 +549,8 @@
     <wire from="(2100,1330)" to="(2100,1560)"/>
     <wire from="(2100,1330)" to="(2140,1330)"/>
     <wire from="(2100,1560)" to="(3160,1560)"/>
+    <wire from="(2100,450)" to="(2100,580)"/>
+    <wire from="(2100,450)" to="(2200,450)"/>
     <wire from="(2120,1050)" to="(2410,1050)"/>
     <wire from="(2120,1310)" to="(2120,1480)"/>
     <wire from="(2120,1480)" to="(2720,1480)"/>
@@ -576,12 +582,6 @@
     <wire from="(2170,460)" to="(2200,460)"/>
     <wire from="(2170,590)" to="(2400,590)"/>
     <wire from="(2180,1410)" to="(2410,1410)"/>
-    <wire from="(1800,580)" to="(2100,580)"/>
-    <wire from="(2100,450)" to="(2100,580)"/>
-    <wire from="(2100,450)" to="(2200,450)"/>
-    <wire from="(1960,420)" to="(2060,420)"/>
-    <wire from="(2060,420)" to="(2060,430)"/>
-    <wire from="(2060,430)" to="(2200,430)"/>
     <wire from="(2180,670)" to="(2180,1410)"/>
     <wire from="(2200,1350)" to="(2410,1350)"/>
     <wire from="(2200,650)" to="(2200,1350)"/>
@@ -1535,7 +1535,6 @@
       <a name="width" val="12"/>
     </comp>
     <comp lib="2" loc="(980,240)" name="Multiplexer">
-      <a name="label" val="INTERRUPT_PC_OVERRIDE"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="3" loc="(740,390)" name="Comparator">
