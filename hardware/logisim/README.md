@@ -1527,3 +1527,34 @@ deshalb wieder ausschließlich explizit benannte lokale Tunnel für die langen
 Rückführungen. Kurze Leitungen bleiben sichtbar, besitzen keine impliziten
 T-Kontakte oder kollinearen Überlappungen, und sowohl ein positiver Audit als
 auch ein absichtlich eingebrachter Kontakt werden im Python-Test geprüft.
+
+### Automatischer Test auf elektrische Fehlerwerte
+
+Nach jeder Änderung an einer Integrationsverdrahtung muss zusätzlich zum
+statischen Leitungstest Logisims eigener Simulator ausgeführt werden. Der
+statische Test erkennt geometrische Auffälligkeiten; nur Logisim selbst kann
+sicher zwischen einem mehrbitigen (orange/schwarzen) Bus und den Fehlerwerten
+`E` beziehungsweise `U` unterscheiden:
+
+```bash
+python3 scripts/check-logisim-circuit.py
+python3 scripts/check-logisim-electrical.py \
+  hardware/logisim/TinyCPU.circ \
+  hardware/logisim/TinyCPU_Peripherals.circ
+```
+
+Das zweite Programm startet für jede Datei `java -jar ... -tty table`, prüft
+den Rückgabecode und bricht ab, sobald eine Tabellenzeile einen eigenständigen
+Wert `E` oder `U` enthält. Mit `LOGISIM_JAR=/pfad/zur.jar` beziehungsweise
+`--jar /pfad/zur.jar` kann eine andere Logisim-Version geprüft werden. Ein
+bestimmter, überschaubarer Teilkreis lässt sich mit `--circuit NAME` als
+Top-Level testen. Bei Teilkreisen mit vielen Eingängen ist der vollständige
+Wahrheitstabellenlauf exponentiell groß; dort bleiben die gezielten
+Vertragstests in `scripts/test-offline.sh` erforderlich.
+
+Die orangefarbenen Leitungen und die kleinen orangefarbenen Zahlen an den
+Bussen in Logisim sind dagegen Breiten-/Wertanzeigen (zum Beispiel 12 oder 16
+Bit), nicht automatisch Verdrahtungsfehler. Ein tatsächlicher Fehler ist als
+`E`, ein undefinierter Wert als `U` sichtbar. Deshalb darf eine optische
+Farbbeurteilung künftig weder als Fehlerdiagnose noch als Reparaturnachweis
+dienen.
