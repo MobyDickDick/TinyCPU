@@ -398,6 +398,20 @@ class LogisimLauncherTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             parse_args(["--trace-output", "trace.tsv", "--jobs", "0"])
 
+    def test_system_only_requires_a_system_and_matrix_output(self):
+        with self.assertRaises(SystemExit):
+            parse_args(["--trace-output", "trace.tsv", "--system-only"])
+        with self.assertRaises(SystemExit):
+            parse_args([
+                "--trace-output", "trace.tsv", "--system", "example", "--system-only",
+            ])
+
+        args = parse_args([
+            "--trace-output", "trace.tsv", "--matrix-output", "matrix",
+            "--system", "example", "--system-only",
+        ])
+        self.assertTrue(args.system_only)
+
 
     def test_autonomous_project_uses_profile_specific_circuit(self):
         source = ROOT / "hardware/logisim/TinyCPU.circ"

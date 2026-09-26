@@ -345,6 +345,21 @@ Swing; das CI-Gate stellt deshalb ausdrücklich `xvfb-run` bereit. Als nächster
 Schritt bleibt die Auswertung des ersten vollständigen elektrischen Laufs und
 die kleinste Reparatur eines dabei nachgewiesenen Signalfehlers.
 
+Für diesen Diagnosezyklus kann die Systemmatrix nach einem fehlgeschlagenen
+Gesamtlauf gezielt wiederholt werden, ohne zuvor erneut die 61 unveränderten
+Kernfälle auszuführen:
+
+```bash
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 --system tinycpu-peripherals-16-12-v1 \
+  --system-only --trace-output /tmp/unused-core.tsv \
+  --matrix-output artifacts/tinycpu-system-diagnostic
+```
+
+`--system-only` ist ausdrücklich ein fokussierter Diagnoseaufruf. Die
+Endabnahme bleibt `scripts/test-logisim.sh`, damit Kern- und Systemregressionen
+weiter gemeinsam verpflichtend laufen.
+
 ## Kompatibilitätsfolgen
 
 1. TinyCPU 1.0, `tinycpu-machine-v1` und beide vorhandenen Hardwareprofile

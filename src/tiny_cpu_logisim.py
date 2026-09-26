@@ -543,6 +543,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--profile", default=DEFAULT_PROFILE.name)
     parser.add_argument("--system")
+    parser.add_argument(
+        "--system-only",
+        action="store_true",
+        help="run only the selected system matrix (diagnostic reruns only)",
+    )
     parser.add_argument("--jar", type=Path)
     parser.add_argument("--java", default=os.environ.get("JAVA", "java"))
     parser.add_argument("--trace-output", type=Path, required=True)
@@ -552,6 +557,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     args = parser.parse_args(argv)
     if args.jobs < 1:
         parser.error("--jobs must be at least 1")
+    if args.system_only and args.system is None:
+        parser.error("--system-only requires --system")
+    if args.system_only and args.matrix_output is None:
+        parser.error("--system-only requires --matrix-output")
     return args
 
 
@@ -562,16 +571,17 @@ def main(argv: list[str] | None = None) -> int:
         if java_major(args.java) < 21:
             raise LogisimError("Java 21 or newer is required")
         jar = resolve_jar(args.jar)
-        source = ROOT / "hardware" / "logisim" / profile.circuit
-        print(f"electrical trace: {profile.name} core (2 runs)", flush=True)
-        run_core_acceptance(
-            source, profile, jar, args.java, args.trace_output, args.timeout
-        )
-        if args.matrix_output is not None:
-            count = run_matrix(
-                source, profile, jar, args.java, args.matrix_output, args.timeout, args.jobs
+        if not args.system_only:
+            source = ROOT / "hardware" / "logisim" / profile.circuit
+            print(f"electrical trace: {profile.name} core (2 runs)", flush=True)
+            run_core_acceptance(
+                source, profile, jar, args.java, args.trace_output, args.timeout
             )
-            print(f"electrical matrix passed: {profile.name} ({count} fixtures)")
+            if args.matrix_output is not None:
+                count = run_matrix(
+                    source, profile, jar, args.java, args.matrix_output, args.timeout, args.jobs
+                )
+                print(f"electrical matrix passed: {profile.name} ({count} fixtures)")
         if args.system is not None:
             if args.matrix_output is None:
                 raise LogisimError("--system requires --matrix-output")
@@ -584,7 +594,8 @@ def main(argv: list[str] | None = None) -> int:
                 system, jar, args.java, args.matrix_output / "system", args.timeout
             )
             print(f"electrical system matrix passed: {system.name} ({count} fixtures)")
-        print(f"electrical trace passed: {profile.name} -> {args.trace_output}")
+        if not args.system_only:
+            print(f"electrical trace passed: {profile.name} -> {args.trace_output}")
         return 0
     except (LogisimError, KeyError, OSError, ET.ParseError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
