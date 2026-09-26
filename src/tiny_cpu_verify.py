@@ -435,8 +435,8 @@ def verify_system_circuit() -> None:
     # write-enable inputs of the core's private RAM.  Exporting those exact
     # nets keeps the system adapter atomic and avoids a second write decoder.
     external_write_sources = {
-        "EXTERNAL_WRITE_VALUE": "(690,680)",
-        "EXTERNAL_WRITE_VALID": "(710,660)",
+        "EXTERNAL_WRITE_VALUE": "(690,220)",
+        "EXTERNAL_WRITE_VALID": "(710,200)",
         "EXTERNAL_WRITE_ENABLE": "(580,620)",
     }
     if any(
@@ -689,6 +689,7 @@ def verify_system_circuit() -> None:
             f"{display_path(system.circuit_path)}: CPU integration boundary differs from contract"
         )
     shared_core_pins = {
+        "RAM_WRITE_ENABLE",
         "INSTRUCTION_BOUNDARY",
         "ENABLE_INTERRUPTS_REQUEST",
         "DISABLE_INTERRUPTS_REQUEST",
@@ -798,6 +799,8 @@ def verify_system_circuit() -> None:
             "INTERRUPT_TARGET_PC", f"({core_input_x},{core_y + 80})"),
         "illegal_return_to_core": (
             "ILL_RET", f"({core_input_x},{core_y + 40})"),
+        "ram_write_enable_to_core": (
+            "RAM_WRITE_ENABLE", f"({core_input_x},{core_y + 160})"),
     }
     if cpu_contract.get("verified_core_paths") != list(required_core_paths) or not all(
             connected(cpu_pin_locations[source], target)

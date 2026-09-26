@@ -181,9 +181,9 @@ seinen bisherigen RAM-Schreibpfad speisen. Die Interrupt-Rückkopplung ist nun v
 `INTERRUPT_ACCEPT` wählt im Fetchpfad mit Vorrang `INTERRUPT_TARGET_PC` als nächsten
 Programmzähler, und `ILL_RET` setzt das vorhandene Sticky-Flag
 `ERROR_ILL`. Damit enden die drei Rückleitungen nicht mehr unverbunden an der
-Integrationsgrenze. `CORE_ADDRESS` und `RAM_WRITE_ENABLE` bleiben dagegen
-vorläufige Adaptereingänge; die eigenständigen Bausteine sind deshalb noch
-kein Nachweis einer vollständigen CPU-Integration.
+Integrationsgrenze. `RAM_WRITE_ENABLE` wird über den externen Speichermodus bis
+zum Schreibfreigabeeingang der `Memory`-FBox geführt; im eigenständigen
+Kernbetrieb wählt derselbe Selektor weiterhin die interne Schreibanforderung.
 
 Die übrigen Übergaben sind jetzt nach der tatsächlich von Logisim erzeugten
 Portreihenfolge verdrahtet. Das ist insbesondere wichtig, weil der Anker einer
@@ -195,5 +195,5 @@ Mehrfachtreiberprüfung, geometrischen Kontakt-Audit sowie einen headless
 Logisim-Tabellenlauf. Damit werden falscher Port, fehlendes Leitungsstück,
 Kurzschluss und ein in Logisim undefinierter Wert getrennt sichtbar. Ein
 absoluter mathematischer Beweis für alle zeitlichen Abläufe ist das noch nicht;
-der vollständige End-to-End-Nachweis bleibt von der Anbindung der beiden
-vorläufigen Adaptereingänge und der elektrischen Systemmatrix abhängig.
+der vollständige End-to-End-Nachweis bleibt von der elektrischen Systemmatrix
+abhängig.

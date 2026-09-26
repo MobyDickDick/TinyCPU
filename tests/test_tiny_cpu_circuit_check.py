@@ -342,7 +342,8 @@ class CircuitCheckTests(unittest.TestCase):
         self.assertIn(("(330,750)", "(1090,750)"), wires)
         self.assertIn(("(1030,790)", "(1120,790)"), wires)
         self.assertIn(("(330,810)", "(1120,810)"), wires)
-        self.assertIn(("(330,830)", "(1100,830)"), wires)
+        self.assertIn(("(330,830)", "(700,830)"), wires)
+        self.assertIn(("(700,830)", "(1100,830)"), wires)
 
     def test_detects_and_repairs_subcircuit_output_bridge(self):
         project = """<?xml version='1.0'?>

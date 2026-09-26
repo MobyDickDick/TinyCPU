@@ -650,6 +650,23 @@ class CircuitVerificationTests(unittest.TestCase):
                     VERIFY.VerificationError, "CPU core integration paths differ"):
                 VERIFY.verify_system_circuit()
 
+    def test_ap18_ram_write_enable_reaches_the_cpu_memory_path(self) -> None:
+        project = ET.parse(
+            MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU.circ"
+        ).getroot()
+        main = project.find("circuit[@name='TinyCPUMain']")
+        self.assertIsNotNone(main)
+        selector = next(
+            component for component in main.findall("comp[@name='Multiplexer']")
+            if any(attribute.get("name") == "label"
+                   and attribute.get("val") == "RAM_WRITE_ENABLE_SELECT"
+                   for attribute in component.findall("a"))
+        )
+        self.assertEqual(selector.get("loc"), "(740,620)")
+        wires = {(wire.get("from"), wire.get("to")) for wire in main.findall("wire")}
+        self.assertIn(("(330,850)", "(680,850)"), wires)
+        self.assertIn(("(740,620)", "(770,620)"), wires)
+
     def test_ap18_cpu_integration_requires_address_width_adapter(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"

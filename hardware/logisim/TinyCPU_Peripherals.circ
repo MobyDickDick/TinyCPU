@@ -237,7 +237,7 @@
     <comp lib="0" loc="(340,300)" name="Constant">
       <a name="value" val="0x1"/>
     </comp>
-    <comp lib="0" loc="(290,670)" name="Pin">
+    <comp lib="0" loc="(280,320)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="RAM_WRITE_ENABLE"/>
     </comp>
@@ -338,6 +338,7 @@
     <wire from="(280,260)" to="(410,260)"/>
     <wire from="(280,280)" to="(410,280)"/>
     <wire from="(340,300)" to="(410,300)"/>
+    <wire from="(280,320)" to="(410,320)"/>
     <wire from="(630,180)" to="(810,180)"/>
     <wire from="(630,200)" to="(790,200)"/>
     <wire from="(630,220)" to="(790,220)"/>
