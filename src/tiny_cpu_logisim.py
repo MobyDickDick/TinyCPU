@@ -14,6 +14,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -512,6 +513,15 @@ def run_system_matrix(system, jar: Path, java: str, output: Path, timeout: int) 
             tree.write(core, encoding="utf-8", xml_declaration=True)
             vector = temporary / f"{case['id']}.txt"
             _write_system_vector(vector, states)
+            # Keep the exact failing inputs outside the temporary directory.
+            # A system mismatch often needs internal probes added to both the
+            # adapter and the injected core; retaining only Logisim's text
+            # report made that follow-up impossible to reproduce exactly.
+            evidence = output / case["id"]
+            evidence.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(vector, evidence / "vector.txt")
+            shutil.copy2(project, evidence / project.name)
+            shutil.copy2(core, evidence / core.name)
             # The upstream entry point initializes Swing before reaching its
             # otherwise headless vector evaluator.  Invoke the same public
             # evaluator through Java's source-file launcher so CI needs no X
@@ -525,9 +535,14 @@ def run_system_matrix(system, jar: Path, java: str, output: Path, timeout: int) 
                 result = subprocess.run(command, capture_output=True, text=True,
                                         timeout=timeout, check=False)
             except subprocess.TimeoutExpired as exc:
-                raise LogisimError(f"system fixture {case['id']}: timed out") from exc
-            evidence = output / f"{case['id']}.txt"
-            evidence.write_text(result.stdout + result.stderr, encoding="utf-8")
+                (evidence / "logisim.txt").write_text(
+                    (exc.stdout or "") + (exc.stderr or ""), encoding="utf-8"
+                )
+                raise LogisimError(
+                    f"system fixture {case['id']} timed out; evidence: {evidence}"
+                ) from exc
+            log = evidence / "logisim.txt"
+            log.write_text(result.stdout + result.stderr, encoding="utf-8")
             if result.returncode:
                 raise LogisimError(
                     f"system fixture {case['id']} failed; evidence: {evidence}"

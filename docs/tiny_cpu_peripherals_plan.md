@@ -377,6 +377,18 @@ Kette aus CPU-Schreibwert, -gültigkeit und -freigabe bis zu den beiden
 Ausgabeportregistern untersucht; aus diesem Befund wird noch keine Änderung
 an Interrupt- oder PC-Pfaden abgeleitet.
 
+Der fokussierte Lauf bewahrt dafür nun pro Fall nicht nur die zusammengefasste
+Logisim-Ausgabe auf, sondern auch den tatsächlich geprüften Vektor, die mit
+dem Fall-ROM versehene `TinyCPU.circ` und die zugehörige
+`TinyCPU_Peripherals.circ`. Diese vier Dateien liegen gemeinsam im nach der
+Fall-ID benannten Artefaktverzeichnis. Damit bleibt gerade der erste
+Fehlschlag nach dem Abbruch unverändert reproduzierbar und kann mit internen
+Messpins untersucht werden, ohne das ROM oder den erwarteten Flankenverlauf
+nachträglich rekonstruieren zu müssen. Ein Regressionstest erzwingt dieses
+Diagnosepaket auch bei einem fehlgeschlagenen Simulatorprozess. Die
+elektrische Abweichung selbst bleibt unverändert bestehen; das Aufbewahren
+der Eingaben wird nicht als Reparatur oder elektrische Abnahme gewertet.
+
 
 ## Kompatibilitätsfolgen
 
