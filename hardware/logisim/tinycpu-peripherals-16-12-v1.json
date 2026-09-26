@@ -62,15 +62,15 @@
           "direction": "output",
           "bits": 1
         },
-        "ENABLE_REQUEST": {
+        "ENABLE_INTERRUPTS_REQUEST": {
           "direction": "output",
           "bits": 1
         },
-        "DISABLE_REQUEST": {
+        "DISABLE_INTERRUPTS_REQUEST": {
           "direction": "output",
           "bits": 1
         },
-        "RETURN_REQUEST": {
+        "RETURN_FROM_INTERRUPT_REQUEST": {
           "direction": "output",
           "bits": 1
         },
@@ -82,7 +82,7 @@
           "direction": "input",
           "bits": 1
         },
-        "TARGET_PC": {
+        "INTERRUPT_TARGET_PC": {
           "direction": "input",
           "bits": 12
         },

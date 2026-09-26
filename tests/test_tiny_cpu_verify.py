@@ -29,6 +29,30 @@ WIRE_SPEC.loader.exec_module(WIRE_CONTACTS)
 
 
 class CircuitVerificationTests(unittest.TestCase):
+    def test_pin_handoffs_reject_crossed_address_and_ram_value_widths(self) -> None:
+        interfaces = {
+            "CPU": {"ADDRESS": {"direction": "output", "bits": 12}},
+            "Memory": {"RAM_READ_VALUE": {"direction": "input", "bits": 16}},
+        }
+        with self.assertRaisesRegex(
+            VERIFY.VerificationError,
+            r"bus width mismatch.*CPU\.ADDRESS -> Memory\.RAM_READ_VALUE: 12 != 16",
+        ):
+            VERIFY.verify_pin_handoffs(
+                interfaces,
+                (("CPU", "ADDRESS", "Memory", "RAM_READ_VALUE"),),
+            )
+
+    def test_pin_handoffs_accept_matching_address_buses(self) -> None:
+        interfaces = {
+            "CPU": {"ADDRESS": {"direction": "output", "bits": 12}},
+            "Memory": {"ADDRESS": {"direction": "input", "bits": 12}},
+        }
+        VERIFY.verify_pin_handoffs(
+            interfaces,
+            (("CPU", "ADDRESS", "Memory", "ADDRESS"),),
+        )
+
     def write_project(self, circuit_body: str, main: str = "Main") -> Path:
         directory = Path(self.enterContext(tempfile.TemporaryDirectory()))
         path = directory / "test.circ"
@@ -570,9 +594,9 @@ class CircuitVerificationTests(unittest.TestCase):
         for label in (
             "CLK", "RESET", "RAM_READ_VALUE", "RAM_READ_VALID",
             "READ_VALUE", "READ_VALID", "WRITE_VALUE", "WRITE_VALID",
-            "WRITE_ENABLE", "INSTRUCTION_BOUNDARY", "ENABLE_REQUEST",
-            "DISABLE_REQUEST", "RETURN_REQUEST", "NEXT_PC",
-            "INTERRUPT_ACCEPT", "TARGET_PC", "ILL_RET",
+            "WRITE_ENABLE", "INSTRUCTION_BOUNDARY", "ENABLE_INTERRUPTS_REQUEST",
+            "DISABLE_INTERRUPTS_REQUEST", "RETURN_FROM_INTERRUPT_REQUEST", "NEXT_PC",
+            "INTERRUPT_ACCEPT", "INTERRUPT_TARGET_PC", "ILL_RET",
         ):
             with self.subTest(path=label):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
@@ -658,9 +682,9 @@ class CircuitVerificationTests(unittest.TestCase):
         source = root / "hardware" / "logisim"
         terminals = (
             "(1050,590)", "(1050,610)", "(810,360)", "(810,380)",
-            "(1270,670)", "(1270,690)", "(810,440)", "(1270,730)",
-            "(1270,710)", "(1270,750)", "(1270,770)", "(1270,790)",
-            "(1270,810)", "(1270,830)",
+            "(1270,630)", "(1270,650)", "(810,440)", "(1270,690)",
+            "(1270,670)", "(1270,710)", "(1270,730)", "(1270,750)",
+            "(1270,770)", "(1270,790)",
             "(810,590)", "(810,690)", "(810,650)",
         )
         for terminal in terminals:
