@@ -142,7 +142,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(650,680)" to="(820,680)"/>', "", 1), encoding="utf-8")
+            '<wire from="(800,690)" to="(970,690)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -160,7 +160,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(200,580)" to="(430,580)"/>', "", 1), encoding="utf-8")
+            '<wire from="(350,590)" to="(580,590)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -178,6 +178,22 @@ class CircuitVerificationTests(unittest.TestCase):
         output = project.find("circuit[@name='OutputPort']")
         self.assertIsNotNone(output)
         self.assertEqual(WIRE_CONTACTS.inspect_circuit(output), [])
+
+    def test_ap18_peripheral_project_has_only_orthogonal_wires(self) -> None:
+        path = MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU_Peripherals.circ"
+        wires, circuits = VERIFY.verify_circuit(path)
+        self.assertGreater(wires, 0)
+        self.assertGreater(circuits, 0)
+
+    def test_ap18_system_routes_have_no_implicit_contacts(self) -> None:
+        project = VERIFY.ET.parse(
+            MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU_Peripherals.circ"
+        ).getroot()
+        for name in ("TinyCPUSystemMain", "CPUIntegrationBoundary"):
+            with self.subTest(circuit=name):
+                circuit = project.find(f"circuit[@name='{name}']")
+                self.assertIsNotNone(circuit)
+                self.assertEqual(WIRE_CONTACTS.inspect_circuit(circuit), [])
 
     def test_ap18_cpu_integration_boundary_matches_contract(self) -> None:
         root = MODULE_PATH.parents[1]
@@ -654,11 +670,11 @@ class CircuitVerificationTests(unittest.TestCase):
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
         terminals = (
-            "(820,780)", "(820,800)", "(650,350)", "(650,370)",
-            "(1040,820)", "(1040,840)", "(650,430)", "(1040,860)",
-            "(1040,880)", "(1040,900)", "(1040,920)", "(1040,940)",
-            "(1040,960)", "(1040,980)",
-            "(650,540)", "(650,640)", "(650,600)",
+            "(970,750)", "(970,770)", "(800,360)", "(800,380)",
+            "(1190,790)", "(1190,810)", "(800,440)", "(1190,850)",
+            "(1190,830)", "(1190,870)", "(1190,890)", "(1190,910)",
+            "(1190,930)", "(1190,950)",
+            "(800,550)", "(800,650)", "(800,610)",
         )
         for terminal in terminals:
             with self.subTest(cpu_hand_off=terminal):
