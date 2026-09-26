@@ -27,6 +27,7 @@ from tiny_cpu_logisim import (
     resolve_jar,
     run_core_acceptance,
     run_matrix,
+    run_system_matrix,
     run_trace,
 )
 from tiny_cpu_profiles import load_profile
@@ -102,6 +103,26 @@ class LogisimLauncherTests(unittest.TestCase):
             text = vector.read_text(encoding="utf-8")
         self.assertIn("OUTPUT_PORT_VALUE[16]", text.splitlines()[0])
         self.assertIn("1 0 1", text.splitlines()[2])
+
+    def test_system_matrix_uses_headless_vector_launcher(self):
+        system = load_system_profile("tinycpu-peripherals-16-12-v1")
+        calls = []
+
+        def fake_run(command, **kwargs):
+            calls.append(command)
+            return subprocess.CompletedProcess(command, 0, "passed", "")
+
+        with tempfile.TemporaryDirectory() as directory, patch(
+            "tiny_cpu_logisim.subprocess.run", side_effect=fake_run
+        ):
+            count = run_system_matrix(
+                system, Path("logisim.jar"), "java", Path(directory), 10
+            )
+
+        self.assertEqual(count, 7)
+        self.assertEqual(len(calls), 7)
+        self.assertIn("-Djava.awt.headless=true", calls[0])
+        self.assertIn(str(ROOT / "scripts/LogisimHeadlessVector.java"), calls[0])
 
     def test_system_handler_is_placed_at_contract_vector(self):
         system = load_system_profile("tinycpu-peripherals-16-12-v1")

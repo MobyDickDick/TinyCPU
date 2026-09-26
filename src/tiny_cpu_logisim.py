@@ -14,7 +14,6 @@ import argparse
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -513,18 +512,15 @@ def run_system_matrix(system, jar: Path, java: str, output: Path, timeout: int) 
             tree.write(core, encoding="utf-8", xml_declaration=True)
             vector = temporary / f"{case['id']}.txt"
             _write_system_vector(vector, states)
-            command = [java, "-jar", str(jar), "--test-vector", system.top_circuit,
-                       str(vector), str(project)]
-            # Logisim 4.1.0's test-vector entry point initializes Swing even
-            # though the evaluator itself is non-interactive.
-            if not os.environ.get("DISPLAY"):
-                xvfb = shutil.which("xvfb-run")
-                if xvfb is None:
-                    raise LogisimError(
-                        "system matrix requires DISPLAY or xvfb-run because "
-                        "Logisim's test-vector launcher initializes Swing"
-                    )
-                command = [xvfb, "-a", *command]
+            # The upstream entry point initializes Swing before reaching its
+            # otherwise headless vector evaluator.  Invoke the same public
+            # evaluator through Java's source-file launcher so CI needs no X
+            # server and the evidence still comes from pinned Logisim 4.1.0.
+            launcher = ROOT / "scripts" / "LogisimHeadlessVector.java"
+            command = [
+                java, "-Djava.awt.headless=true", "--class-path", str(jar),
+                str(launcher), system.top_circuit, str(vector), str(project),
+            ]
             try:
                 result = subprocess.run(command, capture_output=True, text=True,
                                         timeout=timeout, check=False)

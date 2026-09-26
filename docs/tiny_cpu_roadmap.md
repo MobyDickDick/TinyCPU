@@ -265,9 +265,11 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Zeichenkoordinaten ab; dabei erkannte vertauschte CPU-Ausgänge wurden ihren
   semantischen Speicher- und Interruptzielen wieder zugeordnet. Die
   eingefrorene Systemmatrix ist jetzt als sequenzieller Logisim-Testvektorlauf
-  in das elektrische Gate eingebunden und vergleicht die sieben öffentlichen
-  Systemzustände pro Taktflanke mit der VM. Als Nächstes wird der erste dadurch
-  nachgewiesene elektrische Unterschied isoliert und minimal repariert.
+  ausführbar und vergleicht die sieben öffentlichen Systemzustände pro
+  Taktflanke mit der VM. Ihr erster Fall weist noch einen elektrischen
+  Unterschied nach; deshalb bleibt sie bis zur Reparatur außerhalb des
+  verpflichtenden Kern-Gates. Als Nächstes wird dieser Unterschied isoliert
+  und minimal repariert.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
