@@ -157,7 +157,8 @@
         "core_next_pc_to_adapter",
         "interrupt_accept_to_core",
         "interrupt_target_pc_to_core",
-        "illegal_return_to_core"
+        "illegal_return_to_core",
+        "ram_write_enable_to_core"
       ],
       "verified_paths": [
         "core_address_split_to_memory_address"

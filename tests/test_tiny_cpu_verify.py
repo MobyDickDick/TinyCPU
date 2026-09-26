@@ -627,6 +627,46 @@ class CircuitVerificationTests(unittest.TestCase):
                     ):
                         VERIFY.verify_system_circuit()
 
+    def test_ap18_cpu_integration_rejects_width_incompatible_input_order(self) -> None:
+        """Generated core terminals must be followed instead of boundary pin order."""
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
+        project = ET.parse(circuit)
+        boundary = project.getroot().find("circuit[@name='CPUIntegrationBoundary']")
+        self.assertIsNotNone(boundary)
+        wire = next(item for item in boundary.findall("wire")
+                    if item.get("from") == "(280,260)")
+        boundary.remove(wire)
+        ET.SubElement(boundary, "wire", {"from": "(280,260)", "to": "(410,200)"})
+        project.write(circuit, encoding="utf-8", xml_declaration=True)
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+             mock.patch.object(VERIFY, "load_system_profile", return_value=replace(
+                 system, circuit_path=circuit)):
+            with self.assertRaisesRegex(
+                    VERIFY.VerificationError, "CPU core integration paths differ"):
+                VERIFY.verify_system_circuit()
+
+    def test_ap18_ram_write_enable_reaches_the_cpu_memory_path(self) -> None:
+        project = ET.parse(
+            MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU.circ"
+        ).getroot()
+        main = project.find("circuit[@name='TinyCPUMain']")
+        self.assertIsNotNone(main)
+        selector = next(
+            component for component in main.findall("comp[@name='Multiplexer']")
+            if any(attribute.get("name") == "label"
+                   and attribute.get("val") == "RAM_WRITE_ENABLE_SELECT"
+                   for attribute in component.findall("a"))
+        )
+        self.assertEqual(selector.get("loc"), "(740,620)")
+        wires = {(wire.get("from"), wire.get("to")) for wire in main.findall("wire")}
+        self.assertIn(("(330,850)", "(680,850)"), wires)
+        self.assertIn(("(740,620)", "(770,620)"), wires)
+
     def test_ap18_cpu_integration_requires_address_width_adapter(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"

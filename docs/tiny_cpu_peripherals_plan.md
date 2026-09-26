@@ -318,10 +318,10 @@ Rückkopplungen sind in Integrationsgrenze, Kern und eigenständigem
 `FetchDecode`-Diagnoseblatt durchgehend verdrahtet und werden vom Offline-Prüfer
 sowie den Leitungs-Mutationstests geschützt.
 
-Als offene Altlast bleiben der ungetriebene Platzhalter `CORE_ADDRESS` und der
-noch nicht in den privaten RAM-Schreibpfad geführte Eingang
-`RAM_WRITE_ENABLE`. Vor einem vollständigen elektrischen Systemtest müssen
-auch diese beiden Adapterpfade mit dem Kern verbunden werden.
+Der zuvor offene Eingang `RAM_WRITE_ENABLE` ist nun über einen vom bestehenden
+`USE_EXTERNAL_MEMORY` gesteuerten Selektor mit dem Schreibfreigabeeingang der
+privaten `Memory`-FBox verbunden. Ohne externen Speichermodus bleibt der
+bisherige interne Schreibpfad ausgewählt.
 
 ## Kompatibilitätsfolgen
 

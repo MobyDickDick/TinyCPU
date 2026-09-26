@@ -330,8 +330,8 @@ def verify_system_circuit() -> None:
     required_top_paths = {
         "clock_to_cpu": ("(350,480)", "(1050,590)"),
         "reset_to_cpu": ("(350,500)", "(1050,610)"),
-        "memory_read_value_to_cpu": ("(810,360)", "(1050,630)"),
-        "memory_read_valid_to_cpu": ("(810,380)", "(1050,650)"),
+        "memory_read_value_to_cpu": ("(810,360)", "(1050,690)"),
+        "memory_read_valid_to_cpu": ("(810,380)", "(1050,710)"),
         "cpu_address_to_memory": ("(1270,630)", "(590,400)"),
         "cpu_write_value_to_memory": ("(1270,650)", "(590,420)"),
         "cpu_write_valid_to_memory": ("(1270,690)", "(590,440)"),
@@ -342,9 +342,9 @@ def verify_system_circuit() -> None:
         "cpu_disable_request_to_interrupt": ("(1270,750)", "(590,690)"),
         "cpu_return_request_to_interrupt": ("(1270,770)", "(590,710)"),
         "cpu_next_pc_to_interrupt": ("(1270,790)", "(590,730)"),
-        "interrupt_accept_to_cpu": ("(810,590)", "(1050,670)"),
-        "interrupt_target_pc_to_cpu": ("(810,690)", "(1050,690)"),
-        "interrupt_illegal_return_to_cpu": ("(810,650)", "(1050,710)"),
+        "interrupt_accept_to_cpu": ("(810,590)", "(1050,650)"),
+        "interrupt_target_pc_to_cpu": ("(810,690)", "(1050,670)"),
+        "interrupt_illegal_return_to_cpu": ("(810,650)", "(1050,630)"),
     }
     failed_top_paths = [
         name for name, terminals in required_top_paths.items()
@@ -435,8 +435,8 @@ def verify_system_circuit() -> None:
     # write-enable inputs of the core's private RAM.  Exporting those exact
     # nets keeps the system adapter atomic and avoids a second write decoder.
     external_write_sources = {
-        "EXTERNAL_WRITE_VALUE": "(690,680)",
-        "EXTERNAL_WRITE_VALID": "(710,660)",
+        "EXTERNAL_WRITE_VALUE": "(690,220)",
+        "EXTERNAL_WRITE_VALID": "(710,200)",
         "EXTERNAL_WRITE_ENABLE": "(580,620)",
     }
     if any(
@@ -689,6 +689,7 @@ def verify_system_circuit() -> None:
             f"{display_path(system.circuit_path)}: CPU integration boundary differs from contract"
         )
     shared_core_pins = {
+        "RAM_WRITE_ENABLE",
         "INSTRUCTION_BOUNDARY",
         "ENABLE_INTERRUPTS_REQUEST",
         "DISABLE_INTERRUPTS_REQUEST",
@@ -761,10 +762,13 @@ def verify_system_circuit() -> None:
     required_core_paths = {
         "clock_to_core": ("CLK", f"({core_input_x},{core_y})"),
         "reset_to_core": ("RESET", f"({core_input_x},{core_y + 20})"),
+        # The remaining generated input terminals follow TinyCPUMain's pin
+        # coordinates, not the boundary pin order: ILL_RET, interrupt accept,
+        # interrupt target, external-memory value/valid, and selection.
         "adapter_read_value_to_core": (
-            "RAM_READ_VALUE", f"({core_input_x},{core_y + 40})"),
+            "RAM_READ_VALUE", f"({core_input_x},{core_y + 100})"),
         "adapter_read_valid_to_core": (
-            "RAM_READ_VALID", f"({core_input_x},{core_y + 60})"),
+            "RAM_READ_VALID", f"({core_input_x},{core_y + 120})"),
         # With the generated appearance anchored at its output edge,
         # TinyCPUMain exposes the addressed memory value used by
         # PRINT_ADDRESS at the instance x coordinate and its validity 60
@@ -790,11 +794,13 @@ def verify_system_circuit() -> None:
         "core_next_pc_to_adapter": (
             "NEXT_PC", f"({core_x},{core_y + 320})"),
         "interrupt_accept_to_core": (
-            "INTERRUPT_ACCEPT", f"({core_input_x},{core_y + 100})"),
+            "INTERRUPT_ACCEPT", f"({core_input_x},{core_y + 60})"),
         "interrupt_target_pc_to_core": (
-            "INTERRUPT_TARGET_PC", f"({core_input_x},{core_y + 120})"),
+            "INTERRUPT_TARGET_PC", f"({core_input_x},{core_y + 80})"),
         "illegal_return_to_core": (
-            "ILL_RET", f"({core_input_x},{core_y + 140})"),
+            "ILL_RET", f"({core_input_x},{core_y + 40})"),
+        "ram_write_enable_to_core": (
+            "RAM_WRITE_ENABLE", f"({core_input_x},{core_y + 160})"),
     }
     if cpu_contract.get("verified_core_paths") != list(required_core_paths) or not all(
             connected(cpu_pin_locations[source], target)
@@ -802,12 +808,12 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             f"{display_path(system.circuit_path)}: CPU core integration paths differ from contract"
         )
-    external_memory_enable = cpu_boundary.find("comp[@name='Constant'][@loc='(340,240)']")
+    external_memory_enable = cpu_boundary.find("comp[@name='Constant'][@loc='(340,300)']")
     enable_attributes = {
         item.get("name"): item.get("val") for item in external_memory_enable.findall("a")
     } if external_memory_enable is not None else {}
     if enable_attributes.get("value") != "0x1" or not connected(
-        "(340,240)", f"({core_input_x},{core_y + 80})"
+        "(340,300)", f"({core_input_x},{core_y + 140})"
     ):
         raise VerificationError(
             f"{display_path(system.circuit_path)}: CPU external-memory selection is inactive"
