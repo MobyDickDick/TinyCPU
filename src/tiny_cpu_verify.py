@@ -31,6 +31,35 @@ class VerificationError(ValueError):
     """A controlled error in a checked-in artifact."""
 
 
+def verify_pin_handoffs(
+    interfaces: dict[str, dict[str, dict[str, object]]],
+    handoffs: tuple[tuple[str, str, str, str], ...],
+) -> None:
+    """Check the direction and width at both ends of named 1:1 hand-offs.
+
+    A connection is described as ``(producer, output, consumer, input)``.  The
+    labels may differ where the distinction is intentional (for example raw
+    RAM data versus selected external-memory data), but a bus may never be
+    accepted merely because its wire happens to end at a generated box.
+    """
+    for producer_name, output_name, consumer_name, input_name in handoffs:
+        producer = interfaces.get(producer_name, {}).get(output_name)
+        consumer = interfaces.get(consumer_name, {}).get(input_name)
+        description = (
+            f"{producer_name}.{output_name} -> {consumer_name}.{input_name}"
+        )
+        if producer is None or consumer is None:
+            raise VerificationError(f"missing pin in hand-off {description}")
+        if (producer.get("direction") != "output"
+                or consumer.get("direction") != "input"):
+            raise VerificationError(f"pin direction mismatch in hand-off {description}")
+        if producer.get("bits") != consumer.get("bits"):
+            raise VerificationError(
+                f"bus width mismatch in hand-off {description}: "
+                f"{producer.get('bits')} != {consumer.get('bits')}"
+            )
+
+
 def display_path(path: Path) -> Path:
     """Return a stable repository-relative name, while supporting test fixtures."""
     try:
@@ -303,16 +332,16 @@ def verify_system_circuit() -> None:
         "reset_to_cpu": ("(350,500)", "(1050,610)"),
         "memory_read_value_to_cpu": ("(810,360)", "(1050,630)"),
         "memory_read_valid_to_cpu": ("(810,380)", "(1050,650)"),
-        "cpu_address_to_memory": ("(1270,670)", "(590,400)"),
-        "cpu_write_value_to_memory": ("(1270,690)", "(590,420)"),
-        "cpu_write_valid_to_memory": ("(1270,730)", "(590,440)"),
-        "cpu_write_enable_to_memory": ("(1270,710)", "(590,460)"),
+        "cpu_address_to_memory": ("(1270,630)", "(590,400)"),
+        "cpu_write_value_to_memory": ("(1270,650)", "(590,420)"),
+        "cpu_write_valid_to_memory": ("(1270,690)", "(590,440)"),
+        "cpu_write_enable_to_memory": ("(1270,670)", "(590,460)"),
         "memory_ram_write_enable_to_cpu": ("(810,440)", "(1050,730)"),
-        "cpu_instruction_boundary_to_interrupt": ("(1270,750)", "(590,650)"),
-        "cpu_enable_request_to_interrupt": ("(1270,770)", "(590,670)"),
-        "cpu_disable_request_to_interrupt": ("(1270,790)", "(590,690)"),
-        "cpu_return_request_to_interrupt": ("(1270,810)", "(590,710)"),
-        "cpu_next_pc_to_interrupt": ("(1270,830)", "(590,730)"),
+        "cpu_instruction_boundary_to_interrupt": ("(1270,710)", "(590,650)"),
+        "cpu_enable_request_to_interrupt": ("(1270,730)", "(590,670)"),
+        "cpu_disable_request_to_interrupt": ("(1270,750)", "(590,690)"),
+        "cpu_return_request_to_interrupt": ("(1270,770)", "(590,710)"),
+        "cpu_next_pc_to_interrupt": ("(1270,790)", "(590,730)"),
         "interrupt_accept_to_cpu": ("(810,590)", "(1050,670)"),
         "interrupt_target_pc_to_cpu": ("(810,690)", "(1050,690)"),
         "interrupt_illegal_return_to_cpu": ("(810,650)", "(1050,710)"),
@@ -659,6 +688,22 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             f"{display_path(system.circuit_path)}: CPU integration boundary differs from contract"
         )
+    shared_core_pins = {
+        "INSTRUCTION_BOUNDARY",
+        "ENABLE_INTERRUPTS_REQUEST",
+        "DISABLE_INTERRUPTS_REQUEST",
+        "RETURN_FROM_INTERRUPT_REQUEST",
+        "NEXT_PC",
+        "INTERRUPT_ACCEPT",
+        "INTERRUPT_TARGET_PC",
+        "ILL_RET",
+    }
+    if any(cpu_pins.get(label) != core_public_pins.get(label)
+           for label in shared_core_pins):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: CPU pin names or bus widths "
+            "differ across the core integration boundary"
+        )
     cpu_wires = {
         frozenset((wire.get("from"), wire.get("to")))
         for wire in cpu_boundary.findall("wire")
@@ -737,17 +782,17 @@ def verify_system_circuit() -> None:
         "core_instruction_boundary_to_adapter": (
             "INSTRUCTION_BOUNDARY", f"({core_x},{core_y + 120})"),
         "core_enable_request_to_adapter": (
-            "ENABLE_REQUEST", f"({core_x},{core_y + 140})"),
+            "ENABLE_INTERRUPTS_REQUEST", f"({core_x},{core_y + 140})"),
         "core_disable_request_to_adapter": (
-            "DISABLE_REQUEST", f"({core_x},{core_y + 160})"),
+            "DISABLE_INTERRUPTS_REQUEST", f"({core_x},{core_y + 160})"),
         "core_return_request_to_adapter": (
-            "RETURN_REQUEST", f"({core_x},{core_y + 180})"),
+            "RETURN_FROM_INTERRUPT_REQUEST", f"({core_x},{core_y + 180})"),
         "core_next_pc_to_adapter": (
             "NEXT_PC", f"({core_x},{core_y + 320})"),
         "interrupt_accept_to_core": (
             "INTERRUPT_ACCEPT", f"({core_input_x},{core_y + 100})"),
         "interrupt_target_pc_to_core": (
-            "TARGET_PC", f"({core_input_x},{core_y + 120})"),
+            "INTERRUPT_TARGET_PC", f"({core_input_x},{core_y + 120})"),
         "illegal_return_to_core": (
             "ILL_RET", f"({core_input_x},{core_y + 140})"),
     }
@@ -982,14 +1027,14 @@ def verify_system_circuit() -> None:
     expected_interrupt_pins = {
         "INTERRUPT_REQUEST": {"direction": "input", "bits": 1},
         "INSTRUCTION_BOUNDARY": {"direction": "input", "bits": 1},
-        "ENABLE_REQUEST": {"direction": "input", "bits": 1},
-        "DISABLE_REQUEST": {"direction": "input", "bits": 1},
-        "RETURN_REQUEST": {"direction": "input", "bits": 1},
+        "ENABLE_INTERRUPTS_REQUEST": {"direction": "input", "bits": 1},
+        "DISABLE_INTERRUPTS_REQUEST": {"direction": "input", "bits": 1},
+        "RETURN_FROM_INTERRUPT_REQUEST": {"direction": "input", "bits": 1},
         "NEXT_PC": {"direction": "input", "bits": address_bits},
         "CLK": {"direction": "input", "bits": 1},
         "RESET": {"direction": "input", "bits": 1},
         "INTERRUPT_ACCEPT": {"direction": "output", "bits": 1},
-        "TARGET_PC": {"direction": "output", "bits": address_bits},
+        "INTERRUPT_TARGET_PC": {"direction": "output", "bits": address_bits},
         "INTERRUPT_ENABLED": {"direction": "output", "bits": 1},
         "INTERRUPT_PENDING": {"direction": "output", "bits": 1},
         "IN_INTERRUPT_HANDLER": {"direction": "output", "bits": 1},
@@ -1001,6 +1046,56 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             f"{display_path(system.circuit_path)}: InterruptController pins differ from contract"
         )
+    shared_interrupt_pins = {
+        "INSTRUCTION_BOUNDARY",
+        "ENABLE_INTERRUPTS_REQUEST",
+        "DISABLE_INTERRUPTS_REQUEST",
+        "RETURN_FROM_INTERRUPT_REQUEST",
+        "NEXT_PC",
+        "INTERRUPT_ACCEPT",
+        "INTERRUPT_TARGET_PC",
+        "ILL_RET",
+    }
+    if any(
+        interrupt_pins[label]["bits"] != cpu_pins[label]["bits"]
+        or interrupt_pins[label]["direction"] == cpu_pins[label]["direction"]
+        for label in shared_interrupt_pins
+    ):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: interrupt pin names, directions, "
+            "or bus widths differ between connected circuits"
+        )
+    verify_pin_handoffs(
+        {
+            "CPUIntegrationBoundary": cpu_pins,
+            "OutputMemoryPath": path_pins,
+            "InterruptController": interrupt_pins,
+        },
+        (
+            ("CPUIntegrationBoundary", "ADDRESS", "OutputMemoryPath", "ADDRESS"),
+            ("CPUIntegrationBoundary", "WRITE_VALUE", "OutputMemoryPath", "WRITE_VALUE"),
+            ("CPUIntegrationBoundary", "WRITE_VALID", "OutputMemoryPath", "WRITE_VALID"),
+            ("CPUIntegrationBoundary", "WRITE_ENABLE", "OutputMemoryPath", "WRITE_ENABLE"),
+            ("OutputMemoryPath", "READ_VALUE", "CPUIntegrationBoundary", "RAM_READ_VALUE"),
+            ("OutputMemoryPath", "READ_VALID", "CPUIntegrationBoundary", "RAM_READ_VALID"),
+            ("OutputMemoryPath", "RAM_WRITE_ENABLE",
+             "CPUIntegrationBoundary", "RAM_WRITE_ENABLE"),
+            ("CPUIntegrationBoundary", "INSTRUCTION_BOUNDARY",
+             "InterruptController", "INSTRUCTION_BOUNDARY"),
+            ("CPUIntegrationBoundary", "ENABLE_INTERRUPTS_REQUEST",
+             "InterruptController", "ENABLE_INTERRUPTS_REQUEST"),
+            ("CPUIntegrationBoundary", "DISABLE_INTERRUPTS_REQUEST",
+             "InterruptController", "DISABLE_INTERRUPTS_REQUEST"),
+            ("CPUIntegrationBoundary", "RETURN_FROM_INTERRUPT_REQUEST",
+             "InterruptController", "RETURN_FROM_INTERRUPT_REQUEST"),
+            ("CPUIntegrationBoundary", "NEXT_PC", "InterruptController", "NEXT_PC"),
+            ("InterruptController", "INTERRUPT_ACCEPT",
+             "CPUIntegrationBoundary", "INTERRUPT_ACCEPT"),
+            ("InterruptController", "INTERRUPT_TARGET_PC",
+             "CPUIntegrationBoundary", "INTERRUPT_TARGET_PC"),
+            ("InterruptController", "ILL_RET", "CPUIntegrationBoundary", "ILL_RET"),
+        ),
+    )
     interrupt_registers = []
     for component in interrupt.findall("comp[@name='Register']"):
         attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
