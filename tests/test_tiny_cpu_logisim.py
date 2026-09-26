@@ -83,8 +83,7 @@ def _pin_location(circuit, label):
 class LogisimLauncherTests(unittest.TestCase):
 
     @patch("tiny_cpu_logisim.subprocess.run")
-    @patch("tiny_cpu_logisim.shutil.which", return_value="/usr/bin/xvfb-run")
-    def test_system_matrix_preserves_reproduction_inputs(self, _which, run):
+    def test_system_matrix_preserves_reproduction_inputs(self, run):
         run.return_value = subprocess.CompletedProcess([], 1, "mismatch\n", "")
         system = load_system_profile("tinycpu-peripherals-16-12-v1")
         with tempfile.TemporaryDirectory() as directory:
