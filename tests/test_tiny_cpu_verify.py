@@ -781,6 +781,33 @@ class CircuitVerificationTests(unittest.TestCase):
                             VERIFY.VerificationError, "CPU top-level hand-offs differ"):
                         VERIFY.verify_system_circuit()
 
+    def test_ap18_top_level_verification_is_independent_of_canvas_coordinates(self) -> None:
+        """Moving the complete authored top-level layout preserves its contract."""
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
+        project = ET.parse(circuit)
+        top = project.getroot().find("circuit[@name='TinyCPUSystemMain']")
+        self.assertIsNotNone(top)
+
+        def translated(location: str) -> str:
+            x, y = map(int, location.strip("()").split(","))
+            return f"({x + 170},{y + 90})"
+
+        for component in top.findall("comp"):
+            component.set("loc", translated(component.get("loc")))
+        for wire in top.findall("wire"):
+            wire.set("from", translated(wire.get("from")))
+            wire.set("to", translated(wire.get("to")))
+        project.write(circuit, encoding="utf-8", xml_declaration=True)
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+             mock.patch.object(VERIFY, "load_system_profile", return_value=replace(
+                 system, circuit_path=circuit)):
+            VERIFY.verify_system_circuit()
+
     def test_ap18_rejects_crossed_address_and_read_value_buses(self) -> None:
         """A 12-bit address must never terminate at the 16-bit read input."""
         root = MODULE_PATH.parents[1]

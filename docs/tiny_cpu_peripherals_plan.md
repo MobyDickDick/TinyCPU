@@ -323,6 +323,21 @@ Der zuvor offene Eingang `RAM_WRITE_ENABLE` ist nun über einen vom bestehenden
 privaten `Memory`-FBox verbunden. Ohne externen Speichermodus bleibt der
 bisherige interne Schreibpfad ausgewählt.
 
+Eine erneute Top-Level-Kontrolle folgt jetzt nicht mehr den absoluten
+Zeichenkoordinaten der drei generierten Bausteinboxen. Der Offline-Prüfer
+ermittelt deren Anschlüsse aus den benannten Pins der jeweiligen
+Schaltungsdefinition, ihrer Richtung und der von Logisim erzeugten
+Anschlussreihenfolge und verfolgt anschließend ausschließlich die
+Netzkonnektivität. Ein Regressionstest verschiebt das gesamte Top-Level samt
+Leitungen und Pins und verlangt unverändert dieselbe elektrische Aussage. Bei
+dieser Kontrolle wurden die nach einer manuellen Neuanordnung vertauschten
+CPU-Ausgänge wieder ihren semantischen Zielen zugeordnet: Adresse,
+Schreibwert, Schreibgültigkeit, Befehlsimpulse und Folge-PC erreichen nun die
+jeweils gleichnamigen Speicher- beziehungsweise Interruptanschlüsse. Der
+Logisim-Tabellenprüfer bestätigt für das System-Top-Level definierte Ausgänge
+ohne Breitenfehler. Als nächster Schritt bleibt damit die Ausführung und der
+taktweise Vergleich der bereits eingefrorenen Systemmatrix.
+
 ## Kompatibilitätsfolgen
 
 1. TinyCPU 1.0, `tinycpu-machine-v1` und beide vorhandenen Hardwareprofile
