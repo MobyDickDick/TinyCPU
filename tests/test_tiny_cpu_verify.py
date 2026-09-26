@@ -179,6 +179,12 @@ class CircuitVerificationTests(unittest.TestCase):
         self.assertIsNotNone(output)
         self.assertEqual(WIRE_CONTACTS.inspect_circuit(output), [])
 
+    def test_ap18_peripheral_project_has_only_orthogonal_wires(self) -> None:
+        path = MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU_Peripherals.circ"
+        wires, circuits = VERIFY.verify_circuit(path)
+        self.assertGreater(wires, 0)
+        self.assertGreater(circuits, 0)
+
     def test_ap18_system_routes_have_no_implicit_contacts(self) -> None:
         project = VERIFY.ET.parse(
             MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU_Peripherals.circ"
