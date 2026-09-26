@@ -31,6 +31,35 @@ class VerificationError(ValueError):
     """A controlled error in a checked-in artifact."""
 
 
+def verify_pin_handoffs(
+    interfaces: dict[str, dict[str, dict[str, object]]],
+    handoffs: tuple[tuple[str, str, str, str], ...],
+) -> None:
+    """Check the direction and width at both ends of named 1:1 hand-offs.
+
+    A connection is described as ``(producer, output, consumer, input)``.  The
+    labels may differ where the distinction is intentional (for example raw
+    RAM data versus selected external-memory data), but a bus may never be
+    accepted merely because its wire happens to end at a generated box.
+    """
+    for producer_name, output_name, consumer_name, input_name in handoffs:
+        producer = interfaces.get(producer_name, {}).get(output_name)
+        consumer = interfaces.get(consumer_name, {}).get(input_name)
+        description = (
+            f"{producer_name}.{output_name} -> {consumer_name}.{input_name}"
+        )
+        if producer is None or consumer is None:
+            raise VerificationError(f"missing pin in hand-off {description}")
+        if (producer.get("direction") != "output"
+                or consumer.get("direction") != "input"):
+            raise VerificationError(f"pin direction mismatch in hand-off {description}")
+        if producer.get("bits") != consumer.get("bits"):
+            raise VerificationError(
+                f"bus width mismatch in hand-off {description}: "
+                f"{producer.get('bits')} != {consumer.get('bits')}"
+            )
+
+
 def display_path(path: Path) -> Path:
     """Return a stable repository-relative name, while supporting test fixtures."""
     try:
@@ -1036,6 +1065,37 @@ def verify_system_circuit() -> None:
             f"{display_path(system.circuit_path)}: interrupt pin names, directions, "
             "or bus widths differ between connected circuits"
         )
+    verify_pin_handoffs(
+        {
+            "CPUIntegrationBoundary": cpu_pins,
+            "OutputMemoryPath": path_pins,
+            "InterruptController": interrupt_pins,
+        },
+        (
+            ("CPUIntegrationBoundary", "ADDRESS", "OutputMemoryPath", "ADDRESS"),
+            ("CPUIntegrationBoundary", "WRITE_VALUE", "OutputMemoryPath", "WRITE_VALUE"),
+            ("CPUIntegrationBoundary", "WRITE_VALID", "OutputMemoryPath", "WRITE_VALID"),
+            ("CPUIntegrationBoundary", "WRITE_ENABLE", "OutputMemoryPath", "WRITE_ENABLE"),
+            ("OutputMemoryPath", "READ_VALUE", "CPUIntegrationBoundary", "RAM_READ_VALUE"),
+            ("OutputMemoryPath", "READ_VALID", "CPUIntegrationBoundary", "RAM_READ_VALID"),
+            ("OutputMemoryPath", "RAM_WRITE_ENABLE",
+             "CPUIntegrationBoundary", "RAM_WRITE_ENABLE"),
+            ("CPUIntegrationBoundary", "INSTRUCTION_BOUNDARY",
+             "InterruptController", "INSTRUCTION_BOUNDARY"),
+            ("CPUIntegrationBoundary", "ENABLE_INTERRUPTS_REQUEST",
+             "InterruptController", "ENABLE_INTERRUPTS_REQUEST"),
+            ("CPUIntegrationBoundary", "DISABLE_INTERRUPTS_REQUEST",
+             "InterruptController", "DISABLE_INTERRUPTS_REQUEST"),
+            ("CPUIntegrationBoundary", "RETURN_FROM_INTERRUPT_REQUEST",
+             "InterruptController", "RETURN_FROM_INTERRUPT_REQUEST"),
+            ("CPUIntegrationBoundary", "NEXT_PC", "InterruptController", "NEXT_PC"),
+            ("InterruptController", "INTERRUPT_ACCEPT",
+             "CPUIntegrationBoundary", "INTERRUPT_ACCEPT"),
+            ("InterruptController", "INTERRUPT_TARGET_PC",
+             "CPUIntegrationBoundary", "INTERRUPT_TARGET_PC"),
+            ("InterruptController", "ILL_RET", "CPUIntegrationBoundary", "ILL_RET"),
+        ),
+    )
     interrupt_registers = []
     for component in interrupt.findall("comp[@name='Register']"):
         attributes = {item.get("name"): item.get("val") for item in component.findall("a")}

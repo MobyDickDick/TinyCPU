@@ -29,6 +29,30 @@ WIRE_SPEC.loader.exec_module(WIRE_CONTACTS)
 
 
 class CircuitVerificationTests(unittest.TestCase):
+    def test_pin_handoffs_reject_crossed_address_and_ram_value_widths(self) -> None:
+        interfaces = {
+            "CPU": {"ADDRESS": {"direction": "output", "bits": 12}},
+            "Memory": {"RAM_READ_VALUE": {"direction": "input", "bits": 16}},
+        }
+        with self.assertRaisesRegex(
+            VERIFY.VerificationError,
+            r"bus width mismatch.*CPU\.ADDRESS -> Memory\.RAM_READ_VALUE: 12 != 16",
+        ):
+            VERIFY.verify_pin_handoffs(
+                interfaces,
+                (("CPU", "ADDRESS", "Memory", "RAM_READ_VALUE"),),
+            )
+
+    def test_pin_handoffs_accept_matching_address_buses(self) -> None:
+        interfaces = {
+            "CPU": {"ADDRESS": {"direction": "output", "bits": 12}},
+            "Memory": {"ADDRESS": {"direction": "input", "bits": 12}},
+        }
+        VERIFY.verify_pin_handoffs(
+            interfaces,
+            (("CPU", "ADDRESS", "Memory", "ADDRESS"),),
+        )
+
     def write_project(self, circuit_body: str, main: str = "Main") -> Path:
         directory = Path(self.enterContext(tempfile.TemporaryDirectory()))
         path = directory / "test.circ"

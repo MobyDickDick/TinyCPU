@@ -27,6 +27,12 @@ angeschlossen. Für alle direkten 1:1-Übergaben zwischen `TinyCPUMain`,
 Pin-Schema: Name und Busbreite bleiben an beiden Seiten identisch; nur die
 Richtung kehrt sich an der Verbrauchergrenze um. Das betrifft insbesondere
 `INTERRUPT_TARGET_PC` sowie die drei `*_INTERRUPTS_REQUEST`-Signale.
+Der 12-Bit-Ausgang `CPUIntegrationBoundary.ADDRESS` endet ausschließlich am
+12-Bit-Eingang `OutputMemoryPath.ADDRESS`. Er darf insbesondere nicht mit dem
+16-Bit-Eingang `OutputMemoryPath.RAM_READ_VALUE` verbunden werden. Die
+Vertragsprüfung vergleicht deshalb für jede direkte Übergabe ausdrücklich
+Erzeugerpin, Verbraucherpin, Richtung und Breite, statt nur zu prüfen, ob eine
+Leitung optisch an einem Unterbaustein endet.
 Die Prüfung dieser Wege folgt den benannten Pins und den
 tatsächlichen Anschlüssen der generierten Symbole und bleibt dadurch auch nach
 einer manuellen Neuanordnung der Grenze wirksam.
