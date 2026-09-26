@@ -27,6 +27,7 @@ from tiny_cpu_logisim import (
     resolve_jar,
     run_core_acceptance,
     run_matrix,
+    run_system_matrix,
     run_trace,
 )
 from tiny_cpu_profiles import load_profile
@@ -80,6 +81,21 @@ def _pin_location(circuit, label):
 
 
 class LogisimLauncherTests(unittest.TestCase):
+
+    @patch("tiny_cpu_logisim.subprocess.run")
+    @patch("tiny_cpu_logisim.shutil.which", return_value="/usr/bin/xvfb-run")
+    def test_system_matrix_preserves_reproduction_inputs(self, _which, run):
+        run.return_value = subprocess.CompletedProcess([], 1, "mismatch\n", "")
+        system = load_system_profile("tinycpu-peripherals-16-12-v1")
+        with tempfile.TemporaryDirectory() as directory:
+            evidence = Path(directory) / "evidence"
+            with self.assertRaisesRegex(LogisimError, "output-valid-write failed"):
+                run_system_matrix(system, Path("logisim.jar"), "java", evidence, 30)
+            case = evidence / "output-valid-write"
+            self.assertTrue((case / "vector.txt").is_file())
+            self.assertTrue((case / "TinyCPU_Peripherals.circ").is_file())
+            self.assertTrue((case / "TinyCPU.circ").is_file())
+            self.assertEqual((case / "logisim.txt").read_text(), "mismatch\n")
 
     def test_system_matrix_vector_tracks_events_and_vm_state(self):
         system = load_system_profile("tinycpu-peripherals-16-12-v1")

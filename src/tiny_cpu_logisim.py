@@ -513,6 +513,15 @@ def run_system_matrix(system, jar: Path, java: str, output: Path, timeout: int) 
             tree.write(core, encoding="utf-8", xml_declaration=True)
             vector = temporary / f"{case['id']}.txt"
             _write_system_vector(vector, states)
+            # Keep the exact stimulus and both projects next to the simulator
+            # transcript.  In particular, do this before invoking Logisim so
+            # a failing first fixture remains reproducible after the temporary
+            # directory has been removed.
+            case_evidence = output / str(case["id"])
+            case_evidence.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(vector, case_evidence / "vector.txt")
+            shutil.copy2(project, case_evidence / project.name)
+            shutil.copy2(core, case_evidence / core.name)
             command = [java, "-jar", str(jar), "--test-vector", system.top_circuit,
                        str(vector), str(project)]
             # Logisim 4.1.0's test-vector entry point initializes Swing even
@@ -530,7 +539,7 @@ def run_system_matrix(system, jar: Path, java: str, output: Path, timeout: int) 
                                         timeout=timeout, check=False)
             except subprocess.TimeoutExpired as exc:
                 raise LogisimError(f"system fixture {case['id']}: timed out") from exc
-            evidence = output / f"{case['id']}.txt"
+            evidence = case_evidence / "logisim.txt"
             evidence.write_text(result.stdout + result.stderr, encoding="utf-8")
             if result.returncode:
                 raise LogisimError(

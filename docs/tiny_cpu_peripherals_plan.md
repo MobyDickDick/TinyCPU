@@ -341,9 +341,16 @@ Vektorhandler in eine temporäre Kernkopie geladen, aus denselben externen
 Flankenereignissen ein VM-Referenzlauf erzeugt und als sequenzieller
 Logisim-Testvektor gegen alle sieben öffentlichen Systemzustände geprüft.
 Logisim 4.1.0 initialisiert für diesen eigentlich nichtinteraktiven Aufruf
-Swing; das CI-Gate stellt deshalb ausdrücklich `xvfb-run` bereit. Als nächster
-Schritt bleibt die Auswertung des ersten vollständigen elektrischen Laufs und
-die kleinste Reparatur eines dabei nachgewiesenen Signalfehlers.
+Swing; das CI-Gate stellt deshalb ausdrücklich `xvfb-run` bereit. Der erste
+vollständige Lauf ist nun ausgewertet: Bereits der Fall `output-valid-write`
+weicht ab Zeile 4 ab, weil `OUTPUT_PORT_VALUE` bei `0x0000` und
+`OUTPUT_PORT_VALID` bei `0` bleiben, während die VM `0x0017` und `1` erwartet.
+Der Matrixlauf bewahrt deshalb ab jetzt den exakten Vektor, die injizierte
+Kernschaltung, das Systemprojekt und das Logisim-Protokoll fallweise auf.
+Als nächstes abgegrenztes Reparaturpaket wird ausschließlich die Signalkette
+von `EXTERNAL_WRITE_*` über `CPUIntegrationBoundary` und `OutputMemoryPath`
+bis zu den beiden Ausgangsregistern untersucht; Interruptpfade werden erst
+nach bestandenem Ausgabefall geöffnet.
 
 ## Kompatibilitätsfolgen
 

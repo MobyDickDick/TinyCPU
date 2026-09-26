@@ -266,8 +266,13 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   semantischen Speicher- und Interruptzielen wieder zugeordnet. Die
   eingefrorene Systemmatrix ist jetzt als sequenzieller Logisim-Testvektorlauf
   in das elektrische Gate eingebunden und vergleicht die sieben öffentlichen
-  Systemzustände pro Taktflanke mit der VM. Als Nächstes wird der erste dadurch
-  nachgewiesene elektrische Unterschied isoliert und minimal repariert.
+  Systemzustände pro Taktflanke mit der VM. Der erste Unterschied ist im Fall
+  `output-valid-write` ab Vektorzeile 4 auf die ausbleibende Übernahme von
+  Wert `0x0017` und dessen Valid-Bit in die Ausgangsregister eingegrenzt. Das
+  Gate bewahrt nun Vektor, injizierten Kern, Systemprojekt und Simulatorprotokoll
+  als reproduzierbares Fallartefakt auf. Als Nächstes wird ausschließlich diese
+  Schreibsignalkette minimal repariert; die Interruptfälle bleiben bis zum
+  bestandenen Ausgabefall geschlossen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
