@@ -19,6 +19,9 @@ from tiny_cpu_logisim import (
     _expected_edges,
     _expected_halt_output,
     _matrix_program,
+    _system_expected_states,
+    _system_program,
+    _write_system_vector,
     autonomous_project,
     parse_args,
     resolve_jar,
@@ -27,6 +30,7 @@ from tiny_cpu_logisim import (
     run_trace,
 )
 from tiny_cpu_profiles import load_profile
+from tiny_cpu_systems import load_system_profile
 
 
 def _attributes(component):
@@ -76,6 +80,40 @@ def _pin_location(circuit, label):
 
 
 class LogisimLauncherTests(unittest.TestCase):
+
+    def test_system_matrix_vector_tracks_events_and_vm_state(self):
+        system = load_system_profile("tinycpu-peripherals-16-12-v1")
+        case = {
+            "id": "interrupt",
+            "program": "ENABLE_INTERRUPTS()\nHALT()\n",
+            "events": [
+                {"edge": 0, "interrupt_request": True},
+                {"edge": 1, "interrupt_request": False},
+            ],
+        }
+        program = _system_program(case, system)
+        states = _system_expected_states(case, program)
+        self.assertTrue(states[0][2].interrupt_pending)
+        self.assertTrue(states[1][2].halt_error)
+
+        with tempfile.TemporaryDirectory() as directory:
+            vector = Path(directory) / "case.txt"
+            _write_system_vector(vector, states)
+            text = vector.read_text(encoding="utf-8")
+        self.assertIn("OUTPUT_PORT_VALUE[16]", text.splitlines()[0])
+        self.assertIn("1 0 1", text.splitlines()[2])
+
+    def test_system_handler_is_placed_at_contract_vector(self):
+        system = load_system_profile("tinycpu-peripherals-16-12-v1")
+        program = _system_program({
+            "id": "handler",
+            "program": "ENABLE_INTERRUPTS()\nHALT()\n",
+            "vector_program": "LOAD_CONST(7)\nRETURN_FROM_INTERRUPT()\n",
+        }, system)
+        self.assertEqual(program.instructions[system.interrupt_vector].mnemonic,
+                         "LOAD_CONST")
+        self.assertEqual(program.instructions[system.interrupt_vector + 1].mnemonic,
+                         "RETURN_FROM_INTERRUPT")
 
     def test_interrupt_feedback_inputs_remain_connected_after_layout_edits(self):
         """Guard electrical paths without freezing their drawing coordinates."""

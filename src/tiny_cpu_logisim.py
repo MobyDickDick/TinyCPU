@@ -14,6 +14,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -24,6 +25,7 @@ from pathlib import Path
 
 from tiny_cpu_profiles import DEFAULT_PROFILE, load_profile
 from tiny_cpu_assembler import Instruction, Program, assemble, encode_program, opcode_table
+from tiny_cpu_systems import load_system_profile
 from tiny_cpu_vm import TinyCPU
 
 
@@ -140,21 +142,26 @@ def autonomous_project(
     if found != required:
         raise LogisimError(f"{source}: cannot create autonomous trace (found {sorted(found)})")
     if rom_words is not None:
-        rom = next((component for owner in root.findall("circuit")
-                    for component in owner.findall("comp")
-                    if component.get("name") == "ROM"
-                    and _attributes(component).get("label") is not None
-                    and _attributes(component)["label"].get("val") == "INSTRUCTION_ROM"), None)
-        if rom is None:
-            raise LogisimError(f"{source}: INSTRUCTION_ROM is missing")
-        attributes = _attributes(rom)
-        contents = attributes.get("contents")
-        if contents is None:
-            raise LogisimError(f"{source}: INSTRUCTION_ROM has no contents")
-        contents.text = (f"addr/data: {attributes['addrWidth'].get('val')} "
-                         f"{attributes['dataWidth'].get('val')}\n"
-                         + " ".join(f"{word:x}" for word in rom_words) + "\n")
+        _inject_rom(root, source, rom_words)
     tree.write(destination, encoding="utf-8", xml_declaration=True)
+
+
+def _inject_rom(root: ET.Element, source: Path, rom_words: tuple[int, ...]) -> None:
+    """Replace the instruction ROM contents without changing circuit inputs."""
+    rom = next((component for owner in root.findall("circuit")
+                for component in owner.findall("comp")
+                if component.get("name") == "ROM"
+                and _attributes(component).get("label") is not None
+                and _attributes(component)["label"].get("val") == "INSTRUCTION_ROM"), None)
+    if rom is None:
+        raise LogisimError(f"{source}: INSTRUCTION_ROM is missing")
+    attributes = _attributes(rom)
+    contents = attributes.get("contents")
+    if contents is None:
+        raise LogisimError(f"{source}: INSTRUCTION_ROM has no contents")
+    contents.text = (f"addr/data: {attributes['addrWidth'].get('val')} "
+                     f"{attributes['dataWidth'].get('val')}\n"
+                     + " ".join(f"{word:x}" for word in rom_words) + "\n")
 
 
 def java_major(java: str) -> int:
@@ -405,9 +412,137 @@ def run_matrix(
     return len(cases)
 
 
+def _system_program(case: dict[str, object], system) -> Program:
+    """Build one system fixture, placing its handler at the fixed vector."""
+    main = assemble(str(case.get("program", "")), system.base_profile, system)
+    vector_source = case.get("vector_program")
+    if vector_source is None:
+        return main
+    handler = assemble(str(vector_source), system.base_profile, system)
+    if len(main.instructions) > system.interrupt_vector:
+        raise LogisimError(f"system fixture {case.get('id')!r} overlaps its vector")
+    padding = (Instruction("HALT"),) * (system.interrupt_vector - len(main.instructions))
+    return Program(main.instructions + padding + handler.instructions, {}, {},
+                   system.base_profile, system)
+
+
+def _system_expected_states(case: dict[str, object], program: Program) -> list[tuple[bool, bool, TinyCPU]]:
+    """Return input levels and post-edge VM states for a matrix fixture."""
+    events = {int(item["edge"]): item for item in case.get("events", [])}
+    cpu = TinyCPU(program)
+    request = False
+    states = []
+    # Reset scenarios intentionally loop.  Other fixtures run to a terminal
+    # state, with a bounded tail that turns wiring mistakes into clear errors.
+    reset_scenario = any(bool(item.get("reset")) for item in events.values())
+    limit = max(16, len(program.instructions) * 2)
+    if reset_scenario:
+        limit = max(events, default=0) + 2
+    for edge in range(limit):
+        event = events.get(edge, {})
+        request = bool(event.get("interrupt_request", request))
+        reset = bool(event.get("reset", False))
+        cpu.step(interrupt_request=request, reset=reset)
+        states.append((request, reset, TinyCPU(
+            program, pc=cpu.pc, accumulator=cpu.accumulator,
+            accumulator_valid=cpu.accumulator_valid,
+            address_register=cpu.address_register,
+            address_register_valid=cpu.address_register_valid,
+            memory=dict(cpu.memory), errors=dict(cpu.errors), output=list(cpu.output),
+            halted=cpu.halted, halt_error=cpu.halt_error,
+            output_port=cpu.output_port, output_port_valid=cpu.output_port_valid,
+            interrupts_enabled=cpu.interrupts_enabled,
+            interrupt_pending=cpu.interrupt_pending,
+            in_interrupt_handler=cpu.in_interrupt_handler,
+            return_address=cpu.return_address,
+            return_address_valid=cpu.return_address_valid,
+            _interrupt_level=cpu._interrupt_level,
+        )))
+        if cpu.halted and not reset_scenario:
+            return states
+    if not reset_scenario:
+        raise LogisimError(f"system fixture {case.get('id')!r} does not halt in the VM")
+    return states
+
+
+def _write_system_vector(path: Path, states: list[tuple[bool, bool, TinyCPU]]) -> None:
+    """Write a sequential Logisim vector with one checked row per clock level."""
+    header = ("CLK RESET INTERRUPT_REQUEST OUTPUT_PORT_VALUE[16] "
+              "OUTPUT_PORT_VALID INTERRUPT_ENABLED INTERRUPT_PENDING "
+              "IN_INTERRUPT_HANDLER RET_ADDR[12] RET_ADDR_VALID <set> <seq>")
+    rows = [header]
+    initial = TinyCPU(states[0][2].program)
+
+    def values(clock: int, reset: bool, request: bool, cpu: TinyCPU, seq: int) -> str:
+        return (f"{clock} {int(reset)} {int(request)} "
+                f"0x{cpu.output_port & 0xffff:04x} {int(cpu.output_port_valid)} "
+                f"{int(cpu.interrupts_enabled)} {int(cpu.interrupt_pending)} "
+                f"{int(cpu.in_interrupt_handler)} 0x{cpu.return_address & 0xfff:03x} "
+                f"{int(cpu.return_address_valid)} 1 {seq}")
+
+    first_request, first_reset, _ = states[0]
+    rows.append(values(0, first_reset, first_request, initial, 1))
+    sequence = 2
+    for index, (request, reset, cpu) in enumerate(states):
+        rows.append(values(1, reset, request, cpu, sequence))
+        sequence += 1
+        if index + 1 < len(states):
+            next_request, next_reset, _ = states[index + 1]
+            rows.append(values(0, next_reset, next_request, cpu, sequence))
+            sequence += 1
+    path.write_text("\n".join(rows) + "\n", encoding="utf-8")
+
+
+def run_system_matrix(system, jar: Path, java: str, output: Path, timeout: int) -> int:
+    """Execute AP-18's sequential vectors against the peripheral circuit."""
+    matrix = json.loads(system.electrical_matrix_path.read_text(encoding="utf-8"))
+    cases = matrix["cases"]
+    output.mkdir(parents=True, exist_ok=True)
+    for index, case in enumerate(cases, 1):
+        print(f"electrical system matrix: {system.name} [{index}/{len(cases)}] "
+              f"{case['id']}", flush=True)
+        program = _system_program(case, system)
+        states = _system_expected_states(case, program)
+        with tempfile.TemporaryDirectory(prefix="tinycpu-system-matrix-") as directory:
+            temporary = Path(directory)
+            project = temporary / system.circuit_path.name
+            core = temporary / system.base_profile.circuit
+            project.write_bytes(system.circuit_path.read_bytes())
+            tree = ET.parse(ROOT / "hardware/logisim" / system.base_profile.circuit)
+            _inject_rom(tree.getroot(), core, tuple(encode_program(program)))
+            tree.write(core, encoding="utf-8", xml_declaration=True)
+            vector = temporary / f"{case['id']}.txt"
+            _write_system_vector(vector, states)
+            command = [java, "-jar", str(jar), "--test-vector", system.top_circuit,
+                       str(vector), str(project)]
+            # Logisim 4.1.0's test-vector entry point initializes Swing even
+            # though the evaluator itself is non-interactive.
+            if not os.environ.get("DISPLAY"):
+                xvfb = shutil.which("xvfb-run")
+                if xvfb is None:
+                    raise LogisimError(
+                        "system matrix requires DISPLAY or xvfb-run because "
+                        "Logisim's test-vector launcher initializes Swing"
+                    )
+                command = [xvfb, "-a", *command]
+            try:
+                result = subprocess.run(command, capture_output=True, text=True,
+                                        timeout=timeout, check=False)
+            except subprocess.TimeoutExpired as exc:
+                raise LogisimError(f"system fixture {case['id']}: timed out") from exc
+            evidence = output / f"{case['id']}.txt"
+            evidence.write_text(result.stdout + result.stderr, encoding="utf-8")
+            if result.returncode:
+                raise LogisimError(
+                    f"system fixture {case['id']} failed; evidence: {evidence}"
+                )
+    return len(cases)
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--profile", default=DEFAULT_PROFILE.name)
+    parser.add_argument("--system")
     parser.add_argument("--jar", type=Path)
     parser.add_argument("--java", default=os.environ.get("JAVA", "java"))
     parser.add_argument("--trace-output", type=Path, required=True)
@@ -437,6 +572,18 @@ def main(argv: list[str] | None = None) -> int:
                 source, profile, jar, args.java, args.matrix_output, args.timeout, args.jobs
             )
             print(f"electrical matrix passed: {profile.name} ({count} fixtures)")
+        if args.system is not None:
+            if args.matrix_output is None:
+                raise LogisimError("--system requires --matrix-output")
+            system = load_system_profile(args.system)
+            if system.base_profile.name != profile.name:
+                raise LogisimError(
+                    f"system {system.name!r} requires profile {system.base_profile.name!r}"
+                )
+            count = run_system_matrix(
+                system, jar, args.java, args.matrix_output / "system", args.timeout
+            )
+            print(f"electrical system matrix passed: {system.name} ({count} fixtures)")
         print(f"electrical trace passed: {profile.name} -> {args.trace_output}")
         return 0
     except (LogisimError, KeyError, OSError, ET.ParseError, ValueError) as exc:

@@ -263,9 +263,11 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   verdrahtet. Die Top-Level-Abnahme leitet die generierten Bausteinanschlüsse
   nun aus benannten Pins und Netzkonnektivität statt aus festen
   Zeichenkoordinaten ab; dabei erkannte vertauschte CPU-Ausgänge wurden ihren
-  semantischen Speicher- und Interruptzielen wieder zugeordnet. Als Nächstes
-  wird die eingefrorene Systemmatrix elektrisch ausgeführt und taktweise mit
-  der VM verglichen.
+  semantischen Speicher- und Interruptzielen wieder zugeordnet. Die
+  eingefrorene Systemmatrix ist jetzt als sequenzieller Logisim-Testvektorlauf
+  in das elektrische Gate eingebunden und vergleicht die sieben öffentlichen
+  Systemzustände pro Taktflanke mit der VM. Als Nächstes wird der erste dadurch
+  nachgewiesene elektrische Unterschied isoliert und minimal repariert.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
