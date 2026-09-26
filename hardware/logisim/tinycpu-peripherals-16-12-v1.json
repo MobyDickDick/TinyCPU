@@ -30,10 +30,6 @@
           "direction": "input",
           "bits": 1
         },
-        "CORE_ADDRESS": {
-          "direction": "input",
-          "bits": 12
-        },
         "READ_VALUE": {
           "direction": "output",
           "bits": 16
@@ -164,7 +160,7 @@
         "illegal_return_to_core"
       ],
       "verified_paths": [
-        "core_address_to_memory_address"
+        "core_address_split_to_memory_address"
       ],
       "verified_top_level_paths": [
         "clock_to_cpu",
