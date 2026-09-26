@@ -307,7 +307,7 @@ def verify_system_circuit() -> None:
         "cpu_write_value_to_memory": ("(1270,690)", "(590,420)"),
         "cpu_write_valid_to_memory": ("(1270,730)", "(590,440)"),
         "cpu_write_enable_to_memory": ("(1270,710)", "(590,460)"),
-        "memory_ram_write_enable_to_cpu": ("(810,440)", "(1050,750)"),
+        "memory_ram_write_enable_to_cpu": ("(810,440)", "(1050,730)"),
         "cpu_instruction_boundary_to_interrupt": ("(1270,750)", "(590,650)"),
         "cpu_enable_request_to_interrupt": ("(1270,770)", "(590,670)"),
         "cpu_disable_request_to_interrupt": ("(1270,790)", "(590,690)"),
@@ -667,9 +667,31 @@ def verify_system_circuit() -> None:
     for component in cpu_boundary.findall("comp[@name='Pin']"):
         attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
         cpu_pin_locations[attributes.get("label", "")] = component.get("loc")
-    required_cpu_paths = {
-        "core_address_to_memory_address": ("CORE_ADDRESS", "ADDRESS"),
+    address_splitter = cpu_boundary.find(
+        "comp[@name='Splitter'][@loc='(700,580)']"
+    )
+    splitter_attributes = {
+        item.get("name"): item.get("val")
+        for item in address_splitter.findall("a")
+    } if address_splitter is not None else {}
+    expected_address_splitter = {
+        "incoming": "16",
+        **{f"bit{bit}": "0" for bit in range(1, 12)},
+        **{f"bit{bit}": "1" for bit in range(12, 16)},
     }
+    required_address_split_wires = {
+        frozenset(("(630,580)", "(700,580)")),
+        frozenset(("(720,560)", "(740,560)")),
+        frozenset(("(740,560)", "(740,610)")),
+        frozenset(("(740,610)", cpu_pin_locations["ADDRESS"])),
+    }
+    if (splitter_attributes != expected_address_splitter
+            or not required_address_split_wires <= cpu_wires
+            or cpu_contract.get("verified_paths")
+               != ["core_address_split_to_memory_address"]):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: CPU address width adapter differs from contract"
+        )
     def connected(start: str, target: str) -> bool:
         pending = [start]
         visited = {start}
@@ -744,16 +766,6 @@ def verify_system_circuit() -> None:
     ):
         raise VerificationError(
             f"{display_path(system.circuit_path)}: CPU external-memory selection is inactive"
-        )
-
-    required_cpu_connections = {
-        name: connected(cpu_pin_locations[source], cpu_pin_locations[target])
-        for name, (source, target) in required_cpu_paths.items()
-    }
-    if cpu_contract.get("verified_paths") != list(required_cpu_paths) \
-            or not all(required_cpu_connections.values()):
-        raise VerificationError(
-            f"{display_path(system.circuit_path)}: CPU integration data paths differ from contract"
         )
 
     component_contract = contract.get("components", {}).get("output_port", {})
