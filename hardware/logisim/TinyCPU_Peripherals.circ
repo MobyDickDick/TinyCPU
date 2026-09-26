@@ -107,18 +107,20 @@
     <wire from="(1020,610)" to="(1050,610)"/>
     <wire from="(360,630)" to="(590,630)"/>
     <wire from="(810,360)" to="(1000,360)"/>
-    <wire from="(1000,360)" to="(1000,630)"/>
-    <wire from="(1000,630)" to="(1050,630)"/>
+    <wire from="(1000,360)" to="(1000,690)"/>
+    <wire from="(1000,690)" to="(1050,690)"/>
     <wire from="(810,380)" to="(980,380)"/>
-    <wire from="(980,380)" to="(980,650)"/>
-    <wire from="(980,650)" to="(1050,650)"/>
+    <wire from="(980,380)" to="(980,710)"/>
+    <wire from="(980,710)" to="(1050,710)"/>
     <wire from="(810,590)" to="(940,590)"/>
-    <wire from="(940,590)" to="(940,670)"/>
-    <wire from="(940,670)" to="(1050,670)"/>
-    <wire from="(810,690)" to="(1050,690)"/>
+    <wire from="(940,590)" to="(940,650)"/>
+    <wire from="(940,650)" to="(1050,650)"/>
+    <wire from="(810,690)" to="(910,690)"/>
+    <wire from="(910,670)" to="(910,690)"/>
+    <wire from="(910,670)" to="(1050,670)"/>
     <wire from="(810,650)" to="(920,650)"/>
-    <wire from="(920,650)" to="(920,710)"/>
-    <wire from="(920,710)" to="(1050,710)"/>
+    <wire from="(920,630)" to="(920,650)"/>
+    <wire from="(920,630)" to="(1050,630)"/>
     <wire from="(810,440)" to="(960,440)"/>
     <wire from="(960,440)" to="(960,730)"/>
     <wire from="(960,730)" to="(1050,730)"/>
@@ -210,29 +212,29 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="RESET"/>
     </comp>
-    <comp lib="0" loc="(280,300)" name="Pin">
+    <comp lib="0" loc="(280,200)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="ILL_RET"/>
     </comp>
-    <comp lib="0" loc="(280,220)" name="Pin">
+    <comp lib="0" loc="(280,280)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="RAM_READ_VALID"/>
     </comp>
-    <comp lib="0" loc="(280,280)" name="Pin">
+    <comp lib="0" loc="(280,240)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="INTERRUPT_TARGET_PC"/>
       <a name="width" val="12"/>
     </comp>
-    <comp lib="0" loc="(280,200)" name="Pin">
+    <comp lib="0" loc="(280,260)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="RAM_READ_VALUE"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="0" loc="(280,260)" name="Pin">
+    <comp lib="0" loc="(280,220)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="INTERRUPT_ACCEPT"/>
     </comp>
-    <comp lib="0" loc="(340,240)" name="Constant">
+    <comp lib="0" loc="(340,300)" name="Constant">
       <a name="value" val="0x1"/>
     </comp>
     <comp lib="0" loc="(290,670)" name="Pin">
@@ -332,10 +334,10 @@
     <wire from="(280,180)" to="(410,180)"/>
     <wire from="(280,200)" to="(410,200)"/>
     <wire from="(280,220)" to="(410,220)"/>
+    <wire from="(280,240)" to="(410,240)"/>
     <wire from="(280,260)" to="(410,260)"/>
     <wire from="(280,280)" to="(410,280)"/>
-    <wire from="(280,300)" to="(410,300)"/>
-    <wire from="(340,240)" to="(410,240)"/>
+    <wire from="(340,300)" to="(410,300)"/>
     <wire from="(630,180)" to="(810,180)"/>
     <wire from="(630,200)" to="(790,200)"/>
     <wire from="(630,220)" to="(790,220)"/>
