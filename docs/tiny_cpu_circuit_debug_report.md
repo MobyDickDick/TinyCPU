@@ -3415,3 +3415,40 @@ Die Mutationstests verfolgen nun die
 neuen Leitungsendpunkte für Sprünge, Halt, Operanden, Gültigkeit, Folge-PC und
 Interruptbefehle. Die nächste AP-18-Aufgabe ist damit nicht mehr der bereits
 verdrahtete Folge-PC, sondern die noch offene elektrische Systemabnahme.
+
+#### Reparatur der Systemverdrahtung nach der Peripherie-Neuanordnung
+
+- **Ausgangsstand:** `d6bc65cb3c1c1dd62d6b533776a5d5adbd0d6270`
+- **Datum:** 26. September 2026
+
+Die anschließende Neuanordnung von `TinyCPU_Peripherals.circ` hatte die
+öffentlichen Takt-, Reset- und Interruptpins sowie die Adressaufteilung
+verschoben. Gleichzeitig waren acht CPU-seitige Bus- und Steuerpfade am
+System-Top-Level um jeweils einen Anschluss versetzt worden. Dadurch endeten
+unter anderem die 12-Bit-Adresse am Schreibwertanschluss und der Folge-PC am
+Adressanschluss. Außerdem hatte die Konstante `USE_EXTERNAL_MEMORY` beim
+Speichern erneut ihren Wert `1` verloren.
+
+Die Reparatur stellt ausschließlich die nach Portnamen bereits vertraglich
+festgelegten Verbindungen wieder her, setzt die vorhandene Konstante auf `1`
+und passt die koordinatengebundenen Prüfanker an die vom Autor gewählten neuen
+Positionen an. Ein gezielter Mutationstest entfernt weiterhin den aktuellen
+Interruptanforderungspfad, und der Adressadaptertest verändert nun den
+tatsächlich verschobenen Splitter. `FetchDecodeControls` wurde dabei weder
+verschoben noch umgezeichnet.
+
+```bash
+scripts/test-offline.sh
+LOGISIM_JOBS=4 \
+  LOGISIM_JAR="$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+  LOGISIM_OUTPUT=/tmp/tinycpu-current-electrical \
+  scripts/test-logisim.sh
+```
+
+Beide Läufe bestehen: Die Offline-Abnahme umfasst 149 Tests, und die
+elektrische Kernabnahme umfasst zwei identische Kerntraces sowie alle 61
+ISA-/Fehler-Fixtures. Damit ist die Regression des bestehenden 16/12-Kerns
+behoben. Die davon getrennte AP-18-Systemmatrix wird durch das bestehende
+elektrische Kernkommando noch nicht ausgeführt und bleibt das nächste
+dokumentierte Arbeitspaket; eine vollständige elektrische Freigabe der
+Peripherie wird daher noch nicht behauptet.

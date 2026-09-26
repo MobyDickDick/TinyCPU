@@ -184,7 +184,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(300,630)" to="(590,630)"/>', "", 1), encoding="utf-8")
+            '<wire from="(330,630)" to="(590,630)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -676,7 +676,7 @@ class CircuitVerificationTests(unittest.TestCase):
         project = ET.parse(circuit)
         boundary = project.getroot().find("circuit[@name='CPUIntegrationBoundary']")
         self.assertIsNotNone(boundary)
-        splitter = boundary.find("comp[@name='Splitter'][@loc='(730,580)']")
+        splitter = boundary.find("comp[@name='Splitter'][@loc='(680,510)']")
         self.assertIsNotNone(splitter)
         incoming = next(item for item in splitter.findall("a")
                         if item.get("name") == "incoming")
@@ -722,8 +722,8 @@ class CircuitVerificationTests(unittest.TestCase):
             frozenset((wire.get("from"), wire.get("to")))
             for wire in boundary.findall("wire")
         }
-        self.assertIn(frozenset(("(660,500)", "(730,500)")), wires)
-        self.assertNotIn(frozenset(("(660,580)", "(730,580)")), wires)
+        self.assertIn(frozenset(("(660,500)", "(670,500)")), wires)
+        self.assertNotIn(frozenset(("(660,580)", "(680,510)")), wires)
 
     def test_ap18_top_level_requires_cpu_integration_boundary(self) -> None:
         root = MODULE_PATH.parents[1]
