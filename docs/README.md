@@ -94,11 +94,12 @@ Interruptaktivierung, -deaktivierung und Rückkehr; diese vier Signale ersetzen
 die vorläufigen Befehlseingänge der Integrationsgrenze und sind durch einen
 gezielten Mutationstest geschützt. Der Folge-PC des vollständigen Kerns ist ebenfalls direkt und
 mutationstestgeschützt an die Interruptsteuerung angebunden. Offen bleibt damit
-nur noch die elektrische Systemabnahme.
+die Auswertung und gegebenenfalls Reparatur der elektrischen Systemabnahme.
 Die dafür verbindliche
 elektrische Fallliste ist inzwischen versioniert, mit den übrigen
 Systemverträgen quergeprüft und deckt alle neuen Opcodes und Verhaltensfälle
-ab; ausgeführt wird sie erst nach der CPU-Integration. Die Speicherpfadgrenze
+ab. Sie wird nun im elektrischen Gate als sequenzieller, flankengenauer
+Logisim-/VM-Vergleich ausgeführt. Die Speicherpfadgrenze
 des Ausgabeports ist inzwischen vollständig
 verdrahtet und wird offline einschließlich ihrer getrennten RAM-/Port-Freigaben
 und gemeinsamen Wert-/Validitätsauswahl geprüft.

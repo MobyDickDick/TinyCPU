@@ -13,6 +13,9 @@ for profile in "${profiles[@]}"; do
   args=(--profile "$profile" --trace-output "$OUTPUT/$profile/core-trace.tsv"
         --matrix-output "$OUTPUT/$profile/isa-matrix"
         --jobs "${LOGISIM_JOBS:-1}")
+  if [[ "$profile" == "tinycpu-16-12" ]]; then
+    args+=(--system tinycpu-peripherals-16-12-v1)
+  fi
   if [[ -n "${LOGISIM_JAR:-}" ]]; then
     args+=(--jar "$LOGISIM_JAR")
   fi

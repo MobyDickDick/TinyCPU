@@ -334,9 +334,16 @@ dieser Kontrolle wurden die nach einer manuellen Neuanordnung vertauschten
 CPU-Ausgänge wieder ihren semantischen Zielen zugeordnet: Adresse,
 Schreibwert, Schreibgültigkeit, Befehlsimpulse und Folge-PC erreichen nun die
 jeweils gleichnamigen Speicher- beziehungsweise Interruptanschlüsse. Der
-Logisim-Tabellenprüfer bestätigt für das System-Top-Level definierte Ausgänge
-ohne Breitenfehler. Als nächster Schritt bleibt damit die Ausführung und der
-taktweise Vergleich der bereits eingefrorenen Systemmatrix.
+Der Logisim-Tabellenprüfer bestätigt für das System-Top-Level definierte Ausgänge
+ohne Breitenfehler. Die eingefrorene Systemmatrix ist nun in das verpflichtende
+elektrische Gate eingebunden: Für jeden Fall wird das Systemprogramm samt
+Vektorhandler in eine temporäre Kernkopie geladen, aus denselben externen
+Flankenereignissen ein VM-Referenzlauf erzeugt und als sequenzieller
+Logisim-Testvektor gegen alle sieben öffentlichen Systemzustände geprüft.
+Logisim 4.1.0 initialisiert für diesen eigentlich nichtinteraktiven Aufruf
+Swing; das CI-Gate stellt deshalb ausdrücklich `xvfb-run` bereit. Als nächster
+Schritt bleibt die Auswertung des ersten vollständigen elektrischen Laufs und
+die kleinste Reparatur eines dabei nachgewiesenen Signalfehlers.
 
 ## Kompatibilitätsfolgen
 
