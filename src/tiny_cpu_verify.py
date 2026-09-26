@@ -659,6 +659,22 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             f"{display_path(system.circuit_path)}: CPU integration boundary differs from contract"
         )
+    shared_core_pins = {
+        "INSTRUCTION_BOUNDARY",
+        "ENABLE_INTERRUPTS_REQUEST",
+        "DISABLE_INTERRUPTS_REQUEST",
+        "RETURN_FROM_INTERRUPT_REQUEST",
+        "NEXT_PC",
+        "INTERRUPT_ACCEPT",
+        "INTERRUPT_TARGET_PC",
+        "ILL_RET",
+    }
+    if any(cpu_pins.get(label) != core_public_pins.get(label)
+           for label in shared_core_pins):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: CPU pin names or bus widths "
+            "differ across the core integration boundary"
+        )
     cpu_wires = {
         frozenset((wire.get("from"), wire.get("to")))
         for wire in cpu_boundary.findall("wire")
@@ -737,17 +753,17 @@ def verify_system_circuit() -> None:
         "core_instruction_boundary_to_adapter": (
             "INSTRUCTION_BOUNDARY", f"({core_x},{core_y + 120})"),
         "core_enable_request_to_adapter": (
-            "ENABLE_REQUEST", f"({core_x},{core_y + 140})"),
+            "ENABLE_INTERRUPTS_REQUEST", f"({core_x},{core_y + 140})"),
         "core_disable_request_to_adapter": (
-            "DISABLE_REQUEST", f"({core_x},{core_y + 160})"),
+            "DISABLE_INTERRUPTS_REQUEST", f"({core_x},{core_y + 160})"),
         "core_return_request_to_adapter": (
-            "RETURN_REQUEST", f"({core_x},{core_y + 180})"),
+            "RETURN_FROM_INTERRUPT_REQUEST", f"({core_x},{core_y + 180})"),
         "core_next_pc_to_adapter": (
             "NEXT_PC", f"({core_x},{core_y + 320})"),
         "interrupt_accept_to_core": (
             "INTERRUPT_ACCEPT", f"({core_input_x},{core_y + 100})"),
         "interrupt_target_pc_to_core": (
-            "TARGET_PC", f"({core_input_x},{core_y + 120})"),
+            "INTERRUPT_TARGET_PC", f"({core_input_x},{core_y + 120})"),
         "illegal_return_to_core": (
             "ILL_RET", f"({core_input_x},{core_y + 140})"),
     }
@@ -982,14 +998,14 @@ def verify_system_circuit() -> None:
     expected_interrupt_pins = {
         "INTERRUPT_REQUEST": {"direction": "input", "bits": 1},
         "INSTRUCTION_BOUNDARY": {"direction": "input", "bits": 1},
-        "ENABLE_REQUEST": {"direction": "input", "bits": 1},
-        "DISABLE_REQUEST": {"direction": "input", "bits": 1},
-        "RETURN_REQUEST": {"direction": "input", "bits": 1},
+        "ENABLE_INTERRUPTS_REQUEST": {"direction": "input", "bits": 1},
+        "DISABLE_INTERRUPTS_REQUEST": {"direction": "input", "bits": 1},
+        "RETURN_FROM_INTERRUPT_REQUEST": {"direction": "input", "bits": 1},
         "NEXT_PC": {"direction": "input", "bits": address_bits},
         "CLK": {"direction": "input", "bits": 1},
         "RESET": {"direction": "input", "bits": 1},
         "INTERRUPT_ACCEPT": {"direction": "output", "bits": 1},
-        "TARGET_PC": {"direction": "output", "bits": address_bits},
+        "INTERRUPT_TARGET_PC": {"direction": "output", "bits": address_bits},
         "INTERRUPT_ENABLED": {"direction": "output", "bits": 1},
         "INTERRUPT_PENDING": {"direction": "output", "bits": 1},
         "IN_INTERRUPT_HANDLER": {"direction": "output", "bits": 1},
@@ -1000,6 +1016,25 @@ def verify_system_circuit() -> None:
     if interrupt_pins != expected_interrupt_pins:
         raise VerificationError(
             f"{display_path(system.circuit_path)}: InterruptController pins differ from contract"
+        )
+    shared_interrupt_pins = {
+        "INSTRUCTION_BOUNDARY",
+        "ENABLE_INTERRUPTS_REQUEST",
+        "DISABLE_INTERRUPTS_REQUEST",
+        "RETURN_FROM_INTERRUPT_REQUEST",
+        "NEXT_PC",
+        "INTERRUPT_ACCEPT",
+        "INTERRUPT_TARGET_PC",
+        "ILL_RET",
+    }
+    if any(
+        interrupt_pins[label]["bits"] != cpu_pins[label]["bits"]
+        or interrupt_pins[label]["direction"] == cpu_pins[label]["direction"]
+        for label in shared_interrupt_pins
+    ):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: interrupt pin names, directions, "
+            "or bus widths differ between connected circuits"
         )
     interrupt_registers = []
     for component in interrupt.findall("comp[@name='Register']"):

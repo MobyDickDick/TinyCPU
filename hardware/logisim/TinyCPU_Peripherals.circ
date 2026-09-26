@@ -222,7 +222,7 @@
     </comp>
     <comp lib="0" loc="(280,280)" name="Pin">
       <a name="appearance" val="classic"/>
-      <a name="label" val="TARGET_PC"/>
+      <a name="label" val="INTERRUPT_TARGET_PC"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="0" loc="(280,200)" name="Pin">
@@ -289,19 +289,19 @@
     <comp lib="0" loc="(820,740)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="label" val="ENABLE_REQUEST"/>
+      <a name="label" val="ENABLE_INTERRUPTS_REQUEST"/>
       <a name="type" val="output"/>
     </comp>
     <comp lib="0" loc="(820,760)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="label" val="DISABLE_REQUEST"/>
+      <a name="label" val="DISABLE_INTERRUPTS_REQUEST"/>
       <a name="type" val="output"/>
     </comp>
     <comp lib="0" loc="(820,780)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="label" val="RETURN_REQUEST"/>
+      <a name="label" val="RETURN_FROM_INTERRUPT_REQUEST"/>
       <a name="type" val="output"/>
     </comp>
     <comp lib="0" loc="(820,810)" name="Pin">
@@ -657,7 +657,7 @@
     <comp lib="0" loc="(1340,750)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="label" val="TARGET_PC"/>
+      <a name="label" val="INTERRUPT_TARGET_PC"/>
       <a name="type" val="output"/>
       <a name="width" val="12"/>
     </comp>
@@ -683,15 +683,15 @@
     </comp>
     <comp lib="0" loc="(520,510)" name="Pin">
       <a name="appearance" val="classic"/>
-      <a name="label" val="ENABLE_REQUEST"/>
+      <a name="label" val="ENABLE_INTERRUPTS_REQUEST"/>
     </comp>
     <comp lib="0" loc="(520,560)" name="Pin">
       <a name="appearance" val="classic"/>
-      <a name="label" val="DISABLE_REQUEST"/>
+      <a name="label" val="DISABLE_INTERRUPTS_REQUEST"/>
     </comp>
     <comp lib="0" loc="(520,630)" name="Pin">
       <a name="appearance" val="classic"/>
-      <a name="label" val="RETURN_REQUEST"/>
+      <a name="label" val="RETURN_FROM_INTERRUPT_REQUEST"/>
     </comp>
     <comp lib="0" loc="(520,690)" name="Pin">
       <a name="appearance" val="classic"/>

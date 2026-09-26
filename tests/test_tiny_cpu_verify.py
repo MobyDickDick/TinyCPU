@@ -570,9 +570,9 @@ class CircuitVerificationTests(unittest.TestCase):
         for label in (
             "CLK", "RESET", "RAM_READ_VALUE", "RAM_READ_VALID",
             "READ_VALUE", "READ_VALID", "WRITE_VALUE", "WRITE_VALID",
-            "WRITE_ENABLE", "INSTRUCTION_BOUNDARY", "ENABLE_REQUEST",
-            "DISABLE_REQUEST", "RETURN_REQUEST", "NEXT_PC",
-            "INTERRUPT_ACCEPT", "TARGET_PC", "ILL_RET",
+            "WRITE_ENABLE", "INSTRUCTION_BOUNDARY", "ENABLE_INTERRUPTS_REQUEST",
+            "DISABLE_INTERRUPTS_REQUEST", "RETURN_FROM_INTERRUPT_REQUEST", "NEXT_PC",
+            "INTERRUPT_ACCEPT", "INTERRUPT_TARGET_PC", "ILL_RET",
         ):
             with self.subTest(path=label):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))

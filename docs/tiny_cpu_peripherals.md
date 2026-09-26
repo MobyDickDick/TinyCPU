@@ -22,7 +22,12 @@ einem vorläufigen Kernanschluss direkt zur Interruptsteuerung geführt. Damit
 ist der PC-Steuerpfad innerhalb der Grenze ebenfalls vorbereitet; die
 Top-Level-Grenze ist nun mit allen 15 Daten-, Adress-, Schreib-, Befehls- und
 Interruptpfaden direkt an `OutputMemoryPath` und `InterruptController`
-angeschlossen. Die Prüfung dieser Wege folgt den benannten Pins und den
+angeschlossen. Für alle direkten 1:1-Übergaben zwischen `TinyCPUMain`,
+`CPUIntegrationBoundary` und `InterruptController` gilt dabei dasselbe
+Pin-Schema: Name und Busbreite bleiben an beiden Seiten identisch; nur die
+Richtung kehrt sich an der Verbrauchergrenze um. Das betrifft insbesondere
+`INTERRUPT_TARGET_PC` sowie die drei `*_INTERRUPTS_REQUEST`-Signale.
+Die Prüfung dieser Wege folgt den benannten Pins und den
 tatsächlichen Anschlüssen der generierten Symbole und bleibt dadurch auch nach
 einer manuellen Neuanordnung der Grenze wirksam.
 Innerhalb der Grenze speisen außerdem der adressierte Speicherwert des
@@ -122,7 +127,7 @@ IN_INTERRUPT_HANDLER := 0
 INTERRUPT_ENABLED    := 1
 ```
 
-Ein `RETURN_REQUEST` außerhalb eines aktiven Handlers oder ohne gültige
+Ein `RETURN_FROM_INTERRUPT_REQUEST` außerhalb eines aktiven Handlers oder ohne gültige
 Rückkehradresse setzt `ILL_RET`. Verschachtelte Interrupts sind in dieser
 Referenzlösung ausdrücklich nicht vorgesehen.
 
@@ -167,7 +172,7 @@ unveränderte `TinyCPUMain`-CPU als externe Projektbibliothek in ihre
 Integrationsgrenze ein. Der Kern exportiert inzwischen Schreibwert,
 Schreibgültigkeit und Schreibfreigabe direkt von den drei Netzen, die auch
 seinen bisherigen RAM-Schreibpfad speisen. Die Interrupt-Rückkopplung ist nun vollständig elektrisch angebunden:
-`INTERRUPT_ACCEPT` wählt im Fetchpfad mit Vorrang `TARGET_PC` als nächsten
+`INTERRUPT_ACCEPT` wählt im Fetchpfad mit Vorrang `INTERRUPT_TARGET_PC` als nächsten
 Programmzähler, und `ILL_RET` setzt das vorhandene Sticky-Flag
 `ERROR_ILL`. Damit enden die drei Rückleitungen nicht mehr unverbunden an der
 Integrationsgrenze. `CORE_ADDRESS` und `RAM_WRITE_ENABLE` bleiben dagegen
