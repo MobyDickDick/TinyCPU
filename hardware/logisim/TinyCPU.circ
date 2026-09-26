@@ -249,11 +249,12 @@
       <a name="label" val="MONITOR_EFFECTIVE_REGISTER_SELECTED_OUT"/>
       <a name="labelloc" val="east"/>
     </comp>
-    <comp lib="0" loc="(3590,1330)" name="Probe">
+    <comp lib="0" loc="(3590,1330)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
-      <a name="label" val="MONITOR_EFFECTIVE_MEMORY_ADDRESS"/>
-      <a name="labelloc" val="east"/>
+      <a name="label" val="ADDRESS"/>
+      <a name="type" val="output"/>
+      <a name="width" val="16"/>
     </comp>
     <comp lib="0" loc="(3590,1790)" name="Pin">
       <a name="appearance" val="classic"/>

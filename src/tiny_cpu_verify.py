@@ -287,16 +287,16 @@ def verify_system_circuit() -> None:
         ("(810,420)", "(1510,420)"),  # output-port validity state
         ("(1510,420)", "(1510,440)"),
         ("(1510,440)", "(1530,440)"),
-        ("(900,840)", "(1490,840)"),  # pending state
-        ("(880,860)", "(1490,860)"),  # mask state
-        ("(860,890)", "(1490,890)"),  # return address
-        ("(840,920)", "(1490,920)"),  # return-address validity
-        ("(820,940)", "(1490,940)"),  # handler state
-        ("(370,480)", "(590,480)"),  # memory-path clock
-        ("(370,610)", "(590,610)"),  # interrupt-controller clock
-        ("(390,500)", "(590,500)"),  # memory-path reset
-        ("(390,590)", "(590,590)"),  # interrupt-controller reset
-        ("(360,630)", "(590,630)"),  # interrupt request
+        ("(900,860)", "(1540,860)"),  # pending state
+        ("(880,880)", "(1540,880)"),  # mask state
+        ("(860,910)", "(1540,910)"),  # return address
+        ("(840,940)", "(1540,940)"),  # return-address validity
+        ("(820,960)", "(1540,960)"),  # handler state
+        ("(310,480)", "(590,480)"),  # memory-path clock
+        ("(310,610)", "(590,610)"),  # interrupt-controller clock
+        ("(330,500)", "(590,500)"),  # memory-path reset
+        ("(330,590)", "(590,590)"),  # interrupt-controller reset
+        ("(300,630)", "(590,630)"),  # interrupt request
     }
     if not required_top_wires <= top_wires:
         raise VerificationError(
@@ -328,23 +328,23 @@ def verify_system_circuit() -> None:
     # contract catches a wire that merely reaches a box but lands on the wrong
     # named port (the failure that originally produced red E/U rails here).
     required_top_paths = {
-        "clock_to_cpu": ("(350,480)", "(1050,590)"),
-        "reset_to_cpu": ("(350,500)", "(1050,610)"),
-        "memory_read_value_to_cpu": ("(810,360)", "(1050,690)"),
-        "memory_read_valid_to_cpu": ("(810,380)", "(1050,710)"),
-        "cpu_address_to_memory": ("(1270,630)", "(590,400)"),
-        "cpu_write_value_to_memory": ("(1270,650)", "(590,420)"),
-        "cpu_write_valid_to_memory": ("(1270,690)", "(590,440)"),
-        "cpu_write_enable_to_memory": ("(1270,670)", "(590,460)"),
-        "memory_ram_write_enable_to_cpu": ("(810,440)", "(1050,730)"),
-        "cpu_instruction_boundary_to_interrupt": ("(1270,710)", "(590,650)"),
-        "cpu_enable_request_to_interrupt": ("(1270,730)", "(590,670)"),
-        "cpu_disable_request_to_interrupt": ("(1270,750)", "(590,690)"),
-        "cpu_return_request_to_interrupt": ("(1270,770)", "(590,710)"),
-        "cpu_next_pc_to_interrupt": ("(1270,790)", "(590,730)"),
-        "interrupt_accept_to_cpu": ("(810,590)", "(1050,650)"),
-        "interrupt_target_pc_to_cpu": ("(810,690)", "(1050,670)"),
-        "interrupt_illegal_return_to_cpu": ("(810,650)", "(1050,630)"),
+        "clock_to_cpu": ("(290,480)", "(1040,610)"),
+        "reset_to_cpu": ("(290,500)", "(1040,630)"),
+        "memory_read_value_to_cpu": ("(810,360)", "(1040,710)"),
+        "memory_read_valid_to_cpu": ("(810,380)", "(1040,730)"),
+        "cpu_address_to_memory": ("(1260,650)", "(590,400)"),
+        "cpu_write_value_to_memory": ("(1260,670)", "(590,420)"),
+        "cpu_write_valid_to_memory": ("(1260,710)", "(590,440)"),
+        "cpu_write_enable_to_memory": ("(1260,690)", "(590,460)"),
+        "memory_ram_write_enable_to_cpu": ("(810,440)", "(1040,750)"),
+        "cpu_instruction_boundary_to_interrupt": ("(1260,730)", "(590,650)"),
+        "cpu_enable_request_to_interrupt": ("(1260,750)", "(590,670)"),
+        "cpu_disable_request_to_interrupt": ("(1260,770)", "(590,690)"),
+        "cpu_return_request_to_interrupt": ("(1260,790)", "(590,710)"),
+        "cpu_next_pc_to_interrupt": ("(1260,810)", "(590,730)"),
+        "interrupt_accept_to_cpu": ("(810,590)", "(1040,670)"),
+        "interrupt_target_pc_to_cpu": ("(810,690)", "(1040,690)"),
+        "interrupt_illegal_return_to_cpu": ("(810,650)", "(1040,650)"),
     }
     failed_top_paths = [
         name for name, terminals in required_top_paths.items()
@@ -401,6 +401,8 @@ def verify_system_circuit() -> None:
     if any(core_public_pins.get(label) != definition
            for label, definition in expected_external_memory_pins.items()):
         raise VerificationError("AP-18 CPU external-memory interface differs from contract")
+    if core_public_pins.get("ADDRESS") != {"direction": "output", "bits": 16}:
+        raise VerificationError("AP-18 CPU external-address interface differs from contract")
     core_wires = {
         frozenset((wire.get("from"), wire.get("to")))
         for wire in core_definition.findall("wire")
@@ -714,7 +716,7 @@ def verify_system_circuit() -> None:
         attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
         cpu_pin_locations[attributes.get("label", "")] = component.get("loc")
     address_splitter = cpu_boundary.find(
-        "comp[@name='Splitter'][@loc='(700,580)']"
+        "comp[@name='Splitter'][@loc='(730,580)']"
     )
     splitter_attributes = {
         item.get("name"): item.get("val")
@@ -726,10 +728,11 @@ def verify_system_circuit() -> None:
         **{f"bit{bit}": "1" for bit in range(12, 16)},
     }
     required_address_split_wires = {
-        frozenset(("(630,580)", "(700,580)")),
-        frozenset(("(720,560)", "(740,560)")),
-        frozenset(("(740,560)", "(740,610)")),
-        frozenset(("(740,610)", cpu_pin_locations["ADDRESS"])),
+        frozenset(("(660,500)", "(730,500)")),
+        frozenset(("(730,500)", "(730,580)")),
+        frozenset(("(750,560)", "(770,560)")),
+        frozenset(("(770,560)", "(770,610)")),
+        frozenset(("(770,610)", cpu_pin_locations["ADDRESS"])),
     }
     if (splitter_attributes != expected_address_splitter
             or not required_address_split_wires <= cpu_wires
@@ -808,12 +811,12 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             f"{display_path(system.circuit_path)}: CPU core integration paths differ from contract"
         )
-    external_memory_enable = cpu_boundary.find("comp[@name='Constant'][@loc='(340,300)']")
+    external_memory_enable = cpu_boundary.find("comp[@name='Constant'][@loc='(300,300)']")
     enable_attributes = {
         item.get("name"): item.get("val") for item in external_memory_enable.findall("a")
     } if external_memory_enable is not None else {}
     if enable_attributes.get("value") != "0x1" or not connected(
-        "(340,300)", f"({core_input_x},{core_y + 140})"
+        "(300,300)", f"({core_input_x},{core_y + 140})"
     ):
         raise VerificationError(
             f"{display_path(system.circuit_path)}: CPU external-memory selection is inactive"

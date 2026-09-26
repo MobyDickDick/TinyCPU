@@ -123,13 +123,13 @@ class CircuitVerificationTests(unittest.TestCase):
             if component.get("lib") is None
         }
         self.assertEqual(top_instances, {
-            "CPUIntegrationBoundary": "(1270,590)",
+            "CPUIntegrationBoundary": "(1260,610)",
             "OutputMemoryPath": "(810,360)",
             "InterruptController": "(810,590)",
         })
         core = boundary.find("comp[@name='TinyCPUMain']")
         self.assertIsNotNone(core)
-        self.assertEqual(core.get("loc"), "(630,160)")
+        self.assertEqual(core.get("loc"), "(660,160)")
 
         wires = {(wire.get("from"), wire.get("to")) for wire in top.findall("wire")}
         stale_reconstruction = {
@@ -166,7 +166,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(820,940)" to="(1490,940)"/>', "", 1), encoding="utf-8")
+            '<wire from="(820,960)" to="(1540,960)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -184,7 +184,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(360,630)" to="(590,630)"/>', "", 1), encoding="utf-8")
+            '<wire from="(300,630)" to="(590,630)"/>', "", 1), encoding="utf-8")
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -638,9 +638,9 @@ class CircuitVerificationTests(unittest.TestCase):
         boundary = project.getroot().find("circuit[@name='CPUIntegrationBoundary']")
         self.assertIsNotNone(boundary)
         wire = next(item for item in boundary.findall("wire")
-                    if item.get("from") == "(280,260)")
+                    if item.get("from") == "(320,240)")
         boundary.remove(wire)
-        ET.SubElement(boundary, "wire", {"from": "(280,260)", "to": "(410,200)"})
+        ET.SubElement(boundary, "wire", {"from": "(320,240)", "to": "(400,180)"})
         project.write(circuit, encoding="utf-8", xml_declaration=True)
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
@@ -676,7 +676,7 @@ class CircuitVerificationTests(unittest.TestCase):
         project = ET.parse(circuit)
         boundary = project.getroot().find("circuit[@name='CPUIntegrationBoundary']")
         self.assertIsNotNone(boundary)
-        splitter = boundary.find("comp[@name='Splitter'][@loc='(700,580)']")
+        splitter = boundary.find("comp[@name='Splitter'][@loc='(730,580)']")
         self.assertIsNotNone(splitter)
         incoming = next(item for item in splitter.findall("a")
                         if item.get("name") == "incoming")
@@ -689,6 +689,41 @@ class CircuitVerificationTests(unittest.TestCase):
             with self.assertRaisesRegex(
                     VERIFY.VerificationError, "CPU address width adapter differs"):
                 VERIFY.verify_system_circuit()
+
+    def test_ap18_cpu_address_is_exported_from_the_effective_address_net(self) -> None:
+        root = MODULE_PATH.parents[1]
+        core = ET.parse(root / "hardware/logisim/TinyCPU.circ").getroot().find(
+            "circuit[@name='TinyCPUMain']"
+        )
+        boundary = ET.parse(
+            root / "hardware/logisim/TinyCPU_Peripherals.circ"
+        ).getroot().find("circuit[@name='CPUIntegrationBoundary']")
+        self.assertIsNotNone(core)
+        self.assertIsNotNone(boundary)
+
+        address = next(
+            component
+            for component in core.findall("comp[@name='Pin']")
+            if any(
+                attribute.get("name") == "label"
+                and attribute.get("val") == "ADDRESS"
+                for attribute in component.findall("a")
+            )
+        )
+        attributes = {
+            attribute.get("name"): attribute.get("val")
+            for attribute in address.findall("a")
+        }
+        self.assertEqual(address.get("loc"), "(3590,1330)")
+        self.assertEqual(attributes.get("type"), "output")
+        self.assertEqual(attributes.get("width"), "16")
+
+        wires = {
+            frozenset((wire.get("from"), wire.get("to")))
+            for wire in boundary.findall("wire")
+        }
+        self.assertIn(frozenset(("(660,500)", "(730,500)")), wires)
+        self.assertNotIn(frozenset(("(660,580)", "(730,580)")), wires)
 
     def test_ap18_top_level_requires_cpu_integration_boundary(self) -> None:
         root = MODULE_PATH.parents[1]
@@ -721,10 +756,10 @@ class CircuitVerificationTests(unittest.TestCase):
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
         terminals = (
-            "(1050,590)", "(1050,610)", "(810,360)", "(810,380)",
-            "(1270,630)", "(1270,650)", "(810,440)", "(1270,690)",
-            "(1270,670)", "(1270,710)", "(1270,730)", "(1270,750)",
-            "(1270,770)", "(1270,790)",
+            "(1040,610)", "(1040,630)", "(810,360)", "(810,380)",
+            "(1260,650)", "(1260,670)", "(810,440)", "(1260,710)",
+            "(1260,690)", "(1260,730)", "(1260,750)", "(1260,770)",
+            "(1260,790)", "(1260,810)",
             "(810,590)", "(810,690)", "(810,650)",
         )
         for terminal in terminals:
