@@ -259,8 +259,13 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Systemopcode-Decoder exportiert jetzt auch Instruktionsgrenze,
   Interruptaktivierung, -deaktivierung und Rückkehr aus dem vollständigen Kern;
   die vier vorläufigen Adaptereingänge sind durch direkte, mutationstestgeschützte
-  Kernpfade ersetzt. Als Nächstes folgt der PC-Steuerpfad, bevor die Matrix
-  ausgeführt wird.
+  Kernpfade ersetzt. Der PC-Steuerpfad ist inzwischen ebenfalls vollständig
+  verdrahtet. Die Top-Level-Abnahme leitet die generierten Bausteinanschlüsse
+  nun aus benannten Pins und Netzkonnektivität statt aus festen
+  Zeichenkoordinaten ab; dabei erkannte vertauschte CPU-Ausgänge wurden ihren
+  semantischen Speicher- und Interruptzielen wieder zugeordnet. Als Nächstes
+  wird die eingefrorene Systemmatrix elektrisch ausgeführt und taktweise mit
+  der VM verglichen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
