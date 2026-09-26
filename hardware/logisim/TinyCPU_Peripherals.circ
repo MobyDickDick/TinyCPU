@@ -230,7 +230,9 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="RAM_READ_VALID"/>
     </comp>
-    <comp lib="0" loc="(300,300)" name="Constant"/>
+    <comp lib="0" loc="(300,300)" name="Constant">
+      <a name="value" val="0x1"/>
+    </comp>
     <comp lib="0" loc="(300,320)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="RAM_WRITE_ENABLE"/>
