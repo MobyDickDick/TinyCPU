@@ -254,20 +254,20 @@ def verify_system_circuit() -> None:
         )
     top_wires = {(wire.get("from"), wire.get("to")) for wire in circuit.findall("wire")}
     required_top_wires = {
-        ("(800,400)", "(960,400)"),  # output-port value state
-        ("(800,420)", "(940,420)"),  # output-port validity state
-        ("(940,420)", "(940,440)"),
-        ("(940,440)", "(960,440)"),
-        ("(800,570)", "(970,570)"),  # pending state
-        ("(800,590)", "(970,590)"),  # mask state
-        ("(800,630)", "(970,630)"),  # return address
-        ("(800,670)", "(970,670)"),  # return-address validity
-        ("(800,690)", "(970,690)"),  # handler state
-        ("(370,480)", "(580,480)"),  # memory-path clock
-        ("(360,570)", "(580,570)"),  # interrupt-controller clock
-        ("(380,500)", "(580,500)"),  # memory-path reset
-        ("(390,550)", "(580,550)"),  # interrupt-controller reset
-        ("(350,590)", "(580,590)"),  # interrupt request
+        ("(810,400)", "(1530,400)"),  # output-port value state
+        ("(810,420)", "(1510,420)"),  # output-port validity state
+        ("(1510,420)", "(1510,440)"),
+        ("(1510,440)", "(1530,440)"),
+        ("(900,840)", "(1490,840)"),  # pending state
+        ("(880,860)", "(1490,860)"),  # mask state
+        ("(860,890)", "(1490,890)"),  # return address
+        ("(840,920)", "(1490,920)"),  # return-address validity
+        ("(820,940)", "(1490,940)"),  # handler state
+        ("(370,480)", "(590,480)"),  # memory-path clock
+        ("(370,610)", "(590,610)"),  # interrupt-controller clock
+        ("(390,500)", "(590,500)"),  # memory-path reset
+        ("(390,590)", "(590,590)"),  # interrupt-controller reset
+        ("(360,630)", "(590,630)"),  # interrupt request
     }
     if not required_top_wires <= top_wires:
         raise VerificationError(
@@ -299,23 +299,23 @@ def verify_system_circuit() -> None:
     # contract catches a wire that merely reaches a box but lands on the wrong
     # named port (the failure that originally produced red E/U rails here).
     required_top_paths = {
-        "clock_to_cpu": ("(350,480)", "(970,750)"),
-        "reset_to_cpu": ("(350,550)", "(970,770)"),
-        "memory_read_value_to_cpu": ("(800,360)", "(970,790)"),
-        "memory_read_valid_to_cpu": ("(800,380)", "(970,810)"),
-        "cpu_address_to_memory": ("(1190,790)", "(580,400)"),
-        "cpu_write_value_to_memory": ("(1190,810)", "(580,420)"),
-        "cpu_write_valid_to_memory": ("(1190,850)", "(580,440)"),
-        "cpu_write_enable_to_memory": ("(1190,830)", "(580,460)"),
-        "memory_ram_write_enable_to_cpu": ("(800,440)", "(970,910)"),
-        "cpu_instruction_boundary_to_interrupt": ("(1190,870)", "(580,610)"),
-        "cpu_enable_request_to_interrupt": ("(1190,890)", "(580,630)"),
-        "cpu_disable_request_to_interrupt": ("(1190,910)", "(580,650)"),
-        "cpu_return_request_to_interrupt": ("(1190,930)", "(580,670)"),
-        "cpu_next_pc_to_interrupt": ("(1190,950)", "(580,690)"),
-        "interrupt_accept_to_cpu": ("(800,550)", "(970,830)"),
-        "interrupt_target_pc_to_cpu": ("(800,650)", "(970,850)"),
-        "interrupt_illegal_return_to_cpu": ("(800,610)", "(970,870)"),
+        "clock_to_cpu": ("(350,480)", "(1050,590)"),
+        "reset_to_cpu": ("(350,500)", "(1050,610)"),
+        "memory_read_value_to_cpu": ("(810,360)", "(1050,630)"),
+        "memory_read_valid_to_cpu": ("(810,380)", "(1050,650)"),
+        "cpu_address_to_memory": ("(1270,670)", "(590,400)"),
+        "cpu_write_value_to_memory": ("(1270,690)", "(590,420)"),
+        "cpu_write_valid_to_memory": ("(1270,730)", "(590,440)"),
+        "cpu_write_enable_to_memory": ("(1270,710)", "(590,460)"),
+        "memory_ram_write_enable_to_cpu": ("(810,440)", "(1050,750)"),
+        "cpu_instruction_boundary_to_interrupt": ("(1270,750)", "(590,650)"),
+        "cpu_enable_request_to_interrupt": ("(1270,770)", "(590,670)"),
+        "cpu_disable_request_to_interrupt": ("(1270,790)", "(590,690)"),
+        "cpu_return_request_to_interrupt": ("(1270,810)", "(590,710)"),
+        "cpu_next_pc_to_interrupt": ("(1270,830)", "(590,730)"),
+        "interrupt_accept_to_cpu": ("(810,590)", "(1050,670)"),
+        "interrupt_target_pc_to_cpu": ("(810,690)", "(1050,690)"),
+        "interrupt_illegal_return_to_cpu": ("(810,650)", "(1050,710)"),
     }
     if cpu_contract.get("verified_top_level_paths") != list(required_top_paths) or not all(
             top_connected(*terminals) for terminals in required_top_paths.values()):
