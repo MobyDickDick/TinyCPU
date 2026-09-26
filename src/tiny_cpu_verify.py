@@ -292,11 +292,11 @@ def verify_system_circuit() -> None:
         ("(860,910)", "(1540,910)"),  # return address
         ("(840,940)", "(1540,940)"),  # return-address validity
         ("(820,960)", "(1540,960)"),  # handler state
-        ("(310,480)", "(590,480)"),  # memory-path clock
-        ("(310,610)", "(590,610)"),  # interrupt-controller clock
-        ("(330,500)", "(590,500)"),  # memory-path reset
-        ("(330,590)", "(590,590)"),  # interrupt-controller reset
-        ("(300,630)", "(590,630)"),  # interrupt request
+        ("(350,480)", "(590,480)"),  # memory-path clock
+        ("(350,610)", "(590,610)"),  # interrupt-controller clock
+        ("(370,500)", "(590,500)"),  # memory-path reset
+        ("(370,590)", "(590,590)"),  # interrupt-controller reset
+        ("(330,630)", "(590,630)"),  # interrupt request
     }
     if not required_top_wires <= top_wires:
         raise VerificationError(
@@ -328,8 +328,8 @@ def verify_system_circuit() -> None:
     # contract catches a wire that merely reaches a box but lands on the wrong
     # named port (the failure that originally produced red E/U rails here).
     required_top_paths = {
-        "clock_to_cpu": ("(290,480)", "(1040,610)"),
-        "reset_to_cpu": ("(290,500)", "(1040,630)"),
+        "clock_to_cpu": ("(330,480)", "(1040,610)"),
+        "reset_to_cpu": ("(330,500)", "(1040,630)"),
         "memory_read_value_to_cpu": ("(810,360)", "(1040,710)"),
         "memory_read_valid_to_cpu": ("(810,380)", "(1040,730)"),
         "cpu_address_to_memory": ("(1260,650)", "(590,400)"),
@@ -716,7 +716,7 @@ def verify_system_circuit() -> None:
         attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
         cpu_pin_locations[attributes.get("label", "")] = component.get("loc")
     address_splitter = cpu_boundary.find(
-        "comp[@name='Splitter'][@loc='(730,580)']"
+        "comp[@name='Splitter'][@loc='(680,510)']"
     )
     splitter_attributes = {
         item.get("name"): item.get("val")
@@ -728,11 +728,14 @@ def verify_system_circuit() -> None:
         **{f"bit{bit}": "1" for bit in range(12, 16)},
     }
     required_address_split_wires = {
-        frozenset(("(660,500)", "(730,500)")),
-        frozenset(("(730,500)", "(730,580)")),
-        frozenset(("(750,560)", "(770,560)")),
-        frozenset(("(770,560)", "(770,610)")),
-        frozenset(("(770,610)", cpu_pin_locations["ADDRESS"])),
+        frozenset(("(660,500)", "(670,500)")),
+        frozenset(("(670,500)", "(670,510)")),
+        frozenset(("(670,510)", "(680,510)")),
+        frozenset(("(700,490)", "(710,490)")),
+        frozenset(("(710,490)", "(710,500)")),
+        frozenset(("(710,500)", "(840,500)")),
+        frozenset(("(840,500)", "(840,520)")),
+        frozenset(("(840,520)", cpu_pin_locations["ADDRESS"])),
     }
     if (splitter_attributes != expected_address_splitter
             or not required_address_split_wires <= cpu_wires
