@@ -83,6 +83,49 @@ def point(value: str, *, source: Path) -> tuple[int, int]:
     return int(match.group(1)), int(match.group(2))
 
 
+def _pin_label(component: ET.Element) -> str:
+    return next((item.get("val", "") for item in component.findall("a")
+                 if item.get("name") == "label"), "")
+
+
+def _is_output_pin(component: ET.Element) -> bool:
+    return any(item.get("name") == "type" and item.get("val") == "output"
+               for item in component.findall("a"))
+
+
+def generated_symbol_ports(
+    definition: ET.Element, instance: ET.Element,
+) -> dict[str, str]:
+    """Return named terminals of a default Logisim-evolution subcircuit box.
+
+    Logisim orders each side by the authored pin position.  The instance
+    location is the top-right corner of the project's fixed-size default box.
+    Deriving terminals from pin names and the instance transform keeps
+    integration checks independent of absolute canvas coordinates.
+    """
+    pins = list(definition.findall("comp[@name='Pin']"))
+    # Logisim-evolution's ``logisim_evolution`` default appearance uses the
+    # standard 220-pixel subcircuit body in the project format used here.
+    width = 220
+    instance_x, instance_y = map(int, instance.get("loc", "").strip("()").split(","))
+    result: dict[str, str] = {}
+    for output in (False, True):
+        side = sorted(
+            (pin for pin in pins if _is_output_pin(pin) == output),
+            key=lambda pin: point(pin.get("loc", ""), source=Path("Logisim circuit"))[::-1],
+        )
+        terminal_x = instance_x if output else instance_x - width
+        for index, pin in enumerate(side):
+            result[_pin_label(pin)] = f"({terminal_x},{instance_y + index * 20})"
+    return result
+
+
+def pin_locations(circuit: ET.Element) -> dict[str, str]:
+    """Map public pin labels to their authored electrical endpoints."""
+    return {_pin_label(pin): pin.get("loc", "")
+            for pin in circuit.findall("comp[@name='Pin']")}
+
+
 def verify_circuit(path: Path) -> tuple[int, int]:
     try:
         project = ET.parse(path).getroot()
@@ -282,26 +325,6 @@ def verify_system_circuit() -> None:
             f"{display_path(system.circuit_path)}: system top components differ from contract"
         )
     top_wires = {(wire.get("from"), wire.get("to")) for wire in circuit.findall("wire")}
-    required_top_wires = {
-        ("(810,400)", "(1530,400)"),  # output-port value state
-        ("(810,420)", "(1510,420)"),  # output-port validity state
-        ("(1510,420)", "(1510,440)"),
-        ("(1510,440)", "(1530,440)"),
-        ("(900,860)", "(1540,860)"),  # pending state
-        ("(880,880)", "(1540,880)"),  # mask state
-        ("(860,910)", "(1540,910)"),  # return address
-        ("(840,940)", "(1540,940)"),  # return-address validity
-        ("(820,960)", "(1540,960)"),  # handler state
-        ("(350,480)", "(590,480)"),  # memory-path clock
-        ("(350,610)", "(590,610)"),  # interrupt-controller clock
-        ("(370,500)", "(590,500)"),  # memory-path reset
-        ("(370,590)", "(590,590)"),  # interrupt-controller reset
-        ("(330,630)", "(590,630)"),  # interrupt request
-    }
-    if not required_top_wires <= top_wires:
-        raise VerificationError(
-            f"{display_path(system.circuit_path)}: system top integration wiring differs from contract"
-        )
 
     contract = load_json(LOGISIM / "tinycpu-peripherals-16-12-v1.json")
     cpu_contract = contract.get("components", {}).get("cpu_integration", {})
@@ -323,29 +346,51 @@ def verify_system_circuit() -> None:
                         pending.append(neighbour)
         return False
 
-    # Contacts are ordered by the pins' authored Y positions in each generated
-    # Logisim-evolution box.  Keeping these coordinates in the electrical
-    # contract catches a wire that merely reaches a box but lands on the wrong
-    # named port (the failure that originally produced red E/U rails here).
-    required_top_paths = {
-        "clock_to_cpu": ("(330,480)", "(1040,610)"),
-        "reset_to_cpu": ("(330,500)", "(1040,630)"),
-        "memory_read_value_to_cpu": ("(810,360)", "(1040,710)"),
-        "memory_read_valid_to_cpu": ("(810,380)", "(1040,730)"),
-        "cpu_address_to_memory": ("(1260,650)", "(590,400)"),
-        "cpu_write_value_to_memory": ("(1260,670)", "(590,420)"),
-        "cpu_write_valid_to_memory": ("(1260,710)", "(590,440)"),
-        "cpu_write_enable_to_memory": ("(1260,690)", "(590,460)"),
-        "memory_ram_write_enable_to_cpu": ("(810,440)", "(1040,750)"),
-        "cpu_instruction_boundary_to_interrupt": ("(1260,730)", "(590,650)"),
-        "cpu_enable_request_to_interrupt": ("(1260,750)", "(590,670)"),
-        "cpu_disable_request_to_interrupt": ("(1260,770)", "(590,690)"),
-        "cpu_return_request_to_interrupt": ("(1260,790)", "(590,710)"),
-        "cpu_next_pc_to_interrupt": ("(1260,810)", "(590,730)"),
-        "interrupt_accept_to_cpu": ("(810,590)", "(1040,670)"),
-        "interrupt_target_pc_to_cpu": ("(810,690)", "(1040,690)"),
-        "interrupt_illegal_return_to_cpu": ("(810,650)", "(1040,650)"),
+    definitions = {name: project.find(f"circuit[@name='{name}']") for name in top_instances}
+    instances = {component.get("name", ""): component for component in circuit.findall("comp")
+                 if component.get("lib") is None}
+    ports = {name: generated_symbol_ports(definition, instances[name])
+             for name, definition in definitions.items() if definition is not None}
+    public = pin_locations(circuit)
+    expected_cpu_pin_names = set(cpu_contract.get("pins", {}))
+    if set(ports.get("CPUIntegrationBoundary", {})) != expected_cpu_pin_names:
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: CPU integration boundary differs from contract"
+        )
+    named_handoffs = {
+        "clock_to_cpu": (public["CLK"], ports["CPUIntegrationBoundary"]["CLK"]),
+        "reset_to_cpu": (public["RESET"], ports["CPUIntegrationBoundary"]["RESET"]),
+        "memory_read_value_to_cpu": (ports["OutputMemoryPath"]["READ_VALUE"], ports["CPUIntegrationBoundary"]["RAM_READ_VALUE"]),
+        "memory_read_valid_to_cpu": (ports["OutputMemoryPath"]["READ_VALID"], ports["CPUIntegrationBoundary"]["RAM_READ_VALID"]),
+        "cpu_address_to_memory": (ports["CPUIntegrationBoundary"]["ADDRESS"], ports["OutputMemoryPath"]["ADDRESS"]),
+        "cpu_write_value_to_memory": (ports["CPUIntegrationBoundary"]["WRITE_VALUE"], ports["OutputMemoryPath"]["WRITE_VALUE"]),
+        "cpu_write_valid_to_memory": (ports["CPUIntegrationBoundary"]["WRITE_VALID"], ports["OutputMemoryPath"]["WRITE_VALID"]),
+        "cpu_write_enable_to_memory": (ports["CPUIntegrationBoundary"]["WRITE_ENABLE"], ports["OutputMemoryPath"]["WRITE_ENABLE"]),
+        "memory_ram_write_enable_to_cpu": (ports["OutputMemoryPath"]["RAM_WRITE_ENABLE"], ports["CPUIntegrationBoundary"]["RAM_WRITE_ENABLE"]),
+        "cpu_instruction_boundary_to_interrupt": (ports["CPUIntegrationBoundary"]["INSTRUCTION_BOUNDARY"], ports["InterruptController"]["INSTRUCTION_BOUNDARY"]),
+        "cpu_enable_request_to_interrupt": (ports["CPUIntegrationBoundary"]["ENABLE_INTERRUPTS_REQUEST"], ports["InterruptController"]["ENABLE_INTERRUPTS_REQUEST"]),
+        "cpu_disable_request_to_interrupt": (ports["CPUIntegrationBoundary"]["DISABLE_INTERRUPTS_REQUEST"], ports["InterruptController"]["DISABLE_INTERRUPTS_REQUEST"]),
+        "cpu_return_request_to_interrupt": (ports["CPUIntegrationBoundary"]["RETURN_FROM_INTERRUPT_REQUEST"], ports["InterruptController"]["RETURN_FROM_INTERRUPT_REQUEST"]),
+        "cpu_next_pc_to_interrupt": (ports["CPUIntegrationBoundary"]["NEXT_PC"], ports["InterruptController"]["NEXT_PC"]),
+        "interrupt_accept_to_cpu": (ports["InterruptController"]["INTERRUPT_ACCEPT"], ports["CPUIntegrationBoundary"]["INTERRUPT_ACCEPT"]),
+        "interrupt_target_pc_to_cpu": (ports["InterruptController"]["INTERRUPT_TARGET_PC"], ports["CPUIntegrationBoundary"]["INTERRUPT_TARGET_PC"]),
+        "interrupt_illegal_return_to_cpu": (ports["InterruptController"]["ILL_RET"], ports["CPUIntegrationBoundary"]["ILL_RET"]),
     }
+    state_handoffs = {
+        "output value": (ports["OutputMemoryPath"]["OUTPUT_PORT_VALUE"], public["OUTPUT_PORT_VALUE"]),
+        "output valid": (ports["OutputMemoryPath"]["OUTPUT_PORT_VALID"], public["OUTPUT_PORT_VALID"]),
+        "pending": (ports["InterruptController"]["INTERRUPT_PENDING"], public["INTERRUPT_PENDING"]),
+        "enabled": (ports["InterruptController"]["INTERRUPT_ENABLED"], public["INTERRUPT_ENABLED"]),
+        "return address": (ports["InterruptController"]["RET_ADDR"], public["RET_ADDR"]),
+        "return valid": (ports["InterruptController"]["RET_ADDR_VALID"], public["RET_ADDR_VALID"]),
+        "handler": (ports["InterruptController"]["IN_INTERRUPT_HANDLER"], public["IN_INTERRUPT_HANDLER"]),
+        "memory clock": (public["CLK"], ports["OutputMemoryPath"]["CLK"]),
+        "interrupt clock": (public["CLK"], ports["InterruptController"]["CLK"]),
+        "memory reset": (public["RESET"], ports["OutputMemoryPath"]["RESET"]),
+        "interrupt reset": (public["RESET"], ports["InterruptController"]["RESET"]),
+        "interrupt request": (public["INTERRUPT_REQUEST"], ports["InterruptController"]["INTERRUPT_REQUEST"]),
+    }
+    required_top_paths = named_handoffs
     failed_top_paths = [
         name for name, terminals in required_top_paths.items()
         if not top_connected(*terminals)
@@ -357,6 +402,13 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             f"{display_path(system.circuit_path)}: CPU top-level hand-offs differ from contract"
             f"{detail}"
+        )
+    failed_integration = [name for name, terminals in state_handoffs.items()
+                          if not top_connected(*terminals)]
+    if failed_integration:
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: system top integration wiring differs "
+            f"from contract: {', '.join(failed_integration)}"
         )
 
     cpu_name = cpu_contract.get("circuit")
