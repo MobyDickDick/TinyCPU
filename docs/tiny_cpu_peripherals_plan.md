@@ -340,10 +340,14 @@ elektrische Gate eingebunden: Für jeden Fall wird das Systemprogramm samt
 Vektorhandler in eine temporäre Kernkopie geladen, aus denselben externen
 Flankenereignissen ein VM-Referenzlauf erzeugt und als sequenzieller
 Logisim-Testvektor gegen alle sieben öffentlichen Systemzustände geprüft.
-Logisim 4.1.0 initialisiert für diesen eigentlich nichtinteraktiven Aufruf
-Swing; das CI-Gate stellt deshalb ausdrücklich `xvfb-run` bereit. Als nächster
-Schritt bleibt die Auswertung des ersten vollständigen elektrischen Laufs und
-die kleinste Reparatur eines dabei nachgewiesenen Signalfehlers.
+Logisim 4.1.0 initialisiert über seinen regulären Programmeinstieg selbst für
+diesen nichtinteraktiven Aufruf Swing. Das Gate ruft den öffentlichen
+Testvektor-Evaluator deshalb über den kleinen Java-Quellstarter
+`scripts/LogisimHeadlessVector.java` direkt auf. Der elektrische Lauf benötigt
+damit weder `DISPLAY` noch `xvfb-run`; Simulator und Auswertelogik stammen
+weiterhin aus dem gepinnten Logisim-JAR. Als nächster Schritt bleibt die
+Auswertung des ersten vollständigen elektrischen Laufs und die kleinste
+Reparatur eines dabei nachgewiesenen Signalfehlers.
 
 Für diesen Diagnosezyklus kann die Systemmatrix nach einem fehlgeschlagenen
 Gesamtlauf gezielt wiederholt werden, ohne zuvor erneut die 61 unveränderten
@@ -359,6 +363,17 @@ PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
 `--system-only` ist ausdrücklich ein fokussierter Diagnoseaufruf. Die
 Endabnahme bleibt `scripts/test-logisim.sh`, damit Kern- und Systemregressionen
 weiter gemeinsam verpflichtend laufen.
+
+Der damit erstmals ohne grafische Umgebung ausgeführte Lauf stoppt wie von
+der Diagnose-Stopregel verlangt im ersten Fall `output-valid-write`. Die
+Vektoren 1 bis 3 stimmen überein; ab Vektor 4 bleibt
+`OUTPUT_PORT_VALUE` bei `0x0000` statt `0x0017` und
+`OUTPUT_PORT_VALID` bei `0` statt `1`. Die übrigen fünf Fälle wurden nach
+diesem ersten Unterschied nicht ausgeführt. Als nächstes wird deshalb nur die
+Kette aus CPU-Schreibwert, -gültigkeit und -freigabe bis zu den beiden
+Ausgabeportregistern untersucht; aus diesem Befund wird noch keine Änderung
+an Interrupt- oder PC-Pfaden abgeleitet.
+
 
 ## Kompatibilitätsfolgen
 
