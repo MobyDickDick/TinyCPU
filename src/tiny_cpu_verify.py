@@ -317,10 +317,17 @@ def verify_system_circuit() -> None:
         "interrupt_target_pc_to_cpu": ("(810,690)", "(1050,690)"),
         "interrupt_illegal_return_to_cpu": ("(810,650)", "(1050,710)"),
     }
-    if cpu_contract.get("verified_top_level_paths") != list(required_top_paths) or not all(
-            top_connected(*terminals) for terminals in required_top_paths.values()):
+    failed_top_paths = [
+        name for name, terminals in required_top_paths.items()
+        if not top_connected(*terminals)
+    ]
+    if cpu_contract.get("verified_top_level_paths") != list(required_top_paths) \
+            or failed_top_paths:
+        detail = (f": {', '.join(failed_top_paths)}" if failed_top_paths
+                  else ": profile path list differs")
         raise VerificationError(
             f"{display_path(system.circuit_path)}: CPU top-level hand-offs differ from contract"
+            f"{detail}"
         )
 
     cpu_name = cpu_contract.get("circuit")

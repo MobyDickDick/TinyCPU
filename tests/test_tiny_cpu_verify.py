@@ -695,6 +695,41 @@ class CircuitVerificationTests(unittest.TestCase):
                             VERIFY.VerificationError, "CPU top-level hand-offs differ"):
                         VERIFY.verify_system_circuit()
 
+    def test_ap18_rejects_crossed_address_and_read_value_buses(self) -> None:
+        """A 12-bit address must never terminate at the 16-bit read input."""
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
+        project = ET.parse(circuit)
+        top = project.getroot().find("circuit[@name='TinyCPUSystemMain']")
+        self.assertIsNotNone(top)
+
+        # Move the CPU ADDRESS route from OutputMemoryPath.ADDRESS (590,400)
+        # onto its 16-bit RAM_READ_VALUE terminal (590,360).  This reproduces
+        # the particularly dangerous redraw regression independently of the
+        # checked-in coordinate contract.
+        address_end = next(
+            wire for wire in top.findall("wire")
+            if wire.get("to") == "(590,400)"
+        )
+        address_end.set("to", "(590,360)")
+        project.write(circuit, encoding="utf-8", xml_declaration=True)
+
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+             mock.patch.object(
+                 VERIFY,
+                 "load_system_profile",
+                 return_value=replace(system, circuit_path=circuit),
+             ):
+            with self.assertRaisesRegex(
+                VERIFY.VerificationError,
+                "CPU top-level hand-offs differ.*cpu_address_to_memory",
+            ):
+                VERIFY.verify_system_circuit()
+
     def test_ap18_output_port_owns_value_and_valid_registers(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
