@@ -65,6 +65,19 @@ HALT()
                 self.assertEqual(state["output"], [7, 7])
                 self.assertFalse(any(state["errors"].values()))
 
+    def test_checked_in_logisim_rom_can_be_loaded(self) -> None:
+        root = Path(__file__).parents[1]
+        rom = load_program(root / "hardware/logisim/ap5_countdown.rom")
+        source = load_program(root / "hardware/logisim/ap5_countdown.tcpu")
+        self.assertEqual(rom.instructions, source.instructions)
+
+    def test_logisim_rom_header_must_match_profile(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "bad.rom"
+            path.write_text("addr/data: 8 16\n0\n", encoding="utf-8")
+            with self.assertRaisesRegex(AssemblyError, "expected ROM header"):
+                load_program(path)
+
 
 
 if __name__ == "__main__":

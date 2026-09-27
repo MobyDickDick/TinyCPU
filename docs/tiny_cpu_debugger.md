@@ -2,8 +2,10 @@
 
 Der Debugger führt Programme auf dem pausierbaren Python-Referenzmodell aus.
 Er verändert weder Maschinenformat noch Logisim-Schaltung. `.tcpu`-Quellen
-werden durch denselben Assemblerpfad geladen; reine `v2.0 raw`-ROM-Dateien
-funktionieren mit Adress-Breakpoints, besitzen aber keine Quellmetadaten.
+werden durch denselben Assemblerpfad geladen. ROM-Dateien im eigenständigen
+`v2.0 raw`-Format sowie im von Logisim-Schaltungen verwendeten
+`addr/data: ADRESSBITS WORTBITS`-Format funktionieren mit
+Adress-Breakpoints, besitzen aber keine Quellmetadaten.
 
 ## Aufruf
 
@@ -42,8 +44,9 @@ Weitere wichtige Optionen:
 
 - `--input WERT` legt einen ganzzahligen Wert in die Eingabewarteschlange; die
   Option kann für mehrere `INPUT`-Instruktionen wiederholt werden;
-- `--step-limit N` begrenzt die insgesamt ausgeführten Instruktionen (Standard:
-  `10000`), damit beispielsweise eine Endlosschleife deterministisch endet;
+- `--step-limit N` begrenzt die insgesamt ausgeführten Instruktionen auf eine
+  positive Anzahl (Standard: `10000`), damit beispielsweise eine Endlosschleife
+  deterministisch endet;
 - `--json` ersetzt die Textausgabe durch das unten beschriebene JSON-Objekt.
 - `--profile tinycpu-16-12` wählt das unterstützte Daten-/Adressformat und
   Maschinenformat; ohne diese Option bleibt `tinycpu-16-12` der Standard.

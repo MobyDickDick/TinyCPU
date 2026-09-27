@@ -24,6 +24,8 @@ class DebuggerError(ValueError):
 class Debugger:
     def __init__(self, program: Program, *, inputs: list[int] | None = None,
                  step_limit: int = 10000) -> None:
+        if step_limit < 1:
+            raise DebuggerError("step limit must be at least 1")
         self.cpu = TinyCPU(program, list(inputs or []))
         self.program = program
         self.step_limit = step_limit
@@ -135,7 +137,8 @@ def format_text(state: dict[str, object]) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Debug a TinyCPU program symbolically")
-    parser.add_argument("program", type=Path, help=".tcpu source or v2.0 raw .rom image")
+    parser.add_argument("program", type=Path,
+                        help=".tcpu source or Logisim raw .rom image")
     parser.add_argument("--breakpoint", "-b", action="append", default=[], metavar="ADDRESS|LABEL")
     parser.add_argument("--step", action="store_true", help="execute exactly one instruction")
     parser.add_argument("--json", action="store_true", help="emit stable machine-readable JSON")
