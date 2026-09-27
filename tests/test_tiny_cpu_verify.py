@@ -690,6 +690,29 @@ class CircuitVerificationTests(unittest.TestCase):
                     VERIFY.VerificationError, "CPU address width adapter differs"):
                 VERIFY.verify_system_circuit()
 
+    def test_ap18_cpu_address_splitter_output_must_be_connected(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware/logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
+        project = ET.parse(circuit)
+        boundary = project.getroot().find("circuit[@name='CPUIntegrationBoundary']")
+        self.assertIsNotNone(boundary)
+        wire = next(
+            item for item in boundary.findall("wire")
+            if {item.get("from"), item.get("to")} == {"(700,500)", "(710,500)"}
+        )
+        boundary.remove(wire)
+        project.write(circuit, encoding="utf-8", xml_declaration=True)
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+             mock.patch.object(VERIFY, "load_system_profile", return_value=replace(
+                 system, circuit_path=circuit)):
+            with self.assertRaisesRegex(
+                    VERIFY.VerificationError, "CPU address width adapter differs"):
+                VERIFY.verify_system_circuit()
+
     def test_ap18_cpu_address_is_exported_from_the_effective_address_net(self) -> None:
         root = MODULE_PATH.parents[1]
         core = ET.parse(root / "hardware/logisim/TinyCPU.circ").getroot().find(

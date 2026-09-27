@@ -783,8 +783,11 @@ def verify_system_circuit() -> None:
         frozenset(("(660,500)", "(670,500)")),
         frozenset(("(670,500)", "(670,510)")),
         frozenset(("(670,510)", "(680,510)")),
-        frozenset(("(700,490)", "(710,490)")),
-        frozenset(("(710,490)", "(710,500)")),
+        # The low 12-bit branch of an east-facing splitter is its upper
+        # terminal at y=500.  Requiring that exact terminal prevents a wire
+        # drawn one grid step above the component from looking connected in
+        # the XML while electrically floating in Logisim.
+        frozenset(("(700,500)", "(710,500)")),
         frozenset(("(710,500)", "(840,500)")),
         frozenset(("(840,500)", "(840,520)")),
         frozenset(("(840,520)", cpu_pin_locations["ADDRESS"])),
