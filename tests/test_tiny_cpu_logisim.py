@@ -249,15 +249,31 @@ class LogisimLauncherTests(unittest.TestCase):
         )
 
     def test_interrupt_pc_override_preserves_sequential_pc_when_inactive(self):
-        """Select zero must keep the normal next-PC path, not the IRQ target."""
+        """The IRQ mux must select its target only when acceptance is active."""
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         fetch = root.find("circuit[@name='FetchDecode']")
         self.assertIsNotNone(fetch)
-        override = _component_by_label(fetch, "INTERRUPT_PC_OVERRIDE")
-        # A classic two-input mux selects its lower data contact for select 0.
-        default_input = _point_offset(override, x=-30, y=10)
-        interrupt_input = _point_offset(override, x=-30, y=-10)
-        self.assertTrue(_wire_path_exists(fetch, "(870,240)", default_input))
+        override_candidates = []
+        for component in fetch.findall("comp[@name='Multiplexer']"):
+            interrupt_input = _point_offset(component, x=-30, y=10)
+            if _wire_path_exists(
+                fetch, _pin_location(fetch, "INTERRUPT_TARGET_PC"), interrupt_input
+            ):
+                override_candidates.append(component)
+        self.assertEqual(len(override_candidates), 1)
+        override = override_candidates[0]
+        # Classic Logisim multiplexers number their data inputs from top to
+        # bottom: select 0 uses the upper contact and select 1 the lower one.
+        default_input = _point_offset(override, x=-30, y=-10)
+        interrupt_input = _point_offset(override, x=-30, y=10)
+        select_input = _point_offset(override, x=-20, y=20)
+        normal_mux = next(
+            component for component in fetch.findall("comp")
+            if component.get("name") == "Multiplexer" and component is not override
+        )
+        self.assertTrue(
+            _wire_path_exists(fetch, normal_mux.get("loc"), default_input)
+        )
         self.assertTrue(
             _wire_path_exists(
                 fetch,
@@ -270,6 +286,11 @@ class LogisimLauncherTests(unittest.TestCase):
                 fetch,
                 _pin_location(fetch, "INTERRUPT_TARGET_PC"),
                 default_input,
+            )
+        )
+        self.assertTrue(
+            _wire_path_exists(
+                fetch, _pin_location(fetch, "INTERRUPT_ACCEPT"), select_input
             )
         )
 
@@ -693,30 +714,29 @@ class LogisimLauncherTests(unittest.TestCase):
         self.assertEqual(attributes.get("width"), "12")
         self.assertEqual(attributes.get("initial"), "0xfff")
 
-        expected = {
-            ("Constant", "(710,240)"),
-            ("Register", "(550,190)"),
-            ("Adder", "(770,230)"),
-            ("Multiplexer", "(870,240)"),
-            ("Comparator", "(740,390)"),
+        expected_counts = {
+            "Constant": 1,
+            "Register": 1,
+            "Adder": 1,
+            "Multiplexer": 2,
+            "Comparator": 1,
         }
-        for kind, location in expected:
+        for kind, count in expected_counts.items():
             matches = [
                 component for component in fetch.findall("comp")
                 if component.get("name") == kind
-                and component.get("loc") == location
+                and _attributes(component).get("width") == "12"
             ]
-            self.assertEqual(len(matches), 1, f"expected one fetch {kind}")
             self.assertEqual(
-                _attributes(matches[0]).get("width"), "12",
-                f"FetchDecode {kind} must use the 12-bit address profile",
+                len(matches), count,
+                f"FetchDecode must have {count} 12-bit {kind} component(s)",
             )
-        pc_splitter = next(
+        pc_splitters = [
             component for component in fetch.findall("comp")
             if component.get("name") == "Splitter"
-            and component.get("loc") == "(710,470)"
-        )
-        self.assertEqual(_attributes(pc_splitter).get("incoming"), "12")
+            and _attributes(component).get("incoming") == "12"
+        ]
+        self.assertEqual(len(pc_splitters), 1)
 
     def test_authored_fetch_controls_keep_decoder_rows(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
