@@ -517,6 +517,34 @@ def verify_system_circuit() -> None:
     ):
         raise VerificationError("AP-18 CPU external-write paths differ from contract")
 
+    controls_instance = next(
+        (component for component in core_definition.findall("comp[@name='FetchDecodeControls']")
+         if _pin_label(component) == "FETCH_DECODE_CONTROLS"),
+        None,
+    )
+    if controls_instance is None:
+        raise VerificationError("AP-18 CPU memory-write controls are missing")
+    controls_definition = next(
+        circuit for circuit in core_project.findall("circuit")
+        if circuit.get("name") == "FetchDecodeControls"
+    )
+    controls_ports = generated_symbol_ports(controls_definition, controls_instance)
+    request_x, request_y = map(
+        int, write_request.get("loc", "").strip("()").split(",")
+    )
+    request_inputs = (
+        f"({request_x - 50},{request_y - 20})",
+        f"({request_x - 50},{request_y})",
+        f"({request_x - 50},{request_y + 20})",
+    )
+    if any(
+        not core_connected(controls_ports[label], terminal)
+        for label, terminal in zip(
+            ("STORE_ADR", "STORE_ADR_REG", "STORE_REG_OFF"), request_inputs
+        )
+    ):
+        raise VerificationError("AP-18 CPU memory-write request sources differ from contract")
+
     write_enable_selector = next(
         (
             component

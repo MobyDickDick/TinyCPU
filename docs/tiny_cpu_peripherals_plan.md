@@ -461,6 +461,25 @@ nächster eng begrenzter Diagnoseschritt werden deren benannte Eingänge am
 `MEMORY_WRITE_REQUEST`-Gatter und am Gültigkeitspfad verfolgt; andere Daten-,
 Interrupt- oder PC-Pfade bleiben dabei unverändert.
 
+Diese begrenzte Kontrolle hat zwei falsche Quellen am dreifachen
+`MEMORY_WRITE_REQUEST`-Gatter nachgewiesen: Statt `STORE_ADR` und
+`STORE_ADR_REG` waren `SET_DIV0` und `SET_ADDR` angeschlossen; nur
+`STORE_REG_OFF` erreichte bereits den richtigen Eingang. Die beiden offenen
+Store-Ausgänge sind nun über getrennte sichtbare Leitungen angeschlossen. Ein
+semantischer Strukturtest verfolgt alle drei Decoder-Ausgänge bis zu jeweils
+einem eigenen Gate-Eingang und ein Mutationstest entfernt gezielt den ersten
+Pfad. Der Gültigkeitseingang des RAM und der Export
+`EXTERNAL_WRITE_VALID` liegen dagegen bereits gemeinsam und ohne Unterbrechung
+auf `Datapath.ACC_VALID_OUT`.
+
+Der anschließende fokussierte elektrische Lauf bleibt im Fall
+`output-valid-write` an Vektor 4 stehen: Ausgabeportwert und -gültigkeit sind
+weiterhin null. Die falschen Gate-Quellen waren damit ein realer
+Topologiefehler, aber noch nicht der letzte funktionale Unterschied. Als
+nächster Diagnoseschritt werden die drei korrigierten Store-Ausgänge während
+dieses Vektors direkt gemessen; erst danach darf entweder der Decoder oder der
+nachfolgende Schreibpfad geändert werden.
+
 
 ## Kompatibilitätsfolgen
 
