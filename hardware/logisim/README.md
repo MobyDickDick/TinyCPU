@@ -1492,10 +1492,14 @@ the static gate again.
 
 Confirmed visual stubs can additionally be annotated in the XML with
 `tinycpu-dangling="true"` and removed with `--fix --prune-dangling`.  Before
-deleting such a wire, the checker still requires one loose end and a real
-three-way junction at the other end.  This explicit annotation is intentional:
-Logisim's `loc` is not the input-terminal coordinate for every component, so a
-purely geometric guess could silently delete a functional input connection.
+deleting such a branch, the checker still requires a loose leaf and either a
+marked continuation or a real junction at the other end.  It removes one leaf,
+recomputes the remaining topology, and repeats to a fixed point; therefore
+multi-segment stubs and several loose branches at one junction are removed
+completely without relying on coordinates.  This explicit annotation is
+intentional: Logisim's `loc` is not the input-terminal coordinate for every
+component, so a purely geometric guess could silently delete a functional
+input connection.
 
 ### Geometrischer Kontakt-Audit
 
