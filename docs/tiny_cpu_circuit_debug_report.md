@@ -3458,15 +3458,16 @@ Peripherie wird daher noch nicht behauptet.
 - **Ausgangsstand:** `38bb3a0b27778ef6832b1790b4e2ee96aa05b762`
 - **Datum:** 27. September 2026
 
-Die Nachprüfung wurde netztopologisch ausgeführt: Entscheidend waren
-Bauteilanschlüsse und durchgehende orthogonale Netze, nicht die Lage einer
-Leitung neben einem Anschluss. Sie bestätigte die beanstandete Unterbrechung
-am 16-auf-12-Bit-Adressadapter: Der vorhandene Leitungszug begann bei
-`(700,490)`, der tatsächliche niederwertige Splitteranschluss liegt bei
-`(700,500)`. Der vorhandene Knick über `(710,500)` wurde wieder angeschlossen,
-ohne Bauteile zu verschieben. Außerdem hatte das Speichern erneut die Werte
-der beiden Konstanten sowie die semantischen Attribute der beiden Selektoren
-entfernt; diese Attribute wurden am vorhandenen Ort wiederhergestellt.
+Die erste Bewertung des Adresssplitters in dieser Nachprüfung war falsch.
+Verzweigung 0 am oberen Ausgang `(700,490)` führt gemäß den Splitterattributen
+Bits 0 bis 11 und ist damit 12 Bit breit. Verzweigung 1 am unteren Ausgang
+`(700,500)` führt Bits 12 bis 15 und ist nur 4 Bit breit. Das Umlegen der
+Adressleitung auf den unteren Anschluss erzeugte deshalb genau den von Logisim
+gemeldeten Breitenfehler. Der vorhandene Leitungsweg ist wieder mit dem oberen
+12-Bit-Ausgang verbunden; kein Bauteil wurde bewegt. Der Offline-Prüfer
+verlangt nun gemeinsam die Bitzuordnung und den passenden Ausgangsanschluss.
+Die verlorenen Konstantenwerte und Selektorattribute bleiben am vorhandenen
+Ort wiederhergestellt.
 
 Der anschließende fokussierte Systemlauf reproduziert weiterhin ausschließlich
 den bereits dokumentierten ersten Fall und stoppt an Vektor 4:

@@ -279,11 +279,10 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   CPU-seitige Erzeugung von Adresse, Gültigkeit und Freigabe vor der
   Speichergrenze eingegrenzt. Die temporären Messpins wurden nicht in die
   öffentliche Schaltung übernommen. Die anschließende Rückverfolgung hat am
-  16-auf-12-Bit-Adapter einen tatsächlich offenen Übergang gefunden: Die
-  Adressleitung begann eine Rastereinheit oberhalb des niederwertigen
-  Splitteranschlusses. Der Anschluss und der bislang ebenfalls falsche
-  Offline-Prüfanker sind minimal korrigiert und durch einen Mutationstest
-  geschützt. Da der fokussierte elektrische Fall danach weiterhin am
+  16-auf-12-Bit-Adapter zunächst irrtümlich den 4-Bit-Ausgang als
+  niederwertigen Anschluss bewertet. Diese Fehldiagnose ist korrigiert: Der
+  obere Splitterausgang führt Bits 0 bis 11 und damit den 12-Bit-Adressbus;
+  der Prüfer sichert Bitzuordnung und Anschluss gemeinsam. Da der fokussierte elektrische Fall weiterhin am
   Portschreibvorgang scheitert, wurden die erneut manuell angeordneten
   Schaltungen ausschließlich topologisch kontrolliert. Konstanten,
   Selektorbezeichner und Splitteranschluss sind wiederhergestellt; der Prüfer

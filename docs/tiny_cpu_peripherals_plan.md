@@ -412,33 +412,29 @@ Schaltung wurde gemäß Stop-Regel noch kein weiterer Pfad geändert. Als
 nächstes werden diese drei Signale innerhalb des Kerns bis zu Decoder und
 effektiver Adresse zurückverfolgt.
 
-Die Rückverfolgung auf Ausgangsstand `c299d74` hat als ersten konkret offenen
-Übergang den 16-auf-12-Bit-Adressadapter ergeben. Dessen Leitung begann bei
-`(700,490)`, der niederwertige Splitterausgang liegt elektrisch jedoch bei
-`(700,500)`. Damit endete die Leitung eine Rastereinheit oberhalb des
-Bauteilanschlusses; der bisherige Offline-Vertrag hatte irrtümlich genau diese
-offene Koordinate verlangt. Die Reparatur verbindet ausschließlich den
-niederwertigen Splitterausgang mit dem vorhandenen Adresspfad. Verifier und
-Mutationstest verlangen nun den tatsächlichen Bauteilanschluss, sodass die
-gleiche optisch plausible Unterbrechung künftig offline erkannt wird.
+Die damalige Rückverfolgung auf Ausgangsstand `c299d74` war falsch: Beim
+ostwärts gerichteten Splitter führt der obere Ausgang bei `(700,490)` den im
+Attributsatz der Verzweigung `0` zugeordneten 12-Bit-Anteil (Bits 0 bis 11).
+Der untere Ausgang bei `(700,500)` führt dagegen ausschließlich die vier Bits
+12 bis 15. Die vermeintliche Reparatur verband daher einen 4-Bit-Ausgang mit
+dem 12-Bit-Pin `ADDRESS` und erzeugte den in Logisim sichtbaren Breitenfehler.
+Die Leitung liegt wieder auf dem 12-Bit-Ausgang. Verifier und Mutationstest
+prüfen jetzt sowohl die Bitzuordnung als auch diesen tatsächlichen Anschluss.
 
-Der fokussierte elektrische Lauf erreicht nach dieser Reparatur weiterhin den
-ersten Fall `output-valid-write`, beendet ihn aber noch nicht erfolgreich. Die
-Adressunterbrechung ist daher ein belegter Defekt, jedoch noch nicht die
-vollständige Erklärung für den ausbleibenden Portschreibvorgang. Gemäß der
-Stop-Regel wurden Decoder, Gültigkeits- und Freigabepfad in diesem Schritt
-nicht gleichzeitig verändert; sie bilden das nächste Diagnosepaket.
+Der fokussierte elektrische Lauf erreicht nach der Korrektur weiterhin den
+ersten Fall `output-valid-write`, beendet ihn aber noch nicht erfolgreich. Der
+Breitenfehler war ein durch die fehlerhafte Reparatur hinzugefügter Defekt und
+nicht die Erklärung für den schon zuvor ausbleibenden Portschreibvorgang.
+Gemäß der Stop-Regel werden Decoder, Gültigkeits- und Freigabepfad getrennt
+untersucht.
 
 Die anschließende topologische Kontrolle des manuell neu angeordneten Stands
-hat verlorene elektrische Attribute und den bereits bekannten offenen
-Adressübergang gefunden, ohne Bauteile oder Leitungswege nach alten
-Koordinaten zurückzuverschieben. `INSTRUCTION_BOUNDARY_ASSERTED` und
+hat verlorene elektrische Attribute gefunden, ohne Bauteile oder Leitungswege
+nach alten Koordinaten zurückzuverschieben. `INSTRUCTION_BOUNDARY_ASSERTED` und
 `USE_EXTERNAL_MEMORY` treiben wieder den Vertragswert `1`; die vorhandenen
-PC- und RAM-Schreibselektoren tragen wieder ihre semantischen Bezeichner. Am
-16-auf-12-Bit-Adapter beginnt die Adressleitung wieder am tatsächlichen
-niederwertigen Splitteranschluss. Der Offline-Verifier ermittelt die
-betroffenen Pfade nun aus benannten Bausteinports und Netzkonnektivität statt
-aus den Koordinaten vor der Neuanordnung.
+PC- und RAM-Schreibselektoren tragen wieder ihre semantischen Bezeichner. Der
+Offline-Verifier prüft am 16-auf-12-Bit-Adapter Bitzuordnung und den dazu
+passenden Ausgang gemeinsam.
 
 Der fokussierte elektrische Lauf bleibt danach reproduzierbar im ersten Fall
 `output-valid-write` an Vektor 4 stehen. Damit ist die topologische Kontrolle
@@ -451,10 +447,9 @@ und den benannten Bauteilports und bewertet weder die optische Nähe noch alte
 Canvas-Koordinaten als Verbindung. Dabei wurden nach dem erneuten manuellen
 Speichern drei verlorene Bauteilattribute (`INSTRUCTION_BOUNDARY_ASSERTED`,
 `INTERRUPT_PC_OVERRIDE` und `RAM_WRITE_ENABLE_SELECT`), der Vertragswert von
-`USE_EXTERNAL_MEMORY` sowie die wieder um eine Rastereinheit offene
-12-Bit-Adressleitung gefunden. Ausschließlich diese Attribute und der
-vorhandene geknickte Leitungszug vom tatsächlichen Splitteranschluss wurden
-wiederhergestellt; kein Bauteil wurde verschoben.
+`USE_EXTERNAL_MEMORY` gefunden. Die zunächst zusätzlich behauptete offene
+12-Bit-Adressleitung war eine Fehlinterpretation der Splitterausgänge und ist
+wie oben beschrieben korrigiert. Kein Bauteil wurde verschoben.
 
 `EXTERNAL_WRITE_VALID` und `EXTERNAL_WRITE_ENABLE` sind danach topologisch mit
 ihren RAM-seitigen Ursprungsnetzen verbunden. Der fokussierte elektrische Lauf
