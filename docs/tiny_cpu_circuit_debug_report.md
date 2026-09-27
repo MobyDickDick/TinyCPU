@@ -3452,3 +3452,38 @@ behoben. Die davon getrennte AP-18-Systemmatrix wird durch das bestehende
 elektrische Kernkommando noch nicht ausgeführt und bleibt das nächste
 dokumentierte Arbeitspaket; eine vollständige elektrische Freigabe der
 Peripherie wird daher noch nicht behauptet.
+
+#### Topologische Nachprüfung der CPU-Integrationsgrenze
+
+- **Ausgangsstand:** `38bb3a0b27778ef6832b1790b4e2ee96aa05b762`
+- **Datum:** 27. September 2026
+
+Die Nachprüfung wurde netztopologisch ausgeführt: Entscheidend waren
+Bauteilanschlüsse und durchgehende orthogonale Netze, nicht die Lage einer
+Leitung neben einem Anschluss. Sie bestätigte die beanstandete Unterbrechung
+am 16-auf-12-Bit-Adressadapter: Der vorhandene Leitungszug begann bei
+`(700,490)`, der tatsächliche niederwertige Splitteranschluss liegt bei
+`(700,500)`. Der vorhandene Knick über `(710,500)` wurde wieder angeschlossen,
+ohne Bauteile zu verschieben. Außerdem hatte das Speichern erneut die Werte
+der beiden Konstanten sowie die semantischen Attribute der beiden Selektoren
+entfernt; diese Attribute wurden am vorhandenen Ort wiederhergestellt.
+
+Der anschließende fokussierte Systemlauf reproduziert weiterhin ausschließlich
+den bereits dokumentierten ersten Fall und stoppt an Vektor 4:
+
+```bash
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 --system tinycpu-peripherals-16-12-v1 \
+  --system-only --trace-output /tmp/unused-core.tsv \
+  --matrix-output /tmp/tinycpu-system-check
+```
+
+`OUTPUT_PORT_VALUE` bleibt `0x0000` statt `0x0017`, und
+`OUTPUT_PORT_VALID` bleibt `0` statt `1`. Die jetzt abgearbeitete nächste
+Diagnosegrenze vergleicht die beiden CPU-Exporte
+`EXTERNAL_WRITE_VALID`/`EXTERNAL_WRITE_ENABLE` mit ihren Ursprungsnetzen: Die
+Leitungen sind topologisch durchgängig, beide Signale bleiben elektrisch aber
+null. Der erste offene funktionale Unterschied liegt folglich vor der
+Integrationsgrenze an den Eingängen von `MEMORY_WRITE_REQUEST` beziehungsweise
+am Gültigkeitspfad. Es wurde weder eine elektrische Systemfreigabe behauptet
+noch ein anderer Signalweg vorsorglich geändert.

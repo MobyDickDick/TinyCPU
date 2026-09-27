@@ -446,6 +446,26 @@ abgeschlossen, aber noch keine elektrische Freigabe erreicht; als nächstes
 werden ausschließlich `EXTERNAL_WRITE_VALID` und `EXTERNAL_WRITE_ENABLE` am
 Kernausgang mit ihren RAM-seitigen Ursprungsnetzen verglichen.
 
+Diese Anschlusskontrolle ist nun erfolgt. Sie folgt den vollständigen Netzen
+und den benannten Bauteilports und bewertet weder die optische Nähe noch alte
+Canvas-Koordinaten als Verbindung. Dabei wurden nach dem erneuten manuellen
+Speichern drei verlorene Bauteilattribute (`INSTRUCTION_BOUNDARY_ASSERTED`,
+`INTERRUPT_PC_OVERRIDE` und `RAM_WRITE_ENABLE_SELECT`), der Vertragswert von
+`USE_EXTERNAL_MEMORY` sowie die wieder um eine Rastereinheit offene
+12-Bit-Adressleitung gefunden. Ausschließlich diese Attribute und der
+vorhandene geknickte Leitungszug vom tatsächlichen Splitteranschluss wurden
+wiederhergestellt; kein Bauteil wurde verschoben.
+
+`EXTERNAL_WRITE_VALID` und `EXTERNAL_WRITE_ENABLE` sind danach topologisch mit
+ihren RAM-seitigen Ursprungsnetzen verbunden. Der fokussierte elektrische Lauf
+liefert trotzdem an Vektor 4 weiterhin für beide Signale logisch `0`, während
+der Schreibwert bereits `0x0017` erreicht. Der erste noch offene funktionale
+Unterschied liegt damit nicht an der CPU-Integrationsgrenze, sondern vor den
+beiden Exporten in der Erzeugung von Gültigkeit und Schreibanforderung. Als
+nächster eng begrenzter Diagnoseschritt werden deren benannte Eingänge am
+`MEMORY_WRITE_REQUEST`-Gatter und am Gültigkeitspfad verfolgt; andere Daten-,
+Interrupt- oder PC-Pfade bleiben dabei unverändert.
+
 
 ## Kompatibilitätsfolgen
 
