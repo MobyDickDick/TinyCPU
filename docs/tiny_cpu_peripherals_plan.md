@@ -412,6 +412,23 @@ Schaltung wurde gemäß Stop-Regel noch kein weiterer Pfad geändert. Als
 nächstes werden diese drei Signale innerhalb des Kerns bis zu Decoder und
 effektiver Adresse zurückverfolgt.
 
+Die Rückverfolgung auf Ausgangsstand `c299d74` hat als ersten konkret offenen
+Übergang den 16-auf-12-Bit-Adressadapter ergeben. Dessen Leitung begann bei
+`(700,490)`, der niederwertige Splitterausgang liegt elektrisch jedoch bei
+`(700,500)`. Damit endete die Leitung eine Rastereinheit oberhalb des
+Bauteilanschlusses; der bisherige Offline-Vertrag hatte irrtümlich genau diese
+offene Koordinate verlangt. Die Reparatur verbindet ausschließlich den
+niederwertigen Splitterausgang mit dem vorhandenen Adresspfad. Verifier und
+Mutationstest verlangen nun den tatsächlichen Bauteilanschluss, sodass die
+gleiche optisch plausible Unterbrechung künftig offline erkannt wird.
+
+Der fokussierte elektrische Lauf erreicht nach dieser Reparatur weiterhin den
+ersten Fall `output-valid-write`, beendet ihn aber noch nicht erfolgreich. Die
+Adressunterbrechung ist daher ein belegter Defekt, jedoch noch nicht die
+vollständige Erklärung für den ausbleibenden Portschreibvorgang. Gemäß der
+Stop-Regel wurden Decoder, Gültigkeits- und Freigabepfad in diesem Schritt
+nicht gleichzeitig verändert; sie bilden das nächste Diagnosepaket.
+
 
 ## Kompatibilitätsfolgen
 
