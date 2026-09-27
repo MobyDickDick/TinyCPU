@@ -480,6 +480,31 @@ nächster Diagnoseschritt werden die drei korrigierten Store-Ausgänge während
 dieses Vektors direkt gemessen; erst danach darf entweder der Decoder oder der
 nachfolgende Schreibpfad geändert werden.
 
+Diese direkte Messung ist auf Ausgangs-Commit `d00451a` erfolgt. Nach der
+topologischen Wiederherstellung der beim Speichern verlorenen semantischen
+Attribute wurde der fokussierte Lauf mit
+
+```bash
+LOGISIM_JAR=.venv/Include/logisim-evolution-4.1.0-all.jar \
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 --system tinycpu-peripherals-16-12-v1 \
+  --system-only --trace-output /tmp/unused-core.tsv \
+  --matrix-output artifacts/tinycpu-system-diagnostic
+```
+
+reproduziert. Temporäre Messpins am vorhandenen
+`FetchDecodeControls`-Symbol zeigen in der Schreibphase für `STORE_ADR`,
+`STORE_ADR_REG` und `STORE_REG_OFF` jeweils `0`; für den ausgeführten
+`STORE_ADDRESS`-Befehl müsste ausschließlich `STORE_ADR` den Wert `1` liefern.
+Damit sind die drei Leitungen vom Symbol bis zum `MEMORY_WRITE_REQUEST`-Gatter
+nicht der erste abweichende Pfad. Der erste elektrische Unterschied liegt
+spätestens am benannten Decoder-Ausgang `STORE_ADR`; die temporären Messpins
+wurden nicht in die Schaltung übernommen. Als nächstes werden nur der
+`OPCODE`-Eingang und der `STORE_ADR`-Ausgang von `FetchDecodeControls`
+elektrisch gegeneinander geprüft. Wegen der geschützten handgezeichneten
+Darstellung wird vor diesem Nachweis weder der Decoder umgezeichnet noch eine
+Verbindung anhand von Canvas-Koordinaten bewertet.
+
 
 ## Kompatibilitätsfolgen
 
