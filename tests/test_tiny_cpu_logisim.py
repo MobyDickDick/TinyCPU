@@ -107,18 +107,23 @@ def _subcircuit_ports(project, circuit, instance_label):
 
 
 def _controls_port(circuit, label):
-    """Return a named terminal of the intentionally hand-authored control box."""
+    """Resolve a control terminal by its row in the authored symbol."""
     instance = _component_by_label(circuit, "FETCH_DECODE_CONTROLS")
-    offsets = {
-        "ADDR_REG_OFFS_ARGUMENT": 200,
-        "JUMP_ADR": 240, "JUMP_ZERO": 260, "JUMP_NOT_ZERO": 280,
-        "JUMP_NEGATIVE": 300, "JUMP_ERROR": 320, "JUMP_NOT_ERROR": 340,
-        "STORE_ADR": 480, "STORE_ADR_REG": 500, "STORE_REG_OFF": 520,
-        "SET_ILL": 660, "SET_INPUT": 680, "PRINT": 560,
-        "PRINT_ADR": 580, "HALT": 740, "HALT_ERROR": 760,
-        "ADD_OPERAND": 0, "SUB_OPERAND": 20,
-    }
-    return _point_offset(instance, y=offsets[label])
+    rows = (
+        "ADD_OPERAND", "SUB_OPERAND", None, None, None, None, None, None,
+        None, None, "ADDR_REG_OFFS_ARGUMENT", None,
+        "JUMP_ADR", "JUMP_ZERO", "JUMP_NOT_ZERO", "JUMP_NEGATIVE",
+        "JUMP_ERROR", "JUMP_NOT_ERROR", None, None, None, None, None, None,
+        "STORE_ADR", "STORE_ADR_REG", "STORE_REG_OFF", None,
+        "PRINT", "PRINT_ADR", None, None, None, "SET_ILL", "SET_INPUT",
+        None, None, "HALT", "HALT_ERROR",
+    )
+    return _point_offset(instance, y=rows.index(label) * 20)
+
+
+def _box_input(component, row):
+    """Return an input by its row relative to a generated box."""
+    return _point_offset(component, x=-220, y=row * 20)
 
 
 class LogisimLauncherTests(unittest.TestCase):
@@ -614,9 +619,8 @@ class LogisimLauncherTests(unittest.TestCase):
             self.assertTrue(
                 _wire_path_exists(
                     main, _controls_port(main, "ADDR_REG_OFFS_ARGUMENT"),
-                    _point_offset(
-                        _component_by_label(main, "EFFECTIVE_ADDRESS_FBOX"),
-                        -220, 40,
+                    _box_input(
+                        _component_by_label(main, "EFFECTIVE_ADDRESS_FBOX"), 2
                     ),
                 ),
                 f"{name} leaves the register-plus-offset selector floating",
@@ -849,17 +853,6 @@ class LogisimLauncherTests(unittest.TestCase):
             )
 
     def test_add_operand_reaches_operations_input(self):
-        wrong_error_flags_route = {
-            ("(1300,940)", "(2200,940)"),
-            ("(2200,460)", "(2200,940)"),
-            ("(2200,460)", "(2520,460)"),
-            ("(2520,460)", "(2550,460)"),
-        }
-        stale_load_const_route = {
-            ("(1300,940)", "(1670,940)"),
-            ("(1670,780)", "(1670,940)"),
-            ("(1670,780)", "(3380,780)"),
-        }
         for name in ("TinyCPU.circ",):
             root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
             operations = next(c for c in root.findall("circuit") if c.get("name") == "Operations")
@@ -876,7 +869,6 @@ class LogisimLauncherTests(unittest.TestCase):
                 f"{name} does not drive the addition enable input",
             )
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
-            wires = {(wire.get("from"), wire.get("to")) for wire in main.findall("wire")}
             self.assertTrue(
                 _wire_path_exists(
                     main, _controls_port(main, "ADD_OPERAND"),
@@ -885,14 +877,6 @@ class LogisimLauncherTests(unittest.TestCase):
                     )["ADD_OPERAND"],
                 ),
                 f"{name} leaves ADD_OPERAND disconnected",
-            )
-            self.assertTrue(
-                wrong_error_flags_route.isdisjoint(wires),
-                f"{name} routes ADD_OPERAND into the ErrorFlags instance",
-            )
-            self.assertTrue(
-                stale_load_const_route.isdisjoint(wires),
-                f"{name} still routes ADD_OPERAND to the LOAD_CONST monitor",
             )
 
     def test_effective_address_monitors_do_not_cross_address_range_box(self):
@@ -920,8 +904,7 @@ class LogisimLauncherTests(unittest.TestCase):
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
         print_enable = _component_by_label(main, "PRINT_ENABLE")
 
-        # Follow the complete net instead of fixing the test to a particular
-        # canvas route.  (1430,1660) is the PRINT port of the controls instance.
+        # Follow the complete net between the named component terminals.
         self.assertTrue(
             _wire_path_exists(main, _controls_port(main, "PRINT"), print_enable.get("loc")),
             "FetchDecodeControls.PRINT does not reach TinyCPUMain.PRINT_ENABLE",
@@ -932,9 +915,7 @@ class LogisimLauncherTests(unittest.TestCase):
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
         print_address_enable = _component_by_label(main, "PRINT_ADDRESS_ENABLE")
 
-        # Follow the complete net instead of fixing the test to a particular
-        # canvas route.  (1430,1680) is the PRINT_ADDRESS port of the controls
-        # instance.
+        # Follow the complete net between the named component terminals.
         self.assertTrue(
             _wire_path_exists(main, _controls_port(main, "PRINT_ADR"), print_address_enable.get("loc")),
             "FetchDecodeControls.PRINT_ADDRESS does not reach "
@@ -946,8 +927,7 @@ class LogisimLauncherTests(unittest.TestCase):
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
         halted = _component_by_label(main, "HALTED")
 
-        # Follow the complete net instead of fixing the test to a particular
-        # canvas route.  (1430,1840) is the HALT port of the controls instance.
+        # Follow the complete net between the named component terminals.
         self.assertTrue(
             _wire_path_exists(main, _controls_port(main, "HALT"), halted.get("loc")),
             "FetchDecodeControls.HALT does not reach TinyCPUMain.HALTED",
@@ -958,9 +938,7 @@ class LogisimLauncherTests(unittest.TestCase):
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
         halted_with_error = _component_by_label(main, "HALTED_WITH_ERROR")
 
-        # Follow the complete net instead of fixing the test to a particular
-        # canvas route.  (1430,1860) is the HALT_ERROR port of the controls
-        # instance.
+        # Follow the complete net between the named component terminals.
         self.assertTrue(
             _wire_path_exists(main, _controls_port(main, "HALT_ERROR"), halted_with_error.get("loc")),
             "FetchDecodeControls.HALT_ERROR does not reach "
@@ -1005,12 +983,7 @@ class LogisimLauncherTests(unittest.TestCase):
         ))
 
         # The generated JumpBox symbol orders inputs by the child sheet's pin
-        # position: errors, controls, then NEGATIVE and ZERO.  The six control
-        # taps start at (1430,1340); (1430,1450) and (1430,1470) are LOAD_CONST
-        # and LOAD_ADDRESS and must never feed the jump-control inputs.
-        # Keep the box in
-        # its established upper-right position: moving it below the main
-        # circuit makes every signal take a long, hard-to-read detour.
+        # position: errors, controls, then NEGATIVE and ZERO.
         jump_ports = _subcircuit_ports(root, main, "JUMP_BOX")
         error_ports = _subcircuit_ports(root, main, "ERROR_FLAGS")
         datapath_ports = _subcircuit_ports(root, main, "DATAPATH_INSTANCE")
@@ -1106,14 +1079,6 @@ class LogisimLauncherTests(unittest.TestCase):
         ))
 
     def test_sub_operand_reaches_operations_input(self):
-        stale_sub_monitor_route = {
-            ("(1300,960)", "(1770,960)"),
-            ("(1770,960)", "(1770,2510)"),
-        }
-        stale_sub_input_route = {
-            ("(1750,860)", "(1750,1040)"),
-            ("(1750,860)", "(2520,860)"),
-        }
         for name in ("TinyCPU.circ",):
             root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
             operations = next(c for c in root.findall("circuit") if c.get("name") == "Operations")
@@ -1147,7 +1112,6 @@ class LogisimLauncherTests(unittest.TestCase):
                 f"{name} does not drive the public SUB_OPERAND output",
             )
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
-            wires = {(wire.get("from"), wire.get("to")) for wire in main.findall("wire")}
             self.assertTrue(
                 _wire_path_exists(
                     main, _controls_port(main, "SUB_OPERAND"),
@@ -1156,14 +1120,6 @@ class LogisimLauncherTests(unittest.TestCase):
                     )["SUB_OPERAND"],
                 ),
                 f"{name} leaves SUB_OPERAND disconnected",
-            )
-            self.assertTrue(
-                stale_sub_monitor_route.isdisjoint(wires),
-                f"{name} still routes SUB_OPERAND to the stale monitor net",
-            )
-            self.assertTrue(
-                stale_sub_input_route.isdisjoint(wires),
-                f"{name} still routes the stale decoder output to SUB_CONST",
             )
 
     def test_public_decoder_preserves_authored_control_boundary(self):

@@ -69,6 +69,42 @@ def _remove_wire_at(circuit: ET.Element, endpoint: str) -> None:
     circuit.remove(wire)
 
 
+def _wire_path_exists(circuit: ET.Element, start: str, end: str) -> bool:
+    """Follow a Logisim net, including explicit T-junction endpoints."""
+    wires = [(wire.get("from"), wire.get("to"))
+             for wire in circuit.findall("wire")]
+    points = {point for wire in wires for point in wire} | {start, end}
+
+    def coordinates(value: str) -> tuple[int, int]:
+        return tuple(map(int, value.strip("()").split(",")))
+
+    graph: dict[str, set[str]] = {}
+    for left, right in wires:
+        x1, y1 = coordinates(left)
+        x2, y2 = coordinates(right)
+        contacts = [
+            point for point in points
+            if ((x1 == x2 == coordinates(point)[0]
+                 and min(y1, y2) <= coordinates(point)[1] <= max(y1, y2))
+                or (y1 == y2 == coordinates(point)[1]
+                    and min(x1, x2) <= coordinates(point)[0] <= max(x1, x2)))
+        ]
+        contacts.sort(key=coordinates)
+        for first, second in zip(contacts, contacts[1:]):
+            graph.setdefault(first, set()).add(second)
+            graph.setdefault(second, set()).add(first)
+
+    pending, visited = [start], set()
+    while pending:
+        point = pending.pop()
+        if point == end:
+            return True
+        if point not in visited:
+            visited.add(point)
+            pending.extend(graph.get(point, ()))
+    return False
+
+
 class CircuitVerificationTests(unittest.TestCase):
     def test_pin_handoffs_reject_crossed_address_and_ram_value_widths(self) -> None:
         interfaces = {
@@ -546,7 +582,7 @@ class CircuitVerificationTests(unittest.TestCase):
             with self.assertRaisesRegex(VERIFY.VerificationError, "next-PC path"):
                 VERIFY.verify_system_circuit()
 
-    def test_ap18_interrupt_command_paths_reject_bus_contention(self) -> None:
+    def test_ap18_interrupt_command_paths_reject_disconnection(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
@@ -808,9 +844,10 @@ class CircuitVerificationTests(unittest.TestCase):
 
     def test_ap18_cpu_address_is_exported_from_the_effective_address_net(self) -> None:
         root = MODULE_PATH.parents[1]
-        core = ET.parse(root / "hardware/logisim/TinyCPU.circ").getroot().find(
-            "circuit[@name='TinyCPUMain']"
-        )
+        core_project = ET.parse(
+            root / "hardware/logisim/TinyCPU.circ"
+        ).getroot()
+        core = core_project.find("circuit[@name='TinyCPUMain']")
         boundary = ET.parse(
             root / "hardware/logisim/TinyCPU_Peripherals.circ"
         ).getroot().find("circuit[@name='CPUIntegrationBoundary']")
@@ -832,6 +869,13 @@ class CircuitVerificationTests(unittest.TestCase):
         }
         self.assertEqual(attributes.get("type"), "output")
         self.assertEqual(attributes.get("width"), "16")
+        effective_ports = _subcircuit_ports(
+            core_project, core, "EFFECTIVE_ADDRESS_FBOX",
+        )
+        self.assertTrue(_wire_path_exists(
+            core, effective_ports["EFFECTIVE_MEMORY_ADDRESS"],
+            address.get("loc", ""),
+        ))
         VERIFY.verify_system_circuit()
 
     def test_ap18_top_level_requires_cpu_integration_boundary(self) -> None:

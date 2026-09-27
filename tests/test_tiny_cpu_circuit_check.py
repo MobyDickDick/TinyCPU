@@ -351,31 +351,13 @@ class CircuitCheckTests(unittest.TestCase):
         self.assertGreaterEqual(len(selectors), 2)
 
     def test_main_has_no_abandoned_memory_control_branches(self):
-        """Do not restore visually plausible wires with open ends."""
+        """Audit the main sheet electrically instead of naming old segments."""
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
-        main = next(circuit for circuit in root.findall("circuit")
-                    if circuit.get("name") == "TinyCPUMain")
-        wires = {
-            frozenset((wire.get("from"), wire.get("to")))
-            for wire in main.findall("wire")
-        }
-
-        self.assertNotIn(
-            frozenset(("(1080,430)", "(1080,1100)")),
-            wires,
-        )
-        self.assertNotIn(
-            frozenset(("(1100,430)", "(1100,700)")),
-            wires,
-        )
-        self.assertNotIn(
-            frozenset(("(470,160)", "(1690,160)")),
-            wires,
-        )
-        self.assertNotIn(
-            frozenset(("(470,180)", "(1670,180)")),
-            wires,
-        )
+        main = root.find("circuit[@name='TinyCPUMain']")
+        definitions = {circuit.get("name"): circuit
+                       for circuit in root.findall("circuit")}
+        self.assertIsNotNone(main)
+        self.assertEqual(inspect_circuit(main, definitions), [])
 
     def test_detects_and_repairs_subcircuit_output_bridge(self):
         project = """<?xml version='1.0'?>
