@@ -651,10 +651,13 @@ class CircuitVerificationTests(unittest.TestCase):
                 VERIFY.verify_system_circuit()
 
     def test_ap18_ram_write_enable_reaches_the_cpu_memory_path(self) -> None:
-        project = ET.parse(
-            MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU.circ"
-        ).getroot()
-        main = project.find("circuit[@name='TinyCPUMain']")
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        circuit = temporary / "logisim" / "TinyCPU.circ"
+        project = ET.parse(circuit)
+        main = project.getroot().find("circuit[@name='TinyCPUMain']")
         self.assertIsNotNone(main)
         selector = next(
             component for component in main.findall("comp[@name='Multiplexer']")
@@ -662,10 +665,26 @@ class CircuitVerificationTests(unittest.TestCase):
                    and attribute.get("val") == "RAM_WRITE_ENABLE_SELECT"
                    for attribute in component.findall("a"))
         )
-        self.assertEqual(selector.get("loc"), "(740,620)")
-        wires = {(wire.get("from"), wire.get("to")) for wire in main.findall("wire")}
-        self.assertIn(("(330,850)", "(680,850)"), wires)
-        self.assertIn(("(740,620)", "(770,620)"), wires)
+        wire = next(
+            item for item in main.findall("wire")
+            if selector.get("loc") in {item.get("from"), item.get("to")}
+        )
+        main.remove(wire)
+        project.write(circuit, encoding="utf-8", xml_declaration=True)
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+             mock.patch.object(
+                 VERIFY,
+                 "load_system_profile",
+                 return_value=replace(
+                     system,
+                     circuit_path=temporary / "logisim" / "TinyCPU_Peripherals.circ",
+                 ),
+             ):
+            with self.assertRaisesRegex(
+                VERIFY.VerificationError, "RAM write-enable selection paths"
+            ):
+                VERIFY.verify_system_circuit()
 
     def test_ap18_cpu_integration_requires_address_width_adapter(self) -> None:
         root = MODULE_PATH.parents[1]
