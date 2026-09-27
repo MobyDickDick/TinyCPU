@@ -1165,6 +1165,38 @@ class LogisimLauncherTests(unittest.TestCase):
             for label in pin_labels
         ))
 
+    def test_instruction_operand_bus_drives_direct_effective_address(self):
+        """Follow the operand branch; do not freeze the authored canvas position."""
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        main = root.find("circuit[@name='TinyCPUMain']")
+        self.assertIsNotNone(main)
+        fetch_ports = _subcircuit_ports(root, main, "FETCH_DECODE")
+        effective_ports = _subcircuit_ports(root, main, "EFFECTIVE_ADDRESS_FBOX")
+        splitters = [
+            component for component in main.findall("comp[@name='Splitter']")
+            if _wire_path_exists(
+                main, fetch_ports["OPCODE"], component.get("loc")
+            )
+        ]
+        self.assertEqual(len(splitters), 1)
+        splitter = splitters[0]
+        attributes = _attributes(splitter)
+        self.assertEqual(attributes.get("facing"), "south")
+        self.assertEqual(attributes.get("incoming"), "22")
+
+        # Branch 0 contains bits 0..15.  For a south-facing two-way splitter,
+        # it is the second terminal, one spacing interval to the right of the
+        # first branch.  Deriving it from component attributes keeps this
+        # assertion independent of the splitter's absolute canvas position.
+        spacing = int(attributes.get("spacing", "1")) * 10
+        operand_branch = _point_offset(splitter, x=10 + spacing, y=20)
+        self.assertTrue(
+            _wire_path_exists(
+                main, operand_branch, effective_ports["DIRECT_ADDR"]
+            ),
+            "instruction operand branch does not drive EffectiveAddress.DIRECT_ADDR",
+        )
+
     def test_matrix_rom_is_injected_only_into_temporary_project(self):
         source = ROOT / "hardware/logisim/TinyCPU.circ"
         before = source.read_bytes()
