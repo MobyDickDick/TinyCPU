@@ -517,6 +517,38 @@ def verify_system_circuit() -> None:
     ):
         raise VerificationError("AP-18 CPU external-write paths differ from contract")
 
+    write_enable_selector = next(
+        (
+            component
+            for component in core_definition.findall("comp[@name='Multiplexer']")
+            if _pin_label(component) == "RAM_WRITE_ENABLE_SELECT"
+        ),
+        None,
+    )
+    if write_enable_selector is None:
+        raise VerificationError("AP-18 CPU RAM write-enable selection path is missing")
+    selector_x, selector_y = map(
+        int, write_enable_selector.get("loc", "").strip("()").split(",")
+    )
+    selector_default_input = f"({selector_x - 30},{selector_y - 10})"
+    selector_external_input = f"({selector_x - 30},{selector_y + 10})"
+    selector_control_input = f"({selector_x - 20},{selector_y + 20})"
+    if not all((
+        core_connected(write_request.get("loc", ""), selector_default_input),
+        core_connected(
+            core_pin_locations["RAM_WRITE_ENABLE"], selector_external_input
+        ),
+        core_connected(
+            core_pin_locations["USE_EXTERNAL_MEMORY"], selector_control_input
+        ),
+        core_connected(
+            write_enable_selector.get("loc", ""), memory_ports["WRITE_ENABLE"]
+        ),
+    )):
+        raise VerificationError(
+            "AP-18 CPU RAM write-enable selection paths differ from contract"
+        )
+
     expected_interrupt_command_pins = cpu_contract.get(
         "core_interrupt_command_pins", {}
     )
