@@ -429,6 +429,42 @@ class CircuitCheckTests(unittest.TestCase):
                 len(ET.parse(path).getroot().findall("circuit/wire")), 2
             )
 
+    def test_pruning_rechecks_topology_until_a_marked_branch_is_gone(self):
+        project = """<?xml version='1.0'?>
+          <project><circuit name="Top">
+            <wire from="(100,100)" to="(200,100)"/>
+            <wire from="(200,100)" to="(300,100)"/>
+            <wire from="(200,100)" to="(200,160)" tinycpu-dangling="true"/>
+            <wire from="(200,160)" to="(260,160)" tinycpu-dangling="true"/>
+          </circuit></project>"""
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "multi-segment-stub.circ"
+            path.write_text(project)
+            self.assertEqual(repair_project(path, prune_dangling=True), [])
+            wires = ET.parse(path).getroot().findall("circuit/wire")
+            self.assertEqual(
+                {(wire.get("from"), wire.get("to")) for wire in wires},
+                {("(100,100)", "(200,100)"),
+                 ("(200,100)", "(300,100)")},
+            )
+
+    def test_pruning_rechecks_a_junction_with_multiple_marked_leaves(self):
+        project = """<?xml version='1.0'?>
+          <project><circuit name="Top">
+            <wire from="(100,100)" to="(200,100)"/>
+            <wire from="(200,100)" to="(300,100)"/>
+            <wire from="(200,100)" to="(200,40)" tinycpu-dangling="true"/>
+            <wire from="(200,100)" to="(200,160)" tinycpu-dangling="true"/>
+          </circuit></project>"""
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "two-stubs.circ"
+            path.write_text(project)
+            self.assertEqual(repair_project(path, prune_dangling=True), [])
+            wires = ET.parse(path).getroot().findall("circuit/wire")
+            self.assertEqual(len(wires), 2)
+
 
 
 

@@ -440,25 +440,46 @@ def _prune_marked_dangling_wires(circuit: ET.Element) -> bool:
     Connectivity alone cannot distinguish a drawing remnant from a wire ending
     at a component input because ``loc`` is not every component's input
     terminal.  The checker therefore never guesses: a confirmed stub must be
-    marked ``tinycpu-dangling=\"true\"``.  Even then, it is deleted only when
-    one end is loose and the other touches at least two remaining wires.
+    marked ``tinycpu-dangling=\"true\"``.  A marked branch may consist of
+    several segments, or several marked branches may leave the same junction.
+    Remove one proven leaf at a time and rebuild the topology after every
+    removal: deleting a leaf can expose the next loose segment.
+
+    A leaf is proven when its other end either belongs to another marked
+    segment (so a marked multi-segment branch can be peeled from its tip), or
+    remains a junction of at least two wires (so the live route survives).
+    A lone marked continuation of one unmarked wire remains deliberately
+    untouched.
     """
-    wires = circuit.findall("wire")
     changed = False
-    for wire in list(wires):
-        if wire.get("tinycpu-dangling") != "true":
-            continue
-        others = [candidate for candidate in wires if candidate is not wire]
-        ends = (_point(wire.get("from", "")), _point(wire.get("to", "")))
-        connections = [
-            sum(_on_segment(end, (_point(other.get("from", "")),
-                                  _point(other.get("to", ""))))
-                for other in others)
-            for end in ends
-        ]
-        if sorted(connections) == [0, 2]:
-            circuit.remove(wire)
-            changed = True
+    while True:
+        wires = circuit.findall("wire")
+        removable = None
+        for wire in wires:
+            if wire.get("tinycpu-dangling") != "true":
+                continue
+            others = [candidate for candidate in wires if candidate is not wire]
+            ends = (_point(wire.get("from", "")), _point(wire.get("to", "")))
+            contacts = [
+                [other for other in others
+                 if _on_segment(end, (_point(other.get("from", "")),
+                                      _point(other.get("to", ""))))]
+                for end in ends
+            ]
+            loose_ends = [index for index, connected in enumerate(contacts)
+                          if not connected]
+            if len(loose_ends) != 1:
+                continue
+            attached = contacts[1 - loose_ends[0]]
+            if (len(attached) >= 2 or any(
+                    candidate.get("tinycpu-dangling") == "true"
+                    for candidate in attached)):
+                removable = wire
+                break
+        if removable is None:
+            break
+        circuit.remove(removable)
+        changed = True
     return changed
 
 
