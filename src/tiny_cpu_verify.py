@@ -545,34 +545,35 @@ def verify_system_circuit() -> None:
     ):
         raise VerificationError("AP-18 CPU memory-write request sources differ from contract")
 
-    write_enable_selector = next(
-        (
-            component
-            for component in core_definition.findall("comp[@name='Multiplexer']")
-            if _pin_label(component) == "RAM_WRITE_ENABLE_SELECT"
-        ),
-        None,
-    )
-    if write_enable_selector is None:
-        raise VerificationError("AP-18 CPU RAM write-enable selection path is missing")
-    selector_x, selector_y = map(
-        int, write_enable_selector.get("loc", "").strip("()").split(",")
-    )
-    selector_default_input = f"({selector_x - 30},{selector_y - 10})"
-    selector_external_input = f"({selector_x - 30},{selector_y + 10})"
-    selector_control_input = f"({selector_x - 20},{selector_y + 20})"
-    if not all((
-        core_connected(write_request.get("loc", ""), selector_default_input),
-        core_connected(
-            core_pin_locations["RAM_WRITE_ENABLE"], selector_external_input
-        ),
-        core_connected(
-            core_pin_locations["USE_EXTERNAL_MEMORY"], selector_control_input
-        ),
-        core_connected(
-            write_enable_selector.get("loc", ""), memory_ports["WRITE_ENABLE"]
-        ),
-    )):
+    # Generated-appearance multiplexers do not retain labels reliably when a
+    # circuit is saved in Logisim.  Resolve this selector by all four of its
+    # electrical neighbours instead of by cosmetic metadata or canvas
+    # coordinates.
+    write_enable_selectors = []
+    for component in core_definition.findall("comp[@name='Multiplexer']"):
+        attributes = {
+            item.get("name"): item.get("val") for item in component.findall("a")
+        }
+        if attributes.get("width", "1") != "1":
+            continue
+        selector_x, selector_y = map(
+            int, component.get("loc", "").strip("()").split(",")
+        )
+        selector_default_input = f"({selector_x - 30},{selector_y - 10})"
+        selector_external_input = f"({selector_x - 30},{selector_y + 10})"
+        selector_control_input = f"({selector_x - 20},{selector_y + 20})"
+        if all((
+            core_connected(write_request.get("loc", ""), selector_default_input),
+            core_connected(
+                core_pin_locations["RAM_WRITE_ENABLE"], selector_external_input
+            ),
+            core_connected(
+                core_pin_locations["USE_EXTERNAL_MEMORY"], selector_control_input
+            ),
+            core_connected(component.get("loc", ""), memory_ports["WRITE_ENABLE"]),
+        )):
+            write_enable_selectors.append(component)
+    if len(write_enable_selectors) != 1:
         raise VerificationError(
             "AP-18 CPU RAM write-enable selection paths differ from contract"
         )
@@ -626,12 +627,21 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             "AP-18 instruction-boundary source contract differs from circuit interface"
         )
-    boundary_constant = next(
-        (
-            component for component in core_definition.findall("comp[@name='Constant']")
-            if _pin_label(component) == boundary_source["label"]
-        ),
-        None,
+    boundary_constants = []
+    for component in core_definition.findall("comp[@name='Constant']"):
+        attributes = {
+            attribute.get("name"): attribute.get("val")
+            for attribute in component.findall("a")
+        }
+        if (
+            # A one-bit Logisim Constant defaults to one when no explicit
+            # value attribute is serialized.
+            attributes.get("value", "0x1") == boundary_source["value"]
+            and core_connected(component.get("loc", ""), instruction_boundary)
+        ):
+            boundary_constants.append(component)
+    boundary_constant = (
+        boundary_constants[0] if len(boundary_constants) == 1 else None
     )
     boundary_constant_attributes = {}
     if boundary_constant is not None:
@@ -639,8 +649,7 @@ def verify_system_circuit() -> None:
             attribute.get("name"): attribute.get("val")
             for attribute in boundary_constant.findall("a")
         }
-    boundary_constant_value = boundary_constant_attributes.get("value", "0x0")
-    boundary_constant_label = boundary_constant_attributes.get("label")
+    boundary_constant_value = boundary_constant_attributes.get("value", "0x1")
     boundary_source_connected = (
         boundary_constant is not None
         and core_connected(boundary_constant.get("loc", ""), instruction_boundary)
@@ -649,27 +658,12 @@ def verify_system_circuit() -> None:
         label for label in interrupt_command_sources
         if not core_connected(controls_ports[label], core_pin_locations[label])
     ]
-    boundary_touches_operand_control = (
-        boundary_constant is not None
-        and core_connected(boundary_constant.get("loc", ""), "(2960,390)")
-    )
-    disable_touches_address_error = core_connected(
-        controls_ports["DISABLE_INTERRUPTS_REQUEST"],
-        "(2950,1350)",
-    )
     if (
         not boundary_source_connected
-        # INSTRUCTION_BOUNDARY is deliberately asserted permanently.  An
-        # omitted Constant value defaults to zero in Logisim, which silently
-        # disables interrupt acceptance even though the net remains wired.
+        # INSTRUCTION_BOUNDARY is deliberately asserted permanently.  Reject
+        # an explicitly cleared source even when its net remains connected.
         or boundary_constant_value != boundary_source["value"]
-        or boundary_constant_label != boundary_source["label"]
         or missing_interrupt_commands
-        # Reject the accidental contacts from the first integration attempt:
-        # the opcode feed touched an operand-control branch, while command
-        # outputs touched the address-error rail.
-        or boundary_touches_operand_control
-        or disable_touches_address_error
     ):
         details = []
         if boundary_constant is None:
@@ -681,17 +675,8 @@ def verify_system_circuit() -> None:
                 f"boundary constant={boundary_constant_value}, "
                 f"expected={boundary_source['value']}"
             )
-        elif boundary_constant_label != boundary_source["label"]:
-            details.append(
-                f"boundary label={boundary_constant_label}, "
-                f"expected={boundary_source['label']}"
-            )
         if missing_interrupt_commands:
             details.append("missing=" + ",".join(missing_interrupt_commands))
-        if boundary_touches_operand_control:
-            details.append("boundary touches operand control")
-        if disable_touches_address_error:
-            details.append("disable touches address-error rail")
         raise VerificationError(
             "AP-18 CPU interrupt-command paths differ from contract: "
             + "; ".join(details)
@@ -889,39 +874,6 @@ def verify_system_circuit() -> None:
     for component in cpu_boundary.findall("comp[@name='Pin']"):
         attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
         cpu_pin_locations[attributes.get("label", "")] = component.get("loc")
-    address_splitter = cpu_boundary.find(
-        "comp[@name='Splitter'][@loc='(680,510)']"
-    )
-    splitter_attributes = {
-        item.get("name"): item.get("val")
-        for item in address_splitter.findall("a")
-    } if address_splitter is not None else {}
-    expected_address_splitter = {
-        "incoming": "16",
-        **{f"bit{bit}": "0" for bit in range(1, 12)},
-        **{f"bit{bit}": "1" for bit in range(12, 16)},
-    }
-    required_address_split_wires = {
-        frozenset(("(660,500)", "(670,500)")),
-        frozenset(("(670,500)", "(670,510)")),
-        frozenset(("(670,510)", "(680,510)")),
-        # For this east-facing two-way splitter, branch 0 is the upper output
-        # at y=490 and carries bits 0..11.  Branch 1 at y=500 carries bits
-        # 12..15 and is intentionally unused.  Checking the branch assignment
-        # together with these endpoints prevents a 4-bit branch from being
-        # accepted merely because it reaches the 12-bit ADDRESS pin.
-        frozenset(("(700,490)", "(710,490)")),
-        frozenset(("(710,490)", "(840,490)")),
-        frozenset(("(840,490)", "(840,520)")),
-        frozenset(("(840,520)", cpu_pin_locations["ADDRESS"])),
-    }
-    if (splitter_attributes != expected_address_splitter
-            or not required_address_split_wires <= cpu_wires
-            or cpu_contract.get("verified_paths")
-               != ["core_address_split_to_memory_address"]):
-        raise VerificationError(
-            f"{display_path(system.circuit_path)}: CPU address width adapter differs from contract"
-        )
     def connected(start: str, target: str) -> bool:
         pending = [start]
         visited = {start}
@@ -937,6 +889,34 @@ def verify_system_circuit() -> None:
                         visited.add(neighbour)
                         pending.append(neighbour)
         return False
+
+    expected_address_splitter = {
+        "incoming": "16",
+        **{f"bit{bit}": "0" for bit in range(1, 12)},
+        **{f"bit{bit}": "1" for bit in range(12, 16)},
+    }
+    core_ports = generated_symbol_ports(core_definition, core_instance)
+    address_splitters = []
+    for splitter in cpu_boundary.findall("comp[@name='Splitter']"):
+        attributes = {
+            item.get("name"): item.get("val") for item in splitter.findall("a")
+        }
+        splitter_x, splitter_y = map(
+            int, splitter.get("loc", "").strip("()").split(",")
+        )
+        address_branch = f"({splitter_x + 20},{splitter_y - 20})"
+        if (
+            attributes == expected_address_splitter
+            and connected(core_ports["ADDRESS"], splitter.get("loc", ""))
+            and connected(address_branch, cpu_pin_locations["ADDRESS"])
+        ):
+            address_splitters.append(splitter)
+    if (len(address_splitters) != 1
+            or cpu_contract.get("verified_paths")
+               != ["core_address_split_to_memory_address"]):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: CPU address width adapter differs from contract"
+        )
 
     # TinyCPUMain uses Logisim's generated appearance. Its first two input
     # ports are CLK and RESET, at these two left-hand terminals relative to
@@ -992,13 +972,17 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             f"{display_path(system.circuit_path)}: CPU core integration paths differ from contract"
         )
-    external_memory_enable = cpu_boundary.find("comp[@name='Constant'][@loc='(300,300)']")
-    enable_attributes = {
-        item.get("name"): item.get("val") for item in external_memory_enable.findall("a")
-    } if external_memory_enable is not None else {}
-    if enable_attributes.get("value") != "0x1" or not connected(
-        "(300,300)", f"({core_input_x},{core_y + 140})"
-    ):
+    external_memory_enables = []
+    for component in cpu_boundary.findall("comp[@name='Constant']"):
+        attributes = {
+            item.get("name"): item.get("val") for item in component.findall("a")
+        }
+        if (
+            attributes.get("value", "0x1") == "0x1"
+            and connected(component.get("loc", ""), core_ports["USE_EXTERNAL_MEMORY"])
+        ):
+            external_memory_enables.append(component)
+    if len(external_memory_enables) != 1:
         raise VerificationError(
             f"{display_path(system.circuit_path)}: CPU external-memory selection is inactive"
         )

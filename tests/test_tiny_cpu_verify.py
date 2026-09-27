@@ -105,6 +105,29 @@ def _wire_path_exists(circuit: ET.Element, start: str, end: str) -> bool:
     return False
 
 
+def _multiplexer_driven_by(circuit: ET.Element, pin_label: str,
+                           width: str = "1") -> ET.Element:
+    """Resolve a classic mux by the net on its select-1 data input."""
+    pin = _component_by_label(circuit, pin_label)
+    matches = []
+    for component in circuit.findall("comp[@name='Multiplexer']"):
+        attributes = {
+            attribute.get("name"): attribute.get("val")
+            for attribute in component.findall("a")
+        }
+        if attributes.get("width", "1") != width:
+            continue
+        if _wire_path_exists(
+            circuit, pin.get("loc"), _component_terminal(component, -30, 10)
+        ):
+            matches.append(component)
+    if len(matches) != 1:
+        raise AssertionError(
+            f"expected one {width}-bit multiplexer driven by {pin_label}"
+        )
+    return matches[0]
+
+
 class CircuitVerificationTests(unittest.TestCase):
     def test_pin_handoffs_reject_crossed_address_and_ram_value_widths(self) -> None:
         interfaces = {
@@ -216,7 +239,7 @@ class CircuitVerificationTests(unittest.TestCase):
         }
         self.assertFalse(stale_reconstruction <= wires)
 
-    def test_ap18_illegal_return_gate_label_does_not_cover_its_output(self) -> None:
+    def test_ap18_illegal_return_gate_output_reaches_error_flags(self) -> None:
         project = VERIFY.ET.parse(
             MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU.circ"
         ).getroot()
@@ -230,11 +253,10 @@ class CircuitVerificationTests(unittest.TestCase):
                 for attribute in component.findall("a")
             }.get("label") == "ILLEGAL_RETURN_OR"
         )
-        attributes = {
-            attribute.get("name"): attribute.get("val")
-            for attribute in illegal_return_or.findall("a")
-        }
-        self.assertEqual(attributes.get("labelloc"), "north")
+        error_flags = _subcircuit_ports(project, main, "ERROR_FLAGS")
+        self.assertTrue(_wire_path_exists(
+            main, illegal_return_or.get("loc"), error_flags["SET_ILL"]
+        ))
 
     def test_ap18_system_top_requires_public_state_wiring(self) -> None:
         root = MODULE_PATH.parents[1]
@@ -371,19 +393,19 @@ class CircuitVerificationTests(unittest.TestCase):
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
         selector_cases = (
-            ("EXTERNAL_MEMORY_VALUE_SELECT", (-30, -10), (-30, 10), (-20, 20), (0, 0)),
-            ("EXTERNAL_MEMORY_VALID_SELECT", (-30, -10), (-30, 10), (-20, 20), (0, 0)),
+            ("EXTERNAL_MEMORY_VALUE", "16", (-30, -10), (-30, 10), (-20, 20), (0, 0)),
+            ("EXTERNAL_MEMORY_VALID", "1", (-30, -10), (-30, 10), (-20, 20), (0, 0)),
         )
-        for label, *offsets in selector_cases:
+        for pin_label, width, *offsets in selector_cases:
             for offset in offsets:
-                with self.subTest(selector=label, terminal=offset):
+                with self.subTest(selector=pin_label, terminal=offset):
                     temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
                     shutil.copytree(source, temporary / "logisim")
                     core = temporary / "logisim" / "TinyCPU.circ"
                     project = ET.parse(core)
                     main = project.getroot().find("circuit[@name='TinyCPUMain']")
                     self.assertIsNotNone(main)
-                    selector = _component_by_label(main, label)
+                    selector = _multiplexer_driven_by(main, pin_label, width)
                     _remove_wire_at(
                         main, _component_terminal(selector, *offset)
                     )
@@ -527,7 +549,7 @@ class CircuitVerificationTests(unittest.TestCase):
         VERIFY.verify_system_circuit()
 
     def test_ap18_instruction_boundary_constant_must_be_asserted(self) -> None:
-        """A connected default-zero Constant must not masquerade as a boundary."""
+        """An explicitly cleared Constant must not masquerade as a boundary."""
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
@@ -536,11 +558,18 @@ class CircuitVerificationTests(unittest.TestCase):
         project = ET.parse(core)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
         self.assertIsNotNone(main)
-        constant = _component_by_label(main, "INSTRUCTION_BOUNDARY_ASSERTED")
-        value = next(
-            attribute for attribute in constant.findall("a")
+        boundary = _component_by_label(main, "INSTRUCTION_BOUNDARY")
+        constants = [
+            component for component in main.findall("comp[@name='Constant']")
+            if _wire_path_exists(main, component.get("loc"), boundary.get("loc"))
+        ]
+        self.assertEqual(len(constants), 1)
+        value = next((
+            attribute for attribute in constants[0].findall("a")
             if attribute.get("name") == "value"
-        )
+        ), None)
+        if value is None:
+            value = ET.SubElement(constants[0], "a", {"name": "value"})
         value.set("val", "0x0")
         project.write(core, encoding="utf-8", xml_declaration=True)
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
@@ -742,12 +771,7 @@ class CircuitVerificationTests(unittest.TestCase):
         project = ET.parse(circuit)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
         self.assertIsNotNone(main)
-        selector = next(
-            component for component in main.findall("comp[@name='Multiplexer']")
-            if any(attribute.get("name") == "label"
-                   and attribute.get("val") == "RAM_WRITE_ENABLE_SELECT"
-                   for attribute in component.findall("a"))
-        )
+        selector = _multiplexer_driven_by(main, "RAM_WRITE_ENABLE")
         wire = next(
             item for item in main.findall("wire")
             if selector.get("loc") in {item.get("from"), item.get("to")}
@@ -828,11 +852,14 @@ class CircuitVerificationTests(unittest.TestCase):
         project = ET.parse(circuit)
         boundary = project.getroot().find("circuit[@name='CPUIntegrationBoundary']")
         self.assertIsNotNone(boundary)
-        wire = next(
-            item for item in boundary.findall("wire")
-            if {item.get("from"), item.get("to")} == {"(700,490)", "(710,490)"}
+        splitter = next(
+            component for component in boundary.findall("comp[@name='Splitter']")
+            if {
+                attribute.get("name"): attribute.get("val")
+                for attribute in component.findall("a")
+            }.get("incoming") == "16"
         )
-        boundary.remove(wire)
+        _remove_wire_at(boundary, _component_terminal(splitter, 20, -20))
         project.write(circuit, encoding="utf-8", xml_declaration=True)
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
