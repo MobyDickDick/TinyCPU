@@ -287,8 +287,15 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Schaltungen ausschließlich topologisch kontrolliert. Konstanten,
   Selektorbezeichner und Splitteranschluss sind wiederhergestellt; der Prüfer
   folgt den betroffenen benannten Ports jetzt ohne alte Canvas-Koordinaten.
-  Als Nächstes werden ausschließlich Gültigkeits- und Freigabepfad am
-  Kernausgang mit ihren RAM-seitigen Ursprungsnetzen verglichen.
+  Die anschließende topologische Prüfung hat Gültigkeits- und Freigabepfad am
+  Kernausgang bis zu ihren RAM-seitigen Ursprungsnetzen bestätigt und zwei
+  falsche Store-Quellen am Schreibanforderungsgatter korrigiert. Eine direkte
+  elektrische Messung zeigt nun, dass im fehlerhaften Schreibzyklus alle drei
+  benannten Store-Ausgänge null bleiben, obwohl `STORE_ADR` aktiv sein müsste.
+  Als Nächstes werden deshalb ausschließlich `OPCODE`-Eingang und
+  `STORE_ADR`-Ausgang der geschützten `FetchDecodeControls`-Schaltung
+  elektrisch verglichen; ihre Anordnung wird dabei weder anhand absoluter
+  Positionen bewertet noch umgezeichnet.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
