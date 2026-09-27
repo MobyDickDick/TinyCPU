@@ -346,7 +346,7 @@ class CircuitCheckTests(unittest.TestCase):
         self.assertIn(("(680,840)", "(1130,840)"), wires)
 
     def test_main_has_no_abandoned_memory_control_branches(self):
-        """Do not restore the two visually plausible wires with open ends."""
+        """Do not restore visually plausible wires with open ends."""
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(circuit for circuit in root.findall("circuit")
                     if circuit.get("name") == "TinyCPUMain")
@@ -361,6 +361,14 @@ class CircuitCheckTests(unittest.TestCase):
         )
         self.assertNotIn(
             frozenset(("(1100,430)", "(1100,700)")),
+            wires,
+        )
+        self.assertNotIn(
+            frozenset(("(470,160)", "(1690,160)")),
+            wires,
+        )
+        self.assertNotIn(
+            frozenset(("(470,180)", "(1670,180)")),
             wires,
         )
 
