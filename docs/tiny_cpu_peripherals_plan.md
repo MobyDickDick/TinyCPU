@@ -399,6 +399,19 @@ spätere Vektoren werden dadurch ausdrücklich nicht als frühere Ursache
 fehlinterpretiert. Die Datei ist ein Diagnoseindex, kein Ersatz für den
 elektrischen Bericht und noch keine Reparatur der Schreibsignalkette.
 
+Die erste interne Messung grenzt diese Schreibsignalkette jetzt weiter ein.
+Temporäre, ausschließlich im gesicherten Diagnosepaket ergänzte Top-Level-
+Messpins zeigen an Vektor 4 `WRITE_VALUE=0x0017`, aber
+`WRITE_VALID=0`, `WRITE_ENABLE=0` und `ADDRESS=0x001`;
+`INTERRUPT_ACCEPT` bleibt dabei erwartungsgemäß null. Damit sind Ausgabeport,
+Interruptannahme und der transportierte Schreibwert nicht der erste
+abweichende Übergang. Der Fehler liegt vor der Speichergrenze in der
+CPU-seitigen Erzeugung von Adresse, Gültigkeit und Freigabe. Die Messpins
+wurden nicht in die veröffentlichte Systemgrenze übernommen und an der
+Schaltung wurde gemäß Stop-Regel noch kein weiterer Pfad geändert. Als
+nächstes werden diese drei Signale innerhalb des Kerns bis zu Decoder und
+effektiver Adresse zurückverfolgt.
+
 
 ## Kompatibilitätsfolgen
 
