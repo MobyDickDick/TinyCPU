@@ -3488,3 +3488,47 @@ null. Der erste offene funktionale Unterschied liegt folglich vor der
 Integrationsgrenze an den Eingängen von `MEMORY_WRITE_REQUEST` beziehungsweise
 am Gültigkeitspfad. Es wurde weder eine elektrische Systemfreigabe behauptet
 noch ein anderer Signalweg vorsorglich geändert.
+
+#### Topologische Prüfung nach dem erneuten CPU-Redraw
+
+- **Ausgangsstand:** `0598e99f11bdced05a7a2932c81150f35359183f`
+- **Datum:** 27. September 2026
+
+Die Prüfung folgte benannten Pins und vollständigen Netzen und leitete keine
+Verbindung aus der früheren Lage eines Bauteils ab. Der Redraw hatte die
+Ausgänge `EXTERNAL_WRITE_VALID` und `EXTERNAL_WRITE_ENABLE` elektrisch
+zusammengelegt: Der Ausgang des benannten Gatters `MEMORY_WRITE_REQUEST` endete
+am Gültigkeitsnetz statt am Freigabepin. Beide Netze sind nun wieder getrennt.
+Außerdem lagen die beiden Ausgänge `STORE_ADR_REG` und `ACC_MEMORY_REQUEST` des
+`FetchDecodeControls`-Symbols auf derselben senkrechten Leitung. Die
+Store-Anforderung besitzt wieder einen getrennten Leitungsweg zum zugehörigen
+Gattereingang; `FetchDecodeControls` selbst wurde dabei weder verschoben noch
+umgezeichnet.
+
+Der gleiche Vergleich fand einen Kontakt zwischen `Memory.MEMORY_DATA` und
+`EffectiveAddress.DIRECT_ADDR`, der durch einen Leitungsanfang auf dem
+Memory-Datenzweig entstanden war. Der direkte Adresspfad beginnt nun wieder
+getrennt. Die beim Speichern verlorenen semantischen Attribute für die drei
+Speicherselektoren, `INTERRUPT_PC_OVERRIDE`, `ILLEGAL_RETURN_OR` und die
+permanent gesetzte `INSTRUCTION_BOUNDARY_ASSERTED`-Quelle wurden an den
+vorhandenen Bauteilen wiederhergestellt. Der statische Verifier akzeptiert
+anschließend die benannten AP-18-Pfade; der Verdrahtungsprüfer meldet keine
+miteinander verbundenen Ausgänge mehr.
+
+Die vollständige Offline-Suite ist noch nicht grün: 25 ältere Regressionstests
+verwenden weiterhin Koordinaten des Layouts vor `0598e99`, obwohl die von ihnen
+beschriebenen Netze verschoben wurden. Diese Fehlschläge dürfen nicht durch ein
+Zurückverschieben der Zeichnung behoben werden; das nächste Prüf-Arbeitspaket
+muss die betroffenen Assertions auf benannte Komponentenports und
+Netzkonnektivität umstellen. Der elektrische Kernlauf erreicht die vollständige
+61-Fall-Matrix, meldet aber für `jump-zero` weiterhin undefinierte Werte und
+einen Timeout. Daher ist weder der Redraw noch die Kernabnahme freigegeben.
+
+Der fokussierte AP-18-Systemlauf stoppt unverändert im ersten Fall
+`output-valid-write` an Vektor 4: `OUTPUT_PORT_VALUE` ist `0x0000` statt
+`0x0017`, `OUTPUT_PORT_VALID` ist `0` statt `1`. Entsprechend der Stop-Regel
+wurden die sechs späteren Systemfälle nicht als bestanden gewertet. Als
+nächstes sind zuerst die verbliebenen topologischen Testanker und der erste
+elektrische Kernunterschied zu korrigieren; erst danach wird die bereits
+dokumentierte Verfolgung der drei Store-Ausgänge am
+`MEMORY_WRITE_REQUEST`-Gatter fortgesetzt.
