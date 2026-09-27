@@ -90,7 +90,7 @@ class CircuitCheckTests(unittest.TestCase):
             frozenset((wire.get("from"), wire.get("to")))
             for wire in main.findall("wire")
         }
-        self.assertIn(frozenset(("(1020,420)", "(1050,420)")), wires)
+        self.assertIn(frozenset(("(1060,410)", "(1070,410)")), wires)
 
     def test_memory_write_or_third_input_is_driven_by_store_reg_offset(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
@@ -98,9 +98,9 @@ class CircuitCheckTests(unittest.TestCase):
                     if circuit.get("name") == "TinyCPUMain")
         wires = {(wire.get("from"), wire.get("to"))
                  for wire in main.findall("wire")}
-        self.assertIn((("(1400,1610)"), ("(1680,1610)")), wires)
-        self.assertIn((("(1680,140)"), ("(1680,1610)")), wires)
-        self.assertNotIn((("(1680,140)"), ("(1680,1680)")), wires)
+        self.assertIn((("(1430,1620)"), ("(1710,1620)")), wires)
+        self.assertIn((("(1710,150)"), ("(1710,1620)")), wires)
+        self.assertNotIn((("(1710,150)"), ("(1710,1690)")), wires)
 
     def test_standalone_fetch_decoder_uses_visible_wires(self):
         path = (
@@ -338,12 +338,12 @@ class CircuitCheckTests(unittest.TestCase):
                     if circuit.get("name") == "TinyCPUMain")
         wires = {(wire.get("from"), wire.get("to"))
                  for wire in main.findall("wire")}
-        self.assertIn(("(1010,730)", "(1090,730)"), wires)
-        self.assertIn(("(330,750)", "(1090,750)"), wires)
-        self.assertIn(("(1030,790)", "(1120,790)"), wires)
-        self.assertIn(("(330,810)", "(1120,810)"), wires)
-        self.assertIn(("(330,830)", "(700,830)"), wires)
-        self.assertIn(("(700,830)", "(1100,830)"), wires)
+        self.assertIn(("(1040,740)", "(1120,740)"), wires)
+        self.assertIn(("(310,760)", "(1120,760)"), wires)
+        self.assertIn(("(1060,800)", "(1150,800)"), wires)
+        self.assertIn(("(310,820)", "(1150,820)"), wires)
+        self.assertIn(("(310,840)", "(680,840)"), wires)
+        self.assertIn(("(680,840)", "(1130,840)"), wires)
 
     def test_detects_and_repairs_subcircuit_output_bridge(self):
         project = """<?xml version='1.0'?>
