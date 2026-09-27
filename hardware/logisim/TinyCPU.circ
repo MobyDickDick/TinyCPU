@@ -370,11 +370,6 @@
     <comp lib="2" loc="(1220,790)" name="Multiplexer">
       <a name="label" val="EXTERNAL_MEMORY_VALID_SELECT"/>
     </comp>
-    <comp lib="0" loc="(2290,690)" name="Constant">
-      <a name="label" val="DIRECT_ADDRESS_IDLE"/>
-      <a name="value" val="0x0"/>
-      <a name="width" val="16"/>
-    </comp>
     <comp lib="2" loc="(2370,970)" name="Multiplexer">
       <a name="width" val="16"/>
     </comp>
@@ -424,6 +419,8 @@
     <wire from="(1060,780)" to="(1190,780)"/>
     <wire from="(1080,1090)" to="(1210,1090)"/>
     <wire from="(1080,420)" to="(1080,1090)"/>
+    <wire from="(1100,420)" to="(1100,690)"/>
+    <wire from="(1100,690)" to="(2290,690)"/>
     <wire from="(1120,300)" to="(1120,590)"/>
     <wire from="(1120,300)" to="(1810,300)"/>
     <wire from="(1120,590)" to="(1190,590)"/>
