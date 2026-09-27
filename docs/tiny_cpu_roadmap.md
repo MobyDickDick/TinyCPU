@@ -272,9 +272,14 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   elektrischen Unterschied nach; deshalb bleibt sie bis zur Reparatur
   außerhalb des verpflichtenden Kern-Gates. Ein maschinenlesbarer
   Diagnoseindex hält nun den ersten fehlerhaften Vektor und dessen benannte
-  Signale zusätzlich zur unveränderten Simulatorausgabe fest. Als Nächstes
-  wird dieser Unterschied anhand des gesicherten Pakets mit internen Messpins
-  weiter isoliert und anschließend minimal repariert.
+  Signale zusätzlich zur unveränderten Simulatorausgabe fest. Die erste
+  interne Messung zeigt am fehlerhaften Vektor den korrekten Schreibwert
+  `0x0017`, aber `WRITE_VALID=0`, `WRITE_ENABLE=0` und `ADDRESS=0x001`;
+  `INTERRUPT_ACCEPT` bleibt null. Damit ist der Unterschied auf die
+  CPU-seitige Erzeugung von Adresse, Gültigkeit und Freigabe vor der
+  Speichergrenze eingegrenzt. Die temporären Messpins wurden nicht in die
+  öffentliche Schaltung übernommen. Als Nächstes werden nur diese drei
+  Signale bis zu Decoder und effektiver Adresse zurückverfolgt.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
