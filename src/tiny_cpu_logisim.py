@@ -493,6 +493,35 @@ def _write_system_vector(path: Path, states: list[tuple[bool, bool, TinyCPU]]) -
     path.write_text("\n".join(rows) + "\n", encoding="utf-8")
 
 
+def _system_failure_summary(output: str) -> dict[str, object]:
+    """Extract the first named vector mismatch from Logisim's report."""
+    vector_match = re.search(r"Error on test vector (\d+):", output)
+    if vector_match is None:
+        return {"first_failed_vector": None, "mismatches": []}
+    mismatches = []
+    seen_signals = set()
+    for match in re.finditer(
+        r"^\s*([A-Za-z][A-Za-z0-9_]*) = (.+?) \(expected (.+?)\)\s*$",
+        output,
+        re.MULTILINE,
+    ):
+        # Logisim writes values to stdout and the vector marker to stderr, so
+        # capture_output may place every value block before every marker.
+        # A repeated signal starts the following vector's block.
+        if match.group(1) in seen_signals:
+            break
+        seen_signals.add(match.group(1))
+        mismatches.append({
+            "signal": match.group(1),
+            "actual": match.group(2),
+            "expected": match.group(3),
+        })
+    return {
+        "first_failed_vector": int(vector_match.group(1)),
+        "mismatches": mismatches,
+    }
+
+
 def run_system_matrix(system, jar: Path, java: str, output: Path, timeout: int) -> int:
     """Execute AP-18's sequential vectors against the peripheral circuit."""
     matrix = json.loads(system.electrical_matrix_path.read_text(encoding="utf-8"))
@@ -542,8 +571,16 @@ def run_system_matrix(system, jar: Path, java: str, output: Path, timeout: int) 
                     f"system fixture {case['id']} timed out; evidence: {evidence}"
                 ) from exc
             log = evidence / "logisim.txt"
-            log.write_text(result.stdout + result.stderr, encoding="utf-8")
+            simulator_output = result.stdout + result.stderr
+            log.write_text(simulator_output, encoding="utf-8")
             if result.returncode:
+                summary = {
+                    "case": case["id"],
+                    **_system_failure_summary(simulator_output),
+                }
+                (evidence / "diagnostic.json").write_text(
+                    json.dumps(summary, indent=2) + "\n", encoding="utf-8"
+                )
                 raise LogisimError(
                     f"system fixture {case['id']} failed; evidence: {evidence}"
                 )

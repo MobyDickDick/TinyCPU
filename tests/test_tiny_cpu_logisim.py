@@ -84,7 +84,10 @@ class LogisimLauncherTests(unittest.TestCase):
 
     @patch("tiny_cpu_logisim.subprocess.run")
     def test_system_matrix_preserves_reproduction_inputs(self, run):
-        run.return_value = subprocess.CompletedProcess([], 1, "mismatch\n", "")
+        report = ("Error on test vector 4:\n"
+                  "  OUTPUT_PORT_VALUE = 0000 (expected 0017)\n"
+                  "  OUTPUT_PORT_VALID = 0 (expected 1)\n")
+        run.return_value = subprocess.CompletedProcess([], 1, report, "")
         system = load_system_profile("tinycpu-peripherals-16-12-v1")
         with tempfile.TemporaryDirectory() as directory:
             evidence = Path(directory) / "evidence"
@@ -94,7 +97,20 @@ class LogisimLauncherTests(unittest.TestCase):
             self.assertTrue((case / "vector.txt").is_file())
             self.assertTrue((case / "TinyCPU_Peripherals.circ").is_file())
             self.assertTrue((case / "TinyCPU.circ").is_file())
-            self.assertEqual((case / "logisim.txt").read_text(), "mismatch\n")
+            self.assertEqual((case / "logisim.txt").read_text(), report)
+            self.assertEqual(
+                json.loads((case / "diagnostic.json").read_text()),
+                {
+                    "case": "output-valid-write",
+                    "first_failed_vector": 4,
+                    "mismatches": [
+                        {"signal": "OUTPUT_PORT_VALUE", "actual": "0000",
+                         "expected": "0017"},
+                        {"signal": "OUTPUT_PORT_VALID", "actual": "0",
+                         "expected": "1"},
+                    ],
+                },
+            )
 
     def test_system_matrix_vector_tracks_events_and_vm_state(self):
         system = load_system_profile("tinycpu-peripherals-16-12-v1")

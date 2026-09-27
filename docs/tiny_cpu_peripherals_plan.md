@@ -389,6 +389,16 @@ Diagnosepaket auch bei einem fehlgeschlagenen Simulatorprozess. Die
 elektrische Abweichung selbst bleibt unverändert bestehen; das Aufbewahren
 der Eingaben wird nicht als Reparatur oder elektrische Abnahme gewertet.
 
+Der folgende begrenzte Diagnoseschritt macht den bereits beobachteten ersten
+Unterschied zusätzlich maschinenlesbar. Bei einem fehlgeschlagenen Fall legt
+der Matrixlauf neben der unveränderten Simulatorausgabe eine
+`diagnostic.json` ab. Sie nennt die Fall-ID, den ersten fehlerhaften Vektor und
+alle dort von Logisim gemeldeten Signalwerte. Für `output-valid-write` sind
+das weiterhin Vektor 4 sowie `OUTPUT_PORT_VALUE` und `OUTPUT_PORT_VALID`;
+spätere Vektoren werden dadurch ausdrücklich nicht als frühere Ursache
+fehlinterpretiert. Die Datei ist ein Diagnoseindex, kein Ersatz für den
+elektrischen Bericht und noch keine Reparatur der Schreibsignalkette.
+
 
 ## Kompatibilitätsfolgen
 
