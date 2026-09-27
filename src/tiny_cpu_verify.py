@@ -486,12 +486,30 @@ def verify_system_circuit() -> None:
     ):
         raise VerificationError("AP-18 CPU external-write interface differs from contract")
     # These are the three signals which already drive the value, validity and
-    # write-enable inputs of the core's private RAM.  Exporting those exact
-    # nets keeps the system adapter atomic and avoids a second write decoder.
+    # write-enable inputs of the core's private RAM.  Resolve the generated
+    # Memory terminals and the labelled write-request gate topologically so a
+    # redraw cannot make canvas coordinates part of the electrical contract.
+    memory_instance = next(
+        (component for component in core_definition.findall("comp[@name='Memory']")
+         if _pin_label(component) == "MEMORY_INSTANCE"),
+        None,
+    )
+    write_request = next(
+        (component for component in core_definition.findall("comp[@name='OR Gate']")
+         if _pin_label(component) == "MEMORY_WRITE_REQUEST"),
+        None,
+    )
+    if memory_instance is None or write_request is None:
+        raise VerificationError("AP-18 CPU external-write sources are missing")
+    memory_definition = next(
+        circuit for circuit in core_project.findall("circuit")
+        if circuit.get("name") == "Memory"
+    )
+    memory_ports = generated_symbol_ports(memory_definition, memory_instance)
     external_write_sources = {
-        "EXTERNAL_WRITE_VALUE": "(690,220)",
-        "EXTERNAL_WRITE_VALID": "(710,200)",
-        "EXTERNAL_WRITE_ENABLE": "(580,620)",
+        "EXTERNAL_WRITE_VALUE": memory_ports["DATA_IN"],
+        "EXTERNAL_WRITE_VALID": memory_ports["VALID_IN"],
+        "EXTERNAL_WRITE_ENABLE": write_request.get("loc", ""),
     }
     if any(
         not core_connected(source, core_pin_locations[label])
@@ -512,10 +530,24 @@ def verify_system_circuit() -> None:
     # The redraw moved the three system-opcode decodes into the existing
     # FetchDecodeControls block.  Follow the generated FetchDecode output
     # terminals here; do not require the removed duplicate top-level decoder.
+    controls_instance = next(
+        component for component in core_definition.findall("comp")
+        if component.get("name") == "FetchDecodeControls"
+    )
+    controls_definition = core_project.find("circuit[@name='FetchDecodeControls']")
+    if controls_definition is None:
+        raise VerificationError("AP-18 CPU interrupt-command source is missing")
+    controls_ports = generated_symbol_ports(controls_definition, controls_instance)
+    controls_x, controls_y = map(
+        int, controls_instance.get("loc", "").strip("()").split(",")
+    )
     expected_interrupt_command_sources = {
-        "ENABLE_INTERRUPTS_REQUEST": "(1400,1930)",
-        "DISABLE_INTERRUPTS_REQUEST": "(1400,1950)",
-        "RETURN_FROM_INTERRUPT_REQUEST": "(1400,1970)",
+        label: f"FetchDecodeControls.{label}"
+        for label in (
+            "ENABLE_INTERRUPTS_REQUEST",
+            "DISABLE_INTERRUPTS_REQUEST",
+            "RETURN_FROM_INTERRUPT_REQUEST",
+        )
     }
     interrupt_command_sources = cpu_contract.get(
         "core_interrupt_command_sources", {}
@@ -526,7 +558,6 @@ def verify_system_circuit() -> None:
         )
     instruction_boundary = core_pin_locations["INSTRUCTION_BOUNDARY"]
     expected_boundary_source = {
-        "location": "(3560,930)",
         "value": "0x1",
         "label": "INSTRUCTION_BOUNDARY_ASSERTED",
     }
@@ -538,7 +569,7 @@ def verify_system_circuit() -> None:
     boundary_constant = next(
         (
             component for component in core_definition.findall("comp[@name='Constant']")
-            if component.get("loc") == boundary_source["location"]
+            if _pin_label(component) == boundary_source["label"]
         ),
         None,
     )
@@ -552,18 +583,18 @@ def verify_system_circuit() -> None:
     boundary_constant_label = boundary_constant_attributes.get("label")
     boundary_source_connected = (
         boundary_constant is not None
-        and core_connected(boundary_source["location"], instruction_boundary)
+        and core_connected(boundary_constant.get("loc", ""), instruction_boundary)
     )
     missing_interrupt_commands = [
-        label for label, source in interrupt_command_sources.items()
-        if not core_connected(source, core_pin_locations[label])
+        label for label in interrupt_command_sources
+        if not core_connected(controls_ports[label], core_pin_locations[label])
     ]
     boundary_touches_operand_control = (
         boundary_constant is not None
-        and core_connected(boundary_source["location"], "(2960,390)")
+        and core_connected(boundary_constant.get("loc", ""), "(2960,390)")
     )
     disable_touches_address_error = core_connected(
-        interrupt_command_sources["DISABLE_INTERRUPTS_REQUEST"],
+        controls_ports["DISABLE_INTERRUPTS_REQUEST"],
         "(2950,1350)",
     )
     if (
@@ -612,9 +643,23 @@ def verify_system_circuit() -> None:
         for label, definition in expected_feedback_pins.items()
     ):
         raise VerificationError("AP-18 CPU interrupt-feedback interface differs from contract")
+    fetch_instance = next(
+        component for component in core_definition.findall("comp")
+        if component.get("name") == "FetchDecode"
+    )
+    fetch_definition = core_project.find("circuit[@name='FetchDecode']")
+    error_instance = next(
+        component for component in core_definition.findall("comp")
+        if component.get("name") == "ErrorFlags"
+    )
+    error_definition = core_project.find("circuit[@name='ErrorFlags']")
+    if fetch_definition is None or error_definition is None:
+        raise VerificationError("AP-18 CPU interrupt-feedback target is missing")
+    fetch_ports = generated_symbol_ports(fetch_definition, fetch_instance)
+    error_ports = generated_symbol_ports(error_definition, error_instance)
     feedback_targets = {
-        "INTERRUPT_ACCEPT": "(810,460)",
-        "INTERRUPT_TARGET_PC": "(810,480)",
+        "INTERRUPT_ACCEPT": fetch_ports["INTERRUPT_ACCEPT"],
+        "INTERRUPT_TARGET_PC": fetch_ports["INTERRUPT_TARGET_PC"],
     }
     illegal_return_or = next(
         (
@@ -646,8 +691,11 @@ def verify_system_circuit() -> None:
         for label, target in feedback_targets.items()
     ) or not all((
         core_connected(core_pin_locations["ILL_RET"], illegal_return_inputs[0]),
-        core_connected("(1400,1750)", illegal_return_inputs[1]),
-        core_connected(illegal_return_or.get("loc"), "(2400,570)"),
+        # The generated controls box retains two blank output rows before the
+        # sticky-error group; SET_ILL is therefore the terminal 660 pixels
+        # below the box anchor rather than a compacted pin-list coordinate.
+        core_connected(f"({controls_x},{controls_y + 660})", illegal_return_inputs[1]),
+        core_connected(illegal_return_or.get("loc"), error_ports["SET_ILL"]),
     )):
         raise VerificationError("AP-18 CPU interrupt-feedback paths differ from contract")
 
@@ -659,7 +707,7 @@ def verify_system_circuit() -> None:
         raise VerificationError("AP-18 CPU next-PC interface differs from contract")
     if (
         any(component.get("name") == "Tunnel" for component in core_definition.findall("comp"))
-        or not core_connected("(1130,390)", core_pin_locations["NEXT_PC"])
+        or not core_connected(fetch_ports["PC_OUT"], core_pin_locations["NEXT_PC"])
     ):
         raise VerificationError("AP-18 CPU next-PC path differs from contract")
 
@@ -699,10 +747,20 @@ def verify_system_circuit() -> None:
             memory_selectors[label] = candidates[0]
     if set(memory_selectors) != set(expected_selector_widths):
         raise VerificationError("AP-18 CPU external-memory selection paths differ from contract")
+    operations_instance = next(
+        component for component in core_definition.findall("comp")
+        if component.get("name") == "Operations"
+    )
+    operations_definition = core_project.find("circuit[@name='Operations']")
+    if operations_definition is None:
+        raise VerificationError("AP-18 CPU Operations boundary is missing")
+    operations_ports = generated_symbol_ports(operations_definition, operations_instance)
     selector_paths = []
     for label, external_pin, memory_output, consumer in (
-        ("EXTERNAL_MEMORY_VALUE_SELECT", "EXTERNAL_MEMORY_VALUE", "(990,620)", "(2240,740)"),
-        ("EXTERNAL_MEMORY_VALID_SELECT", "EXTERNAL_MEMORY_VALID", "(990,600)", "(2360,800)"),
+        ("EXTERNAL_MEMORY_VALUE_SELECT", "EXTERNAL_MEMORY_VALUE",
+         memory_ports["MEMORY_DATA"], core_pin_locations["PRINT_ADDRESS_VALUE"]),
+        ("EXTERNAL_MEMORY_VALID_SELECT", "EXTERNAL_MEMORY_VALID",
+         memory_ports["MEMORY_VALID"], core_pin_locations["PRINT_ADDRESS_VALID"]),
     ):
         selector = memory_selectors[label]
         selector_x, selector_y = map(int, selector.get("loc").strip("()").split(","))
@@ -719,9 +777,13 @@ def verify_system_circuit() -> None:
     if not all(selector_paths):
         raise VerificationError("AP-18 CPU external-memory selection paths differ from contract")
     memory_valid_output = memory_selectors["EXTERNAL_MEMORY_VALID_SELECT"].get("loc")
-    operations_memory_valid = "(2410,1030)"
-    datapath_acc_valid = "(2000,530)"
-    operations_acc_valid = "(2410,1050)"
+    operations_memory_valid = operations_ports["MEMORY_VALID"]
+    datapath_acc_valid = generated_symbol_ports(
+        core_project.find("circuit[@name='Datapath']"),
+        next(component for component in core_definition.findall("comp")
+             if component.get("name") == "Datapath"),
+    )["ACC_VALID_OUT"]
+    operations_acc_valid = operations_ports["ACC_VALID"]
     if (
         not core_connected(memory_valid_output, operations_memory_valid)
         or not core_connected(datapath_acc_valid, operations_acc_valid)

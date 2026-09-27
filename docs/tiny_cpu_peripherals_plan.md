@@ -429,6 +429,23 @@ vollständige Erklärung für den ausbleibenden Portschreibvorgang. Gemäß der
 Stop-Regel wurden Decoder, Gültigkeits- und Freigabepfad in diesem Schritt
 nicht gleichzeitig verändert; sie bilden das nächste Diagnosepaket.
 
+Die anschließende topologische Kontrolle des manuell neu angeordneten Stands
+hat verlorene elektrische Attribute und den bereits bekannten offenen
+Adressübergang gefunden, ohne Bauteile oder Leitungswege nach alten
+Koordinaten zurückzuverschieben. `INSTRUCTION_BOUNDARY_ASSERTED` und
+`USE_EXTERNAL_MEMORY` treiben wieder den Vertragswert `1`; die vorhandenen
+PC- und RAM-Schreibselektoren tragen wieder ihre semantischen Bezeichner. Am
+16-auf-12-Bit-Adapter beginnt die Adressleitung wieder am tatsächlichen
+niederwertigen Splitteranschluss. Der Offline-Verifier ermittelt die
+betroffenen Pfade nun aus benannten Bausteinports und Netzkonnektivität statt
+aus den Koordinaten vor der Neuanordnung.
+
+Der fokussierte elektrische Lauf bleibt danach reproduzierbar im ersten Fall
+`output-valid-write` an Vektor 4 stehen. Damit ist die topologische Kontrolle
+abgeschlossen, aber noch keine elektrische Freigabe erreicht; als nächstes
+werden ausschließlich `EXTERNAL_WRITE_VALID` und `EXTERNAL_WRITE_ENABLE` am
+Kernausgang mit ihren RAM-seitigen Ursprungsnetzen verglichen.
+
 
 ## Kompatibilitätsfolgen
 

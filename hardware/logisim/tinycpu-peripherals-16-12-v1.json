@@ -125,12 +125,11 @@
         }
       },
       "core_interrupt_command_sources": {
-        "ENABLE_INTERRUPTS_REQUEST": "(1400,1930)",
-        "DISABLE_INTERRUPTS_REQUEST": "(1400,1950)",
-        "RETURN_FROM_INTERRUPT_REQUEST": "(1400,1970)"
+        "ENABLE_INTERRUPTS_REQUEST": "FetchDecodeControls.ENABLE_INTERRUPTS_REQUEST",
+        "DISABLE_INTERRUPTS_REQUEST": "FetchDecodeControls.DISABLE_INTERRUPTS_REQUEST",
+        "RETURN_FROM_INTERRUPT_REQUEST": "FetchDecodeControls.RETURN_FROM_INTERRUPT_REQUEST"
       },
       "instruction_boundary_source": {
-        "location": "(3560,930)",
         "value": "0x1",
         "label": "INSTRUCTION_BOUNDARY_ASSERTED"
       },

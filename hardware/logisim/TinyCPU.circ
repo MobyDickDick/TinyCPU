@@ -189,7 +189,11 @@
       <a name="label" val="INTERRUPT_TARGET_PC"/>
       <a name="width" val="12"/>
     </comp>
-    <comp lib="0" loc="(3590,940)" name="Constant"/>
+    <comp lib="0" loc="(3590,940)" name="Constant">
+      <a name="label" val="INSTRUCTION_BOUNDARY_ASSERTED"/>
+      <a name="value" val="0x1"/>
+      <a name="width" val="1"/>
+    </comp>
     <comp lib="0" loc="(3620,1000)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
@@ -363,9 +367,13 @@
     </comp>
     <comp lib="2" loc="(1180,810)" name="Multiplexer"/>
     <comp lib="2" loc="(2330,990)" name="Multiplexer">
+      <a name="label" val="INTERRUPT_PC_OVERRIDE"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="2" loc="(690,630)" name="Multiplexer"/>
+    <comp lib="2" loc="(690,630)" name="Multiplexer">
+      <a name="labelloc" val="north"/>
+      <a name="label" val="RAM_WRITE_ENABLE_SELECT"/>
+    </comp>
     <comp loc="(1020,610)" name="Memory">
       <a name="label" val="MEMORY_INSTANCE"/>
     </comp>

@@ -284,8 +284,12 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Splitteranschlusses. Der Anschluss und der bislang ebenfalls falsche
   Offline-Prüfanker sind minimal korrigiert und durch einen Mutationstest
   geschützt. Da der fokussierte elektrische Fall danach weiterhin am
-  Portschreibvorgang scheitert, werden als Nächstes ausschließlich
-  Gültigkeits- und Freigabepfad bis zum Decoder zurückverfolgt.
+  Portschreibvorgang scheitert, wurden die erneut manuell angeordneten
+  Schaltungen ausschließlich topologisch kontrolliert. Konstanten,
+  Selektorbezeichner und Splitteranschluss sind wiederhergestellt; der Prüfer
+  folgt den betroffenen benannten Ports jetzt ohne alte Canvas-Koordinaten.
+  Als Nächstes werden ausschließlich Gültigkeits- und Freigabepfad am
+  Kernausgang mit ihren RAM-seitigen Ursprungsnetzen verglichen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
