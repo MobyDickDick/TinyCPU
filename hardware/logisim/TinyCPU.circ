@@ -189,11 +189,7 @@
       <a name="label" val="INTERRUPT_TARGET_PC"/>
       <a name="width" val="12"/>
     </comp>
-    <comp lib="0" loc="(3450,930)" name="Constant">
-      <a name="label" val="INSTRUCTION_BOUNDARY_ASSERTED"/>
-      <a name="value" val="0x1"/>
-      <a name="width" val="1"/>
-    </comp>
+    <comp lib="0" loc="(3450,930)" name="Constant"/>
     <comp lib="0" loc="(3480,1010)" name="Probe">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
@@ -357,25 +353,19 @@
     <comp lib="1" loc="(2270,410)" name="OR Gate">
       <a name="inputs" val="4"/>
       <a name="label" val="ILLEGAL_RETURN_OR"/>
-      <a name="labelloc" val="north"/>
     </comp>
     <comp lib="1" loc="(520,610)" name="OR Gate">
       <a name="inputs" val="3"/>
       <a name="label" val="MEMORY_WRITE_REQUEST"/>
     </comp>
     <comp lib="2" loc="(1150,750)" name="Multiplexer">
-      <a name="label" val="EXTERNAL_MEMORY_VALUE_SELECT"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="2" loc="(1220,790)" name="Multiplexer">
-      <a name="label" val="EXTERNAL_MEMORY_VALID_SELECT"/>
-    </comp>
+    <comp lib="2" loc="(1220,790)" name="Multiplexer"/>
     <comp lib="2" loc="(2370,970)" name="Multiplexer">
       <a name="width" val="16"/>
     </comp>
-    <comp lib="2" loc="(700,620)" name="Multiplexer">
-      <a name="label" val="RAM_WRITE_ENABLE_SELECT"/>
-    </comp>
+    <comp lib="2" loc="(700,620)" name="Multiplexer"/>
     <comp loc="(1020,600)" name="Memory">
       <a name="label" val="MEMORY_INSTANCE"/>
     </comp>
@@ -410,7 +400,7 @@
     <wire from="(1020,620)" to="(1040,620)"/>
     <wire from="(1040,620)" to="(1040,690)"/>
     <wire from="(1040,690)" to="(1040,740)"/>
-    <wire from="(1100,690)" to="(2290,690)"/>
+    <wire from="(1040,690)" to="(2290,690)"/>
     <wire from="(1040,740)" to="(1120,740)"/>
     <wire from="(1060,340)" to="(1200,340)"/>
     <wire from="(1060,360)" to="(1200,360)"/>
@@ -462,12 +452,12 @@
     <wire from="(1430,1510)" to="(1510,1510)"/>
     <wire from="(1430,1530)" to="(1490,1530)"/>
     <wire from="(1430,1550)" to="(1470,1550)"/>
-    <wire from="(1430,1570)" to="(1730,1570)"/>
-    <wire from="(1430,1590)" to="(1740,1590)"/>
+    <wire from="(1430,1570)" to="(1670,1570)"/>
+    <wire from="(1430,1590)" to="(1690,1590)"/>
     <wire from="(1430,1610)" to="(1710,1610)"/>
     <wire from="(1430,1630)" to="(1450,1630)"/>
-    <wire from="(1430,1650)" to="(1670,1650)"/>
-    <wire from="(1430,1670)" to="(1690,1670)"/>
+    <wire from="(1430,1650)" to="(1690,1650)"/>
+    <wire from="(1430,1670)" to="(1670,1670)"/>
     <wire from="(1430,1750)" to="(2090,1750)"/>
     <wire from="(1430,1770)" to="(2150,1770)"/>
     <wire from="(1430,1830)" to="(3480,1830)"/>
@@ -513,17 +503,14 @@
     <wire from="(1650,1330)" to="(1650,2000)"/>
     <wire from="(1650,1330)" to="(1890,1330)"/>
     <wire from="(1650,2000)" to="(1710,2000)"/>
-    <wire from="(1670,1650)" to="(1670,1790)"/>
-    <wire from="(1670,1790)" to="(3480,1790)"/>
-    <wire from="(1670,180)" to="(1670,1650)"/>
-    <wire from="(1690,160)" to="(1690,1670)"/>
-    <wire from="(1690,1670)" to="(1690,1810)"/>
-    <wire from="(1690,1810)" to="(3480,1810)"/>
-    <wire from="(1710,140)" to="(1710,1610)"/>
-    <wire from="(1730,80)" to="(1730,1570)"/>
-    <wire from="(1740,1590)" to="(1740,60)"/>
-    <wire from="(1750,1590)" to="(1750,1890)"/>
-    <wire from="(1750,820)" to="(1750,1590)"/>
+    <wire from="(1670,140)" to="(1670,1570)"/>
+    <wire from="(1670,1670)" to="(1670,1810)"/>
+    <wire from="(1670,1810)" to="(3480,1810)"/>
+    <wire from="(1690,120)" to="(1690,1590)"/>
+    <wire from="(1690,1650)" to="(1690,1790)"/>
+    <wire from="(1690,1790)" to="(3480,1790)"/>
+    <wire from="(1710,100)" to="(1710,1610)"/>
+    <wire from="(1750,820)" to="(1750,1890)"/>
     <wire from="(1750,820)" to="(2230,820)"/>
     <wire from="(1770,490)" to="(1770,840)"/>
     <wire from="(1770,490)" to="(1850,490)"/>
@@ -727,33 +714,33 @@
     <wire from="(340,460)" to="(840,460)"/>
     <wire from="(3430,430)" to="(3440,430)"/>
     <wire from="(3430,450)" to="(3460,450)"/>
-    <wire from="(3440,120)" to="(3440,430)"/>
+    <wire from="(3440,180)" to="(3440,430)"/>
     <wire from="(3450,930)" to="(3480,930)"/>
-    <wire from="(3460,100)" to="(3460,450)"/>
+    <wire from="(3460,160)" to="(3460,450)"/>
     <wire from="(3470,1300)" to="(3470,1330)"/>
     <wire from="(3470,1330)" to="(3480,1330)"/>
-    <wire from="(390,140)" to="(1710,140)"/>
-    <wire from="(390,140)" to="(390,630)"/>
+    <wire from="(390,100)" to="(1710,100)"/>
+    <wire from="(390,100)" to="(390,630)"/>
     <wire from="(390,630)" to="(470,630)"/>
-    <wire from="(410,60)" to="(1740,60)"/>
-    <wire from="(410,60)" to="(410,610)"/>
+    <wire from="(410,120)" to="(1690,120)"/>
+    <wire from="(410,120)" to="(410,610)"/>
     <wire from="(410,610)" to="(470,610)"/>
+    <wire from="(430,140)" to="(1670,140)"/>
+    <wire from="(430,140)" to="(430,590)"/>
     <wire from="(430,590)" to="(470,590)"/>
-    <wire from="(430,80)" to="(1730,80)"/>
-    <wire from="(430,80)" to="(430,590)"/>
     <wire from="(520,610)" to="(630,610)"/>
     <wire from="(630,610)" to="(630,910)"/>
     <wire from="(630,610)" to="(670,610)"/>
     <wire from="(630,910)" to="(3480,910)"/>
     <wire from="(650,630)" to="(650,840)"/>
     <wire from="(650,630)" to="(670,630)"/>
-    <wire from="(680,100)" to="(3460,100)"/>
-    <wire from="(680,100)" to="(680,400)"/>
+    <wire from="(680,160)" to="(3460,160)"/>
+    <wire from="(680,160)" to="(680,400)"/>
     <wire from="(680,400)" to="(840,400)"/>
     <wire from="(680,640)" to="(680,820)"/>
     <wire from="(680,820)" to="(1130,820)"/>
-    <wire from="(700,120)" to="(3440,120)"/>
-    <wire from="(700,120)" to="(700,380)"/>
+    <wire from="(700,180)" to="(3440,180)"/>
+    <wire from="(700,180)" to="(700,380)"/>
     <wire from="(700,380)" to="(840,380)"/>
     <wire from="(700,620)" to="(800,620)"/>
     <wire from="(720,200)" to="(2110,200)"/>
@@ -1551,7 +1538,6 @@
       <a name="width" val="12"/>
     </comp>
     <comp lib="2" loc="(980,240)" name="Multiplexer">
-      <a name="label" val="INTERRUPT_PC_OVERRIDE"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="3" loc="(740,390)" name="Comparator">
