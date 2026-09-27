@@ -845,13 +845,14 @@ def verify_system_circuit() -> None:
         frozenset(("(660,500)", "(670,500)")),
         frozenset(("(670,500)", "(670,510)")),
         frozenset(("(670,510)", "(680,510)")),
-        # The low 12-bit branch of an east-facing splitter is its upper
-        # terminal at y=500.  Requiring that exact terminal prevents a wire
-        # drawn one grid step above the component from looking connected in
-        # the XML while electrically floating in Logisim.
-        frozenset(("(700,500)", "(710,500)")),
-        frozenset(("(710,500)", "(840,500)")),
-        frozenset(("(840,500)", "(840,520)")),
+        # For this east-facing two-way splitter, branch 0 is the upper output
+        # at y=490 and carries bits 0..11.  Branch 1 at y=500 carries bits
+        # 12..15 and is intentionally unused.  Checking the branch assignment
+        # together with these endpoints prevents a 4-bit branch from being
+        # accepted merely because it reaches the 12-bit ADDRESS pin.
+        frozenset(("(700,490)", "(710,490)")),
+        frozenset(("(710,490)", "(840,490)")),
+        frozenset(("(840,490)", "(840,520)")),
         frozenset(("(840,520)", cpu_pin_locations["ADDRESS"])),
     }
     if (splitter_attributes != expected_address_splitter

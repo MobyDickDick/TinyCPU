@@ -701,7 +701,7 @@ class CircuitVerificationTests(unittest.TestCase):
         self.assertIsNotNone(boundary)
         wire = next(
             item for item in boundary.findall("wire")
-            if {item.get("from"), item.get("to")} == {"(700,500)", "(710,500)"}
+            if {item.get("from"), item.get("to")} == {"(700,490)", "(710,490)"}
         )
         boundary.remove(wire)
         project.write(circuit, encoding="utf-8", xml_declaration=True)

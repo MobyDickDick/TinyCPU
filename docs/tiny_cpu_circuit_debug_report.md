@@ -3452,3 +3452,39 @@ behoben. Die davon getrennte AP-18-Systemmatrix wird durch das bestehende
 elektrische Kernkommando noch nicht ausgeführt und bleibt das nächste
 dokumentierte Arbeitspaket; eine vollständige elektrische Freigabe der
 Peripherie wird daher noch nicht behauptet.
+
+#### Topologische Nachprüfung der CPU-Integrationsgrenze
+
+- **Ausgangsstand:** `38bb3a0b27778ef6832b1790b4e2ee96aa05b762`
+- **Datum:** 27. September 2026
+
+Die erste Bewertung des Adresssplitters in dieser Nachprüfung war falsch.
+Verzweigung 0 am oberen Ausgang `(700,490)` führt gemäß den Splitterattributen
+Bits 0 bis 11 und ist damit 12 Bit breit. Verzweigung 1 am unteren Ausgang
+`(700,500)` führt Bits 12 bis 15 und ist nur 4 Bit breit. Das Umlegen der
+Adressleitung auf den unteren Anschluss erzeugte deshalb genau den von Logisim
+gemeldeten Breitenfehler. Der vorhandene Leitungsweg ist wieder mit dem oberen
+12-Bit-Ausgang verbunden; kein Bauteil wurde bewegt. Der Offline-Prüfer
+verlangt nun gemeinsam die Bitzuordnung und den passenden Ausgangsanschluss.
+Die verlorenen Konstantenwerte und Selektorattribute bleiben am vorhandenen
+Ort wiederhergestellt.
+
+Der anschließende fokussierte Systemlauf reproduziert weiterhin ausschließlich
+den bereits dokumentierten ersten Fall und stoppt an Vektor 4:
+
+```bash
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 --system tinycpu-peripherals-16-12-v1 \
+  --system-only --trace-output /tmp/unused-core.tsv \
+  --matrix-output /tmp/tinycpu-system-check
+```
+
+`OUTPUT_PORT_VALUE` bleibt `0x0000` statt `0x0017`, und
+`OUTPUT_PORT_VALID` bleibt `0` statt `1`. Die jetzt abgearbeitete nächste
+Diagnosegrenze vergleicht die beiden CPU-Exporte
+`EXTERNAL_WRITE_VALID`/`EXTERNAL_WRITE_ENABLE` mit ihren Ursprungsnetzen: Die
+Leitungen sind topologisch durchgängig, beide Signale bleiben elektrisch aber
+null. Der erste offene funktionale Unterschied liegt folglich vor der
+Integrationsgrenze an den Eingängen von `MEMORY_WRITE_REQUEST` beziehungsweise
+am Gültigkeitspfad. Es wurde weder eine elektrische Systemfreigabe behauptet
+noch ein anderer Signalweg vorsorglich geändert.
