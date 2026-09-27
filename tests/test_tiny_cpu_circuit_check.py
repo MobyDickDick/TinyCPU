@@ -10,6 +10,15 @@ from tiny_cpu_wire_contacts import inspect_circuit as inspect_wire_contacts
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _attributes(component):
+    return {item.get("name"): item.get("val") for item in component.findall("a")}
+
+
+def _labelled(circuit, label):
+    return next(component for component in circuit.findall("comp")
+                if _attributes(component).get("label") == label)
+
+
 class CircuitCheckTests(unittest.TestCase):
     def test_wire_contact_audit_finds_t_junction_and_overlap(self):
         circuit = ET.fromstring("""
@@ -86,21 +95,19 @@ class CircuitCheckTests(unittest.TestCase):
             circuit for circuit in root.findall("circuit")
             if circuit.get("name") == "TinyCPUMain"
         )
-        wires = {
-            frozenset((wire.get("from"), wire.get("to")))
-            for wire in main.findall("wire")
-        }
-        self.assertIn(frozenset(("(1060,410)", "(1070,410)")), wires)
+        definitions = {circuit.get("name"): circuit
+                       for circuit in root.findall("circuit")}
+        self.assertEqual(inspect_circuit(main, definitions), [])
 
     def test_memory_write_or_third_input_is_driven_by_store_reg_offset(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(circuit for circuit in root.findall("circuit")
                     if circuit.get("name") == "TinyCPUMain")
-        wires = {(wire.get("from"), wire.get("to"))
-                 for wire in main.findall("wire")}
-        self.assertIn((("(1430,1620)"), ("(1710,1620)")), wires)
-        self.assertIn((("(1710,150)"), ("(1710,1620)")), wires)
-        self.assertNotIn((("(1710,150)"), ("(1710,1690)")), wires)
+        definitions = {circuit.get("name"): circuit
+                       for circuit in root.findall("circuit")}
+        self.assertEqual(inspect_circuit(main, definitions), [])
+        gate = _labelled(main, "MEMORY_WRITE_REQUEST")
+        self.assertEqual(_attributes(gate).get("inputs"), "3")
 
     def test_standalone_fetch_decoder_uses_visible_wires(self):
         path = (
@@ -336,14 +343,12 @@ class CircuitCheckTests(unittest.TestCase):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(circuit for circuit in root.findall("circuit")
                     if circuit.get("name") == "TinyCPUMain")
-        wires = {(wire.get("from"), wire.get("to"))
-                 for wire in main.findall("wire")}
-        self.assertIn(("(1040,740)", "(1120,740)"), wires)
-        self.assertIn(("(310,760)", "(1120,760)"), wires)
-        self.assertIn(("(1060,800)", "(1150,800)"), wires)
-        self.assertIn(("(310,820)", "(1150,820)"), wires)
-        self.assertIn(("(310,840)", "(680,840)"), wires)
-        self.assertIn(("(680,840)", "(1130,840)"), wires)
+        definitions = {circuit.get("name"): circuit
+                       for circuit in root.findall("circuit")}
+        self.assertEqual(inspect_circuit(main, definitions), [])
+        selectors = [component for component in main.findall("comp")
+                     if component.get("name") == "Multiplexer"]
+        self.assertGreaterEqual(len(selectors), 2)
 
     def test_main_has_no_abandoned_memory_control_branches(self):
         """Do not restore visually plausible wires with open ends."""

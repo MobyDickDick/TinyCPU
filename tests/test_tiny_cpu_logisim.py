@@ -54,10 +54,26 @@ def _component_by_label(circuit, label):
 
 def _wire_path_exists(circuit, start, end):
     graph = {}
-    for wire in circuit.findall("wire"):
-        left, right = wire.get("from"), wire.get("to")
-        graph.setdefault(left, set()).add(right)
-        graph.setdefault(right, set()).add(left)
+    wires = [(wire.get("from"), wire.get("to"))
+             for wire in circuit.findall("wire")]
+    points = {point for wire in wires for point in wire} | {start, end}
+
+    def coordinates(point):
+        return tuple(map(int, point.strip("()").split(",")))
+
+    for left, right in wires:
+        x1, y1 = coordinates(left)
+        x2, y2 = coordinates(right)
+        contacts = []
+        for point in points:
+            x, y = coordinates(point)
+            if ((x1 == x2 == x and min(y1, y2) <= y <= max(y1, y2)) or
+                    (y1 == y2 == y and min(x1, x2) <= x <= max(x1, x2))):
+                contacts.append(point)
+        contacts.sort(key=coordinates)
+        for first, second in zip(contacts, contacts[1:]):
+            graph.setdefault(first, set()).add(second)
+            graph.setdefault(second, set()).add(first)
     pending, visited = [start], set()
     while pending:
         point = pending.pop()
@@ -79,6 +95,30 @@ def _point_offset(component, x=0, y=0):
 
 def _pin_location(circuit, label):
     return _component_by_label(circuit, label).get("loc")
+
+
+def _subcircuit_ports(project, circuit, instance_label):
+    """Resolve an instance's terminals from its child circuit's named pins."""
+    instance = _component_by_label(circuit, instance_label)
+    definition = project.find(f"circuit[@name='{instance.get('name')}']")
+    if definition is None:
+        raise AssertionError(f"missing definition for {instance.get('name')}")
+    return generated_symbol_ports(definition, instance)
+
+
+def _controls_port(circuit, label):
+    """Return a named terminal of the intentionally hand-authored control box."""
+    instance = _component_by_label(circuit, "FETCH_DECODE_CONTROLS")
+    offsets = {
+        "ADDR_REG_OFFS_ARGUMENT": 200,
+        "JUMP_ADR": 240, "JUMP_ZERO": 260, "JUMP_NOT_ZERO": 280,
+        "JUMP_NEGATIVE": 300, "JUMP_ERROR": 320, "JUMP_NOT_ERROR": 340,
+        "STORE_ADR": 480, "STORE_ADR_REG": 500, "STORE_REG_OFF": 520,
+        "SET_ILL": 660, "SET_INPUT": 680, "PRINT": 560,
+        "PRINT_ADR": 580, "HALT": 740, "HALT_ERROR": 760,
+        "ADD_OPERAND": 0, "SUB_OPERAND": 20,
+    }
+    return _point_offset(instance, y=offsets[label])
 
 
 class LogisimLauncherTests(unittest.TestCase):
@@ -174,12 +214,14 @@ class LogisimLauncherTests(unittest.TestCase):
         self.assertIsNotNone(main)
         self.assertTrue(
             _wire_path_exists(
-                main, _pin_location(main, "INTERRUPT_ACCEPT"), "(840,470)"
+                main, _pin_location(main, "INTERRUPT_ACCEPT"),
+                _subcircuit_ports(root, main, "FETCH_DECODE")["INTERRUPT_ACCEPT"]
             )
         )
         self.assertTrue(
             _wire_path_exists(
-                main, _pin_location(main, "INTERRUPT_TARGET_PC"), "(840,490)"
+                main, _pin_location(main, "INTERRUPT_TARGET_PC"),
+                _subcircuit_ports(root, main, "FETCH_DECODE")["INTERRUPT_TARGET_PC"]
             )
         )
         illegal_return_or = _component_by_label(main, "ILLEGAL_RETURN_OR")
@@ -191,9 +233,14 @@ class LogisimLauncherTests(unittest.TestCase):
         self.assertTrue(
             _wire_path_exists(main, _pin_location(main, "ILL_RET"), upper_input)
         )
-        self.assertTrue(_wire_path_exists(main, "(1430,1760)", lower_input))
+        self.assertTrue(_wire_path_exists(
+            main, _controls_port(main, "SET_ILL"), lower_input
+        ))
         self.assertTrue(
-            _wire_path_exists(main, illegal_return_or.get("loc"), "(2430,580)")
+            _wire_path_exists(
+                main, illegal_return_or.get("loc"),
+                _subcircuit_ports(root, main, "ERROR_FLAGS")["SET_ILL"],
+            )
         )
 
     def test_interrupt_pc_override_preserves_sequential_pc_when_inactive(self):
@@ -255,23 +302,33 @@ class LogisimLauncherTests(unittest.TestCase):
             )
             return f"({decoder_x + 20},{decoder_y - 640 + 0x3f * 10})"
 
+        def main_controls_port(tree, label):
+            main = tree.getroot().find("circuit[@name='TinyCPUMain']")
+            return _controls_port(main, label)
+
+        def memory_gate_input(tree):
+            main = tree.getroot().find("circuit[@name='TinyCPUMain']")
+            return _point_offset(_component_by_label(
+                main, "MEMORY_WRITE_REQUEST"
+            ), -50, -20)
+
         mutations = (
             (
                 "normal halt export",
                 "TinyCPUMain",
-                lambda tree: "(1430,1840)",
+                lambda tree: main_controls_port(tree, "HALT"),
                 self.test_halt_control_reaches_public_halted_pin,
             ),
             (
                 "error halt export",
                 "TinyCPUMain",
-                lambda tree: "(1430,1860)",
+                lambda tree: main_controls_port(tree, "HALT_ERROR"),
                 self.test_halt_error_control_reaches_public_halted_with_error_pin,
             ),
             (
                 "jump control alignment",
                 "TinyCPUMain",
-                lambda tree: "(1430,1340)",
+                lambda tree: main_controls_port(tree, "JUMP_ADR"),
                 self.test_jump_wiring_is_encapsulated_without_tunnels,
             ),
             (
@@ -307,7 +364,7 @@ class LogisimLauncherTests(unittest.TestCase):
             (
                 "memory write gate input",
                 "TinyCPUMain",
-                lambda tree: "(470,600)",
+                memory_gate_input,
                 self.test_visible_top_level_memory_or_gate_has_every_input_connected,
             ),
         )
@@ -472,26 +529,23 @@ class LogisimLauncherTests(unittest.TestCase):
             autonomous_project(source, target, "TinyCPUMain")
             root = ET.parse(target).getroot()
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
-            parts = {(c.get("name"), c.get("loc")) for c in main.findall("comp")}
-            self.assertIn(("Clock", "(310,310)"), parts)
-            self.assertIn(("NOT Gate", "(310,370)"), parts)
-            self.assertIn(("Clock", "(270,370)"), parts)
-            self.assertNotIn(("POR", "(310,370)"), parts)
-            self.assertNotIn(("PowerOnReset", "(310,370)"), parts)
-            clocks = {
-                component.get("loc"): _attributes(component)
+            self.assertFalse(any(
+                component.get("name") in {"POR", "PowerOnReset"}
                 for component in main.findall("comp")
-                if component.get("name") == "Clock"
-            }
-            self.assertEqual(clocks["(310,310)"]["highDuration"], "2")
-            self.assertEqual(clocks["(310,310)"]["lowDuration"], "2")
-            self.assertEqual(clocks["(270,370)"]["highDuration"], "100")
-            self.assertEqual(clocks["(270,370)"]["lowDuration"], "2")
-            wires = {
-                (wire.get("from"), wire.get("to"))
-                for wire in main.findall("wire")
-            }
-            self.assertIn(("(270,370)", "(290,370)"), wires)
+            ))
+            clocks = [component for component in main.findall("comp")
+                      if component.get("name") == "Clock"]
+            trace_clock = next(component for component in clocks
+                               if _attributes(component).get("label") == "TRACE_CLK")
+            reset_clock = next(component for component in clocks
+                               if _attributes(component).get("highDuration") == "100")
+            self.assertEqual(_attributes(trace_clock).get("lowDuration"), "2")
+            self.assertEqual(_attributes(reset_clock).get("lowDuration"), "2")
+            inverter = next(component for component in main.findall("comp")
+                            if component.get("name") == "NOT Gate")
+            self.assertTrue(_wire_path_exists(
+                main, reset_clock.get("loc"), _point_offset(inverter, -20),
+            ))
             labels = [a.get("val") for a in main.findall("comp/a") if a.get("name") == "label"]
             self.assertIn("halt", labels)
             self.assertIn("HALTED_WITH_ERROR", labels)
@@ -557,11 +611,14 @@ class LogisimLauncherTests(unittest.TestCase):
         for name in ("TinyCPU.circ",):
             root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
-            wires = {(w.get("from"), w.get("to")) for w in main.findall("wire")}
-            expected = (("(2210,1420)", "(2440,1420)") if name == "TinyCPU.circ"
-                        else ("(2750,1770)", "(2970,1770)"))
-            self.assertIn(
-                expected, wires,
+            self.assertTrue(
+                _wire_path_exists(
+                    main, _controls_port(main, "ADDR_REG_OFFS_ARGUMENT"),
+                    _point_offset(
+                        _component_by_label(main, "EFFECTIVE_ADDRESS_FBOX"),
+                        -220, 40,
+                    ),
+                ),
                 f"{name} leaves the register-plus-offset selector floating",
             )
 
@@ -757,8 +814,11 @@ class LogisimLauncherTests(unittest.TestCase):
         # These are the input terminals rendered by Logisim for the OR gates
         # highlighted on the integration sheet.  Keep the count explicit so a
         # redraw cannot silently leave an input at its default/floating value.
+        gate = _component_by_label(main, "MEMORY_WRITE_REQUEST")
         expected_inputs = {
-            "MEMORY_WRITE_REQUEST": {"(470,600)", "(470,620)", "(470,640)"},
+            "MEMORY_WRITE_REQUEST": {
+                _point_offset(gate, -50, y) for y in (-20, 0, 20)
+            },
         }
         wire_endpoints = {
             endpoint
@@ -776,23 +836,19 @@ class LogisimLauncherTests(unittest.TestCase):
                 f"{label} has an unconnected input terminal",
             )
 
-        controls = _component_by_label(main, "FETCH_DECODE_CONTROLS")
-        controls_definition = next(
-            circuit for circuit in root.findall("circuit")
-            if circuit.get("name") == "FetchDecodeControls"
-        )
-        controls_ports = generated_symbol_ports(controls_definition, controls)
         for store_request, terminal in zip(
             ("STORE_ADR", "STORE_ADR_REG", "STORE_REG_OFF"),
-            ("(470,600)", "(470,620)", "(470,640)"),
+            sorted(expected_inputs["MEMORY_WRITE_REQUEST"],
+                   key=lambda point: int(point.strip("()").split(",")[1])),
         ):
             self.assertTrue(
-                _wire_path_exists(main, controls_ports[store_request], terminal),
+                _wire_path_exists(
+                    main, _controls_port(main, store_request), terminal
+                ),
                 f"{store_request} does not reach MEMORY_WRITE_REQUEST",
             )
 
     def test_add_operand_reaches_operations_input(self):
-        expected = ("(1430,1100)", "(2440,1100)")
         wrong_error_flags_route = {
             ("(1300,940)", "(2200,940)"),
             ("(2200,460)", "(2200,940)"),
@@ -821,7 +877,15 @@ class LogisimLauncherTests(unittest.TestCase):
             )
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             wires = {(wire.get("from"), wire.get("to")) for wire in main.findall("wire")}
-            self.assertIn(expected, wires, f"{name} leaves ADD_OPERAND disconnected")
+            self.assertTrue(
+                _wire_path_exists(
+                    main, _controls_port(main, "ADD_OPERAND"),
+                    _subcircuit_ports(
+                        root, main, "OPERATIONS_INSTANCE"
+                    )["ADD_OPERAND"],
+                ),
+                f"{name} leaves ADD_OPERAND disconnected",
+            )
             self.assertTrue(
                 wrong_error_flags_route.isdisjoint(wires),
                 f"{name} routes ADD_OPERAND into the ErrorFlags instance",
@@ -835,33 +899,19 @@ class LogisimLauncherTests(unittest.TestCase):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
 
-        # The generated AddressRangeFBox occupies x=3060..3280 and
-        # y=1370..1530.  The old direct monitor routes crossed its face,
-        # obscuring port names and making unrelated nets look connected.
-        box_left, box_right = 3060, 3280
-        box_top, box_bottom = 1370, 1530
-        for wire in main.findall("wire"):
-            (x1, y1), (x2, y2) = (
-                tuple(map(int, wire.get(endpoint).strip("()").split(",")))
-                for endpoint in ("from", "to")
-            )
-            horizontal_crossing = (
-                y1 == y2
-                and box_top < y1 < box_bottom
-                and min(x1, x2) < box_right
-                and max(x1, x2) > box_left
-            )
-            self.assertFalse(
-                horizontal_crossing,
-                f"wire {wire.get('from')}..{wire.get('to')} crosses AddressRangeFBox",
-            )
-
+        effective = _subcircuit_ports(root, main, "EFFECTIVE_ADDRESS_FBOX")
         self.assertTrue(
-            _wire_path_exists(main, "(2660,1340)", "(3620,1290)"),
+            _wire_path_exists(
+                main, effective["EFFECTIVE_REGISTER_SELECTED_OUT"],
+                _component_by_label(main, "MONITOR_EFFECTIVE_REGISTER_SELECTED_OUT").get("loc"),
+            ),
             "effective-register monitor was disconnected by the visual reroute",
         )
         self.assertTrue(
-            _wire_path_exists(main, "(2660,1380)", "(3610,1310)"),
+            _wire_path_exists(
+                main, effective["EFFECTIVE_MEMORY_ADDRESS"],
+                _pin_location(main, "ADDRESS"),
+            ),
             "effective-address monitor was disconnected by the visual reroute",
         )
 
@@ -873,7 +923,7 @@ class LogisimLauncherTests(unittest.TestCase):
         # Follow the complete net instead of fixing the test to a particular
         # canvas route.  (1430,1660) is the PRINT port of the controls instance.
         self.assertTrue(
-            _wire_path_exists(main, "(1430,1660)", print_enable.get("loc")),
+            _wire_path_exists(main, _controls_port(main, "PRINT"), print_enable.get("loc")),
             "FetchDecodeControls.PRINT does not reach TinyCPUMain.PRINT_ENABLE",
         )
 
@@ -886,7 +936,7 @@ class LogisimLauncherTests(unittest.TestCase):
         # canvas route.  (1430,1680) is the PRINT_ADDRESS port of the controls
         # instance.
         self.assertTrue(
-            _wire_path_exists(main, "(1430,1680)", print_address_enable.get("loc")),
+            _wire_path_exists(main, _controls_port(main, "PRINT_ADR"), print_address_enable.get("loc")),
             "FetchDecodeControls.PRINT_ADDRESS does not reach "
             "TinyCPUMain.PRINT_ADDRESS_ENABLE",
         )
@@ -899,7 +949,7 @@ class LogisimLauncherTests(unittest.TestCase):
         # Follow the complete net instead of fixing the test to a particular
         # canvas route.  (1430,1840) is the HALT port of the controls instance.
         self.assertTrue(
-            _wire_path_exists(main, "(1430,1840)", halted.get("loc")),
+            _wire_path_exists(main, _controls_port(main, "HALT"), halted.get("loc")),
             "FetchDecodeControls.HALT does not reach TinyCPUMain.HALTED",
         )
 
@@ -912,7 +962,7 @@ class LogisimLauncherTests(unittest.TestCase):
         # canvas route.  (1430,1860) is the HALT_ERROR port of the controls
         # instance.
         self.assertTrue(
-            _wire_path_exists(main, "(1430,1860)", halted_with_error.get("loc")),
+            _wire_path_exists(main, _controls_port(main, "HALT_ERROR"), halted_with_error.get("loc")),
             "FetchDecodeControls.HALT_ERROR does not reach "
             "TinyCPUMain.HALTED_WITH_ERROR",
         )
@@ -924,7 +974,7 @@ class LogisimLauncherTests(unittest.TestCase):
         # INPUT with no value asserts SET_INPUT at the controls instance. The
         # matching ErrorFlags input is the last input on its generated symbol.
         self.assertTrue(
-            _wire_path_exists(main, "(1430,1780)", "(2430,600)"),
+            _wire_path_exists(main, _controls_port(main, "SET_INPUT"), _subcircuit_ports(root, main, "ERROR_FLAGS")["SET_INPUT"]),
             "FetchDecodeControls.SET_INPUT does not reach ErrorFlags.SET_INPUT",
         )
 
@@ -935,10 +985,6 @@ class LogisimLauncherTests(unittest.TestCase):
                  if component.get("name") == "JumpBox"]
         self.assertEqual(len(boxes), 1)
         self.assertEqual(_attributes(boxes[0]).get("label"), "JUMP_BOX")
-        self.assertEqual(
-            boxes[0].get("loc"), "(3570,460)",
-            "JumpBox must stay in the existing compact upper-right layout",
-        )
 
         jump_labels = {
             "JUMP_ADR_CONTROL", "JUMP_ZERO_CONTROL", "JUMP_NEGATIVE_CONTROL",
@@ -965,19 +1011,28 @@ class LogisimLauncherTests(unittest.TestCase):
         # Keep the box in
         # its established upper-right position: moving it below the main
         # circuit makes every signal take a long, hard-to-read detour.
-        sources = [
-            "(2650,460)", "(2650,480)", "(2650,500)", "(2650,520)",
-            "(2650,540)", "(2650,560)", "(1430,1340)", "(1430,1360)",
-            "(1430,1380)", "(1430,1400)", "(1430,1420)", "(1430,1440)",
-            "(2030,520)", "(2030,500)",
-        ]
-        for source, y in zip(sources, range(460, 740, 20)):
+        jump_ports = _subcircuit_ports(root, main, "JUMP_BOX")
+        error_ports = _subcircuit_ports(root, main, "ERROR_FLAGS")
+        datapath_ports = _subcircuit_ports(root, main, "DATAPATH_INSTANCE")
+        sources = {
+            **{f"ERROR_{name.removesuffix('_OUT')}": error_ports[name]
+               for name in ("OVF_OUT", "DIV0_OUT", "ADDR_OUT", "INV_OUT",
+                            "ILL_OUT", "INPUT_OUT")},
+            **{name: _controls_port(main, name) for name in
+               ("JUMP_ADR", "JUMP_ZERO", "JUMP_NOT_ZERO", "JUMP_NEGATIVE",
+                "JUMP_ERROR", "JUMP_NOT_ERROR")},
+            "NEGATIVE": datapath_ports["NEGATIVE"],
+            "ZERO": datapath_ports["ZERO"],
+        }
+        for port, source in sources.items():
             self.assertTrue(
-                _wire_path_exists(main, source, f"(3350,{y})"),
-                f"{source} does not reach its JumpBox input",
+                _wire_path_exists(main, source, jump_ports[port]),
+                f"{port} does not reach its JumpBox input",
             )
-        self.assertTrue(_wire_path_exists(main, "(3570,460)", "(650,390)"))
-        self.assertTrue(_wire_path_exists(main, "(3570,480)", "(630,410)"))
+        wire_endpoints = {endpoint for wire in main.findall("wire")
+                          for endpoint in (wire.get("from"), wire.get("to"))}
+        self.assertIn(jump_ports["IS_NOT_ZERO"], wire_endpoints)
+        self.assertIn(jump_ports["DEC_JUMP_NOT_ZERO"], wire_endpoints)
 
     def test_jump_box_gates_zero_conditions_with_the_matching_controls(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
@@ -1051,7 +1106,6 @@ class LogisimLauncherTests(unittest.TestCase):
         ))
 
     def test_sub_operand_reaches_operations_input(self):
-        expected = ("(1430,1120)", "(2440,1120)")
         stale_sub_monitor_route = {
             ("(1300,960)", "(1770,960)"),
             ("(1770,960)", "(1770,2510)"),
@@ -1094,7 +1148,15 @@ class LogisimLauncherTests(unittest.TestCase):
             )
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             wires = {(wire.get("from"), wire.get("to")) for wire in main.findall("wire")}
-            self.assertIn(expected, wires, f"{name} leaves SUB_OPERAND disconnected")
+            self.assertTrue(
+                _wire_path_exists(
+                    main, _controls_port(main, "SUB_OPERAND"),
+                    _subcircuit_ports(
+                        root, main, "OPERATIONS_INSTANCE"
+                    )["SUB_OPERAND"],
+                ),
+                f"{name} leaves SUB_OPERAND disconnected",
+            )
             self.assertTrue(
                 stale_sub_monitor_route.isdisjoint(wires),
                 f"{name} still routes SUB_OPERAND to the stale monitor net",

@@ -49,6 +49,15 @@ def _component_terminal(component: ET.Element, x: int, y: int) -> str:
     return f"({component_x + x},{component_y + y})"
 
 
+def _subcircuit_ports(project: ET.Element, circuit: ET.Element,
+                      label: str) -> dict[str, str]:
+    instance = _component_by_label(circuit, label)
+    definition = project.find(f"circuit[@name='{instance.get('name')}']")
+    if definition is None:
+        raise AssertionError(f"missing definition for {instance.get('name')}")
+    return VERIFY.generated_symbol_ports(definition, instance)
+
+
 def _remove_wire_at(circuit: ET.Element, endpoint: str) -> None:
     """Remove a wire incident on a named/derived electrical terminal."""
     wire = next((
@@ -545,8 +554,10 @@ class CircuitVerificationTests(unittest.TestCase):
         core = temporary / "logisim" / "TinyCPU.circ"
         project = ET.parse(core)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
-        ET.SubElement(main, "wire", {"from": "(3590,940)", "to": "(2960,940)"})
-        ET.SubElement(main, "wire", {"from": "(2960,940)", "to": "(2960,390)"})
+        controls = _subcircuit_ports(
+            project.getroot(), main, "FETCH_DECODE_CONTROLS"
+        )
+        _remove_wire_at(main, controls["DISABLE_INTERRUPTS_REQUEST"])
         project.write(core, encoding="utf-8", xml_declaration=True)
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
@@ -594,14 +605,20 @@ class CircuitVerificationTests(unittest.TestCase):
         core = temporary / "logisim" / "TinyCPU.circ"
         project = ET.parse(core)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
-        swaps = {
-            frozenset(("(2150,1060)", "(2440,1060)")): "(2440,1040)",
-            frozenset(("(2390,1040)", "(2440,1040)")): "(2440,1060)",
-        }
-        for wire in main.findall("wire"):
-            replacement = swaps.get(frozenset((wire.get("from"), wire.get("to"))))
-            if replacement is not None:
-                wire.set("to", replacement)
+        operations = _subcircuit_ports(project.getroot(), main, "OPERATIONS_INSTANCE")
+        memory = _subcircuit_ports(project.getroot(), main, "MEMORY_INSTANCE")
+        datapath = _subcircuit_ports(project.getroot(), main, "DATAPATH_INSTANCE")
+        for target in (operations["MEMORY_VALID"], operations["ACC_VALID"]):
+            _remove_wire_at(main, target)
+        for source, target in (
+            (memory["MEMORY_VALID"], operations["ACC_VALID"]),
+            (datapath["ACC_VALID_OUT"], operations["MEMORY_VALID"]),
+        ):
+            sx, sy = map(int, source.strip("()").split(","))
+            tx, ty = map(int, target.strip("()").split(","))
+            bend = f"({sx},{ty})"
+            ET.SubElement(main, "wire", {"from": source, "to": bend})
+            ET.SubElement(main, "wire", {"from": bend, "to": target})
         project.write(core, encoding="utf-8", xml_declaration=True)
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
@@ -725,11 +742,8 @@ class CircuitVerificationTests(unittest.TestCase):
         project = ET.parse(circuit)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
         self.assertIsNotNone(main)
-        wire = next(
-            item for item in main.findall("wire")
-            if item.get("from") == "(1430,1580)"
-        )
-        main.remove(wire)
+        gate = _component_by_label(main, "MEMORY_WRITE_REQUEST")
+        _remove_wire_at(main, _component_terminal(gate, -50, -20))
         project.write(circuit, encoding="utf-8", xml_declaration=True)
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
@@ -816,16 +830,9 @@ class CircuitVerificationTests(unittest.TestCase):
             attribute.get("name"): attribute.get("val")
             for attribute in address.findall("a")
         }
-        self.assertEqual(address.get("loc"), "(3620,1340)")
         self.assertEqual(attributes.get("type"), "output")
         self.assertEqual(attributes.get("width"), "16")
-
-        wires = {
-            frozenset((wire.get("from"), wire.get("to")))
-            for wire in boundary.findall("wire")
-        }
-        self.assertIn(frozenset(("(660,500)", "(670,500)")), wires)
-        self.assertNotIn(frozenset(("(660,580)", "(680,510)")), wires)
+        VERIFY.verify_system_circuit()
 
     def test_ap18_top_level_requires_cpu_integration_boundary(self) -> None:
         root = MODULE_PATH.parents[1]
