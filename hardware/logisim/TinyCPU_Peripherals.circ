@@ -230,9 +230,7 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="RAM_READ_VALID"/>
     </comp>
-    <comp lib="0" loc="(300,300)" name="Constant">
-      <a name="value" val="0x1"/>
-    </comp>
+    <comp lib="0" loc="(300,300)" name="Constant"/>
     <comp lib="0" loc="(300,320)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="RAM_WRITE_ENABLE"/>
@@ -362,8 +360,7 @@
     <wire from="(670,510)" to="(680,510)"/>
     <wire from="(700,340)" to="(700,370)"/>
     <wire from="(700,370)" to="(860,370)"/>
-    <wire from="(700,490)" to="(710,490)"/>
-    <wire from="(710,490)" to="(840,490)"/>
+    <wire from="(700,490)" to="(840,490)"/>
     <wire from="(720,320)" to="(720,350)"/>
     <wire from="(720,350)" to="(860,350)"/>
     <wire from="(740,300)" to="(740,330)"/>
