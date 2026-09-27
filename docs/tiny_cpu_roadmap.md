@@ -270,8 +270,11 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Kernschaltung, Systemschaltung und unveränderte Simulatorausgabe gemeinsam
   als reproduzierbares Diagnosepaket auf. Ihr erster Fall weist noch einen
   elektrischen Unterschied nach; deshalb bleibt sie bis zur Reparatur
-  außerhalb des verpflichtenden Kern-Gates. Als Nächstes wird dieser
-  Unterschied anhand des gesicherten Pakets isoliert und minimal repariert.
+  außerhalb des verpflichtenden Kern-Gates. Ein maschinenlesbarer
+  Diagnoseindex hält nun den ersten fehlerhaften Vektor und dessen benannte
+  Signale zusätzlich zur unveränderten Simulatorausgabe fest. Als Nächstes
+  wird dieser Unterschied anhand des gesicherten Pakets mit internen Messpins
+  weiter isoliert und anschließend minimal repariert.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
