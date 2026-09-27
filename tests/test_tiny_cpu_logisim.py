@@ -32,6 +32,7 @@ from tiny_cpu_logisim import (
 )
 from tiny_cpu_profiles import load_profile
 from tiny_cpu_systems import load_system_profile
+from tiny_cpu_verify import generated_symbol_ports
 
 
 def _attributes(component):
@@ -773,6 +774,21 @@ class LogisimLauncherTests(unittest.TestCase):
             self.assertTrue(
                 terminals.issubset(wire_endpoints),
                 f"{label} has an unconnected input terminal",
+            )
+
+        controls = _component_by_label(main, "FETCH_DECODE_CONTROLS")
+        controls_definition = next(
+            circuit for circuit in root.findall("circuit")
+            if circuit.get("name") == "FetchDecodeControls"
+        )
+        controls_ports = generated_symbol_ports(controls_definition, controls)
+        for store_request, terminal in zip(
+            ("STORE_ADR", "STORE_ADR_REG", "STORE_REG_OFF"),
+            ("(470,600)", "(470,620)", "(470,640)"),
+        ):
+            self.assertTrue(
+                _wire_path_exists(main, controls_ports[store_request], terminal),
+                f"{store_request} does not reach MEMORY_WRITE_REQUEST",
             )
 
     def test_add_operand_reaches_operations_input(self):

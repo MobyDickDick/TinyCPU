@@ -716,6 +716,36 @@ class CircuitVerificationTests(unittest.TestCase):
             ):
                 VERIFY.verify_system_circuit()
 
+    def test_ap18_memory_write_request_uses_store_decoder_outputs(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        circuit = temporary / "logisim" / "TinyCPU.circ"
+        project = ET.parse(circuit)
+        main = project.getroot().find("circuit[@name='TinyCPUMain']")
+        self.assertIsNotNone(main)
+        wire = next(
+            item for item in main.findall("wire")
+            if item.get("from") == "(1430,1580)"
+        )
+        main.remove(wire)
+        project.write(circuit, encoding="utf-8", xml_declaration=True)
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+             mock.patch.object(
+                 VERIFY,
+                 "load_system_profile",
+                 return_value=replace(
+                     system,
+                     circuit_path=temporary / "logisim" / "TinyCPU_Peripherals.circ",
+                 ),
+             ):
+            with self.assertRaisesRegex(
+                VERIFY.VerificationError, "memory-write request sources"
+            ):
+                VERIFY.verify_system_circuit()
+
     def test_ap18_cpu_integration_requires_address_width_adapter(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"

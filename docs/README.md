@@ -78,6 +78,12 @@ die 12-Bit-Adresse vom vorläufigen Kernanschluss zur Speichergrenze. Die
 CPU-seitigen Signale für Schreibwert, Schreibgültigkeit und Schreibfreigabe
 reichen ebenfalls direkt bis zur Speichergrenze. Die Regression verfolgt all
 diese Wege anhand der benannten Pins statt veralteter Zeichenkoordinaten.
+Die Schreibanforderung wird nun ausschließlich aus den drei Store-Decodes
+gebildet; zwei zuvor versehentlich angeschlossene Fehler-Setzsignale sind durch
+getrennte sichtbare Leitungen ersetzt und per Mutationstest abgesichert. Der
+erste elektrische Systemfall bleibt dennoch beim Portschreibvorgang offen,
+sodass als Nächstes die Store-Decodes am fehlerhaften Vektor direkt gemessen
+werden.
 Die Instruktionsgrenze und die drei Befehlsimpulse für Interruptaktivierung,
 -deaktivierung und Rückkehr sind nun ebenfalls direkt und
 mutationstestgeschützt weitergereicht. Auch der Folge-PC gelangt von einem
