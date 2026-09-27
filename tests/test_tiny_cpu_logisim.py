@@ -249,15 +249,23 @@ class LogisimLauncherTests(unittest.TestCase):
         )
 
     def test_interrupt_pc_override_preserves_sequential_pc_when_inactive(self):
-        """Select zero must keep the normal next-PC path, not the IRQ target."""
+        """The IRQ mux must select its target only when acceptance is active."""
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         fetch = root.find("circuit[@name='FetchDecode']")
         self.assertIsNotNone(fetch)
         override = _component_by_label(fetch, "INTERRUPT_PC_OVERRIDE")
-        # A classic two-input mux selects its lower data contact for select 0.
-        default_input = _point_offset(override, x=-30, y=10)
-        interrupt_input = _point_offset(override, x=-30, y=-10)
-        self.assertTrue(_wire_path_exists(fetch, "(870,240)", default_input))
+        # Classic Logisim multiplexers number their data inputs from top to
+        # bottom: select 0 uses the upper contact and select 1 the lower one.
+        default_input = _point_offset(override, x=-30, y=-10)
+        interrupt_input = _point_offset(override, x=-30, y=10)
+        select_input = _point_offset(override, x=-20, y=20)
+        normal_mux = next(
+            component for component in fetch.findall("comp")
+            if component.get("name") == "Multiplexer" and component is not override
+        )
+        self.assertTrue(
+            _wire_path_exists(fetch, normal_mux.get("loc"), default_input)
+        )
         self.assertTrue(
             _wire_path_exists(
                 fetch,
@@ -270,6 +278,11 @@ class LogisimLauncherTests(unittest.TestCase):
                 fetch,
                 _pin_location(fetch, "INTERRUPT_TARGET_PC"),
                 default_input,
+            )
+        )
+        self.assertTrue(
+            _wire_path_exists(
+                fetch, _pin_location(fetch, "INTERRUPT_ACCEPT"), select_input
             )
         )
 
