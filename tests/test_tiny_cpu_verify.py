@@ -28,6 +28,38 @@ sys.modules[WIRE_SPEC.name] = WIRE_CONTACTS
 WIRE_SPEC.loader.exec_module(WIRE_CONTACTS)
 
 
+def _component_by_label(circuit: ET.Element, label: str) -> ET.Element:
+    """Return one labelled component without depending on its canvas position."""
+    matches = [
+        component for component in circuit.findall("comp")
+        if any(
+            attribute.get("name") == "label" and attribute.get("val") == label
+            for attribute in component.findall("a")
+        )
+    ]
+    if len(matches) != 1:
+        raise AssertionError(f"expected exactly one component labelled {label!r}")
+    return matches[0]
+
+
+def _component_terminal(component: ET.Element, x: int, y: int) -> str:
+    component_x, component_y = map(
+        int, component.get("loc", "").strip("()").split(",")
+    )
+    return f"({component_x + x},{component_y + y})"
+
+
+def _remove_wire_at(circuit: ET.Element, endpoint: str) -> None:
+    """Remove a wire incident on a named/derived electrical terminal."""
+    wire = next((
+        item for item in circuit.findall("wire")
+        if endpoint in {item.get("from"), item.get("to")}
+    ), None)
+    if wire is None:
+        raise AssertionError(f"no wire is connected to terminal {endpoint}")
+    circuit.remove(wire)
+
+
 class CircuitVerificationTests(unittest.TestCase):
     def test_pin_handoffs_reject_crossed_address_and_ram_value_widths(self) -> None:
         interfaces = {
@@ -293,37 +325,39 @@ class CircuitVerificationTests(unittest.TestCase):
     def test_ap18_cpu_integration_requires_external_memory_selection_paths(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
-        for endpoint in (
-            "(1090,730)", "(1090,750)", "(1100,760)", "(1120,740)",
-            "(1120,790)", "(1120,810)", "(1130,820)", "(1150,800)",
-        ):
-            with self.subTest(endpoint=endpoint):
-                temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
-                shutil.copytree(source, temporary / "logisim")
-                core = temporary / "logisim" / "TinyCPU.circ"
-                project = ET.parse(core)
-                main = project.getroot().find("circuit[@name='TinyCPUMain']")
-                self.assertIsNotNone(main)
-                wire = next(
-                    item for item in main.findall("wire")
-                    if endpoint in {item.get("from"), item.get("to")}
-                )
-                main.remove(wire)
-                project.write(core, encoding="utf-8", xml_declaration=True)
-                system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
-                with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
-                     mock.patch.object(
-                         VERIFY,
-                         "load_system_profile",
-                         return_value=replace(
-                             system,
-                             circuit_path=temporary / "logisim" / "TinyCPU_Peripherals.circ",
-                         ),
-                     ):
-                    with self.assertRaisesRegex(
-                        VERIFY.VerificationError, "external-memory selection paths differ"
-                    ):
-                        VERIFY.verify_system_circuit()
+        selector_cases = (
+            ("EXTERNAL_MEMORY_VALUE_SELECT", (-30, -10), (-30, 10), (-20, 20), (0, 0)),
+            ("EXTERNAL_MEMORY_VALID_SELECT", (-30, -10), (-30, 10), (-20, 20), (0, 0)),
+        )
+        for label, *offsets in selector_cases:
+            for offset in offsets:
+                with self.subTest(selector=label, terminal=offset):
+                    temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+                    shutil.copytree(source, temporary / "logisim")
+                    core = temporary / "logisim" / "TinyCPU.circ"
+                    project = ET.parse(core)
+                    main = project.getroot().find("circuit[@name='TinyCPUMain']")
+                    self.assertIsNotNone(main)
+                    selector = _component_by_label(main, label)
+                    _remove_wire_at(
+                        main, _component_terminal(selector, *offset)
+                    )
+                    project.write(core, encoding="utf-8", xml_declaration=True)
+                    system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+                    with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+                         mock.patch.object(
+                             VERIFY,
+                             "load_system_profile",
+                             return_value=replace(
+                                 system,
+                                 circuit_path=temporary / "logisim" / "TinyCPU_Peripherals.circ",
+                             ),
+                         ):
+                        with self.assertRaisesRegex(
+                            VERIFY.VerificationError,
+                            "external-memory selection paths differ",
+                        ):
+                            VERIFY.verify_system_circuit()
 
     def test_ap18_cpu_integration_requires_external_write_paths(self) -> None:
         root = MODULE_PATH.parents[1]
@@ -457,10 +491,7 @@ class CircuitVerificationTests(unittest.TestCase):
         project = ET.parse(core)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
         self.assertIsNotNone(main)
-        constant = next(
-            component for component in main.findall("comp[@name='Constant']")
-            if component.get("loc") == "(3560,930)"
-        )
+        constant = _component_by_label(main, "INSTRUCTION_BOUNDARY_ASSERTED")
         value = next(
             attribute for attribute in constant.findall("a")
             if attribute.get("name") == "value"
@@ -490,9 +521,8 @@ class CircuitVerificationTests(unittest.TestCase):
         core = temporary / "logisim" / "TinyCPU.circ"
         project = ET.parse(core)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
-        wire = next(item for item in main.findall("wire")
-                    if "(3590,1170)" in {item.get("from"), item.get("to")})
-        main.remove(wire)
+        next_pc = _component_by_label(main, "NEXT_PC")
+        _remove_wire_at(main, next_pc.get("loc", ""))
         project.write(core, encoding="utf-8", xml_declaration=True)
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
@@ -515,8 +545,8 @@ class CircuitVerificationTests(unittest.TestCase):
         core = temporary / "logisim" / "TinyCPU.circ"
         project = ET.parse(core)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
-        ET.SubElement(main, "wire", {"from": "(3560,930)", "to": "(2960,930)"})
-        ET.SubElement(main, "wire", {"from": "(2960,930)", "to": "(2960,390)"})
+        ET.SubElement(main, "wire", {"from": "(3590,940)", "to": "(2960,940)"})
+        ET.SubElement(main, "wire", {"from": "(2960,940)", "to": "(2960,390)"})
         project.write(core, encoding="utf-8", xml_declaration=True)
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
@@ -565,8 +595,8 @@ class CircuitVerificationTests(unittest.TestCase):
         project = ET.parse(core)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
         swaps = {
-            frozenset(("(2120,1050)", "(2410,1050)")): "(2410,1030)",
-            frozenset(("(2360,1030)", "(2410,1030)")): "(2410,1050)",
+            frozenset(("(2150,1060)", "(2440,1060)")): "(2440,1040)",
+            frozenset(("(2390,1040)", "(2440,1040)")): "(2440,1060)",
         }
         for wire in main.findall("wire"):
             replacement = swaps.get(frozenset((wire.get("from"), wire.get("to"))))
@@ -756,7 +786,7 @@ class CircuitVerificationTests(unittest.TestCase):
             attribute.get("name"): attribute.get("val")
             for attribute in address.findall("a")
         }
-        self.assertEqual(address.get("loc"), "(3590,1330)")
+        self.assertEqual(address.get("loc"), "(3620,1340)")
         self.assertEqual(attributes.get("type"), "output")
         self.assertEqual(attributes.get("width"), "16")
 
