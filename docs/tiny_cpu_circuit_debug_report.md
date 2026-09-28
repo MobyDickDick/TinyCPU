@@ -3625,3 +3625,51 @@ unverändert. Das nächste dokumentierte Diagnosepaket vergleicht ausschließlic
 `Datapath.ACC_VALID_OUT` mit dem CPU-Export `EXTERNAL_WRITE_VALID` während der
 Vektoren 2 und 3; erst ein dort nachgewiesener erster Unterschied darf eine
 kleinstmögliche Reparatur auslösen.
+
+#### Elektrischer Vergleich des internen Schreibgültigkeitspfads
+
+- **Ausgangsstand:** `5b9b3cd1ce62de13763639184b0f536b63ec73c1`
+- **Datum:** 28. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Für den angekündigten Vergleich wurde ausschließlich eine Kopie unter
+`/tmp/ap18-internal/` instrumentiert. Ein passiver Ausgang führt
+`Datapath.ACC_VALID_OUT` durch die generierte `TinyCPUMain`-Schnittstelle und
+die bestehende `CPUIntegrationBoundary` bis auf das Systemblatt. Der
+zusätzliche Messpin verändert weder die eingecheckten Schaltungen noch die
+handgestaltete Darstellung von `FetchDecodeControls`. Die Messung verwendet
+unverändert ROM und acht Taktvektoren des ersten Falls
+`output-valid-write`.
+
+```bash
+java -Djava.awt.headless=true \
+  --class-path .venv/Include/logisim-evolution-4.1.0-all.jar \
+  scripts/LogisimHeadlessVector.java TinyCPUSystemMain \
+  /tmp/ap18-internal/vector.txt \
+  /tmp/ap18-internal/TinyCPU_Peripherals.circ
+```
+
+`INTERNAL_ACC_VALID` ist in Vektor 1 logisch `0` und bleibt auch nach der
+ersten steigenden Flanke in den Vektoren 2 bis 8 auf `0`. Das stimmt in jedem
+Vektor mit dem bereits gemessenen regulären Ausgang
+`EXTERNAL_WRITE_VALID` überein. Der Exportpfad verliert die Gültigkeit daher
+nicht; er gibt den tatsächlichen Zustand des Akkumulator-Gültigkeitsregisters
+weiter.
+
+Als Kontrolllauf wurde dieselbe Befehlsfolge `LOAD_CONST(23)`,
+`STORE_ADDRESS(4095)`, `LOAD_ADDRESS(4095)`, `HALT()` in einer zweiten
+temporären Kopie direkt auf `TinyCPUMain` ausgeführt. Der dort ebenfalls
+passiv herausgeführte Ausgang `ACC_VALID_OUT` ist nach `LOAD_CONST` und während
+`STORE_ADDRESS` logisch `1`. Erst `LOAD_ADDRESS` übernimmt wie erwartet das
+ungültige Bit der zuvor nicht beschriebenen internen Speicherzelle und setzt
+ihn auf `0`. Damit sind Register und Ausgang im eigenständigen Kern elektrisch
+funktionsfähig; nur im eingebetteten Systemlauf bleibt das Gültigkeitsregister
+aus, obwohl der Akkumulatorwert dort `0x0017` erreicht.
+
+Der erste offene funktionale Unterschied liegt somit vor
+`Datapath.ACC_VALID_OUT`, nicht zwischen diesem Ausgang und
+`EXTERNAL_WRITE_VALID`. Gemäß Stop-Regel wurde keine Schaltung geändert. Das
+nächste dokumentierte Diagnosepaket misst ausschließlich `ACC_LOAD`,
+`VALID_IN` und `CLK` unmittelbar am `Datapath` vor und nach der ersten
+steigenden Flanke und vergleicht System- und Kernlauf. Alle Decoder-, Export-,
+Speicher-, Port- und Interruptpfade bleiben bis zu diesem Nachweis unverändert.

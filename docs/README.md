@@ -92,8 +92,13 @@ Grenzvergleich zeigt die Schreibfreigabe in den Vektoren 2 und 3 korrekt auf
 Schreibgültigkeit bleibt dagegen bereits am Ausgang der
 `CPUIntegrationBoundary` auf `0`. Da dasselbe Netz direkt den Eingang des
 aktiven `OutputMemoryPath` speist, liegt der erste Unterschied vor der
-Systemgrenze. Als Nächstes wird deshalb ausschließlich der CPU-interne Pfad von
-`Datapath.ACC_VALID_OUT` zum Export `EXTERNAL_WRITE_VALID` verfolgt.
+Systemgrenze. Der anschließende interne Vergleich zeigt, dass
+`Datapath.ACC_VALID_OUT` und der Export `EXTERNAL_WRITE_VALID` im eingebetteten
+System in allen acht Vektoren gemeinsam `0` führen. Ein eigenständiger
+Kernlauf setzt dasselbe Akkumulator-Gültigkeitsregister nach `LOAD_CONST(23)`
+dagegen korrekt auf `1`. Als Nächstes werden deshalb ausschließlich
+`ACC_LOAD`, `VALID_IN` und `CLK` am `Datapath` während der ersten steigenden
+Systemflanke mit dem eigenständigen Kernlauf verglichen.
 Die Instruktionsgrenze und die drei Befehlsimpulse für Interruptaktivierung,
 -deaktivierung und Rückkehr sind nun ebenfalls direkt und
 mutationstestgeschützt weitergereicht. Auch der Folge-PC gelangt von einem

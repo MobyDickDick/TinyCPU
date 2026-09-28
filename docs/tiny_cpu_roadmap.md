@@ -535,6 +535,14 @@ der Übersichtsseite benötigen deshalb ein neu abgegrenztes Arbeitspaket; aus
 diesem historischen Abschnitt darf kein impliziter Folgeauftrag abgeleitet
 werden.
 
+Die nachgelagerte AP-18-Systemdiagnose bestätigt inzwischen außerdem, dass
+`Datapath.ACC_VALID_OUT` und `EXTERNAL_WRITE_VALID` elektrisch denselben
+Zustand führen. Im eingebetteten Portfixture bleiben beide nach
+`LOAD_CONST(23)` auf `0`, während ein eigenständiger Kernlauf das
+Gültigkeitsregister korrekt auf `1` setzt. Die Exportleitung ist deshalb nicht
+zu ändern; der nächste begrenzte Vergleich gilt den drei Datapath-Eingängen
+`ACC_LOAD`, `VALID_IN` und `CLK` an der ersten steigenden Flanke.
+
 ## Dokumentierter Bedienbarkeitsbefund
 
 Die elektrische Prüfbarkeit von `TinyCPUMain` bedeutet nicht automatisch eine
