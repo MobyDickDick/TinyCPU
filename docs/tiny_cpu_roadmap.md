@@ -543,6 +543,13 @@ Gültigkeitsregister korrekt auf `1` setzt. Die Exportleitung ist deshalb nicht
 zu ändern; der nächste begrenzte Vergleich gilt den drei Datapath-Eingängen
 `ACC_LOAD`, `VALID_IN` und `CLK` an der ersten steigenden Flanke.
 
+Dieser Vergleich ist inzwischen abgeschlossen: Ladefreigabe und Takt stimmen
+zwischen System- und Kernlauf überein. Der erste Unterschied liegt an
+`Datapath.VALID_IN`, das für `LOAD_CONST(23)` im eingebetteten Lauf `0` statt
+`1` führt. Der nächste begrenzte Vergleich gilt daher ausschließlich
+`Operations.RESULT_IS_VALID` und seiner Leitung zu diesem Eingang; eine
+Schaltungsänderung ist daraus noch nicht abgeleitet.
+
 ## Dokumentierter Bedienbarkeitsbefund
 
 Die elektrische Prüfbarkeit von `TinyCPUMain` bedeutet nicht automatisch eine

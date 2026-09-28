@@ -3673,3 +3673,38 @@ nächste dokumentierte Diagnosepaket misst ausschließlich `ACC_LOAD`,
 `VALID_IN` und `CLK` unmittelbar am `Datapath` vor und nach der ersten
 steigenden Flanke und vergleicht System- und Kernlauf. Alle Decoder-, Export-,
 Speicher-, Port- und Interruptpfade bleiben bis zu diesem Nachweis unverändert.
+
+#### Elektrischer Vergleich der Datapath-Eingänge
+
+- **Ausgangsstand:** `ba3137794a7868f4b21f758d15fa3bb10916ce0c`
+- **Datum:** 28. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Der angekündigte Vergleich verwendet eine ausschließlich unter
+`/tmp/ap18-datapath-inputs/` instrumentierte Kopie. Passive Ausgänge beobachten
+`ACC_LOAD`, `VALID_IN` und `CLK` unmittelbar an der vorhandenen
+`Datapath`-Instanz. ROM und acht Vektoren entsprechen unverändert dem ersten
+Systemfall `output-valid-write`; eine zweite Kopie führt dieselben vier
+Befehle direkt auf `TinyCPUMain` aus.
+
+```bash
+java -Djava.awt.headless=true \
+  --class-path .venv/Include/logisim-evolution-4.1.0-all.jar \
+  scripts/LogisimHeadlessVector.java TinyCPUSystemMain \
+  /tmp/ap18-datapath-inputs/vector.txt \
+  /tmp/ap18-datapath-inputs/TinyCPU_Peripherals.circ
+```
+
+Im System- und im Kontrolllauf ist `ACC_LOAD` für `LOAD_CONST(23)` aktiv und
+`CLK` erreicht den Baustein mit derselben Phase. Nur `VALID_IN` weicht ab: Vor
+der ersten steigenden Flanke liegt im Kontrolllauf `1`, im eingebetteten Lauf
+aber `0` an. Das erklärt den bisherigen Befund vollständig: Beide Läufe laden
+den Wert `0x0017`, doch nur der Kontrolllauf lädt zugleich ein gültiges Bit.
+
+Die eingecheckten Schaltungen wurden nicht verändert. Der erste Unterschied
+ist jetzt am benannten Eingang `Datapath.VALID_IN` belegt. Das nächste
+dokumentierte Diagnosepaket vergleicht ausschließlich den vorgelagerten
+Ausgang `Operations.RESULT_IS_VALID` mit diesem Eingang in beiden Läufen. Je
+nach Ergebnis liegt der kleinste Reparaturort entweder auf dieser Leitung oder
+innerhalb der Gültigkeitserzeugung von `Operations`; alle anderen Signalwege
+bleiben bis dahin unverändert.
