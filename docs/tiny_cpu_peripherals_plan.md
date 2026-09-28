@@ -747,3 +747,21 @@ unveränderte Fall `output-valid-write` erneut ausgeführt. Datenwert, Decoder,
 `Operations`, Export, Ausgabeport, Interruptsteuerung, PC-Pfad und die
 geschützte Darstellung von `FetchDecodeControls` bleiben bis dahin
 unverändert.
+
+## Wiederherstellung der Ladegültigkeits-Auswahl
+
+Die angekündigte Reparatur stellt die drei benannten, ein Bit breiten Stufen
+`ACC_MEMORY_VALID_SELECT`, `ACC_NOT_VALID_SELECT` und
+`ACC_INPUT_VALID_SELECT` wieder her. Nur ihr Ausgang erreicht nun
+`Datapath.VALID_IN`; die falsche Verbindung vom Überlaufausgang wurde
+entfernt. `FetchDecodeControls` selbst blieb unverändert. Ein fokussierter
+elektrischer Messpin in einer Kopie unter `/tmp` bestätigt vor der ersten
+steigenden Flanke des Falls `output-valid-write` `VALID_IN=1`. Die
+vollständige elektrische Kernmatrix bleibt mit allen 61 Fixtures grün.
+
+Der erneut ausgeführte Systemfall übernimmt an Vektor 4 den Portwert und
+dessen Gültigkeit dennoch weiterhin nicht. Damit ist die dokumentierte
+Ladegültigkeits-Auswahl repariert, aber die Systemabnahme noch nicht
+freigegeben. Als nächstes wird ausschließlich geprüft, ob das eingebettete
+`Datapath.ACC_VALID_OUT` das an der ersten Flanke anliegende `VALID_IN=1`
+speichert und bis zum Store-Zyklus hält.

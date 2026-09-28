@@ -887,6 +887,74 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             "AP-18 Operations validity inputs are crossed, disconnected, or shorted"
         )
+    controls_instance = next(
+        component for component in core_definition.findall("comp")
+        if component.get("name") == "FetchDecodeControls"
+    )
+    controls_definition = core_project.find("circuit[@name='FetchDecodeControls']")
+    datapath_instance = next(
+        component for component in core_definition.findall("comp")
+        if component.get("name") == "Datapath"
+    )
+    datapath_definition = core_project.find("circuit[@name='Datapath']")
+    if controls_definition is None or datapath_definition is None:
+        raise VerificationError("AP-18 CPU load-validity boundaries are missing")
+    controls_ports = generated_symbol_ports(controls_definition, controls_instance)
+    datapath_ports = generated_symbol_ports(datapath_definition, datapath_instance)
+    validity_selectors = {}
+    for component in core_definition.findall("comp[@name='Multiplexer']"):
+        attributes = {
+            item.get("name"): item.get("val") for item in component.findall("a")
+        }
+        label = attributes.get("label")
+        if label in {
+            "ACC_MEMORY_VALID_SELECT",
+            "ACC_NOT_VALID_SELECT",
+            "ACC_INPUT_VALID_SELECT",
+        }:
+            validity_selectors.setdefault(label, []).append(component)
+    if any(len(validity_selectors.get(label, ())) != 1 for label in (
+        "ACC_MEMORY_VALID_SELECT", "ACC_NOT_VALID_SELECT", "ACC_INPUT_VALID_SELECT"
+    )):
+        raise VerificationError("AP-18 CPU load-validity selectors differ from contract")
+
+    def mux_terminals(label: str) -> tuple[str, str, str, str]:
+        component = validity_selectors[label][0]
+        x, y = map(int, component.get("loc").strip("()").split(","))
+        return component.get("loc"), f"({x - 30},{y - 10})", \
+            f"({x - 30},{y + 10})", f"({x - 20},{y + 20})"
+
+    memory_out, memory_default, memory_selected, memory_control = mux_terminals(
+        "ACC_MEMORY_VALID_SELECT"
+    )
+    not_out, not_default, not_selected, not_control = mux_terminals(
+        "ACC_NOT_VALID_SELECT"
+    )
+    input_out, input_default, input_selected, input_control = mux_terminals(
+        "ACC_INPUT_VALID_SELECT"
+    )
+    constants = {}
+    for component in core_definition.findall("comp[@name='Constant']"):
+        attributes = {
+            item.get("name"): item.get("val") for item in component.findall("a")
+        }
+        constants.setdefault(attributes.get("value", "0x0"), []).append(
+            component.get("loc")
+        )
+    validity_paths = (
+        any(core_connected(point, memory_default) for point in constants.get("0x1", ())),
+        core_connected(memory_valid_output, memory_selected),
+        core_connected(controls_ports["ACC_MEMORY_REQUEST"], memory_control),
+        core_connected(memory_out, not_default),
+        core_connected(datapath_ports["ACC_VALID_OUT"], not_selected),
+        core_connected(controls_ports["INVERT"], not_control),
+        core_connected(not_out, input_default),
+        any(core_connected(point, input_selected) for point in constants.get("0x0", ())),
+        core_connected(controls_ports["INPUT"], input_control),
+        core_connected(input_out, datapath_ports["VALID_IN"]),
+    )
+    if not all(validity_paths):
+        raise VerificationError("AP-18 CPU load-validity selection paths differ from contract")
     cpu_pins = {}
     for component in cpu_boundary.findall("comp[@name='Pin']"):
         attributes = {item.get("name"): item.get("val") for item in component.findall("a")}

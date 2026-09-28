@@ -734,6 +734,36 @@ class CircuitVerificationTests(unittest.TestCase):
             ):
                 VERIFY.verify_system_circuit()
 
+    def test_ap18_cpu_integration_requires_load_validity_selection(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        for label in (
+            "ACC_MEMORY_VALID_SELECT", "ACC_NOT_VALID_SELECT", "ACC_INPUT_VALID_SELECT"
+        ):
+            with self.subTest(selector=label):
+                temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+                shutil.copytree(source, temporary / "logisim")
+                core = temporary / "logisim" / "TinyCPU.circ"
+                project = ET.parse(core)
+                main = project.getroot().find("circuit[@name='TinyCPUMain']")
+                selector = _component_by_label(main, label)
+                _remove_wire_at(main, selector.get("loc"))
+                project.write(core, encoding="utf-8", xml_declaration=True)
+                system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+                with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+                     mock.patch.object(
+                         VERIFY,
+                         "load_system_profile",
+                         return_value=replace(
+                             system,
+                             circuit_path=temporary / "logisim" / "TinyCPU_Peripherals.circ",
+                         ),
+                     ):
+                    with self.assertRaisesRegex(
+                        VERIFY.VerificationError, "load-validity selection paths"
+                    ):
+                        VERIFY.verify_system_circuit()
+
     def test_ap18_cpu_integration_requires_declared_core_paths(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
