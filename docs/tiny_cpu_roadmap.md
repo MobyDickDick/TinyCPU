@@ -292,10 +292,13 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   falsche Store-Quellen am Schreibanforderungsgatter korrigiert. Eine direkte
   elektrische Messung zeigt nun, dass im fehlerhaften Schreibzyklus alle drei
   benannten Store-Ausgänge null bleiben, obwohl `STORE_ADR` aktiv sein müsste.
-  Als Nächstes werden deshalb ausschließlich `OPCODE`-Eingang und
-  `STORE_ADR`-Ausgang der geschützten `FetchDecodeControls`-Schaltung
-  elektrisch verglichen; ihre Anordnung wird dabei weder anhand absoluter
-  Positionen bewertet noch umgezeichnet.
+  `OPCODE`-Eingang und `STORE_ADR`-Ausgang der geschützten
+  `FetchDecodeControls`-Schaltung sind inzwischen elektrisch verglichen. Der
+  isolierte 64-Zeilen-Lauf bestätigt für `0x29` den korrekten
+  `STORE_ADR`-Ausgang; die Schaltung wurde weder umgezeichnet noch verändert.
+  Der nächste Vergleich folgt deshalb im eingebetteten Kern dem Opcode-Wert
+  vom `FetchDecode`-Ausgang bis zum Decoder-Eingang während des ersten
+  fehlerhaften Systemvektors.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

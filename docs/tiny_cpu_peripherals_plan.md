@@ -505,6 +505,28 @@ elektrisch gegeneinander geprüft. Wegen der geschützten handgezeichneten
 Darstellung wird vor diesem Nachweis weder der Decoder umgezeichnet noch eine
 Verbindung anhand von Canvas-Koordinaten bewertet.
 
+Dieser Vergleich ist auf Ausgangs-Commit `b187b1c` erfolgt. Der vorhandene
+elektrische Decodertest wurde zunächst an die inzwischen veröffentlichte
+Schnittstelle angepasst: Der Ausgang des `NOT`-Befehls heißt dort `INVERT`,
+und die Systemopcodes 56 bis 58 besitzen eigene, gültige Ausgänge statt
+`INVALID_OPERAND` zu setzen. Anschließend hat
+
+```bash
+LOGISIM_JAR=.venv/Include/logisim-evolution-4.1.0-all.jar \
+  python3 scripts/test-logisim-decode.py
+```
+
+alle 64 möglichen Werte direkt an den sechs `OPCODE`-Eingangsbits elektrisch
+angelegt und sämtliche öffentlichen Ausgänge verglichen. Der Lauf besteht;
+insbesondere setzt `0x29` ausschließlich den erwarteten Ausgang `STORE_ADR`.
+Damit sind Decoderzeile und Ausgangsleitung innerhalb der geschützten
+`FetchDecodeControls`-Schaltung elektrisch belegt und werden nicht verändert.
+Zusammen mit der zuvor am eingebetteten Symbol gemessenen Null liegt der erste
+Unterschied nun vor dem Decoder: Als nächstes wird während Vektor 4 der am
+eingebetteten `OPCODE`-Eingang ankommende Wert mit dem Opcode-Ausgang von
+`FetchDecode` verglichen. Andere Decoder-, Schreib-, Interrupt- und PC-Pfade
+bleiben bis zu diesem Nachweis unverändert.
+
 
 ## Kompatibilitätsfolgen
 

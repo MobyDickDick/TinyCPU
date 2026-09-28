@@ -21,18 +21,19 @@ OUTPUTS = (
     "ADD_OPERAND", "SUB_OPERAND", "MUL_OPERAND", "DIV_OPERAND",
     "AND_OPERAND", "OR_OPERAND", "XOR_OPERAND",
     "CONST_ARGUMENT", "ADDR_ARGUMENT", "ADDR_REG_ARGUMENT",
-    "ADDR_REG_OFFS_ARGUMENT", "NOT", "JUMP_ADR", "JUMP_ZERO",
+    "ADDR_REG_OFFS_ARGUMENT", "INVERT", "JUMP_ADR", "JUMP_ZERO",
     "JUMP_NOT_ZERO", "JUMP_NEGATIVE", "JUMP_ERROR", "JUMP_NOT_ERROR",
     "LOAD_CONST", "LOAD_ADR", "LOAD_ADR_REG", "LOAD_REG_OFF",
     "LD_REG_CONST", "LD_REG_ADR", "STORE_ADR", "STORE_ADR_REG",
     "STORE_REG_OFF",
     "SET_OVF", "SET_DIV0", "SET_ADDR", "SET_INV", "SET_ILL", "SET_INPUT",
     "CLEAR_ERROR", "INPUT", "PRINT", "PRINT_ADR", "HALT", "HALT_ERROR",
-    "INVALID_OPERAND",
+    "INVALID_OPERAND", "ENABLE_INTERRUPTS_REQUEST",
+    "DISABLE_INTERRUPTS_REQUEST", "RETURN_FROM_INTERRUPT_REQUEST",
 )
 
 DIRECT = {
-    "NOT": "NOT", "JUMP_ADDRESS": "JUMP_ADR", "JUMP_ZERO": "JUMP_ZERO",
+    "NOT": "INVERT", "JUMP_ADDRESS": "JUMP_ADR", "JUMP_ZERO": "JUMP_ZERO",
     "JUMP_NOT_ZERO": "JUMP_NOT_ZERO", "JUMP_NEGATIVE": "JUMP_NEGATIVE",
     "JUMP_ERROR": "JUMP_ERROR", "JUMP_NOT_ERROR": "JUMP_NOT_ERROR",
     "CLEAR_ERROR": "CLEAR_ERROR", "INPUT": "INPUT", "PRINT": "PRINT",
@@ -50,12 +51,20 @@ INTERNAL_ROWS = {
     0x2C: "SET_OVF", 0x2D: "SET_DIV0", 0x2E: "SET_ADDR",
     0x2F: "SET_INV", 0x30: "SET_ILL", 0x31: "SET_INPUT",
 }
+SYSTEM_ROWS = {
+    0x38: "ENABLE_INTERRUPTS_REQUEST",
+    0x39: "DISABLE_INTERRUPTS_REQUEST",
+    0x3A: "RETURN_FROM_INTERRUPT_REQUEST",
+}
 
 
 def expected_row(code: int, opcodes: dict[str, dict[str, object]]) -> dict[str, int]:
     row = dict.fromkeys(OUTPUTS, 0)
     instruction = next((item for item in opcodes.values() if item["code"] == code), None)
     if instruction is None:
+        if code in SYSTEM_ROWS:
+            row[SYSTEM_ROWS[code]] = 1
+            return row
         if code == 0x3F:
             row["SET_ILL"] = 1
             row["HALT_ERROR"] = 1
@@ -124,7 +133,8 @@ def main() -> int:
                     f"{source.name}: opcode {code}: mismatched outputs {', '.join(differences)}"
                 )
         print(f"{source.name}: electrical decode acceptance passed: "
-              "50 opcodes, 6 internal rows, and 8 reserved codes")
+              "50 core opcodes, 3 system opcodes, 6 internal rows, "
+              "and 5 reserved codes")
     return 0
 
 
