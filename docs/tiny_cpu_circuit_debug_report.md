@@ -3532,3 +3532,50 @@ nächstes sind zuerst die verbliebenen topologischen Testanker und der erste
 elektrische Kernunterschied zu korrigieren; erst danach wird die bereits
 dokumentierte Verfolgung der drei Store-Ausgänge am
 `MEMORY_WRITE_REQUEST`-Gatter fortgesetzt.
+
+#### Elektrische Messung des eingebetteten Store-Decodes
+
+- **Ausgangsstand:** `7eae3b0411642e982bd99f5249ff8067cfc67a93`
+- **Datum:** 28. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Das nächste dokumentierte AP-18-Diagnosepaket misst den bereits topologisch
+abgesicherten Opcode-Pfad im eingebetteten `TinyCPUMain`. Dafür wurde eine
+Kopie von `TinyCPU.circ` ausschließlich unter `/tmp/opcode-measure/` erzeugt,
+das ROM mit dem unveränderten Programm des Falls `output-valid-write` geladen
+und das vorhandene Opcode-Netz mit einem passiven 6-Bit-Messpin beobachtet.
+Eine zweite temporäre Kopie unter `/tmp/store-measure/` beobachtete zusätzlich
+den benannten `STORE_ADR`-Ausgang. Die eingecheckte Schaltung und insbesondere
+`FetchDecodeControls` blieben unverändert.
+
+```bash
+java -Djava.awt.headless=true \
+  --class-path .venv/Include/logisim-evolution-4.1.0-all.jar \
+  scripts/LogisimHeadlessVector.java TinyCPUMain \
+  /tmp/store-measure/vector.txt /tmp/store-measure/TinyCPU.circ
+
+LOGISIM_JAR="$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 --system tinycpu-peripherals-16-12-v1 \
+  --system-only --trace-output /tmp/unused-core.tsv \
+  --matrix-output /tmp/ap18-system-current
+```
+
+Der Messlauf zeigt `OPCODE=0x29`, `STORE_ADR=1` und
+`EXTERNAL_WRITE_ENABLE=1` unmittelbar nach der ersten steigenden Flanke sowie
+während der folgenden Low-Phase (Vektoren 2 und 3). An der zweiten steigenden
+Flanke muss der Ausgabeport diese Anforderung übernehmen. Nach dem Abklingen
+dieser Flanke (Vektor 4) hat der PC bereits zum Folgebefehl weitergeschaltet;
+der kombinatorische Pfad zeigt korrekt `OPCODE=0x24`, `STORE_ADR=0` und
+`EXTERNAL_WRITE_ENABLE=0`. Die frühere temporäre Messung, die am
+Post-Edge-Vektor 4 noch `STORE_ADR=1` erwartete, hatte somit nicht den
+Schreibzyklus vor der Flanke beobachtet. Am Decoder ist kein elektrischer
+Fehler nachgewiesen und es wurde dort nichts verändert.
+
+Der fokussierte Systemlauf erreicht weiterhin den ersten Fall und endet mit
+Exitcode 1: An Vektor 4 bleiben `OUTPUT_PORT_VALUE=0x0000` statt `0x0017` und
+`OUTPUT_PORT_VALID=0` statt `1`. Der nächste Diagnoseschritt folgt deshalb den
+Signalen `WRITE_ENABLE`, `WRITE_VALID` und `CLK` an der
+`CPUIntegrationBoundary` bis zu den gleichnamigen Eingängen des `OutputPort`
+unmittelbar vor der zweiten steigenden Flanke. Andere Decoder-, Daten-,
+Interrupt- und PC-Pfade bleiben gemäß Stop-Regel unverändert.
