@@ -548,6 +548,40 @@ class CircuitVerificationTests(unittest.TestCase):
         """The redrawn FetchDecode command paths remain electrically valid."""
         VERIFY.verify_system_circuit()
 
+    def test_ap18_fetch_opcode_path_is_required(self) -> None:
+        """Follow named ports and connectivity, not the current canvas coordinates."""
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        core = temporary / "logisim" / "TinyCPU.circ"
+        project = ET.parse(core)
+        main = project.getroot().find("circuit[@name='TinyCPUMain']")
+        self.assertIsNotNone(main)
+        controls = next(
+            component for component in main.findall("comp[@name='FetchDecodeControls']")
+        )
+        definition = project.getroot().find("circuit[@name='FetchDecodeControls']")
+        self.assertIsNotNone(definition)
+        opcode_terminal = VERIFY.generated_symbol_ports(definition, controls)["OPCODE"]
+        _remove_wire_at(main, opcode_terminal)
+        project.write(core, encoding="utf-8", xml_declaration=True)
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+             mock.patch.object(
+                 VERIFY,
+                 "load_system_profile",
+                 return_value=replace(
+                     system,
+                     circuit_path=temporary / "logisim" / "TinyCPU_Peripherals.circ",
+                 ),
+             ):
+            with self.assertRaisesRegex(
+                VERIFY.VerificationError,
+                "opcode path from FetchDecode to FetchDecodeControls differs",
+            ):
+                VERIFY.verify_system_circuit()
+
     def test_ap18_instruction_boundary_constant_must_be_asserted(self) -> None:
         """An explicitly cleared Constant must not masquerade as a boundary."""
         root = MODULE_PATH.parents[1]

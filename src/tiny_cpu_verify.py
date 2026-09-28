@@ -529,6 +529,55 @@ def verify_system_circuit() -> None:
         if circuit.get("name") == "FetchDecodeControls"
     )
     controls_ports = generated_symbol_ports(controls_definition, controls_instance)
+
+    # FetchDecode exports the complete 22-bit instruction word.  The authored
+    # splitter must pass its six high opcode bits to FetchDecodeControls.  Find
+    # that splitter by its electrical neighbours and bit mapping, rather than
+    # by the coordinates of the current drawing.
+    fetch_instance = next(
+        component for component in core_definition.findall("comp")
+        if component.get("name") == "FetchDecode"
+    )
+    fetch_definition = core_project.find("circuit[@name='FetchDecode']")
+    if fetch_definition is None:
+        raise VerificationError("AP-18 CPU opcode path source is missing")
+    fetch_ports = generated_symbol_ports(fetch_definition, fetch_instance)
+    opcode_splitters = []
+    for splitter in core_definition.findall("comp[@name='Splitter']"):
+        attributes = {
+            attribute.get("name"): attribute.get("val")
+            for attribute in splitter.findall("a")
+        }
+        if attributes.get("incoming") != "22" or attributes.get("facing") != "south":
+            continue
+        splitter_x, splitter_y = map(
+            int, splitter.get("loc", "").strip("()").split(",")
+        )
+        # With two outputs and spacing=2, Logisim places the branch terminals
+        # one grid unit either side and two below the incoming terminal.
+        branches = (
+            f"({splitter_x - 10},{splitter_y + 20})",
+            f"({splitter_x + 10},{splitter_y + 20})",
+        )
+        high_bits_on_branch_one = all(
+            attributes.get(f"bit{bit}", "0") == "1" for bit in range(16, 22)
+        )
+        low_bits_on_branch_zero = all(
+            attributes.get(f"bit{bit}", "0") == "0" for bit in range(16)
+        )
+        if (
+            high_bits_on_branch_one
+            and low_bits_on_branch_zero
+            and core_connected(fetch_ports["OPCODE"], splitter.get("loc", ""))
+            and core_connected(branches[1], controls_ports["OPCODE"])
+        ):
+            opcode_splitters.append(splitter)
+    if len(opcode_splitters) != 1:
+        raise VerificationError(
+            "AP-18 CPU opcode path from FetchDecode to FetchDecodeControls differs "
+            "from contract"
+        )
+
     request_x, request_y = map(
         int, write_request.get("loc", "").strip("()").split(",")
     )

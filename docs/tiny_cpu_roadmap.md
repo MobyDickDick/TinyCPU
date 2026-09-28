@@ -297,8 +297,13 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   isolierte 64-Zeilen-Lauf bestätigt für `0x29` den korrekten
   `STORE_ADR`-Ausgang; die Schaltung wurde weder umgezeichnet noch verändert.
   Der nächste Vergleich folgt deshalb im eingebetteten Kern dem Opcode-Wert
-  vom `FetchDecode`-Ausgang bis zum Decoder-Eingang während des ersten
-  fehlerhaften Systemvektors.
+  vom `FetchDecode`-Ausgang bis zum Decoder-Eingang. Dieser Pfad ist nun
+  ausschließlich topologisch geprüft: Der 22-Bit-Ausgang erreicht den
+  Splitter, und dessen Zweig für Bits 16 bis 21 erreicht den benannten
+  6-Bit-Eingang von `FetchDecodeControls`. Ein Mutationstest des Endanschlusses
+  läuft im GitHub-Offline-Gate mit. Als nächstes ist der so abgesicherte
+  Opcode-Wert während des ersten fehlerhaften Systemvektors elektrisch zu
+  messen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

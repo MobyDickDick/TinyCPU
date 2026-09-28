@@ -317,6 +317,15 @@ Sticky-Fehlerpfad für illegale Operationen speist. Dieselben drei
 Rückkopplungen sind in Integrationsgrenze, Kern und eigenständigem
 `FetchDecode`-Diagnoseblatt durchgehend verdrahtet und werden vom Offline-Prüfer
 sowie den Leitungs-Mutationstests geschützt.
+Der anschließende, ausschließlich topologische Vergleich bestätigt nun auch
+den eingebetteten Opcode-Pfad: Das vollständige 22-Bit-Instruktionswort läuft
+vom benannten `FetchDecode.OPCODE`-Ausgang zum Splitter, dessen Zweig für Bits
+16 bis 21 den benannten `FetchDecodeControls.OPCODE`-Eingang speist. Der Prüfer
+leitet sämtliche Anschlüsse aus Bausteindefinition, Instanz und
+Netzkonnektivität ab; weder die aktuelle Position der drei Bausteine noch ein
+früherer Leitungsverlauf ist Bestandteil des Vertrags. Ein gezielter
+Mutationstest trennt den Decoder-Eingang und läuft damit auch im ausgelagerten
+GitHub-Offline-Gate.
 
 Der zuvor offene Eingang `RAM_WRITE_ENABLE` ist nun über einen vom bestehenden
 `USE_EXTERNAL_MEMORY` gesteuerten Selektor mit dem Schreibfreigabeeingang der
