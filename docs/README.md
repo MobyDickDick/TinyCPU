@@ -80,10 +80,15 @@ reichen ebenfalls direkt bis zur Speichergrenze. Die Regression verfolgt all
 diese Wege anhand der benannten Pins statt veralteter Zeichenkoordinaten.
 Die Schreibanforderung wird nun ausschließlich aus den drei Store-Decodes
 gebildet; zwei zuvor versehentlich angeschlossene Fehler-Setzsignale sind durch
-getrennte sichtbare Leitungen ersetzt und per Mutationstest abgesichert. Der
-erste elektrische Systemfall bleibt dennoch beim Portschreibvorgang offen,
-sodass als Nächstes die Store-Decodes am fehlerhaften Vektor direkt gemessen
-werden.
+getrennte sichtbare Leitungen ersetzt und per Mutationstest abgesichert. Die
+anschließende elektrische Messung des eingebetteten Kerns bestätigt vor der
+entscheidenden steigenden Flanke den Opcode `0x29`, `STORE_ADR=1` und
+`EXTERNAL_WRITE_ENABLE=1`. Nach der Flanke zeigt der kombinatorische Decoder
+bereits den Folgebefehl `0x24`; eine frühere Messung ausschließlich am
+fehlgeschlagenen Post-Edge-Vektor hatte diesen Taktbezug übersehen. Der erste
+elektrische Systemfall bleibt beim Portschreibvorgang offen. Als Nächstes
+werden deshalb Freigabe, Gültigkeit und Takt direkt an der Systemgrenze und am
+Ausgabeport während dieser Flanke verglichen.
 Die Instruktionsgrenze und die drei Befehlsimpulse für Interruptaktivierung,
 -deaktivierung und Rückkehr sind nun ebenfalls direkt und
 mutationstestgeschützt weitergereicht. Auch der Folge-PC gelangt von einem

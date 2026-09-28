@@ -594,3 +594,30 @@ geprüft sind:
 Diese Reihenfolge ist die Grenze des geplanten AP 18. Die Implementierung darf
 die festgelegten Verträge präzisieren, aber weder zusätzliche Geräte noch eine
 Änderung bestehender Profile stillschweigend in das Paket aufnehmen.
+
+Der angekündigte eingebettete Vergleich ist auf Ausgangs-Commit `7eae3b0`
+erfolgt. Ein ausschließlich in `/tmp` erzeugtes Diagnoseprojekt ergänzte am
+bestehenden Opcode-Netz und am benannten `STORE_ADR`-Ausgang passive
+Messpins; weder `TinyCPU.circ` noch die geschützte Darstellung von
+`FetchDecodeControls` wurden verändert. Das ROM enthielt unverändert den
+ersten Systemfall mit `LOAD_CONST(23)`, `STORE_ADDRESS(4095)`,
+`LOAD_ADDRESS(4095)` und `HALT()`.
+
+Die Messung korrigiert zugleich die bisherige zeitliche Zuordnung des
+fehlgeschlagenen Vektors. Nach der ersten steigenden Flanke (Vektor 2) und in
+der anschließenden Low-Phase (Vektor 3) führt der eingebettete Opcode-Pfad
+`0x29`; `STORE_ADR` und `EXTERNAL_WRITE_ENABLE` sind jeweils `1`. An der
+zweiten steigenden Flanke soll der Ausgabeport genau diese Anforderung
+übernehmen. Nach dem Abklingen derselben Flanke (Vektor 4) hat der PC jedoch
+bereits weitergeschaltet: Der kombinatorische Opcode-Pfad zeigt dann korrekt
+`0x24`, und `STORE_ADR` sowie `EXTERNAL_WRITE_ENABLE` sind wieder `0`. Die
+frühere Erwartung, am Post-Edge-Vektor 4 noch den Store-Decoderwert zu sehen,
+war daher falsch; sie begründet keine Änderung am Decoder.
+
+Der unveränderte fokussierte Systemlauf scheitert weiterhin an Vektor 4 mit
+`OUTPUT_PORT_VALUE=0x0000` und `OUTPUT_PORT_VALID=0`. Der erste offene
+Unterschied liegt nun hinter dem nachgewiesen korrekten Store-Decode und seiner
+CPU-internen Schreibfreigabe. Als nächster enger Diagnoseschritt werden
+`WRITE_ENABLE`, `WRITE_VALID` und `CLK` unmittelbar vor der zweiten steigenden
+Flanke an der `CPUIntegrationBoundary` und am `OutputPort` verglichen. Erst ein
+dort benannter erster Unterschied darf eine Schaltungsänderung auslösen.
