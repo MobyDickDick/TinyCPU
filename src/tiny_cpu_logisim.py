@@ -126,11 +126,16 @@ def autonomous_project(
             if width is not None:
                 ET.SubElement(component, "a", {"name": "width", "val": width.get("val", "1")})
             # Pin replacement must preserve the current circuit's explicit
-            # inactive levels.  In particular, Logisim's one-bit Constant
-            # defaults to one: that is required by the active-low adapter
-            # selects, but it falsely asserts the active-high ILL_RET input
-            # and makes JUMP_ERROR take its error branch in clean runs.
-            inactive_value = "0x0" if name == "ILL_RET" else "0x1"
+            # inactive levels.  Logisim's Constant defaults to one, which is
+            # required by the active-low memory adapters but would assert the
+            # active-high interrupt and illegal-return controls.  Keeping the
+            # interrupt target at zero as well makes the generated fixture
+            # deterministic even if its acceptance wiring regresses later.
+            inactive_value = (
+                "0x0"
+                if name in {"INTERRUPT_ACCEPT", "INTERRUPT_TARGET_PC", "ILL_RET"}
+                else "0x1"
+            )
             ET.SubElement(
                 component, "a", {"name": "value", "val": inactive_value}
             )

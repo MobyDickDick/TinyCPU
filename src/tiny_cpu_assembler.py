@@ -154,18 +154,40 @@ def assemble(source: str, profile: Profile = DEFAULT_PROFILE,
 
 def load_program(path: Path, profile: Profile = DEFAULT_PROFILE,
                  system: SystemProfile | None = None) -> Program:
-    """Load assembly or a Logisim ``v2.0 raw`` ROM image."""
+    """Load assembly or a Logisim raw ROM image.
+
+    Logisim uses ``addr/data: ADDRESS_BITS WORD_BITS`` for memory contents
+    embedded in a circuit.  Older standalone images use ``v2.0 raw``.  Accept
+    both spellings so checked-in hardware fixtures can also be inspected with
+    the symbolic debugger.
+    """
     if path.suffix != ".rom":
         return assemble(path.read_text(encoding="utf-8"), profile, system)
     tokens = path.read_text(encoding="utf-8").split()
-    if tokens[:2] != ["v2.0", "raw"]:
-        raise AssemblyError(f"{path}: expected 'v2.0 raw' ROM header")
+    if tokens[:2] == ["v2.0", "raw"]:
+        payload = tokens[2:]
+    elif tokens[:1] == ["addr/data:"]:
+        rom_address_bits = (profile.memory_size - 1).bit_length()
+        expected = ["addr/data:", str(rom_address_bits), str(profile.word_bits)]
+        if tokens[:3] != expected:
+            raise AssemblyError(f"{path}: expected ROM header {' '.join(expected)!r}")
+        payload = tokens[3:]
+    else:
+        raise AssemblyError(
+            f"{path}: expected 'v2.0 raw' or 'addr/data: "
+            f"{(profile.memory_size - 1).bit_length()} {profile.word_bits}' ROM header"
+        )
+    if len(payload) > profile.memory_size:
+        raise AssemblyError(
+            f"{path}: ROM contains {len(payload)} words but profile "
+            f"{profile.name} has only {profile.memory_size} addresses"
+        )
     by_code = {entry["code"]: entry for entry in opcode_table(profile, system).values()}
     instructions = []
-    for address, token in enumerate(tokens[2:]):
+    for address, token in enumerate(payload):
         try:
             word = int(token, 16)
-            if word >= 1 << profile.word_bits:
+            if not 0 <= word < 1 << profile.word_bits:
                 raise ValueError
             entry = by_code[word >> profile.data_bits]
         except (ValueError, KeyError):

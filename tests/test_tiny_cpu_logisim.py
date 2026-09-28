@@ -580,9 +580,12 @@ class LogisimLauncherTests(unittest.TestCase):
     def test_autonomous_project_drives_optional_inputs_inactive(self):
         source = ROOT / "hardware/logisim/TinyCPU.circ"
         inactive = {
-            "EXTERNAL_MEMORY_VALUE", "EXTERNAL_MEMORY_VALID",
-            "USE_EXTERNAL_MEMORY", "INTERRUPT_ACCEPT",
-            "INTERRUPT_TARGET_PC", "ILL_RET",
+            "EXTERNAL_MEMORY_VALUE": "0x1",
+            "EXTERNAL_MEMORY_VALID": "0x1",
+            "USE_EXTERNAL_MEMORY": "0x1",
+            "INTERRUPT_ACCEPT": "0x0",
+            "INTERRUPT_TARGET_PC": "0x0",
+            "ILL_RET": "0x0",
         }
         source_main = ET.parse(source).getroot().find("circuit[@name='TinyCPUMain']")
         self.assertIsNotNone(source_main)
@@ -591,7 +594,7 @@ class LogisimLauncherTests(unittest.TestCase):
             for component in source_main.findall("comp[@name='Pin']")
             if _attributes(component).get("label") in inactive
         }
-        self.assertEqual(set(locations.values()), inactive)
+        self.assertEqual(set(locations.values()), set(inactive))
 
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory) / source.name
@@ -609,8 +612,7 @@ class LogisimLauncherTests(unittest.TestCase):
             for location, attributes in constants.items():
                 name = locations[location]
                 with self.subTest(input=name):
-                    expected = "0x0" if name == "ILL_RET" else "0x1"
-                    self.assertEqual(attributes.get("value"), expected)
+                    self.assertEqual(attributes.get("value"), inactive[name])
 
     def test_autonomous_project_can_stop_on_error_halt(self):
         source = ROOT / "hardware/logisim/TinyCPU.circ"

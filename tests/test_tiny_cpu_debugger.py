@@ -45,6 +45,10 @@ class DebuggerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unknown label"): debugger.add_breakpoint("missing")
         with self.assertRaisesRegex(ValueError, "outside"): debugger.add_breakpoint(1)
 
+    def test_nonpositive_step_limit_is_rejected(self) -> None:
+        with self.assertRaisesRegex(ValueError, "at least 1"):
+            Debugger(assemble("HALT()"), step_limit=0)
+
     def test_all_flags_and_invalid_states_are_visible(self) -> None:
         debugger = Debugger(assemble("HALT()"))
         debugger.cpu.address_register_valid = False
