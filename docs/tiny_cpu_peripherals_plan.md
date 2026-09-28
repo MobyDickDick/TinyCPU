@@ -649,3 +649,30 @@ keine Schaltung geändert. Als nächster enger Diagnoseschritt wird nur der
 CPU-interne Gültigkeitspfad von `Datapath.ACC_VALID_OUT` bis zum
 `EXTERNAL_WRITE_VALID`-Pin verglichen; alle Decoder-, Freigabe-, Takt- und
 Portregisterpfade bleiben bis zu diesem Nachweis unverändert.
+
+Dieser interne Vergleich ist auf Ausgangs-Commit `5b9b3cd` erfolgt. Eine nur
+unter `/tmp/ap18-internal/` instrumentierte Kopie führt
+`Datapath.ACC_VALID_OUT` über einen zusätzlichen passiven Ausgang durch die
+vorhandene CPU-Integrationsgrenze bis in den unveränderten ersten
+Systemvektorfall. Der reguläre Export `EXTERNAL_WRITE_VALID` und der neue
+Messausgang sind dort in allen acht Vektoren gleichzeitig `0`. Damit liegt
+zwischen Akkumulator-Gültigkeitsregister und CPU-Export kein elektrischer
+Unterschied vor; insbesondere in den Vektoren 2 und 3 reicht der Export den
+tatsächlichen Zustand des Registers unverändert weiter.
+
+Ein ergänzender Lauf derselben vier Befehle direkt auf `TinyCPUMain` trennt
+den Fehler weiter ein: Dort wechselt `ACC_VALID_OUT` nach `LOAD_CONST(23)` auf
+`1`, bleibt während `STORE_ADDRESS(4095)` gültig und fällt erst mit dem
+nachfolgenden `LOAD_ADDRESS(4095)` erwartungsgemäß auf die noch ungültige
+Speicherzelle zurück. Der Gültigkeitsspeicher und sein Ausgang funktionieren
+also im eigenständigen Kernlauf. Im eingebetteten Systemlauf übernimmt der
+Akkumulator zwar den Wert `0x0017`, sein Gültigkeitsregister bleibt jedoch
+`0`.
+
+Gemäß Stop-Regel wurde keine eingecheckte Schaltung verändert. Der erste noch
+offene funktionale Unterschied liegt nun vor `Datapath.ACC_VALID_OUT`. Als
+nächster enger Diagnoseschritt werden deshalb ausschließlich `ACC_LOAD`,
+`VALID_IN` und `CLK` am `Datapath` unmittelbar vor und nach der ersten
+steigenden Flanke im eingebetteten System mit dem eigenständigen Kernlauf
+verglichen. Decoder-, Export-, Speicher-, Port- und Interruptpfade bleiben bis
+zu diesem Nachweis unverändert.
