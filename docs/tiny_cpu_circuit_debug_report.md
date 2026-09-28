@@ -3579,3 +3579,49 @@ Signalen `WRITE_ENABLE`, `WRITE_VALID` und `CLK` an der
 `CPUIntegrationBoundary` bis zu den gleichnamigen Eingängen des `OutputPort`
 unmittelbar vor der zweiten steigenden Flanke. Andere Decoder-, Daten-,
 Interrupt- und PC-Pfade bleiben gemäß Stop-Regel unverändert.
+
+#### Elektrischer Vergleich an der System-Schreibgrenze
+
+- **Ausgangsstand:** `f22cc1fe48fa5776e75229b3fb9d53b1d7dac843`
+- **Datum:** 28. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Das angekündigte begrenzte Diagnosepaket verwendet erneut unverändert den
+Fall `output-valid-write`. Eine ausschließlich unter
+`/tmp/ap18-boundary/` erzeugte Kopie ergänzt auf dem Systemblatt passive Pins
+an den vollständigen Netzen `WRITE_ENABLE`, `WRITE_VALID` und `CLK`. Die
+ersten beiden Messpunkte beginnen an den entsprechenden Ausgängen der
+`CPUIntegrationBoundary` und enden ohne Zwischenlogik an den gleichnamigen
+Eingängen von `OutputMemoryPath`; das Taktnetz verbindet Systemeingang,
+CPU-Grenze und Speicher-/Portgrenze gemeinsam. Der auf dem Blatt tatsächlich
+aktive Ausgabeport ist in `OutputMemoryPath` integriert; der getrennt
+definierte Teilkreis `OutputPort` besitzt dort keine Instanz. Weder die
+eingecheckte Systemschaltung noch `TinyCPU.circ` wurden für die Messung
+verändert.
+
+```bash
+java -Djava.awt.headless=true \
+  --class-path .venv/Include/logisim-evolution-4.1.0-all.jar \
+  scripts/LogisimHeadlessVector.java TinyCPUSystemMain \
+  /tmp/ap18-boundary/vector.txt \
+  /tmp/ap18-boundary/TinyCPU_Peripherals.circ
+```
+
+Die Messung trennt die drei Kandidaten eindeutig. `WRITE_ENABLE` ist direkt
+nach der ersten steigenden Flanke in Vektor 2 sowie in der nachfolgenden
+Low-Phase Vektor 3 logisch `1`; die zuvor nachgewiesene Store-Anforderung
+erreicht also die Speichergrenze. `CLK` folgt in allen acht Vektoren exakt dem
+angelegten Systemtakt und besitzt seine zweite steigende Flanke in Vektor 4.
+`WRITE_VALID` bleibt dagegen in allen acht Vektoren `0`, insbesondere in den
+Vektoren 2 und 3 unmittelbar vor dieser Flanke. Da die Portschreiblogik den
+Adressvergleich, `WRITE_ENABLE` und `WRITE_VALID` mit einem dreifachen UND
+verknüpft, kann sie den Ladeeingang der beiden Portregister nicht aktivieren.
+
+Damit ist der erste Unterschied am `WRITE_VALID`-Ausgang der
+`CPUIntegrationBoundary` benannt. Die direkte Top-Level-Leitung, der
+gemeinsame Takt und die nachfolgenden Portregister liegen erst dahinter und
+werden nicht vorsorglich geändert. Gemäß Stop-Regel blieb die Schaltung
+unverändert. Das nächste dokumentierte Diagnosepaket vergleicht ausschließlich
+`Datapath.ACC_VALID_OUT` mit dem CPU-Export `EXTERNAL_WRITE_VALID` während der
+Vektoren 2 und 3; erst ein dort nachgewiesener erster Unterschied darf eine
+kleinstmögliche Reparatur auslösen.

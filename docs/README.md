@@ -86,9 +86,14 @@ entscheidenden steigenden Flanke den Opcode `0x29`, `STORE_ADR=1` und
 `EXTERNAL_WRITE_ENABLE=1`. Nach der Flanke zeigt der kombinatorische Decoder
 bereits den Folgebefehl `0x24`; eine frühere Messung ausschließlich am
 fehlgeschlagenen Post-Edge-Vektor hatte diesen Taktbezug übersehen. Der erste
-elektrische Systemfall bleibt beim Portschreibvorgang offen. Als Nächstes
-werden deshalb Freigabe, Gültigkeit und Takt direkt an der Systemgrenze und am
-Ausgabeport während dieser Flanke verglichen.
+elektrische Systemfall bleibt beim Portschreibvorgang offen. Der anschließende
+Grenzvergleich zeigt die Schreibfreigabe in den Vektoren 2 und 3 korrekt auf
+`1` und den gemeinsamen Takt phasengleich an CPU- und Speichergrenze; die
+Schreibgültigkeit bleibt dagegen bereits am Ausgang der
+`CPUIntegrationBoundary` auf `0`. Da dasselbe Netz direkt den Eingang des
+aktiven `OutputMemoryPath` speist, liegt der erste Unterschied vor der
+Systemgrenze. Als Nächstes wird deshalb ausschließlich der CPU-interne Pfad von
+`Datapath.ACC_VALID_OUT` zum Export `EXTERNAL_WRITE_VALID` verfolgt.
 Die Instruktionsgrenze und die drei Befehlsimpulse für Interruptaktivierung,
 -deaktivierung und Rückkehr sind nun ebenfalls direkt und
 mutationstestgeschützt weitergereicht. Auch der Folge-PC gelangt von einem

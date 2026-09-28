@@ -303,9 +303,13 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Vor der entscheidenden steigenden Flanke liegen `OPCODE=0x29`,
   `STORE_ADR=1` und `EXTERNAL_WRITE_ENABLE=1` an. Nach der Flanke ist
   erwartungsgemäß bereits der Folgeopcode `0x24` sichtbar. Damit ist der
-  Decoder kein belegter Reparaturort. Als Nächstes werden Schreibfreigabe,
-  Schreibgültigkeit und Takt an der Systemgrenze und direkt am Ausgabeport
-  während derselben Flanke verglichen.
+  Decoder kein belegter Reparaturort. Der anschließende Vergleich an der
+  Systemgrenze zeigt `WRITE_ENABLE=1` vor der zweiten steigenden Flanke und
+  einen phasengleichen Takt bis zum aktiven `OutputMemoryPath`.
+  `WRITE_VALID` bleibt dagegen bereits am Ausgang der
+  `CPUIntegrationBoundary` auf `0`. Der erste Unterschied liegt deshalb vor
+  der Systemgrenze; als Nächstes wird nur der CPU-interne Pfad von
+  `Datapath.ACC_VALID_OUT` nach `EXTERNAL_WRITE_VALID` verfolgt.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
