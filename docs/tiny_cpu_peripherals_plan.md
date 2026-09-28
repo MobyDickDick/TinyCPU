@@ -725,3 +725,25 @@ Immediate-Gültigkeitswert, der `ACC_MEMORY_SELECT`-gesteuerte
 Gültigkeitsmultiplexer und dessen Weiterleitung bis `Datapath.VALID_IN`
 verfolgt. Erst der erste abweichende oder offene benannte Übergang darf
 repariert werden.
+
+Die angekündigte lokale Verfolgung ist auf Ausgangs-Commit `e4443f9`
+abgeschlossen. Der unveränderte elektrische Systemfall scheitert weiterhin
+zuerst an Vektor 4 mit `OUTPUT_PORT_VALUE=0x0000` und
+`OUTPUT_PORT_VALID=0`. Die portbezogene Topologie zeigt nun eindeutig, dass
+`Datapath.VALID_IN` am Ausgang `Operations.OVERFLOW` liegt, während
+`Operations.RESULT_IS_VALID` auf einem getrennten Netz endet. Die in der
+Integrationsbeschreibung benannten Stufen `ACC_MEMORY_VALID_SELECT`,
+`ACC_NOT_VALID_SELECT` und `ACC_INPUT_VALID_SELECT` sind auf dem aktuellen
+`TinyCPUMain` nicht vorhanden. Damit existiert auch kein
+`ACC_MEMORY_SELECT`-gesteuerter Multiplexer mehr, der für `LOAD_CONST` den
+konstant gültigen Immediate-Pfad auswählen könnte.
+
+Dieser Befund benennt erstmals den fehlenden Übergang und den falschen
+Ersatzpfad, rechtfertigt aber noch keine Änderung anderer Netze. Das nächste
+enge Reparaturpaket stellt ausschließlich die dokumentierte
+Ladegültigkeits-Auswahl vor `Datapath.VALID_IN` wieder her. Seine erste
+elektrische Abnahme ist `LOAD_CONST(23)` mit `VALID_IN=1`; erst danach wird der
+unveränderte Fall `output-valid-write` erneut ausgeführt. Datenwert, Decoder,
+`Operations`, Export, Ausgabeport, Interruptsteuerung, PC-Pfad und die
+geschützte Darstellung von `FetchDecodeControls` bleiben bis dahin
+unverändert.
