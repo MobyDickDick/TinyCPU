@@ -100,9 +100,14 @@ dagegen korrekt auf `1`. Als Nächstes werden deshalb ausschließlich
 `ACC_LOAD`, `VALID_IN` und `CLK` am `Datapath` während der ersten steigenden
 Systemflanke mit dem eigenständigen Kernlauf verglichen. Dieser Vergleich
 schließt Ladefreigabe und Takt inzwischen aus: `VALID_IN` führt nur im
-eingebetteten Lauf fälschlich `0`. Als Nächstes wird ausschließlich
-`Operations.RESULT_IS_VALID` mit diesem Eingang verglichen; eine
-Schaltungsänderung ist bis zu diesem Nachweis nicht zulässig.
+eingebetteten Lauf fälschlich `0`. Der anschließende Vergleich zeigt
+`Operations.RESULT_IS_VALID` und `Datapath.VALID_IN` in allen Systemvektoren
+gemeinsam auf `0`; eine Leitungsreparatur ist daraus nicht zulässig. Für
+`LOAD_CONST` ist der inaktive Operations-Ausgang zudem nicht die erwartete
+Gültigkeitsquelle. Als Nächstes wird deshalb ausschließlich die dokumentierte
+Immediate-Gültigkeitsauswahl über `ACC_MEMORY_SELECT` bis zum
+`Datapath.VALID_IN` verfolgt; erst ein dort benannter erster Unterschied darf
+eine Schaltungsänderung auslösen.
 Die Instruktionsgrenze und die drei Befehlsimpulse für Interruptaktivierung,
 -deaktivierung und Rückkehr sind nun ebenfalls direkt und
 mutationstestgeschützt weitergereicht. Auch der Folge-PC gelangt von einem

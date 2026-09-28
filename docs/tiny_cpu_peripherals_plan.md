@@ -700,3 +700,28 @@ eingebetteten und eigenständigen Lauf verglichen. Erst wenn Quelle und Eingang
 voneinander abweichen, darf die Leitung repariert werden; andernfalls wird die
 Gültigkeitserzeugung für `LOAD_CONST` innerhalb von `Operations` weiter
 verfolgt.
+
+Dieser Quellenvergleich ist auf Ausgangs-Commit `09e5b38` erfolgt. Eine nur
+unter `/tmp/ap18-result-valid/` instrumentierte Kopie führte
+`Operations.RESULT_IS_VALID` und `Datapath.VALID_IN` über eindeutig benannte
+Diagnoseausgänge bis in den unveränderten Fall `output-valid-write`; die
+eingecheckten Schaltungen blieben unverändert. In allen acht Vektoren führen
+beide Signale logisch `0`. Zwischen dem vermuteten Operations-Ausgang und dem
+Datapath-Eingang ist damit in diesem Lauf kein Wertunterschied nachgewiesen,
+sodass gemäß Stop-Regel keine Leitung geändert wurde.
+
+Der Befund korrigiert zugleich die bisherige Quellenannahme: Während
+`LOAD_CONST(23)` ist kein arithmetischer Operationszweig aktiv, daher ist
+`Operations.RESULT_IS_VALID=0` für sich genommen erwartbar und kann nicht die
+Gültigkeit des unmittelbaren Ladebefehls liefern. Die statische Netzverfolgung
+zeigt außerdem, dass `Datapath.VALID_IN` nicht am
+`RESULT_IS_VALID`-Ausgang hängt, sondern derzeit dasselbe Netz wie
+`Operations.OVERFLOW` und `ErrorFlags.SET_OVF` erreicht. Das belegt eine
+verdächtige Integration, bestimmt aber noch nicht den korrekten Reparaturpfad:
+Die dokumentierte Ladegültigkeits-Auswahl muss zunächst anhand ihrer benannten
+Selektoren und tatsächlichen Bauteilports lokalisiert werden. Als nächster enger
+Diagnoseschritt werden deshalb beim ersten `LOAD_CONST` ausschließlich der
+Immediate-Gültigkeitswert, der `ACC_MEMORY_SELECT`-gesteuerte
+Gültigkeitsmultiplexer und dessen Weiterleitung bis `Datapath.VALID_IN`
+verfolgt. Erst der erste abweichende oder offene benannte Übergang darf
+repariert werden.
