@@ -621,3 +621,31 @@ CPU-internen Schreibfreigabe. Als nächster enger Diagnoseschritt werden
 `WRITE_ENABLE`, `WRITE_VALID` und `CLK` unmittelbar vor der zweiten steigenden
 Flanke an der `CPUIntegrationBoundary` und am `OutputPort` verglichen. Erst ein
 dort benannter erster Unterschied darf eine Schaltungsänderung auslösen.
+
+Dieser Grenzvergleich ist auf Ausgangs-Commit `f22cc1f` erfolgt. Die
+unveränderte erste Systemfixture wurde in einer Kopie unter
+`/tmp/ap18-boundary/` um drei passive Ausgabepins erweitert. Sie beobachten
+die vollständigen Netze `WRITE_ENABLE`, `WRITE_VALID` und `CLK`; die
+eingecheckten Schaltungen wurden nicht verändert. Die Messpunkte liegen am
+Ausgang der `CPUIntegrationBoundary`. Da die Top-Level-Leitungen diese Punkte
+direkt mit den gleichnamigen Eingängen von `OutputMemoryPath` und den Takt
+zusätzlich mit dessen `CLK`-Eingang verbinden, messen sie zugleich die
+ankommenden Portsignale. Der eigenständige historische Teilkreis `OutputPort`
+ist auf dem Systemblatt nicht instanziiert; die aktiven Portregister liegen in
+`OutputMemoryPath`.
+
+In Vektor 2, unmittelbar nach der ersten steigenden Flanke, und in der
+folgenden Low-Phase (Vektor 3) ist `WRITE_ENABLE=1`. `CLK` entspricht in allen
+acht Vektoren exakt dem angelegten Systemtakt. `WRITE_VALID` bleibt dagegen in
+allen Vektoren `0`, also auch unmittelbar vor der zweiten steigenden Flanke,
+an der die Portregister den Wert `0x0017` übernehmen sollten. Das
+`OUTPUT_WRITE_GATE` kann seine drei Bedingungen aus Adressvergleich,
+Schreibfreigabe und Schreibgültigkeit deshalb nicht gleichzeitig erfüllen.
+
+Der erste elektrische Unterschied liegt damit bereits am
+`WRITE_VALID`-Ausgang der `CPUIntegrationBoundary`, nicht in deren
+Top-Level-Leitung, am Takt oder in den Portregistern. Gemäß Stop-Regel wurde
+keine Schaltung geändert. Als nächster enger Diagnoseschritt wird nur der
+CPU-interne Gültigkeitspfad von `Datapath.ACC_VALID_OUT` bis zum
+`EXTERNAL_WRITE_VALID`-Pin verglichen; alle Decoder-, Freigabe-, Takt- und
+Portregisterpfade bleiben bis zu diesem Nachweis unverändert.
