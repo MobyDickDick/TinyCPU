@@ -308,8 +308,14 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   einen phasengleichen Takt bis zum aktiven `OutputMemoryPath`.
   `WRITE_VALID` bleibt dagegen bereits am Ausgang der
   `CPUIntegrationBoundary` auf `0`. Der erste Unterschied liegt deshalb vor
-  der Systemgrenze; als Nächstes wird nur der CPU-interne Pfad von
-  `Datapath.ACC_VALID_OUT` nach `EXTERNAL_WRITE_VALID` verfolgt.
+  der Systemgrenze. Die weitere Verfolgung hat Export, Akkumulatorregister und
+  dessen Ladefreigabe ausgeschlossen und den Unterschied bis
+  `Datapath.VALID_IN` zurückgeführt. Dort liegt aktuell fälschlich
+  `Operations.OVERFLOW` an; die dokumentierten Multiplexerstufen für
+  Immediate-, Speicher-, NOT- und INPUT-Gültigkeit fehlen auf dem aktuellen
+  `TinyCPUMain`. Als Nächstes wird ausschließlich diese
+  Ladegültigkeits-Auswahl wiederhergestellt und zunächst mit
+  `LOAD_CONST(23)` elektrisch abgenommen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

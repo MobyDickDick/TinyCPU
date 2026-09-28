@@ -3708,3 +3708,49 @@ Ausgang `Operations.RESULT_IS_VALID` mit diesem Eingang in beiden Läufen. Je
 nach Ergebnis liegt der kleinste Reparaturort entweder auf dieser Leitung oder
 innerhalb der Gültigkeitserzeugung von `Operations`; alle anderen Signalwege
 bleiben bis dahin unverändert.
+
+#### Lokalisierung der fehlenden Ladegültigkeits-Auswahl
+
+- **Ausgangsstand:** `e4443f9d6ec19695974b25ca93c25b539113c878`
+- **Datum:** 28. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Das angekündigte Paket hat zuerst den unveränderten Fall
+`output-valid-write` erneut elektrisch ausgeführt. Er reproduziert den ersten
+Unterschied weiterhin an Vektor 4: `OUTPUT_PORT_VALUE` bleibt `0x0000` statt
+`0x0017`, und `OUTPUT_PORT_VALID` bleibt `0` statt `1`. Die unveränderte
+Simulatorausgabe und der maschinenlesbare Diagnoseindex liegen außerhalb von
+Git unter `/tmp/ap18-validity-source/system/output-valid-write/`.
+
+```bash
+LOGISIM_JAR="$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 --system tinycpu-peripherals-16-12-v1 \
+  --system-only --trace-output /tmp/unused-core.tsv \
+  --matrix-output /tmp/ap18-validity-source
+```
+
+Die anschließende portbezogene Netzverfolgung korrigiert die im vorigen Paket
+noch offene Quellenannahme eindeutig. `Datapath.VALID_IN` ist elektrisch mit
+`Operations.OVERFLOW` verbunden; `Operations.RESULT_IS_VALID` liegt dagegen
+auf einem getrennten Netz. Auf `TinyCPUMain` existiert außerdem keiner der
+drei in der Integrationsdokumentation benannten Gültigkeitsmultiplexer
+`ACC_MEMORY_VALID_SELECT`, `ACC_NOT_VALID_SELECT` und
+`ACC_INPUT_VALID_SELECT`. Die vier vorhandenen Multiplexer gehören zur
+externen Speicherwert-/Gültigkeitswahl, zur RAM-Schreibfreigabe und zur
+PC-Auswahl. Es gibt daher auf dem aktuellen Blatt keinen
+`ACC_MEMORY_SELECT`-gesteuerten Ladegültigkeitsmultiplexer, an dem ein
+Immediate-Gültigkeitswert elektrisch gemessen werden könnte.
+
+Damit ist der erste offene benannte Übergang nicht innerhalb von `Operations`
+und auch nicht auf dessen `RESULT_IS_VALID`-Ausgang belegt. Er ist die fehlende
+Auswahl zwischen der für `LOAD_CONST` konstant gültigen Quelle, der
+Speichergültigkeit und den nachgelagerten NOT-/INPUT-Übersteuerungen vor
+`Datapath.VALID_IN`. Die bestehende direkte Verbindung von `OVERFLOW` zu
+`VALID_IN` ist zugleich der konkret belegte falsche Ersatzpfad. Gemäß
+Stop-Regel wurde noch keine Schaltung verändert: Eine Reparatur muss im
+nächsten Paket ausschließlich diese dokumentierte Gültigkeitsauswahl
+wiederherstellen und zuerst `LOAD_CONST(23)` elektrisch bis
+`Datapath.VALID_IN=1` nachweisen. Decoder-, Datenwert-, Export-, Speicher-,
+Port-, Interrupt- und PC-Pfade sowie `FetchDecodeControls` bleiben dabei
+unverändert.
