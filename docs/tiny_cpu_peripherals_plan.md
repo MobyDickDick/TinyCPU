@@ -676,3 +676,27 @@ nächster enger Diagnoseschritt werden deshalb ausschließlich `ACC_LOAD`,
 steigenden Flanke im eingebetteten System mit dem eigenständigen Kernlauf
 verglichen. Decoder-, Export-, Speicher-, Port- und Interruptpfade bleiben bis
 zu diesem Nachweis unverändert.
+
+Dieser Vergleich ist auf Ausgangs-Commit `ba31377` erfolgt. Eine ausschließlich
+unter `/tmp/ap18-datapath-inputs/` instrumentierte Projektkopie führt die drei
+Signale an den vorhandenen Anschlüssen des `Datapath` als passive Messausgänge
+heraus. Der Lauf verwendet weiterhin den unveränderten Fall
+`output-valid-write`; als Kontrolle dient dieselbe Befehlsfolge im direkt
+ausgeführten `TinyCPUMain`. Die eingecheckten Schaltungen und insbesondere
+`FetchDecodeControls` blieben unverändert.
+
+`ACC_LOAD` ist in beiden Läufen während `LOAD_CONST(23)` logisch `1`, und `CLK`
+folgt in beiden Läufen phasengleich dem angelegten Takt. `VALID_IN` unterscheidet
+sich dagegen bereits vor der ersten steigenden Flanke: Der eigenständige Kern
+führt dort `1`, der eingebettete Systemkern `0`. Nach der Flanke übernimmt das
+Akkumulatorwertregister deshalb in beiden Läufen `0x0017`, während nur der
+eigenständige Kern auch das Gültigkeitsbit setzt. Damit sind Ladefreigabe,
+Taktpfad und beide Register als gemeinsamer Reparaturort ausgeschlossen.
+
+Gemäß Stop-Regel wurde noch keine Schaltung geändert. Der erste benannte
+Unterschied liegt am `Datapath.VALID_IN`-Eingang. Als nächster enger Schritt
+wird ausschließlich dessen Quelle `Operations.RESULT_IS_VALID` im
+eingebetteten und eigenständigen Lauf verglichen. Erst wenn Quelle und Eingang
+voneinander abweichen, darf die Leitung repariert werden; andernfalls wird die
+Gültigkeitserzeugung für `LOAD_CONST` innerhalb von `Operations` weiter
+verfolgt.
