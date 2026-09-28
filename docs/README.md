@@ -108,6 +108,12 @@ Gültigkeitsquelle. Als Nächstes wird deshalb ausschließlich die dokumentierte
 Immediate-Gültigkeitsauswahl über `ACC_MEMORY_SELECT` bis zum
 `Datapath.VALID_IN` verfolgt; erst ein dort benannter erster Unterschied darf
 eine Schaltungsänderung auslösen.
+Diese Auswahl ist inzwischen mit drei benannten Ein-Bit-Multiplexern
+wiederhergestellt; `LOAD_CONST(23)` führt vor der ersten Flanke nachweislich
+`VALID_IN=1`, und die vollständige 61-Fall-Kernmatrix bleibt grün. Der
+eingebettete Systemfall übernimmt den gültigen Portwert dennoch noch nicht.
+Als nächstes wird daher ausschließlich die Speicherung von `VALID_IN` nach
+`Datapath.ACC_VALID_OUT` an der ersten Systemflanke erneut gemessen.
 Die Instruktionsgrenze und die drei Befehlsimpulse für Interruptaktivierung,
 -deaktivierung und Rückkehr sind nun ebenfalls direkt und
 mutationstestgeschützt weitergereicht. Auch der Folge-PC gelangt von einem

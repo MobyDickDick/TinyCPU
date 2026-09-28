@@ -366,6 +366,19 @@
       <a name="width" val="16"/>
     </comp>
     <comp lib="2" loc="(700,620)" name="Multiplexer"/>
+    <comp lib="0" loc="(1520,2290)" name="Constant">
+      <a name="value" val="0x1"/>
+    </comp>
+    <comp lib="0" loc="(1750,2430)" name="Constant"/>
+    <comp lib="2" loc="(1600,2300)" name="Multiplexer">
+      <a name="label" val="ACC_MEMORY_VALID_SELECT"/>
+    </comp>
+    <comp lib="2" loc="(1700,2360)" name="Multiplexer">
+      <a name="label" val="ACC_NOT_VALID_SELECT"/>
+    </comp>
+    <comp lib="2" loc="(1800,2420)" name="Multiplexer">
+      <a name="label" val="ACC_INPUT_VALID_SELECT"/>
+    </comp>
     <comp loc="(1020,600)" name="Memory">
       <a name="label" val="MEMORY_INSTANCE"/>
     </comp>
@@ -467,6 +480,27 @@
     <wire from="(1430,1930)" to="(1770,1930)"/>
     <wire from="(1430,1950)" to="(1790,1950)"/>
     <wire from="(1430,1970)" to="(1810,1970)"/>
+    <wire from="(1220,790)" to="(1220,2310)"/>
+    <wire from="(1220,2310)" to="(1570,2310)"/>
+    <wire from="(1890,1500)" to="(1890,2380)"/>
+    <wire from="(1680,2380)" to="(1890,2380)"/>
+    <wire from="(2130,1770)" to="(2130,2440)"/>
+    <wire from="(1780,2440)" to="(2130,2440)"/>
+    <wire from="(1730,1890)" to="(1730,2320)"/>
+    <wire from="(1580,2320)" to="(1730,2320)"/>
+    <wire from="(1520,2290)" to="(1570,2290)"/>
+    <wire from="(1600,2300)" to="(1650,2300)"/>
+    <wire from="(1650,2300)" to="(1650,2350)"/>
+    <wire from="(1650,2350)" to="(1670,2350)"/>
+    <wire from="(1700,2360)" to="(1750,2360)"/>
+    <wire from="(1750,2360)" to="(1750,2410)"/>
+    <wire from="(1750,2410)" to="(1770,2410)"/>
+    <wire from="(1750,2430)" to="(1770,2430)"/>
+    <wire from="(1800,2420)" to="(1940,2420)"/>
+    <wire from="(1940,510)" to="(1940,2420)"/>
+    <wire from="(1830,510)" to="(1940,510)"/>
+    <wire from="(2050,510)" to="(2050,2370)"/>
+    <wire from="(1670,2370)" to="(2050,2370)"/>
     <wire from="(1440,550)" to="(1440,770)"/>
     <wire from="(1440,770)" to="(2770,770)"/>
     <wire from="(1450,1630)" to="(1450,2200)"/>
@@ -524,7 +558,6 @@
     <wire from="(1770,1640)" to="(3110,1640)"/>
     <wire from="(1770,280)" to="(1770,510)"/>
     <wire from="(1770,280)" to="(2410,280)"/>
-    <wire from="(1770,510)" to="(1830,510)"/>
     <wire from="(1790,1410)" to="(1790,1600)"/>
     <wire from="(1790,1600)" to="(3070,1600)"/>
     <wire from="(1790,1660)" to="(1790,1950)"/>

@@ -3754,3 +3754,31 @@ wiederherstellen und zuerst `LOAD_CONST(23)` elektrisch bis
 `Datapath.VALID_IN=1` nachweisen. Decoder-, Datenwert-, Export-, Speicher-,
 Port-, Interrupt- und PC-Pfade sowie `FetchDecodeControls` bleiben dabei
 unverändert.
+
+#### Wiederherstellung der Ladegültigkeits-Auswahl
+
+- **Ausgangsstand:** `5cb2be8`
+- **Datum:** 28. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Das begrenzte Reparaturpaket ergänzt ausschließlich die drei dokumentierten
+Ein-Bit-Multiplexer `ACC_MEMORY_VALID_SELECT`, `ACC_NOT_VALID_SELECT` und
+`ACC_INPUT_VALID_SELECT` vor `Datapath.VALID_IN`. Ihre Selektoren folgen den
+bereits vorhandenen, benannten Netzen `ACC_MEMORY_REQUEST`, `INVERT` und
+`INPUT`. Die zuvor belegte falsche Direktverbindung von
+`Operations.OVERFLOW` wurde am `VALID_IN`-Eingang entfernt. Die
+handgestaltete Schaltung `FetchDecodeControls` wurde nicht verändert.
+
+Eine temporäre passive Messung am Ausgang der letzten Auswahl zeigt vor der
+ersten steigenden Flanke des unveränderten Programms `LOAD_CONST(23)` den
+geforderten Wert `VALID_IN=1`. Die Offline-Suite und die vollständige
+elektrische Kernabnahme mit zwei Kerntraces und 61 Matrixfällen bleiben grün.
+Der anschließend erneut ausgeführte Systemfall `output-valid-write` scheitert
+jedoch weiterhin zuerst an Vektor 4: `OUTPUT_PORT_VALUE` bleibt `0x0000`
+statt `0x0017`, `OUTPUT_PORT_VALID` bleibt `0` statt `1`.
+
+Damit ist die im vorigen Paket benannte fehlende Auswahl behoben, ohne daraus
+eine Systemfreigabe abzuleiten. Das nächste Diagnosepaket vergleicht nur
+`Datapath.VALID_IN` unmittelbar vor der ersten Flanke mit
+`Datapath.ACC_VALID_OUT` unmittelbar danach und während des Store-Zyklus im
+eingebetteten Lauf.
