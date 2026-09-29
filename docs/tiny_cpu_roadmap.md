@@ -315,7 +315,11 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Immediate-, Speicher-, NOT- und INPUT-Gültigkeit fehlen auf dem aktuellen
   `TinyCPUMain`. Als Nächstes wird ausschließlich diese
   Ladegültigkeits-Auswahl wiederhergestellt und zunächst mit
-  `LOAD_CONST(23)` elektrisch abgenommen.
+  `LOAD_CONST(23)` elektrisch abgenommen. Die direkte Folgemessung bestätigt
+  `ACC_LOAD`, `VALID_IN`, `CLK` und `ACC_VALID_OUT` an der Datapath-Grenze.
+  Der erste verbleibende Systemunterschied liegt am CPU-Adressausgang
+  (`0x001` statt `0xfff` im Store-Zyklus); als Nächstes wird ausschließlich
+  dessen Weg über die 16-auf-12-Bit-Auswahl verfolgt.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
