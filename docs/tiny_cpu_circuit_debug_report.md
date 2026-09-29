@@ -3782,3 +3782,49 @@ eine Systemfreigabe abzuleiten. Das nächste Diagnosepaket vergleicht nur
 `Datapath.VALID_IN` unmittelbar vor der ersten Flanke mit
 `Datapath.ACC_VALID_OUT` unmittelbar danach und während des Store-Zyklus im
 eingebetteten Lauf.
+
+#### Nachprüfung der neu gezeichneten Ladegültigkeits-Leitungen
+
+- **Ausgangsstand:** `cde97780322c91befd434262edcfafe4281a9491`
+- **Datum:** 28. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Die statische Abnahme der manuell neu gezeichneten Leitungen scheiterte
+zunächst an der semantischen AP-18-Prüfung. Die drei neuen Ein-Bit-Multiplexer
+hatten ihre Bezeichner verloren, die neue Immediate-Konstante besaß den
+Defaultwert `0`, und der Select-Eingang der mittleren Stufe war mit dem
+Decoder-Ausgang neben `INVERT` verbunden. Die Korrektur ergänzt die drei
+Bezeichner, setzt ausschließlich diese Konstante auf `1` und führt den
+Select-Eingang mit einem expliziten Leitungsendpunkt auf das vorhandene
+`INVERT`-Netz. `FetchDecodeControls` selbst wurde weder verschoben noch
+umgezeichnet.
+
+```bash
+scripts/test-offline.sh
+```
+
+Der Lauf besteht vollständig: 23 Projekte mit 47 Schaltungen und 2988
+rechtwinkligen Leitungen sowie die Verträge für 50 Opcodes und sechs
+Sticky-Fehlerfälle sind gültig. Damit sind alle zehn benannten Übergänge der
+Ladegültigkeits-Auswahl wieder topologisch nachgewiesen.
+
+Das unmittelbar folgende dokumentierte Paket zur Speicherung von
+`VALID_IN` wurde mit dem ersten elektrischen Systemfall ausgeführt:
+
+```bash
+LOGISIM_JAR="$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 --system tinycpu-peripherals-16-12-v1 \
+  --system-only --trace-output /tmp/unused-core.tsv \
+  --matrix-output /tmp/ap18-post-redraw
+```
+
+Die ersten drei Vektoren bestehen. An Vektor 4 bleiben
+`OUTPUT_PORT_VALUE=0x0000` statt `0x0017` und `OUTPUT_PORT_VALID=0` statt `1`.
+Da die topologische Auswahl nun vollständig ist und der direkte Exportpfad
+von `Datapath.ACC_VALID_OUT` bereits im vorigen Diagnosepaket elektrisch ohne
+Abweichung bestätigt wurde, hält das eingebettete Gültigkeitsregister bis zum
+Store weiterhin `0`. Eine Systemfreigabe wird daraus ausdrücklich nicht
+abgeleitet. Das nächste Paket vergleicht nur `ACC_LOAD`, `VALID_IN`, `CLK` und
+`RESET` direkt an der eingebetteten `Datapath`-Instanz um die erste steigende
+Flanke.
