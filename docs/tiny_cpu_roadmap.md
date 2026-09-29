@@ -320,9 +320,11 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Der anschließende Adressvergleich zeigt bereits am direkt verbundenen
   `EffectiveAddress.EFFECTIVE_MEMORY_ADDRESS` und 16-Bit-Kernexport `0x0001`
   statt `0x0fff`; der 16-auf-12-Bit-Adapter reicht diesen Wert korrekt als
-  `0x001` weiter und ist kein Reparaturort. Als Nächstes werden ausschließlich
-  Operanden- und Auswahleingänge der effektiven Adressbildung im direkten
-  Store-Modus verfolgt.
+  `0x001` weiter und ist kein Reparaturort. Die anschließende Eingangsmessung
+  zeigt bei inaktiven Registerauswahlen bereits am direkten Operanden von
+  `EffectiveAddress` `0x0001`; dessen Ausgang folgt diesem Wert korrekt. Als
+  Nächstes wird ausschließlich dieser 16-Bit-Instruktionsoperand vom Splitter
+  bis zum Eingang der effektiven Adressbildung verfolgt.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

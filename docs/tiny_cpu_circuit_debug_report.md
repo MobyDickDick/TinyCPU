@@ -3879,3 +3879,33 @@ Auswahleingänge von `EffectiveAddress` beim `STORE_ADDRESS(0xfff)` mit dessen
 Ausgang. Erst ein dort belegter falscher oder offener Übergang darf repariert
 werden. Decoder-, Daten-, Gültigkeits-, Export-, Adapter-, Speicher-, Port-
 und Interruptpfade bleiben bis dahin unverändert.
+
+#### Elektrischer Vergleich der effektiven Adressbildung
+
+- **Ausgangsstand:** `e17e130dd872091e93520225346f4b1cfb37fd5d`
+- **Datum:** 29. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Der angekündigte Vergleich wurde am unveränderten Fall `output-valid-write`
+in einer nur unter `/tmp/ap18-effective-address-check/` instrumentierten Kopie
+ausgeführt. Im `STORE_ADDRESS(0xfff)`-Zyklus sind beide Auswahlursachen für
+Adressregister und Adressregister-plus-Offset inaktiv. Trotzdem liegt am
+16-Bit-Eingang `EffectiveAddress.DIRECT_ADDR` bereits `0x0001` statt
+`0x0fff`. Der Ausgang `EFFECTIVE_MEMORY_ADDRESS` folgt diesem direkten
+Operanden unverändert mit `0x0001`. Die Register- und Offsetoperanden werden
+dabei nicht ausgewählt und sind daher nicht der erste Unterschied.
+
+Damit arbeitet die Auswahl innerhalb von `EffectiveAddress` für den direkten
+Store-Modus entsprechend ihren tatsächlichen Eingängen. Der erste falsche
+benannte Übergang liegt vor dem Baustein am direkten Operandenpfad; eine
+Reparatur innerhalb der effektiven Adressbildung würde den belegten Befund nur
+verdecken. Die instrumentierte Schaltung und die Simulatorausgabe bleiben als
+lokale Diagnoseartefakte außerhalb von Git. Die eingecheckten Schaltungen
+wurden nicht verändert.
+
+Das nächste enge Diagnosepaket verfolgt deshalb ausschließlich den
+16-Bit-Operanden des aktuellen Instruktionsworts vom Splitter bis zum Eingang
+`EffectiveAddress.DIRECT_ADDR`. Erst ein dort belegter falscher Splitterzweig
+oder offener Übergang darf repariert werden. Auswahl, Ausgang und alle
+nachgelagerten Adress-, Speicher- und Portpfade sowie Daten-, Gültigkeits- und
+Interruptnetze bleiben bis dahin unverändert.
