@@ -813,3 +813,20 @@ Schreibgültigkeit und Schreibfreigabe korrekt anliegen, führt
 nicht ausgewählt. Als nächstes enges Paket wird ausschließlich
 `EffectiveAddress.EFFECTIVE_MEMORY_ADDRESS` gegen `TinyCPUMain.ADDRESS` und
 die 16-auf-12-Bit-Auswahl in `CPUIntegrationBoundary` elektrisch verglichen.
+
+## Elektrischer Vergleich des CPU-Adressexports
+
+Die angekündigte Messung ist mit temporären Diagnosekopien des Falls
+`output-valid-write` abgeschlossen. Bereits
+`EffectiveAddress.EFFECTIVE_MEMORY_ADDRESS` und der direkt damit verbundene
+öffentliche 16-Bit-Ausgang `TinyCPUMain.ADDRESS` führen `0x0001` statt der für
+`STORE_ADDRESS(0xfff)` erwarteten Adresse. Hinter dem 16-auf-12-Bit-Splitter
+der `CPUIntegrationBoundary` liegt entsprechend `0x001` an. Der Splitter
+verändert den niederwertigen Wert somit nicht und ist kein belegter
+Reparaturort; die eingecheckten Schaltungen blieben unverändert.
+
+Als nächstes enges Paket werden ausschließlich die Operanden- und
+Auswahleingänge von `EffectiveAddress` für den direkten Store-Modus bis zu
+`EFFECTIVE_MEMORY_ADDRESS` elektrisch verglichen. Alle nachgelagerten
+Adress-, Speicher- und Portpfade sowie Decoder-, Daten-, Gültigkeits- und
+Interruptnetze bleiben bis zu diesem Nachweis unverändert.
