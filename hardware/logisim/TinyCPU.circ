@@ -354,10 +354,6 @@
       <a name="width" val="12"/>
     </comp>
     <comp lib="0" loc="(830,440)" name="Constant"/>
-    <comp lib="0" loc="(2540,1400)" name="Constant">
-      <a name="value" val="0x0"/>
-      <a name="width" val="16"/>
-    </comp>
     <comp lib="1" loc="(2420,410)" name="OR Gate">
       <a name="inputs" val="4"/>
       <a name="label" val="ILLEGAL_RETURN_OR"/>
@@ -561,7 +557,9 @@
     <wire from="(1850,1540)" to="(3180,1540)"/>
     <wire from="(1870,1330)" to="(1870,1440)"/>
     <wire from="(1870,1440)" to="(1870,1520)"/>
-    <wire from="(1870,1440)" to="(2560,1440)"/>
+    <wire from="(1870,1440)" to="(2520,1440)"/>
+    <wire from="(2520,1420)" to="(2520,1440)"/>
+    <wire from="(2520,1420)" to="(2560,1420)"/>
     <wire from="(1870,1520)" to="(3160,1520)"/>
     <wire from="(1890,1050)" to="(1890,1310)"/>
     <wire from="(1890,1050)" to="(2140,1050)"/>
@@ -612,7 +610,9 @@
     <wire from="(2340,1030)" to="(2460,1030)"/>
     <wire from="(2340,820)" to="(2340,1030)"/>
     <wire from="(2340,820)" to="(3590,820)"/>
-    <wire from="(2360,1420)" to="(2560,1420)"/>
+    <wire from="(2360,1420)" to="(2500,1420)"/>
+    <wire from="(2500,1400)" to="(2500,1420)"/>
+    <wire from="(2500,1400)" to="(2560,1400)"/>
     <wire from="(2360,670)" to="(2360,1420)"/>
     <wire from="(2380,1360)" to="(2560,1360)"/>
     <wire from="(2380,650)" to="(2380,1360)"/>
@@ -649,7 +649,6 @@
     <wire from="(2540,370)" to="(3140,370)"/>
     <wire from="(2540,510)" to="(2620,510)"/>
     <wire from="(2550,1280)" to="(2790,1280)"/>
-    <wire from="(2540,1400)" to="(2560,1400)"/>
     <wire from="(2560,390)" to="(2560,490)"/>
     <wire from="(2560,390)" to="(2860,390)"/>
     <wire from="(2560,490)" to="(2620,490)"/>
@@ -810,11 +809,6 @@
     <comp lib="0" loc="(490,80)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="DIRECT_ADDR"/>
-      <a name="width" val="16"/>
-    </comp>
-    <comp lib="0" loc="(500,320)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="OFFSET_ADDR"/>
       <a name="width" val="16"/>
     </comp>
     <comp lib="0" loc="(500,370)" name="Pin">

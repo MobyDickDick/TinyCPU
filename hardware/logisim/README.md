@@ -433,11 +433,11 @@ bewusst kurze Namen, die den angeschlossenen Ausgängen von
 `FetchDecodeControls` entsprechen: `ADR_REG` kürzt `ADDRESS_REGISTER` ab und
 `REG_OFF` steht für `ADDRESS_REGISTER_PLUS_OFFSET`. So bleiben beispielsweise
 `LOAD_ADR_REG`, `ADD_ADR_REG` und `STORE_REG_OFF` vollständig sichtbar. Auch
-die vier 16-Bit-Eingänge heißen kompakt `DIRECT_ADDR`, `REG_ADDR`,
-`OFFSET_ADDR` und `REG_SELECTED`. Das Präfix `EFFECTIVE_` entfällt an den Eingängen. Die Ausgänge von
+die drei 16-Bit-Eingänge heißen kompakt `DIRECT_ADDR`, `REG_ADDR` und
+`REG_SELECTED`. Das Präfix `EFFECTIVE_` entfällt an den Eingängen. Die Ausgänge von
 `FetchDecodeControls` verwenden dieselben Kürzel (`ADR`, `ADR_REG` und
 `REG_OFF`), sodass jede angeschlossene 1:1-Verbindung auf beiden Seiten
-denselben Namen trägt; die Pinpositionen ändern sich dadurch nicht.
+denselben Namen trägt.
 
 Die Top-Level-Routen zu `EffectiveAddress` besitzen getrennte Korridore. Die
 zuvor kurzgeschlossenen Paare `MUL_ADR_REG`/`MUL_REG_OFF` und
