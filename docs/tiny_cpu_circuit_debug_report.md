@@ -3909,3 +3909,30 @@ Das nächste enge Diagnosepaket verfolgt deshalb ausschließlich den
 oder offener Übergang darf repariert werden. Auswahl, Ausgang und alle
 nachgelagerten Adress-, Speicher- und Portpfade sowie Daten-, Gültigkeits- und
 Interruptnetze bleiben bis dahin unverändert.
+
+#### Elektrische Prüfung des Instruktionsoperanden
+
+- **Ausgangsstand:** `22910ea`
+- **Datum:** 29. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Eine nur unter `/tmp` instrumentierte Kopie legte
+`STORE_ADDRESS(0xfff)` als einziges ROM-Wort an und führte Instruktionswort,
+beide Splitterzweige und den vorhandenen öffentlichen Adressausgang passiv
+heraus. Das Instruktionswort ist `0x29ffff`, der sechs Bit breite Opcodezweig
+ist `0x29`, und der 16-Bit-Operandenzweig ist `0xffff`. Die statische
+Netzverfolgung bestätigt außerdem dessen bereits vorhandene durchgehende
+Verbindung mit `EffectiveAddress.DIRECT_ADDR`. Ein Splitterfehler oder offener
+Übergang auf diesem begrenzten Pfad ist damit widerlegt. Ein Regressionstest
+sichert nun neben der Verbindung auch die Zuordnung der Bits 0 bis 15 zum
+Operanden- und der Bits 16 bis 21 zum Opcodezweig.
+
+Der öffentliche Adressausgang bleibt bei dieser Anregung `0x0001`. Damit war
+die vorherige temporäre Messung von `0x0001` nicht dem benannten
+`DIRECT_ADDR`-Eingang zuzuordnen; an der eingecheckten Schaltung wurde gemäß
+Stop-Regel nichts geändert. Das nächste Paket misst ausschließlich die
+tatsächlichen Anschlüsse der vier 16-Bit-Eingänge, beide Auswahlsteuersignale
+und die zwei Multiplexerausgänge innerhalb von `EffectiveAddress`. Erst der
+dort belegte erste Unterschied darf repariert werden. Anschließend wird in
+einem getrennten Paket zuerst `output-valid-write` und erst nach dessen Erfolg
+die vollständige Systemmatrix erneut ausgeführt.

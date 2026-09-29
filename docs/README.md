@@ -114,6 +114,15 @@ wiederhergestellt; `LOAD_CONST(23)` führt vor der ersten Flanke nachweislich
 eingebettete Systemfall übernimmt den gültigen Portwert dennoch noch nicht.
 Als nächstes wird daher ausschließlich die Speicherung von `VALID_IN` nach
 `Datapath.ACC_VALID_OUT` an der ersten Systemflanke erneut gemessen.
+Diese Speicherung und der nachgelagerte CPU-Adressexport sind inzwischen
+bestätigt. Die weitere Adressdiagnose hat außerdem den unmittelbaren
+Instruktionsoperanden korrigierend als `0xffff` vom 22-Bit-Splitter bis
+`EffectiveAddress.DIRECT_ADDR` nachgewiesen; der zuvor dort berichtete Wert
+`0x0001` stammte von einem falsch zugeordneten temporären Messpunkt. Als
+nächstes werden ausschließlich die vier 16-Bit-Eingänge, beide Selektoren und
+die beiden Multiplexerausgänge der effektiven Adressauswahl elektrisch
+verglichen. Danach folgt als eigenes Paket zunächst die Wiederholung des Falls
+`output-valid-write` und erst bei dessen Erfolg die vollständige Systemmatrix.
 Die Instruktionsgrenze und die drei Befehlsimpulse für Interruptaktivierung,
 -deaktivierung und Rückkehr sind nun ebenfalls direkt und
 mutationstestgeschützt weitergereicht. Auch der Folge-PC gelangt von einem
