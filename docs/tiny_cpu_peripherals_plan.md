@@ -830,3 +830,19 @@ Auswahleingänge von `EffectiveAddress` für den direkten Store-Modus bis zu
 `EFFECTIVE_MEMORY_ADDRESS` elektrisch verglichen. Alle nachgelagerten
 Adress-, Speicher- und Portpfade sowie Decoder-, Daten-, Gültigkeits- und
 Interruptnetze bleiben bis zu diesem Nachweis unverändert.
+
+## Elektrischer Vergleich der effektiven Adressbildung
+
+Die begrenzte Messung am unveränderten Fall `output-valid-write` ist
+abgeschlossen. Während `STORE_ADDRESS(0xfff)` sind die beiden
+Registerauswahlen inaktiv, aber am direkten 16-Bit-Operanden von
+`EffectiveAddress` liegt bereits `0x0001` statt `0x0fff`. Der Baustein gibt
+diesen ausgewählten Wert erwartungsgemäß unverändert als
+`EFFECTIVE_MEMORY_ADDRESS=0x0001` aus. Register-, Offset- und Ausgangspfad sind
+damit nicht der erste Fehlerort und wurden nicht verändert.
+
+Als nächstes enges Paket wird ausschließlich der unmittelbare
+Instruktionsoperand vom 16-Bit-Splitterzweig bis
+`EffectiveAddress.DIRECT_ADDR` verfolgt. Alle anderen Decoder-, Auswahl-,
+Adress-, Speicher-, Port-, Daten-, Gültigkeits- und Interruptpfade bleiben bis
+zu diesem Nachweis unverändert.
