@@ -151,7 +151,9 @@
     <comp lib="0" loc="(1820,470)" name="Constant">
       <a name="value" val="0x0"/>
     </comp>
-    <comp lib="0" loc="(1980,950)" name="Constant"/>
+    <comp lib="0" loc="(1980,950)" name="Constant">
+      <a name="value" val="0x1"/>
+    </comp>
     <comp lib="0" loc="(2010,400)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="ILL_RET"/>
@@ -364,9 +366,15 @@
       <a name="width" val="16"/>
     </comp>
     <comp lib="2" loc="(1220,790)" name="Multiplexer"/>
-    <comp lib="2" loc="(2050,960)" name="Multiplexer"/>
-    <comp lib="2" loc="(2160,970)" name="Multiplexer"/>
-    <comp lib="2" loc="(2230,980)" name="Multiplexer"/>
+    <comp lib="2" loc="(2050,960)" name="Multiplexer">
+      <a name="label" val="ACC_MEMORY_VALID_SELECT"/>
+    </comp>
+    <comp lib="2" loc="(2160,970)" name="Multiplexer">
+      <a name="label" val="ACC_NOT_VALID_SELECT"/>
+    </comp>
+    <comp lib="2" loc="(2230,980)" name="Multiplexer">
+      <a name="label" val="ACC_INPUT_VALID_SELECT"/>
+    </comp>
     <comp lib="2" loc="(2480,970)" name="Multiplexer">
       <a name="width" val="16"/>
     </comp>
@@ -559,7 +567,8 @@
     <wire from="(1870,1440)" to="(2560,1440)"/>
     <wire from="(1870,1520)" to="(3160,1520)"/>
     <wire from="(1890,1310)" to="(1890,1500)"/>
-    <wire from="(1890,1500)" to="(2880,1500)"/>
+    <wire from="(1890,1500)" to="(2150,1500)"/>
+    <wire from="(2150,1500)" to="(2880,1500)"/>
     <wire from="(1910,1290)" to="(1910,1380)"/>
     <wire from="(1910,1380)" to="(2560,1380)"/>
     <wire from="(1950,790)" to="(1950,970)"/>
@@ -578,7 +587,8 @@
     <wire from="(2070,890)" to="(2070,980)"/>
     <wire from="(2070,890)" to="(2320,890)"/>
     <wire from="(2070,980)" to="(2130,980)"/>
-    <wire from="(2140,990)" to="(2140,1330)"/>
+    <wire from="(2140,990)" to="(2150,990)"/>
+    <wire from="(2150,990)" to="(2150,1500)"/>
     <wire from="(2160,970)" to="(2200,970)"/>
     <wire from="(2190,990)" to="(2200,990)"/>
     <wire from="(2210,1000)" to="(2210,1050)"/>

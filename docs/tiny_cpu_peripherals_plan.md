@@ -765,3 +765,32 @@ Ladegültigkeits-Auswahl repariert, aber die Systemabnahme noch nicht
 freigegeben. Als nächstes wird ausschließlich geprüft, ob das eingebettete
 `Datapath.ACC_VALID_OUT` das an der ersten Flanke anliegende `VALID_IN=1`
 speichert und bis zum Store-Zyklus hält.
+
+## Topologische Nachprüfung nach der manuellen Neuverdrahtung
+
+Die manuell neu gezeichnete Leitungsgruppe vor `Datapath.VALID_IN` hatte die
+drei semantischen Multiplexerbezeichner verloren. Außerdem führte die
+Immediate-Quelle `0` statt `1`, und der Select-Eingang von
+`ACC_NOT_VALID_SELECT` endete auf dem benachbarten Decoder-Netz statt auf
+`INVERT`. Die Nachprüfung hat ausschließlich diese drei Eigenschaften
+korrigiert: Die vorhandenen Multiplexer tragen wieder ihre dokumentierten
+Namen, die Immediate-Konstante ist `1`, und die Leitung endet über einen
+expliziten Knickpunkt auf dem bereits vorhandenen `INVERT`-Netz. Die
+Anordnung von `FetchDecodeControls` blieb unverändert.
+
+Der semantische Offline-Prüfer verfolgt danach alle zehn Übergänge der
+Ladegültigkeits-Auswahl erfolgreich; auch die allgemeinen Prüfungen auf offene
+Unterblattanschlüsse, Mehrfachtreiber, Busbreiten und implizite Kontakte sind
+grün. Der anschließend ausgeführte erste elektrische Systemfall reproduziert
+weiterhin an Vektor 4 `OUTPUT_PORT_VALUE=0x0000` und
+`OUTPUT_PORT_VALID=0`. Zusammen mit dem bereits belegten direkten Export von
+`Datapath.ACC_VALID_OUT` nach `EXTERNAL_WRITE_VALID` schließt das das nächste
+dokumentierte Paket ab: Das eingebettete Gültigkeitsregister hält bis zum
+Store-Zyklus weiterhin `0`; der Fehler liegt nicht mehr in der nun
+topologisch vollständigen Auswahl oder im Exportpfad.
+
+Als nächstes enges Diagnosepaket werden deshalb ausschließlich die
+Registersteueranschlüsse `ACC_LOAD`, `VALID_IN`, `CLK` und `RESET` direkt an
+der eingebetteten `Datapath`-Instanz um die erste steigende Flanke verglichen.
+Weitere Decoder-, Daten-, Speicher-, Port- und Interruptnetze bleiben bis zu
+diesem Nachweis unverändert.
