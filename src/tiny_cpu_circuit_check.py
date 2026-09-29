@@ -345,7 +345,7 @@ def _dangling_subcircuit_output_issues(
 
 
 def _dangling_bus_input_issues(circuit: ET.Element) -> list[CircuitIssue]:
-    """Report an isolated multibit input wire ending far from every component.
+    """Report unused multibit inputs and their abandoned wire stubs.
 
     A sheet input is allowed to be unused, but a wire drawn from it promises a
     connection.  Previous checks only followed gate inputs and subcircuit
@@ -368,6 +368,14 @@ def _dangling_bus_input_issues(circuit: ET.Element) -> list[CircuitIssue]:
                 or int(attributes.get("width", "1")) == 1):
             continue
         terminal = _point(component.get("loc", ""))
+        attached = [wire for wire in wires if _on_segment(terminal, wire)]
+        if not attached:
+            label = attributes.get("label") or f"Pin@{component.get('loc')}"
+            issues.append(CircuitIssue(
+                circuit.get("name", "<unnamed>"),
+                f"{label} is an unconnected input pin",
+            ))
+            continue
         for start, end in wires:
             if terminal not in (start, end):
                 continue

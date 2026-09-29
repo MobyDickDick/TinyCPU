@@ -238,6 +238,19 @@ class CircuitCheckTests(unittest.TestCase):
             "OFFSET_ADDR has a dangling input wire ending at (250, 100)"
         ])
 
+    def test_detects_unconnected_bus_input_pin(self):
+        circuit = ET.fromstring("""
+          <circuit name="Broken">
+            <comp lib="0" loc="(100,100)" name="Pin">
+              <a name="label" val="OFFSET_ADDR"/><a name="width" val="16"/>
+            </comp>
+          </circuit>
+        """)
+        messages = [issue.message for issue in inspect_circuit(circuit)]
+        self.assertEqual(messages, [
+            "OFFSET_ADDR is an unconnected input pin"
+        ])
+
     def test_accepts_bus_input_wire_ending_at_nearby_component_contact(self):
         circuit = ET.fromstring("""
           <circuit name="Connected">

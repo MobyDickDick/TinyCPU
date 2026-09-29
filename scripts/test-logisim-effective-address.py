@@ -34,7 +34,7 @@ def run_fixture(jar: Path, name: str, values: dict[str, int]) -> dict[str, str]:
         for attribute in list(component):
             component.remove(attribute)
         ET.SubElement(component, "a", name="value", val=hex(values[label]))
-        if label in {"REG_ADDR", "DIRECT_ADDR", "OFFSET_ADDR", "REG_SELECTED"}:
+        if label in {"REG_ADDR", "DIRECT_ADDR", "REG_SELECTED"}:
             ET.SubElement(component, "a", name="width", val="16")
 
     with tempfile.TemporaryDirectory(prefix=f"tinycpu-effective-address-{name}-") as directory:
@@ -61,7 +61,6 @@ def main() -> int:
     common = {
         "REG_ADDR": 20,
         "DIRECT_ADDR": 10,
-        "OFFSET_ADDR": 21,
         "REG_SELECTED": 21,
         "ADDR_REG_ARGUMENT": 0,
         "ADDR_REG_OFFS_ARGUMENT": 0,
