@@ -3981,3 +3981,51 @@ Systemausgänge als oszillierend. Entsprechend der Stop-Regel wurde weder die
 Systemmatrix weiter ausgeführt noch ein weiterer Pfad verändert. Die nächste
 Diagnose beginnt an den öffentlichen Systemzuständen und lokalisiert den ersten
 intern oszillierenden benannten Übergang.
+
+#### Eingrenzung der Systemoszillation
+
+- **Ausgangsstand:** `e999037`
+- **Datum:** 29. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Zu Beginn schlug das verpflichtende Offline-Gate fehl, weil die manuelle
+Neuspeicherung die Immediate-Konstante der bereits abgenommenen
+Ladegültigkeits-Auswahl von `1` auf den Defaultwert `0` zurückgesetzt hatte.
+Die Konstante wurde ohne weitere Verdrahtungsänderung wieder auf `1` gesetzt;
+danach bestehen Verifier und alle 170 Unit-Tests. Dieser unabhängige
+Baselinefehler erklärt die Systemoszillation nicht.
+
+Der fokussierte elektrische Lauf reproduziert sie weiterhin unverändert:
+
+```bash
+LOGISIM_JAR="$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 --system tinycpu-peripherals-16-12-v1 \
+  --system-only --trace-output /tmp/unused-core.tsv \
+  --matrix-output /tmp/ap18-oscillation-diagnosis
+```
+
+`output-valid-write` meldet ab Vektor 1 alle sieben öffentlichen Zustände als
+oszillierend. Ein kontrollierter historischer A/B-Lauf mit demselben ROM,
+demselben Systemprojekt und demselben Vektor grenzt die Einführung auf die
+Effective-Address-Reparatur ein: Der unmittelbare Vorgänger von `3568cfc`
+liefert in den ersten drei Vektoren stabile Nullzustände und scheitert erst wie
+zuvor am erwarteten Portschreibvorgang; `3568cfc` oszilliert bereits im ersten
+Vektor. Der autonome Kernlauf bleibt davon unabhängig grün.
+
+Der A/B-Vergleich begrenzt den ersten Standunterschied damit auf den neu
+eingefügten Übergang zwischen den beiden Effective-Address-Multiplexern und
+dessen unmittelbare Hauptblattanschlüsse. Er beweist noch nicht, dass der
+isoliert grüne Multiplexer selbst oszilliert: Der isolierte
+Effective-Address-Fall und der autonome Kernlauf bestehen weiterhin. Ebenso
+sind die sieben gleichzeitig als oszillierend gemeldeten Systemausgänge kein
+Beleg für sieben voneinander unabhängige Fehler, sondern die gemeinsame Folge
+des nicht einschwingenden Gesamtnetzes.
+
+Gemäß Stop-Regel bleibt die Schaltung in diesem Diagnosepaket an dieser Grenze
+unverändert. Das nächste Paket misst ausschließlich
+`EFFECTIVE_REGISTER_SELECTED_OUT`, `EFFECTIVE_MEMORY_ADDRESS`, den öffentlichen
+Kernpin `ADDRESS` und den 12-Bit-Adresspin der `CPUIntegrationBoundary` im
+ersten Vektor. Erst der erste dort tatsächlich oszillierende benannte Übergang
+darf repariert werden; der bereits isoliert bestätigte Multiplexerübergang
+wird nicht allein aufgrund dieses A/B-Befunds zurückgenommen.
