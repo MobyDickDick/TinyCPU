@@ -746,7 +746,43 @@ class CircuitVerificationTests(unittest.TestCase):
                 core = temporary / "logisim" / "TinyCPU.circ"
                 project = ET.parse(core)
                 main = project.getroot().find("circuit[@name='TinyCPUMain']")
-                selector = _component_by_label(main, label)
+                datapath = next(
+                    component for component in main.findall("comp")
+                    if component.get("name") == "Datapath"
+                )
+                datapath_ports = VERIFY.generated_symbol_ports(
+                    project.getroot().find("circuit[@name='Datapath']"), datapath
+                )
+                one_bit_muxes = [
+                    component for component in main.findall("comp[@name='Multiplexer']")
+                    if next((attribute.get("val") for attribute in component.findall("a")
+                             if attribute.get("name") == "width"), "1") == "1"
+                ]
+                input_selector = next(
+                    component for component in one_bit_muxes
+                    if _wire_path_exists(main, component.get("loc"),
+                                         datapath_ports["VALID_IN"])
+                )
+                not_selector = next(
+                    component for component in one_bit_muxes
+                    if component is not input_selector and _wire_path_exists(
+                        main, component.get("loc"),
+                        _component_terminal(input_selector, -30, -10),
+                    )
+                )
+                memory_selector = next(
+                    component for component in one_bit_muxes
+                    if component not in (input_selector, not_selector)
+                    and _wire_path_exists(
+                        main, component.get("loc"),
+                        _component_terminal(not_selector, -30, -10),
+                    )
+                )
+                selector = {
+                    "ACC_MEMORY_VALID_SELECT": memory_selector,
+                    "ACC_NOT_VALID_SELECT": not_selector,
+                    "ACC_INPUT_VALID_SELECT": input_selector,
+                }[label]
                 _remove_wire_at(main, selector.get("loc"))
                 project.write(core, encoding="utf-8", xml_declaration=True)
                 system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
@@ -760,7 +796,8 @@ class CircuitVerificationTests(unittest.TestCase):
                          ),
                      ):
                     with self.assertRaisesRegex(
-                        VERIFY.VerificationError, "load-validity selection paths"
+                        VERIFY.VerificationError,
+                        "load-validity (?:selectors|selection paths)",
                     ):
                         VERIFY.verify_system_circuit()
 

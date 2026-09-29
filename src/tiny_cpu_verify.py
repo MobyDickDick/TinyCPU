@@ -901,38 +901,46 @@ def verify_system_circuit() -> None:
         raise VerificationError("AP-18 CPU load-validity boundaries are missing")
     controls_ports = generated_symbol_ports(controls_definition, controls_instance)
     datapath_ports = generated_symbol_ports(datapath_definition, datapath_instance)
-    validity_selectors = {}
-    for component in core_definition.findall("comp[@name='Multiplexer']"):
-        attributes = {
-            item.get("name"): item.get("val") for item in component.findall("a")
-        }
-        label = attributes.get("label")
-        if label in {
-            "ACC_MEMORY_VALID_SELECT",
-            "ACC_NOT_VALID_SELECT",
-            "ACC_INPUT_VALID_SELECT",
-        }:
-            validity_selectors.setdefault(label, []).append(component)
-    if any(len(validity_selectors.get(label, ())) != 1 for label in (
-        "ACC_MEMORY_VALID_SELECT", "ACC_NOT_VALID_SELECT", "ACC_INPUT_VALID_SELECT"
-    )):
-        raise VerificationError("AP-18 CPU load-validity selectors differ from contract")
-
-    def mux_terminals(label: str) -> tuple[str, str, str, str]:
-        component = validity_selectors[label][0]
+    def mux_terminals(component: ET.Element) -> tuple[str, str, str, str]:
         x, y = map(int, component.get("loc").strip("()").split(","))
         return component.get("loc"), f"({x - 30},{y - 10})", \
             f"({x - 30},{y + 10})", f"({x - 20},{y + 20})"
 
-    memory_out, memory_default, memory_selected, memory_control = mux_terminals(
-        "ACC_MEMORY_VALID_SELECT"
-    )
-    not_out, not_default, not_selected, not_control = mux_terminals(
-        "ACC_NOT_VALID_SELECT"
-    )
-    input_out, input_default, input_selected, input_control = mux_terminals(
-        "ACC_INPUT_VALID_SELECT"
-    )
+    # Logisim removes labels that it cannot render from these compact one-bit
+    # multiplexers when the hand-drawn circuit is saved.  Identify the stages
+    # by their electrical chain into Datapath.VALID_IN instead of turning those
+    # drawing-only labels into part of the hardware contract.
+    one_bit_muxes = [
+        component for component in core_definition.findall("comp[@name='Multiplexer']")
+        if next((item.get("val") for item in component.findall("a")
+                 if item.get("name") == "width"), "1") == "1"
+    ]
+    terminals = {id(component): mux_terminals(component) for component in one_bit_muxes}
+    input_candidates = [
+        component for component in one_bit_muxes
+        if core_connected(terminals[id(component)][0], datapath_ports["VALID_IN"])
+    ]
+    if len(input_candidates) != 1:
+        raise VerificationError("AP-18 CPU load-validity selectors differ from contract")
+    input_selector = input_candidates[0]
+    input_out, input_default, input_selected, input_control = terminals[id(input_selector)]
+    not_candidates = [
+        component for component in one_bit_muxes if component is not input_selector
+        and core_connected(terminals[id(component)][0], input_default)
+    ]
+    if len(not_candidates) != 1:
+        raise VerificationError("AP-18 CPU load-validity selectors differ from contract")
+    not_selector = not_candidates[0]
+    not_out, not_default, not_selected, not_control = terminals[id(not_selector)]
+    memory_candidates = [
+        component for component in one_bit_muxes
+        if component not in (input_selector, not_selector)
+        and core_connected(terminals[id(component)][0], not_default)
+    ]
+    if len(memory_candidates) != 1:
+        raise VerificationError("AP-18 CPU load-validity selectors differ from contract")
+    memory_out, memory_default, memory_selected, memory_control = \
+        terminals[id(memory_candidates[0])]
     constants = {}
     for component in core_definition.findall("comp[@name='Constant']"):
         attributes = {

@@ -3828,3 +3828,23 @@ Store weiterhin `0`. Eine Systemfreigabe wird daraus ausdrücklich nicht
 abgeleitet. Das nächste Paket vergleicht nur `ACC_LOAD`, `VALID_IN`, `CLK` und
 `RESET` direkt an der eingebetteten `Datapath`-Instanz um die erste steigende
 Flanke.
+
+#### Elektrische Prüfung der Datapath-Registergrenze
+
+- **Ausgangsstand:** `54eafa5f50606852dbadc919fdbf557e18521766`
+- **Datum:** 29. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Eine temporär instrumentierte Kopie unter
+`/tmp/ap18-datapath-pin-check/` bestätigt am ersten `LOAD_CONST(23)` vor der
+steigenden Flanke `ACC_LOAD=1`, `VALID_IN=1` und den phasengleichen Takt.
+Nach der Flanke führt `Datapath.ACC_VALID_OUT=1`; das Bit bleibt bis in den
+anschließenden Store-Zyklus gesetzt. Die vier angekündigten Datapath-Pfade
+sind daher nicht der erste Fehlerort und wurden nicht verändert.
+
+Die ergänzende Messung an der CPU-Systemgrenze zeigt im Store-Zyklus den
+korrekten Wert `0x0017`, `WRITE_VALID=1` und `WRITE_ENABLE=1`, aber
+`ADDRESS=0x001` statt `0xfff`. Der unveränderte Systemlauf scheitert dadurch
+weiterhin zuerst an Vektor 4 mit einem unveränderten Ausgabeport. Das nächste
+Paket beschränkt sich auf den Vergleich von effektivem Adressausgang,
+öffentlichem Kernadresspin und dem 16-auf-12-Bit-Adapter.

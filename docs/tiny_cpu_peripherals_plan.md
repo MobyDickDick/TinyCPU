@@ -794,3 +794,22 @@ Registersteueranschlüsse `ACC_LOAD`, `VALID_IN`, `CLK` und `RESET` direkt an
 der eingebetteten `Datapath`-Instanz um die erste steigende Flanke verglichen.
 Weitere Decoder-, Daten-, Speicher-, Port- und Interruptnetze bleiben bis zu
 diesem Nachweis unverändert.
+
+## Elektrische Nachprüfung des Akkumulator-Gültigkeitsregisters
+
+Die angekündigte Messung wurde an einer ausschließlich unter
+`/tmp/ap18-datapath-pin-check/` instrumentierten Kopie des Systemfalls
+`output-valid-write` durchgeführt. Vor der ersten steigenden Flanke liegen
+`ACC_LOAD=1` und `VALID_IN=1` an; der Datapath sieht denselben Takt wie der
+Testvektor. Unmittelbar nach der Flanke ist `ACC_VALID_OUT=1`, und der Zustand
+bleibt im folgenden Store-Zyklus gesetzt. An diesen vier Pfaden wurde deshalb
+keine Schaltungsänderung vorgenommen.
+
+Die weitergehende Anschlussmessung hat den ersten nachgelagerten Unterschied
+am öffentlichen CPU-Adresspfad lokalisiert: Während Schreibwert `0x0017`,
+Schreibgültigkeit und Schreibfreigabe korrekt anliegen, führt
+`CPUIntegrationBoundary.ADDRESS=0x001` statt der für
+`STORE_ADDRESS(0xfff)` erwarteten Adresse `0xfff`. Der Ausgabeport wird daher
+nicht ausgewählt. Als nächstes enges Paket wird ausschließlich
+`EffectiveAddress.EFFECTIVE_MEMORY_ADDRESS` gegen `TinyCPUMain.ADDRESS` und
+die 16-auf-12-Bit-Auswahl in `CPUIntegrationBoundary` elektrisch verglichen.
