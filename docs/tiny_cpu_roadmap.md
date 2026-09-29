@@ -317,9 +317,12 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Ladegültigkeits-Auswahl wiederhergestellt und zunächst mit
   `LOAD_CONST(23)` elektrisch abgenommen. Die direkte Folgemessung bestätigt
   `ACC_LOAD`, `VALID_IN`, `CLK` und `ACC_VALID_OUT` an der Datapath-Grenze.
-  Der erste verbleibende Systemunterschied liegt am CPU-Adressausgang
-  (`0x001` statt `0xfff` im Store-Zyklus); als Nächstes wird ausschließlich
-  dessen Weg über die 16-auf-12-Bit-Auswahl verfolgt.
+  Der anschließende Adressvergleich zeigt bereits am direkt verbundenen
+  `EffectiveAddress.EFFECTIVE_MEMORY_ADDRESS` und 16-Bit-Kernexport `0x0001`
+  statt `0x0fff`; der 16-auf-12-Bit-Adapter reicht diesen Wert korrekt als
+  `0x001` weiter und ist kein Reparaturort. Als Nächstes werden ausschließlich
+  Operanden- und Auswahleingänge der effektiven Adressbildung im direkten
+  Store-Modus verfolgt.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

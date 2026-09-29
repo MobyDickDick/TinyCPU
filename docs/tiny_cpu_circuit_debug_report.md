@@ -3848,3 +3848,34 @@ korrekten Wert `0x0017`, `WRITE_VALID=1` und `WRITE_ENABLE=1`, aber
 weiterhin zuerst an Vektor 4 mit einem unveränderten Ausgabeport. Das nächste
 Paket beschränkt sich auf den Vergleich von effektivem Adressausgang,
 öffentlichem Kernadresspin und dem 16-auf-12-Bit-Adapter.
+
+#### Elektrischer Vergleich des CPU-Adressexports
+
+- **Ausgangsstand:** `5e0688192aa242429dfe05016fde4266e0309757`
+- **Datum:** 29. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Der angekündigte Vergleich wurde mit zwei ausschließlich unter
+`/tmp/ap18-address-check/` und `/tmp/ap18-address-system/` instrumentierten
+Kopien des unveränderten Falls `output-valid-write` ausgeführt. Im direkten
+Kernlauf führt der öffentliche 16-Bit-Pin `TinyCPUMain.ADDRESS` während aller
+beobachteten Phasen `0x0001`. Die statische Netzverfolgung bestätigt, dass
+dieser Pin ohne Auswahlstufe am selben Netz wie
+`EffectiveAddress.EFFECTIVE_MEMORY_ADDRESS` liegt; beide benannten Übergänge
+führen daher elektrisch denselben falschen Wert.
+
+Ein zusätzlicher passiver 12-Bit-Messpin hinter dem Splitter der
+`CPUIntegrationBoundary` zeigt im eingebetteten Lauf ebenfalls durchgehend
+`0x001`. Der Adapter reicht damit die niederwertigen zwölf Bits des bereits
+falschen 16-Bit-Werts unverändert weiter; weder Kernexport noch
+16-auf-12-Bit-Anpassung sind der erste Unterschied. Im Store-Zyklus wird also
+weiterhin nicht die erwartete direkte Adresse `0xfff` erzeugt. Die
+instrumentierten Kopien und Simulatorausgaben bleiben als lokale
+Diagnoseartefakte außerhalb von Git; die eingecheckten Schaltungen wurden
+nicht verändert.
+
+Das nächste enge Diagnosepaket vergleicht ausschließlich die Operanden- und
+Auswahleingänge von `EffectiveAddress` beim `STORE_ADDRESS(0xfff)` mit dessen
+Ausgang. Erst ein dort belegter falscher oder offener Übergang darf repariert
+werden. Decoder-, Daten-, Gültigkeits-, Export-, Adapter-, Speicher-, Port-
+und Interruptpfade bleiben bis dahin unverändert.
