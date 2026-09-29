@@ -911,3 +911,30 @@ Die vollständige Systemmatrix wurde deshalb nicht geöffnet. Als nächstes wird
 ausschließlich diese neu benannte Oszillation an der Systemgrenze eingegrenzt;
 die reparierte Adressauswahl wird nicht ohne einen abweichenden benannten Port
 wieder verändert.
+
+## Eingrenzung der Oszillation auf den Effective-Address-Übergang
+
+Der reproduzierte Systemfall `output-valid-write` oszilliert nicht aufgrund
+der Peripherie oder des 16-auf-12-Bit-Adapters. Ein historischer Vergleich mit
+dem Stand unmittelbar vor der Adressmultiplexer-Reparatur liefert bis Vektor 3
+stabile Systemausgänge und erst danach den bereits bekannten falschen
+Ausgabewert. Mit der reparierten `EffectiveAddress`-Schaltung oszillieren die
+sieben öffentlichen Systemzustände dagegen bereits ab Vektor 1.
+
+Der erste Standunterschied, der die Oszillation aktiviert, ist damit auf den
+neu eingefügten Übergang zwischen den beiden Effective-Address-Multiplexern
+und dessen unmittelbare Hauptblattanschlüsse begrenzt. Der isolierte
+Effective-Address-Fall und der autonome Kernlauf bleiben grün; daraus darf
+weder ein Fehler des Multiplexers noch ein Fehler der Peripherie abgeleitet
+werden. Insbesondere ist die gemeinsame Meldung aller sieben öffentlichen
+Zustände nur Logisims Folge des nicht einschwingenden Gesamtnetzes und kein
+Nachweis von sieben unabhängigen Registerfehlern.
+
+Gemäß Stop-Regel wurde diese Grenze in diesem Diagnosepaket nicht umverdrahtet.
+Als nächstes enges Diagnosepaket werden ausschließlich
+`EFFECTIVE_REGISTER_SELECTED_OUT`, `EFFECTIVE_MEMORY_ADDRESS`, der öffentliche
+Kernpin `ADDRESS` und der 12-Bit-Adresspin der `CPUIntegrationBoundary` im
+ersten Vektor verglichen. Erst der erste dort tatsächlich oszillierende
+benannte Übergang darf repariert werden; der isoliert korrekte
+Multiplexerübergang wird nicht allein aufgrund dieses A/B-Befunds
+zurückgenommen.
