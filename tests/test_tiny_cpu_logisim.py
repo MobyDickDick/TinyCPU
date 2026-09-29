@@ -1205,6 +1205,14 @@ class LogisimLauncherTests(unittest.TestCase):
         attributes = _attributes(splitter)
         self.assertEqual(attributes.get("facing"), "south")
         self.assertEqual(attributes.get("incoming"), "22")
+        self.assertTrue(all(
+            attributes.get(f"bit{bit}", "0") == "0"
+            for bit in range(16)
+        ))
+        self.assertTrue(all(
+            attributes.get(f"bit{bit}") == "1"
+            for bit in range(16, 22)
+        ))
 
         # Branch 0 contains bits 0..15.  For a south-facing two-way splitter,
         # it is the second terminal, one spacing interval to the right of the

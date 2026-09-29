@@ -846,3 +846,25 @@ Instruktionsoperand vom 16-Bit-Splitterzweig bis
 `EffectiveAddress.DIRECT_ADDR` verfolgt. Alle anderen Decoder-, Auswahl-,
 Adress-, Speicher-, Port-, Daten-, Gültigkeits- und Interruptpfade bleiben bis
 zu diesem Nachweis unverändert.
+
+## Elektrische Prüfung des unmittelbaren Instruktionsoperanden
+
+Die angekündigte Messung wurde am unveränderten `STORE_ADDRESS(0xfff)` mit
+einer ausschließlich unter `/tmp` instrumentierten Kopie durchgeführt. Das
+22-Bit-Instruktionswort liegt als `0x29ffff` am Splittereingang an. Der
+Opcode-Zweig führt `0x29`; der aus den Bits 0 bis 15 gebildete Operandenzweig
+führt `0xffff`. Derselbe Wert liegt am topologisch direkt verbundenen Eingang
+`EffectiveAddress.DIRECT_ADDR` an. Splitterzuordnung und Leitung bis zu diesem
+Eingang sind damit nicht der erste Fehlerort; die eingecheckte Schaltung wurde
+nicht verändert.
+
+Der bisherige Befund `DIRECT_ADDR=0x0001` ist damit als falsche Zuordnung eines
+temporären Messpunkts korrigiert. Der öffentliche Adressausgang bleibt im
+fokussierten Lauf dennoch `0x0001`. Als nächstes enges Diagnosepaket werden
+deshalb ausschließlich die beiden Auswahlsteuersignale und die vier benannten
+16-Bit-Eingänge von `EffectiveAddress` an den tatsächlichen Symbolanschlüssen
+mit dem internen Ausgang des ersten und zweiten Multiplexers verglichen. Erst
+ein dort belegter erster Unterschied darf eine Änderung der Auswahlverdrahtung
+auslösen. Danach folgt als separates Paket die erneute Ausführung des ersten
+Systemfalls; alle Speicher-, Port-, Daten-, Gültigkeits- und Interruptpfade
+bleiben bis dahin unverändert.
