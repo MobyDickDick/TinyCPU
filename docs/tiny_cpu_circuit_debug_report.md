@@ -4029,3 +4029,102 @@ Kernpin `ADDRESS` und den 12-Bit-Adresspin der `CPUIntegrationBoundary` im
 ersten Vektor. Erst der erste dort tatsächlich oszillierende benannte Übergang
 darf repariert werden; der bereits isoliert bestätigte Multiplexerübergang
 wird nicht allein aufgrund dieses A/B-Befunds zurückgenommen.
+
+
+#### Wiederherstellung der Immediate-Ladegültigkeit nach der Neuanordnung
+
+- **Ausgangsstand:** `69af29a`
+- **Datum:** 29. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Vor der angekündigten elektrischen Messung der vier Adresssignale scheiterte
+das gemäß Stop-Regel zuerst ausgeführte Offline-Gate: Die Immediate-Konstante
+der bereits dokumentierten Ladegültigkeits-Auswahl war durch die vorherige
+manuelle Neuanordnung auf den Logisim-Defaultwert `0` zurückgefallen. Der
+Verifier meldete deshalb gezielt `AP-18 CPU load-validity selection paths
+differ from contract`.
+
+Die Reparatur setzt ausschließlich diese Konstante wieder auf den zuvor
+elektrisch belegten Wert `1`. `FetchDecodeControls` sowie Adress-, Speicher-,
+Port- und Interruptnetze wurden nicht verändert.
+
+```bash
+scripts/test-offline.sh
+
+LOGISIM_JAR="$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 --system tinycpu-peripherals-16-12-v1 \
+  --system-only --trace-output /tmp/unused-core.tsv \
+  --matrix-output /tmp/ap18-repeat
+```
+
+Der Offline-Lauf besteht wieder mit 23 Projekten, 47 Schaltungen und 2972
+rechtwinkligen Leitungen. Der elektrische Diagnoselauf stoppt unverändert im
+ersten Fall: Ab Vektor 1 werden alle sieben öffentlichen Systemzustände als
+oszillierend gemeldet. Die vollständige Systemmatrix wurde deshalb nicht
+geöffnet und AP 18 bleibt in Umsetzung.
+
+Das nächste enge Diagnosepaket bleibt der bereits angekündigte Vergleich von
+`EFFECTIVE_REGISTER_SELECTED_OUT`, `EFFECTIVE_MEMORY_ADDRESS`, dem öffentlichen
+Kernpin `ADDRESS` und dem 12-Bit-Adresspin der `CPUIntegrationBoundary` im
+ersten Vektor. Die reparierte Ladegültigkeitskonstante und der isoliert grüne
+Multiplexerübergang werden nicht ohne einen abweichenden benannten Port erneut
+verändert.
+
+#### Hierarchische Lokalisierung der Systemoszillation
+
+- **Ausgangsstand:** `337f929`
+- **Datum:** 29. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Der erste Vektor von `output-valid-write` wurde in einer temporären
+hierarchischen Zustandsinspektion ausgeführt. Sie liest Logisims eigene
+`PropagationPoints` aus der ausschließlich unter `/tmp` kompilierten
+Diagnosehilfe aus; weder Java-Helfer noch instrumentierte Schaltung werden
+eingecheckt.
+
+Die vier angekündigten Adresspunkte sind stabil und fehlen vollständig in der
+Oszillationsmenge. `EFFECTIVE_REGISTER_SELECTED_OUT`,
+`EFFECTIVE_MEMORY_ADDRESS` und `TinyCPUMain.ADDRESS` führen jeweils `0x0017`;
+`CPUIntegrationBoundary.ADDRESS` führt nach dem Adapter `0x017`. Damit sind
+die Effective-Address-Stufen, der öffentliche Kernexport und der
+16-auf-12-Bit-Adapter nicht der erste oszillierende Übergang.
+
+Die erste tatsächliche Rückkopplung liegt auf den Speicherwert- und
+Speichergültigkeitspfaden. Die Zustandsinspektion nennt unter anderem die
+beiden externen Speicherselektoren auf `TinyCPUMain`, deren externe Eingänge,
+`PRINT_ADDRESS_VALUE`, `PRINT_ADDRESS_VALID`, beide `RAM_READ_*`- und
+`READ_*`-Grenzsignale sowie die davon abhängigen Operations-Eingänge als
+oszillierende Punkte. Die statische Portverfolgung erklärt diese Menge:
+`CPUIntegrationBoundary` verbindet die nach den externen Selektoren liegenden
+`PRINT_ADDRESS_*`-Ausgänge zurück mit der RAM-Leseseite des
+`OutputMemoryPath`. Dessen ausgewählte `READ_*`-Ausgänge gelangen über die
+Boundary wieder an die externen Selektoreingänge desselben Kerns. Bei aktivem
+`USE_EXTERNAL_MEMORY` sind damit Wert und Gültigkeit jeweils ohne Register in
+sich selbst zurückgeführt.
+
+Der konkrete Zyklus lautet:
+
+```text
+TinyCPUMain external selector -> PRINT_ADDRESS_*
+  -> CPUIntegrationBoundary RAM_READ_*
+  -> OutputMemoryPath READ_*
+  -> CPUIntegrationBoundary READ_*
+  -> TinyCPUMain EXTERNAL_MEMORY_*
+  -> TinyCPUMain external selector
+```
+
+Damit ist auch erklärt, warum alle sieben öffentlichen Systemzustände
+scheinbar gemeinsam oszillieren: Sie werden vom Testvektorlauf verworfen,
+sobald der gemeinsame Top-Level-Propagator nicht einschwingt; es handelt sich
+nicht um sieben unabhängige Zustandsfehler. Die vorausgehende
+Effective-Address-Änderung hat die Rückkopplung sichtbar gemacht, ist aber
+selbst nicht Teil der von Logisim gemeldeten Oszillationspunkte.
+
+Gemäß Stop-Regel wurde noch keine Schaltung verändert. Das nächste begrenzte
+Reparaturpaket exportiert ausschließlich `Memory.MEMORY_DATA` und
+`Memory.MEMORY_VALID` **vor** der externen Auswahl als neue rohe Kernsignale
+und ersetzt damit die beiden falschen `PRINT_ADDRESS_*`-Rückwege in der
+`CPUIntegrationBoundary`. Anschließend wird zuerst `output-valid-write`
+wiederholt; die vollständige Systemmatrix bleibt bis zu dessen Erfolg
+geschlossen.

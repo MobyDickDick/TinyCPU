@@ -938,3 +938,68 @@ ersten Vektor verglichen. Erst der erste dort tatsächlich oszillierende
 benannte Übergang darf repariert werden; der isoliert korrekte
 Multiplexerübergang wird nicht allein aufgrund dieses A/B-Befunds
 zurückgenommen.
+
+## Wiederherstellung der Immediate-Ladegültigkeit nach der Neuanordnung
+
+Vor dem angekündigten elektrischen Vergleich der vier Adresssignale hat das
+verpflichtende Offline-Gate einen neuen, engeren Vertragsbruch erkannt: Die
+Immediate-Konstante der bereits dokumentierten Ladegültigkeits-Auswahl trug
+nach der manuellen Neuanordnung wieder den Logisim-Defaultwert `0`. Nur dieses
+Attribut wurde auf den zuvor elektrisch belegten Wert `1` zurückgesetzt.
+`FetchDecodeControls` sowie Adress-, Speicher-, Port- und Interruptnetze
+blieben unverändert. Der Offline-Lauf besteht danach wieder vollständig.
+
+Der anschließend erneut ausgeführte Fall `output-valid-write` meldet weiterhin
+ab Vektor 1 alle sieben öffentlichen Systemzustände als oszillierend. Die
+Korrektur der unabhängigen Ladegültigkeitsregression ist daher keine
+Systemfreigabe; die vollständige Systemmatrix bleibt geschlossen. Das nächste
+enge Diagnosepaket bleibt der bereits angekündigte Vergleich von
+`EFFECTIVE_REGISTER_SELECTED_OUT`, `EFFECTIVE_MEMORY_ADDRESS`, dem öffentlichen
+Kernpin `ADDRESS` und dem 12-Bit-Adresspin der `CPUIntegrationBoundary`.
+
+## Ursache der Systemoszillation
+
+Die angekündigte hierarchische Messung wurde mit dem ersten Vektor von
+`output-valid-write` durchgeführt. Entgegen der bisherigen Eingrenzung sind
+alle vier Adresssignale stabil: `EFFECTIVE_REGISTER_SELECTED_OUT`,
+`EFFECTIVE_MEMORY_ADDRESS` und der öffentliche Kernpin `ADDRESS` führen
+`0x0017`; der 12-Bit-Ausgang der `CPUIntegrationBoundary` führt entsprechend
+`0x017`. Keiner dieser Punkte gehört zu Logisims Oszillationsmenge. Die
+Effective-Address-Reparatur ist daher nicht der oszillierende Übergang.
+
+Die Oszillationsmenge beginnt stattdessen an den beiden externen
+Speicherrückführungen. `CPUIntegrationBoundary` verwendet derzeit
+`PRINT_ADDRESS_VALUE` und `PRINT_ADDRESS_VALID` als vermeintliche rohe
+RAM-Leseausgänge. Diese Signale liegen aber bereits **hinter** den beiden vom
+Systemmodus aktivierten externen Speichermultiplexern. Dadurch entstehen zwei
+rein kombinatorische Schleifen:
+
+```text
+EXTERNAL_MEMORY_VALUE_SELECT -> PRINT_ADDRESS_VALUE
+  -> CPUIntegrationBoundary.RAM_READ_VALUE
+  -> OutputMemoryPath.READ_VALUE
+  -> CPUIntegrationBoundary.READ_VALUE
+  -> TinyCPUMain.EXTERNAL_MEMORY_VALUE
+  -> EXTERNAL_MEMORY_VALUE_SELECT
+
+EXTERNAL_MEMORY_VALID_SELECT -> PRINT_ADDRESS_VALID
+  -> CPUIntegrationBoundary.RAM_READ_VALID
+  -> OutputMemoryPath.READ_VALID
+  -> CPUIntegrationBoundary.READ_VALID
+  -> TinyCPUMain.EXTERNAL_MEMORY_VALID
+  -> EXTERNAL_MEMORY_VALID_SELECT
+```
+
+Logisim meldet folgerichtig die beiden Selektoren, die Ein- und Ausgänge der
+Speichergrenzen sowie die davon abhängigen Operations-Signale als
+oszillierend. Die sieben öffentlichen Systemzustände sind nur nachgelagerte
+Fehlermeldungen des nicht eingeschwungenen Top-Levels.
+
+Gemäß Stop-Regel wurde die Schaltung in diesem Diagnosepaket nicht verändert.
+Das nächste Reparaturpaket muss ausschließlich rohe `Memory.MEMORY_DATA`- und
+`Memory.MEMORY_VALID`-Signale vor den externen Selektoren aus dem Kern
+exportieren und diese beiden neuen Ausgänge statt der nachselektierten
+`PRINT_ADDRESS_*`-Signale an die RAM-Leseseite der
+`CPUIntegrationBoundary` anschließen. Danach werden zuerst
+`output-valid-write` und erst bei dessen Erfolg die übrigen Systemfälle
+ausgeführt.
