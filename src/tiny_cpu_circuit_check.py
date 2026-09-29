@@ -344,6 +344,51 @@ def _dangling_subcircuit_output_issues(
     return issues
 
 
+def _dangling_bus_input_issues(circuit: ET.Element) -> list[CircuitIssue]:
+    """Report an isolated multibit input wire ending far from every component.
+
+    A sheet input is allowed to be unused, but a wire drawn from it promises a
+    connection.  Previous checks only followed gate inputs and subcircuit
+    outputs, so an abandoned input-pin stub escaped detection.  Primitive
+    contacts are commonly offset from their component's ``loc`` by up to 50
+    pixels; requiring more than 100 pixels of Manhattan distance keeps this
+    check conservative while detecting conspicuous remnants in empty space.
+    """
+    wires = [(_point(wire.get("from", "")), _point(wire.get("to", "")))
+             for wire in circuit.findall("wire")]
+    components = circuit.findall("comp")
+    component_locations = {
+        _point(component.get("loc", "")) for component in components
+    }
+    issues = []
+    for component in components:
+        attributes = _attributes(component)
+        if (component.get("name") != "Pin"
+                or attributes.get("type", "input") != "input"
+                or int(attributes.get("width", "1")) == 1):
+            continue
+        terminal = _point(component.get("loc", ""))
+        for start, end in wires:
+            if terminal not in (start, end):
+                continue
+            loose = end if start == terminal else start
+            if sum(_on_segment(loose, wire) for wire in wires) != 1:
+                continue
+            other_locations = component_locations - {terminal}
+            distance = min((
+                abs(loose[0] - point[0]) + abs(loose[1] - point[1])
+                for point in other_locations
+            ), default=101)
+            if distance <= 100:
+                continue
+            label = attributes.get("label") or f"Pin@{component.get('loc')}"
+            issues.append(CircuitIssue(
+                circuit.get("name", "<unnamed>"),
+                f"{label} has a dangling input wire ending at {loose}",
+            ))
+    return issues
+
+
 def _net_drivers(circuit: ET.Element,
                  definitions: dict[str, ET.Element] | None = None,
                  omitted_wire: ET.Element | None = None) -> dict[Point, list[_Driver]]:
@@ -393,6 +438,7 @@ def inspect_circuit(circuit: ET.Element,
     issues.extend(_undriven_gate_input_issues(circuit, definitions))
     issues.extend(_unwired_multiplexer_input_issues(circuit))
     issues.extend(_dangling_subcircuit_output_issues(circuit, definitions))
+    issues.extend(_dangling_bus_input_issues(circuit))
     return issues
 
 
