@@ -3936,3 +3936,48 @@ und die zwei Multiplexerausgänge innerhalb von `EffectiveAddress`. Erst der
 dort belegte erste Unterschied darf repariert werden. Anschließend wird in
 einem getrennten Paket zuerst `output-valid-write` und erst nach dessen Erfolg
 die vollständige Systemmatrix erneut ausgeführt.
+
+#### Elektrischer Vergleich beider Effective-Address-Multiplexerstufen
+
+- **Ausgangsstand:** `bf53d59`
+- **Datum:** 29. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Der isolierte elektrische Lauf regt die tatsächlichen sechs Eingänge mit
+voneinander unterscheidbaren Werten an: `DIRECT_ADDR=0xffff`,
+`REG_ADDR=0x0014`, `OFFSET_ADDR=0x0015`, `REG_SELECTED=0x0001` sowie beide
+Selektoren `0`. `EFFECTIVE_REGISTER_SELECTED_OUT` führt danach korrekt
+`0xffff`, `EFFECTIVE_MEMORY_ADDRESS` dagegen `0x0001`. Die erste Stufe und
+beide Selektoren verhalten sich damit erwartungsgemäß; der erste Unterschied
+liegt am unselektierten Dateneingang der zweiten Stufe, der vom separaten
+`REG_SELECTED`-Eingang statt vom Ausgang der ersten Stufe gespeist wird.
+
+Der damalige Fall `store-direct-diagnostic` im elektrischen Effective-Address-Skript
+hält diese Beobachtung mit absichtlich verschiedenen Werten fest. Die zuvor
+gleichen Werte für ersten Multiplexerausgang und `REG_SELECTED` konnten den
+fehlenden Übergang nicht sichtbar machen. Gemäß Stop-Regel wurde noch keine
+Schaltung geändert. Das nächste Paket repariert ausschließlich diesen
+Datenübergang und führt danach nacheinander die isolierte Adressabnahme, den
+Fall `output-valid-write` und bei dessen Erfolg die vollständige Systemmatrix
+aus.
+
+#### Reparatur des Effective-Address-Übergangs
+
+- **Ausgangsstand:** `39d9406`
+- **Datum:** 29. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Der Ausgang des ersten Adressmultiplexers erreicht nun direkt den
+unselektierten Eingang des zweiten Multiplexers. Der getrennte Eingang
+`REG_SELECTED` speist ausschließlich dessen Offset-Zweig. Ein topologischer
+Regressionstest leitet beide Kontakte aus den tatsächlichen
+Multiplexerpositionen ab; der elektrische Fall verwendet unterschiedliche
+Werte und erwartet nun `0xffff` an beiden Ausgängen. Der zweimalige autonome
+Kernlauf bleibt grün.
+
+Die unmittelbar folgende Ausführung von `output-valid-write` erreicht noch
+keinen Wertvergleich: Logisim kennzeichnet ab Vektor 1 alle sieben
+Systemausgänge als oszillierend. Entsprechend der Stop-Regel wurde weder die
+Systemmatrix weiter ausgeführt noch ein weiterer Pfad verändert. Die nächste
+Diagnose beginnt an den öffentlichen Systemzuständen und lokalisiert den ersten
+intern oszillierenden benannten Übergang.

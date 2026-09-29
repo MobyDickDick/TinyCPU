@@ -171,3 +171,21 @@ interaktiver Anzeige verschoben: Ein früherer Bedienversuch lieferte
 undefinierte beziehungsweise elektrische Fehlerwerte und damit kein
 verwertbares Testprotokoll. Der Aufschub ändert den vollständig elektrisch
 nachgewiesenen Funktionsstatus nicht.
+
+Der elektrische Vergleich der effektiven Adressauswahl ist nun mit
+unterscheidbaren Eingangswerten abgeschlossen: Die erste Stufe wählt den
+direkten Operanden `0xffff` korrekt, die zweite Stufe liefert bei inaktivem
+Offsetselektor jedoch den eigenständigen Eingang `REG_SELECTED=0x0001`. Ihr
+Dateneingang wird nicht vom Ausgang der ersten Stufe gespeist. Die Schaltung
+blieb gemäß Stop-Regel unverändert; als nächstes wird ausschließlich dieser
+Übergang repariert und danach zunächst die Effective-Address-Abnahme und der
+Fall `output-valid-write` wiederholt.
+
+Der belegte Übergangsfehler in `EffectiveAddress` ist inzwischen repariert:
+Die erste Multiplexerstufe speist direkt die Standardseite der zweiten, während
+`REG_SELECTED` nur deren Offset-Zweig erreicht. Der unterscheidbare elektrische
+Regressionsfall und der zweimalige autonome Kernlauf bestehen. Die danach
+zuerst wiederholte Fixture `output-valid-write` meldet jedoch bereits ab ihrem
+ersten Vektor alle öffentlichen Systemzustände als oszillierend. Deshalb wurde
+die vollständige Systemmatrix gemäß Stop-Regel noch nicht geöffnet; als
+nächstes wird ausschließlich diese Oszillation eingegrenzt.

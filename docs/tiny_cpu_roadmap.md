@@ -322,9 +322,16 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   statt `0x0fff`; der 16-auf-12-Bit-Adapter reicht diesen Wert korrekt als
   `0x001` weiter und ist kein Reparaturort. Die anschließende Eingangsmessung
   zeigt bei inaktiven Registerauswahlen bereits am direkten Operanden von
-  `EffectiveAddress` `0x0001`; dessen Ausgang folgt diesem Wert korrekt. Als
-  Nächstes wird ausschließlich dieser 16-Bit-Instruktionsoperand vom Splitter
-  bis zum Eingang der effektiven Adressbildung verfolgt.
+  `EffectiveAddress` `0x0001`; dessen Ausgang folgt diesem Wert korrekt. Die
+  korrigierende Folgemessung weist den 16-Bit-Instruktionsoperanden bis
+  `EffectiveAddress.DIRECT_ADDR` als `0xffff` nach. Mit unterscheidbaren
+  Eingangswerten ist der erste tatsächliche Unterschied nun zwischen den
+  Multiplexerstufen belegt: Die erste liefert `0xffff`, während die zweite
+  ihren separaten Eingang `REG_SELECTED=0x0001` übernimmt. Dieser Übergang ist
+  nun repariert und durch unterscheidbare Werte sowie den autonomen Kernlauf
+  abgesichert. Die zuerst wiederholte Fixture `output-valid-write` meldet
+  allerdings ab Vektor 1 oszillierende Systemzustände; als Nächstes wird
+  ausschließlich diese Oszillation eingegrenzt.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
