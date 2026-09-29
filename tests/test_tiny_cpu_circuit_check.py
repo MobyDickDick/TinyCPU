@@ -221,6 +221,37 @@ class CircuitCheckTests(unittest.TestCase):
             ["RESULT of ALU has a dangling output wire ending at (300, 100)"],
         )
 
+    def test_detects_abandoned_bus_input_stub(self):
+        circuit = ET.fromstring("""
+          <circuit name="Broken">
+            <comp lib="0" loc="(100,100)" name="Pin">
+              <a name="label" val="OFFSET_ADDR"/><a name="width" val="16"/>
+            </comp>
+            <comp lib="0" loc="(400,300)" name="Constant">
+              <a name="width" val="16"/>
+            </comp>
+            <wire from="(100,100)" to="(250,100)"/>
+          </circuit>
+        """)
+        messages = [issue.message for issue in inspect_circuit(circuit)]
+        self.assertEqual(messages, [
+            "OFFSET_ADDR has a dangling input wire ending at (250, 100)"
+        ])
+
+    def test_accepts_bus_input_wire_ending_at_nearby_component_contact(self):
+        circuit = ET.fromstring("""
+          <circuit name="Connected">
+            <comp lib="0" loc="(100,100)" name="Pin">
+              <a name="label" val="VALUE"/><a name="width" val="16"/>
+            </comp>
+            <comp lib="3" loc="(300,100)" name="Comparator">
+              <a name="width" val="16"/>
+            </comp>
+            <wire from="(100,100)" to="(250,100)"/>
+          </circuit>
+        """)
+        self.assertEqual(inspect_circuit(circuit), [])
+
     def test_accepts_subcircuit_output_wire_continued_at_a_bend(self):
         producer = ET.fromstring("""
           <circuit name="Producer">
