@@ -62,27 +62,37 @@ def main() -> int:
         "REG_ADDR": 20,
         "DIRECT_ADDR": 10,
         "OFFSET_ADDR": 21,
-        "REG_SELECTED": 20,
+        "REG_SELECTED": 21,
         "ADDR_REG_ARGUMENT": 0,
         "ADDR_REG_OFFS_ARGUMENT": 0,
     }
     fixtures = {
-        "direct": ({"REG_SELECTED": 10}, "0x000a", "0"),
-        "register": ({"ADDR_REG_ARGUMENT": 1}, "0x0014", "0"),
-        "register-offset": ({"ADDR_REG_ARGUMENT": 1, "ADDR_REG_OFFS_ARGUMENT": 1}, "0x0015", "0"),
-        "maximum": ({"ADDR_REG_ARGUMENT": 1, "REG_ADDR": 0x0FFF, "REG_SELECTED": 0x0FFF}, "0x0fff", "0"),
-        "out-of-range": ({"ADDR_REG_ARGUMENT": 1, "REG_ADDR": 0x1000, "REG_SELECTED": 0x1000}, "0x1000", "1"),
+        "direct": ({}, "0x000a", "0x000a", "0"),
+        "register": ({"ADDR_REG_ARGUMENT": 1}, "0x0014", "0x0014", "0"),
+        "register-offset": ({"ADDR_REG_ARGUMENT": 1, "ADDR_REG_OFFS_ARGUMENT": 1}, "0x0014", "0x0015", "0"),
+        "maximum": ({"ADDR_REG_ARGUMENT": 1, "REG_ADDR": 0x0FFF}, "0x0fff", "0x0fff", "0"),
+        "out-of-range": ({"ADDR_REG_ARGUMENT": 1, "REG_ADDR": 0x1000}, "0x1000", "0x1000", "1"),
+        # Keep the AP-18 regression values deliberately distinct: the second
+        # mux must consume the selected direct address, not REG_SELECTED.
+        "store-direct-regression": (
+            {"DIRECT_ADDR": 0xFFFF, "REG_SELECTED": 1},
+            "0xffff", "0xffff", "0",
+        ),
     }
-    for name, (specific, expected_address, expected_range) in fixtures.items():
+    for name, (specific, expected_selected, expected_address, expected_range) in fixtures.items():
         actual = run_fixture(jar, name, common | specific)
         expected = {
+            "EFFECTIVE_REGISTER_SELECTED_OUT": expected_selected,
             "EFFECTIVE_MEMORY_ADDRESS": expected_address,
             "ADDRESS_OUT_OF_RANGE": expected_range,
         }
         differences = [key for key, value in expected.items() if actual.get(key) != value]
         if differences:
             raise LogisimError(f"effective-address fixture {name}: mismatched {', '.join(differences)}")
-    print("electrical effective-address acceptance passed: direct, register, offset, and range boundary")
+    print(
+        "electrical effective-address acceptance passed: direct, register, "
+        "offset, range boundary, and AP-18 direct-store regression"
+    )
     return 0
 
 

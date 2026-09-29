@@ -868,3 +868,46 @@ ein dort belegter erster Unterschied darf eine Änderung der Auswahlverdrahtung
 auslösen. Danach folgt als separates Paket die erneute Ausführung des ersten
 Systemfalls; alle Speicher-, Port-, Daten-, Gültigkeits- und Interruptpfade
 bleiben bis dahin unverändert.
+
+## Elektrischer Vergleich der effektiven Adressauswahl
+
+Der angekündigte Vergleich ist auf Ausgangs-Commit `bf53d59` mit paarweise
+verschiedenen Eingangswerten erfolgt. Beim direkten Store führen
+`DIRECT_ADDR=0xffff`, `REG_ADDR=0x0014`, `OFFSET_ADDR=0x0015` und
+`REG_SELECTED=0x0001`; beide Auswahlsteuersignale sind `0`. Der erste
+Multiplexer liefert korrekt `EFFECTIVE_REGISTER_SELECTED_OUT=0xffff`. Der
+zweite Multiplexer liefert dagegen `EFFECTIVE_MEMORY_ADDRESS=0x0001`, weil
+sein unselektierter Dateneingang unmittelbar vom eigenständigen öffentlichen
+Eingang `REG_SELECTED` und nicht vom Ausgang des ersten Multiplexers gespeist
+wird. Damit ist der erste elektrische Unterschied zwischen den beiden
+Multiplexerstufen benannt; Eingänge, Selektoren und die erste Stufe sind kein
+Reparaturort.
+
+Die Diagnose ist als eigener Fall im elektrischen Effective-Address-Lauf
+festgehalten. Sie verwendet absichtlich verschiedene Werte, damit die bisher
+gleichen Fixture-Werte den fehlenden Übergang nicht länger verdecken. Gemäß
+Stop-Regel wurde die Schaltung in diesem Paket nicht geändert. Als nächstes
+wird ausschließlich der Datenübergang vom Ausgang der ersten zur
+unselektierten Datenseite der zweiten Multiplexerstufe repariert. Anschließend
+folgen getrennt zuerst die Effective-Address-Abnahme, dann
+`output-valid-write` und erst bei dessen Erfolg die vollständige Systemmatrix.
+
+## Reparatur des Übergangs zwischen den Adressmultiplexern
+
+Der elektrisch belegte Übergangsfehler ist nun minimal in `EffectiveAddress`
+repariert. Der Ausgang der ersten Multiplexerstufe führt direkt auf den
+unselektierten Dateneingang der zweiten Stufe; `REG_SELECTED` erreicht nur noch
+deren Offset-Zweig. Der bisherige externe Rückweg über `OFFSET_ADDR` ist aus
+dem aktiven Datenpfad entfernt. `FetchDecodeControls` und alle übrigen
+Daten-, Speicher-, Port- und Interruptpfade blieben unverändert.
+
+Der isolierte elektrische Regressionsfall verwendet weiterhin
+`DIRECT_ADDR=0xffff` und den unterscheidbaren Wert `REG_SELECTED=0x0001` und
+liefert jetzt durch beide Stufen `0xffff`. Der autonome Kernlauf besteht
+weiterhin zweimal. Die anschließend vorschriftsmäßig zuerst ausgeführte
+Systemfixture `output-valid-write` ist noch nicht grün: Bereits ihr erster
+Vektor meldet sämtliche sieben öffentlichen Systemzustände als oszillierend.
+Die vollständige Systemmatrix wurde deshalb nicht geöffnet. Als nächstes wird
+ausschließlich diese neu benannte Oszillation an der Systemgrenze eingegrenzt;
+die reparierte Adressauswahl wird nicht ohne einen abweichenden benannten Port
+wieder verändert.

@@ -1187,6 +1187,35 @@ class LogisimLauncherTests(unittest.TestCase):
             for label in pin_labels
         ))
 
+    def test_effective_address_cascades_selected_base_into_offset_mux(self):
+        """Keep distinct direct and offset values from masking the mux handoff."""
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        effective = root.find("circuit[@name='EffectiveAddress']")
+        self.assertIsNotNone(effective)
+        muxes = sorted(
+            effective.findall("comp[@name='Multiplexer']"),
+            key=lambda component: int(component.get("loc").split(",")[1][:-1]),
+        )
+        self.assertEqual(len(muxes), 2)
+        selected_base, offset_select = muxes
+        self.assertTrue(
+            _wire_path_exists(
+                effective,
+                selected_base.get("loc"),
+                _point_offset(offset_select, x=-30, y=-10),
+            ),
+            "the first address mux must drive the default input of the offset mux",
+        )
+        reg_selected = _component_by_label(effective, "REG_SELECTED")
+        self.assertTrue(
+            _wire_path_exists(
+                effective,
+                reg_selected.get("loc"),
+                _point_offset(offset_select, x=-30, y=10),
+            ),
+            "REG_SELECTED must drive only the offset-selected mux input",
+        )
+
     def test_instruction_operand_bus_drives_direct_effective_address(self):
         """Follow the operand branch; do not freeze the authored canvas position."""
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
