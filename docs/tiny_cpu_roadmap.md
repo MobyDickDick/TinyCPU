@@ -329,9 +329,13 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Multiplexerstufen belegt: Die erste liefert `0xffff`, während die zweite
   ihren separaten Eingang `REG_SELECTED=0x0001` übernimmt. Dieser Übergang ist
   nun repariert und durch unterscheidbare Werte sowie den autonomen Kernlauf
-  abgesichert. Die zuerst wiederholte Fixture `output-valid-write` meldet
-  allerdings ab Vektor 1 oszillierende Systemzustände; als Nächstes wird
-  ausschließlich diese Oszillation eingegrenzt.
+  abgesichert. Die kombinatorische Rückführung nachselektierter Speicherwerte
+  ist inzwischen durch zwei rohe Kernspeicherausgänge ersetzt;
+  `output-valid-write` besteht dadurch ohne oszillierende Zustände. Die nun
+  weiter geöffnete Matrix stoppt bei `output-invalid-write`, weil der
+  Ausgabeport ab Vektor 8 `0x0014` statt des zuvor gespeicherten Werts
+  `0x0017` hält. Als Nächstes wird ausschließlich dieser ungültige
+  Schreibversuch an den drei Port-Schreibsignalen eingegrenzt.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

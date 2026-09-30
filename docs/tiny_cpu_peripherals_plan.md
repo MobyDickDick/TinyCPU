@@ -1003,3 +1003,27 @@ exportieren und diese beiden neuen Ausgänge statt der nachselektierten
 `CPUIntegrationBoundary` anschließen. Danach werden zuerst
 `output-valid-write` und erst bei dessen Erfolg die übrigen Systemfälle
 ausgeführt.
+
+## Reparatur der oszillierenden Speicherrückführung
+
+Der Kern exportiert `Memory.MEMORY_DATA` und `Memory.MEMORY_VALID` nun als
+eigene Ausgänge `RAW_MEMORY_VALUE` und `RAW_MEMORY_VALID` unmittelbar vor den
+externen Speicherselektoren. `CPUIntegrationBoundary` verwendet ausschließlich
+diese beiden Rohsignale für `READ_VALUE` und `READ_VALID`; die bisherigen
+Rückwege über die bereits nachselektierten `PRINT_ADDRESS_*`-Signale entfallen.
+Damit enthält der Systemdatenpfad keine kombinatorische Selbstrückführung mehr.
+
+Der Vertrag benennt die neuen Kernpins und ihre direkten Speicherpfade. Der
+Prüfer leitet sämtliche Anschlüsse der generierten Kernbox jetzt aus den
+Pinbezeichnungen statt aus festen Zeilenpositionen ab. Ein Mutationstest trennt
+jeden Rohspeicherexport einzeln und belegt, dass die Regression erkannt wird.
+
+Der zuerst wiederholte Fall `output-valid-write` besteht elektrisch und zeigt
+damit, dass die Oszillation behoben ist. Die anschließend geöffnete Matrix
+stoppt regelkonform beim nächsten Fall `output-invalid-write`: Ab Vektor 8
+liefert `OUTPUT_PORT_VALUE` den Wert `0x0014` statt des zu haltenden Werts
+`0x0017`; eine Oszillation wird nicht mehr gemeldet. Das nächste enge
+Diagnosepaket verfolgt deshalb ausschließlich Schreibwert, Schreibgültigkeit
+und Schreibfreigabe dieses ungültigen Schreibversuchs bis zum
+`OutputPort`-Register. Die übrigen Systemfälle bleiben bis zu diesem Befund
+geschlossen.

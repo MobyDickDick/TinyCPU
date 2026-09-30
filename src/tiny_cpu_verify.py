@@ -453,6 +453,13 @@ def verify_system_circuit() -> None:
     if any(core_public_pins.get(label) != definition
            for label, definition in expected_external_memory_pins.items()):
         raise VerificationError("AP-18 CPU external-memory interface differs from contract")
+    expected_raw_memory_pins = cpu_contract.get("core_raw_memory_pins", {})
+    if expected_raw_memory_pins != {
+        "RAW_MEMORY_VALUE": {"direction": "output", "bits": 16},
+        "RAW_MEMORY_VALID": {"direction": "output", "bits": 1},
+    } or any(core_public_pins.get(label) != definition
+             for label, definition in expected_raw_memory_pins.items()):
+        raise VerificationError("AP-18 CPU raw-memory interface differs from contract")
     if core_public_pins.get("ADDRESS") != {"direction": "output", "bits": 16}:
         raise VerificationError("AP-18 CPU external-address interface differs from contract")
     core_wires = {
@@ -849,6 +856,13 @@ def verify_system_circuit() -> None:
     if operations_definition is None:
         raise VerificationError("AP-18 CPU Operations boundary is missing")
     operations_ports = generated_symbol_ports(operations_definition, operations_instance)
+    if not all((
+        core_connected(memory_ports["MEMORY_DATA"],
+                       core_pin_locations["RAW_MEMORY_VALUE"]),
+        core_connected(memory_ports["MEMORY_VALID"],
+                       core_pin_locations["RAW_MEMORY_VALID"]),
+    )):
+        raise VerificationError("AP-18 CPU raw-memory export paths differ from contract")
     selector_paths = []
     for label, external_pin, memory_output, consumer in (
         ("EXTERNAL_MEMORY_VALUE_SELECT", "EXTERNAL_MEMORY_VALUE",
@@ -1043,53 +1057,28 @@ def verify_system_circuit() -> None:
             f"{display_path(system.circuit_path)}: CPU address width adapter differs from contract"
         )
 
-    # TinyCPUMain uses Logisim's generated appearance. Its first two input
-    # ports are CLK and RESET, at these two left-hand terminals relative to
-    # the single, contractually placed core instance.
-    core_x, core_y = map(int, core_instance.get("loc").strip("()").split(","))
-    core_input_x = core_x - 220
+    # Follow TinyCPUMain's generated terminals by their authored pin names.
+    # This remains stable when an additive interface changes the generated
+    # box ordering, and prevents a visually plausible positional miswire.
     required_core_paths = {
-        "clock_to_core": ("CLK", f"({core_input_x},{core_y})"),
-        "reset_to_core": ("RESET", f"({core_input_x},{core_y + 20})"),
-        # The remaining generated input terminals follow TinyCPUMain's pin
-        # coordinates, not the boundary pin order: ILL_RET, interrupt accept,
-        # interrupt target, external-memory value/valid, and selection.
-        "adapter_read_value_to_core": (
-            "RAM_READ_VALUE", f"({core_input_x},{core_y + 100})"),
-        "adapter_read_valid_to_core": (
-            "RAM_READ_VALID", f"({core_input_x},{core_y + 120})"),
-        # With the generated appearance anchored at its output edge,
-        # TinyCPUMain exposes the addressed memory value used by
-        # PRINT_ADDRESS at the instance x coordinate and its validity 60
-        # pixels below it.
-        "core_read_value_to_adapter": (
-            "READ_VALUE", f"({core_x},{core_y + 20})"),
-        "core_read_valid_to_adapter": (
-            "READ_VALID", f"({core_x},{core_y + 40})"),
-        "core_write_value_to_adapter": (
-            "WRITE_VALUE", f"({core_x},{core_y + 60})"),
-        "core_write_valid_to_adapter": (
-            "WRITE_VALID", f"({core_x},{core_y + 80})"),
-        "core_write_enable_to_adapter": (
-            "WRITE_ENABLE", f"({core_x},{core_y + 100})"),
-        "core_instruction_boundary_to_adapter": (
-            "INSTRUCTION_BOUNDARY", f"({core_x},{core_y + 120})"),
-        "core_enable_request_to_adapter": (
-            "ENABLE_INTERRUPTS_REQUEST", f"({core_x},{core_y + 140})"),
-        "core_disable_request_to_adapter": (
-            "DISABLE_INTERRUPTS_REQUEST", f"({core_x},{core_y + 160})"),
-        "core_return_request_to_adapter": (
-            "RETURN_FROM_INTERRUPT_REQUEST", f"({core_x},{core_y + 180})"),
-        "core_next_pc_to_adapter": (
-            "NEXT_PC", f"({core_x},{core_y + 320})"),
-        "interrupt_accept_to_core": (
-            "INTERRUPT_ACCEPT", f"({core_input_x},{core_y + 60})"),
-        "interrupt_target_pc_to_core": (
-            "INTERRUPT_TARGET_PC", f"({core_input_x},{core_y + 80})"),
-        "illegal_return_to_core": (
-            "ILL_RET", f"({core_input_x},{core_y + 40})"),
-        "ram_write_enable_to_core": (
-            "RAM_WRITE_ENABLE", f"({core_input_x},{core_y + 160})"),
+        "clock_to_core": ("CLK", core_ports["CLK"]),
+        "reset_to_core": ("RESET", core_ports["RESET"]),
+        "adapter_read_value_to_core": ("RAM_READ_VALUE", core_ports["EXTERNAL_MEMORY_VALUE"]),
+        "adapter_read_valid_to_core": ("RAM_READ_VALID", core_ports["EXTERNAL_MEMORY_VALID"]),
+        "core_read_value_to_adapter": ("READ_VALUE", core_ports["RAW_MEMORY_VALUE"]),
+        "core_read_valid_to_adapter": ("READ_VALID", core_ports["RAW_MEMORY_VALID"]),
+        "core_write_value_to_adapter": ("WRITE_VALUE", core_ports["EXTERNAL_WRITE_VALUE"]),
+        "core_write_valid_to_adapter": ("WRITE_VALID", core_ports["EXTERNAL_WRITE_VALID"]),
+        "core_write_enable_to_adapter": ("WRITE_ENABLE", core_ports["EXTERNAL_WRITE_ENABLE"]),
+        "core_instruction_boundary_to_adapter": ("INSTRUCTION_BOUNDARY", core_ports["INSTRUCTION_BOUNDARY"]),
+        "core_enable_request_to_adapter": ("ENABLE_INTERRUPTS_REQUEST", core_ports["ENABLE_INTERRUPTS_REQUEST"]),
+        "core_disable_request_to_adapter": ("DISABLE_INTERRUPTS_REQUEST", core_ports["DISABLE_INTERRUPTS_REQUEST"]),
+        "core_return_request_to_adapter": ("RETURN_FROM_INTERRUPT_REQUEST", core_ports["RETURN_FROM_INTERRUPT_REQUEST"]),
+        "core_next_pc_to_adapter": ("NEXT_PC", core_ports["NEXT_PC"]),
+        "interrupt_accept_to_core": ("INTERRUPT_ACCEPT", core_ports["INTERRUPT_ACCEPT"]),
+        "interrupt_target_pc_to_core": ("INTERRUPT_TARGET_PC", core_ports["INTERRUPT_TARGET_PC"]),
+        "illegal_return_to_core": ("ILL_RET", core_ports["ILL_RET"]),
+        "ram_write_enable_to_core": ("RAM_WRITE_ENABLE", core_ports["RAM_WRITE_ENABLE"]),
     }
     if cpu_contract.get("verified_core_paths") != list(required_core_paths) or not all(
             connected(cpu_pin_locations[source], target)

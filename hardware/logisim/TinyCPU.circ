@@ -148,6 +148,19 @@
       <a name="label" val="MONITOR_INPUT"/>
       <a name="labelloc" val="east"/>
     </comp>
+    <comp lib="0" loc="(1040,620)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="RAW_MEMORY_VALUE"/>
+      <a name="type" val="output"/>
+      <a name="width" val="16"/>
+    </comp>
+    <comp lib="0" loc="(1060,640)" name="Pin">
+      <a name="appearance" val="classic"/>
+      <a name="facing" val="west"/>
+      <a name="label" val="RAW_MEMORY_VALID"/>
+      <a name="type" val="output"/>
+    </comp>
     <comp lib="0" loc="(1820,470)" name="Constant">
       <a name="value" val="0x0"/>
     </comp>
@@ -411,7 +424,8 @@
     <wire from="(1060,360)" to="(1200,360)"/>
     <wire from="(1060,380)" to="(1160,380)"/>
     <wire from="(1060,400)" to="(1070,400)"/>
-    <wire from="(1060,600)" to="(1060,780)"/>
+    <wire from="(1060,600)" to="(1060,640)"/>
+    <wire from="(1060,640)" to="(1060,780)"/>
     <wire from="(1060,780)" to="(1190,780)"/>
     <wire from="(1080,1090)" to="(1210,1090)"/>
     <wire from="(1080,420)" to="(1080,1090)"/>

@@ -106,6 +106,16 @@
           "bits": 1
         }
       },
+      "core_raw_memory_pins": {
+        "RAW_MEMORY_VALUE": {
+          "direction": "output",
+          "bits": 16
+        },
+        "RAW_MEMORY_VALID": {
+          "direction": "output",
+          "bits": 1
+        }
+      },
       "core_interrupt_command_pins": {
         "INSTRUCTION_BOUNDARY": {
           "direction": "output",
