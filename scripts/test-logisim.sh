@@ -21,6 +21,10 @@ for profile in "${profiles[@]}"; do
   fi
 done
 
+if ! PYTHONPATH=src python3 scripts/test-logisim-operator.py; then
+  failed+=(operator-panel)
+fi
+
 if (( ${#failed[@]} )); then
   printf 'electrical profile acceptance failed: %s\n' "${failed[*]}" >&2
   exit 1

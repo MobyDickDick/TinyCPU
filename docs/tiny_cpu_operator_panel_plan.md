@@ -1,6 +1,7 @@
 # Bedienbarkeitsbefund und Vorschlag für ein TinyCPU-Operator-Panel
 
-**Status:** dokumentierter Folgepaket-Vorschlag, noch nicht umgesetzt.
+**Status:** als additives AP 21 umgesetzt; der interaktive GUI-Kurztest bleibt
+bis zu einer sichtbaren Bedienumgebung ausdrücklich nachzuholen.
 
 ## Anlass
 
@@ -102,5 +103,44 @@ Lauf auf dem Panel als neuer GUI-Nachweis protokolliert werden.
 
 Bei einer Umsetzung werden die Kurzanleitung in
 `hardware/logisim/README.md`, der Funktionsstatus und der Diagnosebericht um
-den tatsächlich beobachteten Bedienlauf ergänzt. Bis dahin bleibt dieses
-Dokument bewusst ein Vorschlag und behauptet keine vorhandene Bedienoberfläche.
+den tatsächlich beobachteten Bedienlauf ergänzt. Die automatische Umsetzung
+ist nachfolgend dokumentiert; nur der ausdrücklich als manuell gekennzeichnete
+Sichtlauf bleibt noch offen.
+
+## Umsetzung als AP 21
+
+Das getrennte Projekt `hardware/logisim/TinyCPU_Operator.circ` importiert den
+unveränderten `TinyCPUMain` aus `TinyCPU.circ`. `STEP` und der mit `RUN`
+freigegebene langsame Logisim-Takt werden vor dem einzigen CPU-Takteingang
+durch `CPU_CLOCK_SOURCE` vereinigt; dadurch existiert kein zweiter Treiber.
+Ein gehaltener `STEP`-Pegel enthält nur eine steigende Flanke. Vor dem nächsten
+Schritt muss der Schalter wieder auf `0` gesetzt werden.
+
+Das Panel zeigt Takt, Druckwert und -freigabe, Folge-PC, Adresse, Normal- und
+Fehlerhalt sowie alle sechs benannten Fehlerbits. Die Textlegende erklärt
+zusätzlich `U` und `E`, damit diese Simulatorzustände nicht mit einem regulären
+Fehlerhalt verwechselt werden. Alle für die Basisschaltung unbenutzten
+AP-18-Eingänge sind explizit mit inaktiven Konstanten verbunden.
+
+Der Offline-Verifier prüft Kernimport, Bedieneingänge, Taktarbitrierung,
+Resetpfad und die benannten Beobachtungspfade. Der elektrische Paneltest prüft
+den niedrigen Ruhezustand, genau eine steigende `STEP`-Flanke und das Ausbleiben
+einer zweiten Flanke bei gehaltenem Eingang. Die bestehende vollständige
+elektrische Kernabnahme bleibt unverändert Bestandteil von
+`scripts/test-logisim.sh`; der neue Paneltest läuft anschließend zusätzlich.
+
+### Kurzanleitung
+
+1. `TinyCPU_Operator.circ` in Logisim-evolution 4.1.0 öffnen.
+2. `RESET` auf `1` setzen, mit `STEP` eine vollständige Flanke (`0 → 1 → 0`)
+   ausführen und `RESET` wieder auf `0` setzen.
+3. Für Einzelbetrieb `STEP` jeweils auf `1` und wieder auf `0` setzen. Für den
+   langsamen Lauf `RUN` einschalten; währenddessen `STEP` auf `0` lassen.
+4. `PRINT_VALUE` nur bei `PRINT_ENABLE=1` ablesen. `HALTED=1` bezeichnet den
+   Normalhalt, `HALTED_WITH_ERROR=1` den Fehlerhalt; `U` oder `E` sind niemals
+   erfolgreiche Haltanzeigen.
+
+Ein sichtbarer, manuell bedienter Lauf kann in der nicht interaktiven
+Abnahmeumgebung nicht ehrlich protokolliert werden. Diese Nachprüfung ist daher
+wie der frühere AP-20.8-GUI-Kurztest verschoben; sie ändert nichts an den
+automatischen Struktur-, Takt- und Kernnachweisen.

@@ -41,6 +41,7 @@ abdeckt und Ausgabe, Haltzustand, Register, Speicher-Validität und Fehlerflags
 | **18. Peripherie und Integration** | Eine optionale 16/12-Systemvariante mit speicherabgebildetem Ausgabeport und einer maskierbaren Interruptquelle ergänzen. | Versionierte System-, Maschinenformat- und Trace-Verträge bestehen taktgenaue VM-/Logisim-Abnahmen, ohne die bisherigen Profile oder Gates zu verändern. |
 | **19. Systematische Schaltungsdiagnose** | Die aktuelle `TinyCPU.circ` in zehn reproduzierbaren Aufgaben von Umgebung und Fetch bis zur vollständigen elektrischen Regression untersuchen und nur belegte Netzfehler minimal reparieren. | Ein frischer Checkout besteht Offline-, 16/12-Matrix- und GUI-Kurzabnahme; jeder behobene Fehler ist auf die erste abweichende Flanke und benannte Ports zurückgeführt. |
 | **20. Wiederherstellung der CPU-Profile** | Den aktuellen 8/8-Breitenfehler und die ausbleibenden Kernhalte beider Profile isolieren, minimal reparieren und gegen Redraw-Regressionen absichern. | Offline-Gate, Kerntraces und vollständige elektrische ISA-/Fehlermatrizen bestehen für 16/12 und 8/8; ein GUI-Kurztest bestätigt den Kandidaten. |
+| **21. Operator-Panel** | Eine additive Bedienansicht mit Reset, Einzelschritt, langsamem Lauf und benannten Zustandsanzeigen ergänzen, ohne `TinyCPUMain` umzuzeichnen. | Ein einziger arbitrierter Taktpfad und alle sichtbaren Kernzustände sind strukturell geprüft; ein elektrischer Vektor belegt genau eine STEP-Flanke ohne Wiederholung bei gehaltenem Eingang. |
 
 ## Abhängigkeiten und Reihenfolge
 

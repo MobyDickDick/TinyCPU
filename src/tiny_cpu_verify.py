@@ -120,6 +120,106 @@ def generated_symbol_ports(
     return result
 
 
+def verify_operator_panel() -> None:
+    """Check the additive AP-21 operator panel and its single clock driver."""
+    source = LOGISIM / "TinyCPU_Operator.circ"
+    try:
+        project = ET.parse(source).getroot()
+    except (OSError, ET.ParseError) as exc:
+        raise VerificationError(f"{display_path(source)}: invalid operator panel: {exc}") from exc
+    main = project.find("main")
+    panel = project.find("circuit[@name='TinyCPUOperator']")
+    if main is None or main.get("name") != "TinyCPUOperator" or panel is None:
+        raise VerificationError(f"{display_path(source)}: TinyCPUOperator is not the main circuit")
+    if not any(lib.get("desc") == "file#TinyCPU.circ" for lib in project.findall("lib")):
+        raise VerificationError(f"{display_path(source)}: frozen TinyCPU core import is missing")
+
+    attributes = {
+        id(component): {item.get("name"): item.get("val") for item in component.findall("a")}
+        for component in panel.findall("comp")
+    }
+    controls = {
+        attributes[id(component)].get("label"): component
+        for component in panel.findall("comp[@name='Pin']")
+        if attributes[id(component)].get("type") != "output"
+    }
+    if set(controls) != {"RESET", "STEP", "RUN"}:
+        raise VerificationError(f"{display_path(source)}: operator controls differ")
+    core = panel.find("comp[@lib='10'][@name='TinyCPUMain']")
+    if core is None:
+        raise VerificationError(f"{display_path(source)}: TinyCPUMain placement is missing")
+    clock_gate = next((component for component in panel.findall("comp")
+                       if attributes[id(component)].get("label") == "CPU_CLOCK_SOURCE"), None)
+    run_gate = next((component for component in panel.findall("comp")
+                     if attributes[id(component)].get("label") == "RUN_CLOCK_ENABLED"), None)
+    clock = next((component for component in panel.findall("comp[@name='Clock']")
+                  if attributes[id(component)].get("label") == "RUN_CLOCK"), None)
+    if (clock_gate is None or clock_gate.get("name") != "OR Gate"
+            or run_gate is None or run_gate.get("name") != "AND Gate" or clock is None):
+        raise VerificationError(f"{display_path(source)}: STEP/RUN clock arbitration differs")
+
+    segments = [(wire.get("from", ""), wire.get("to", "")) for wire in panel.findall("wire")]
+    graph: dict[str, set[str]] = {}
+    for start, end in segments:
+        graph.setdefault(start, set()).add(end)
+        graph.setdefault(end, set()).add(start)
+
+    def connected(start: str, target: str) -> bool:
+        seen, pending = {start}, [start]
+        while pending:
+            current = pending.pop()
+            if current == target:
+                return True
+            for neighbor in graph.get(current, ()):
+                if neighbor not in seen:
+                    seen.add(neighbor)
+                    pending.append(neighbor)
+        return False
+
+    core_definition = ET.parse(LOGISIM / "TinyCPU.circ").getroot().find(
+        "circuit[@name='TinyCPUMain']"
+    )
+    if core_definition is None:
+        raise VerificationError("TinyCPU.circ: TinyCPUMain is missing")
+    ports = generated_symbol_ports(core_definition, core)
+    gate_x, gate_y = point(clock_gate.get("loc", ""), source=source)
+    run_x, run_y = point(run_gate.get("loc", ""), source=source)
+    # A default two-input east-facing OR gate uses inputs 20 pixels above/below its
+    # location. Its output must be the sole net reaching the core clock.
+    if not connected(clock_gate.get("loc", ""), ports["CLK"]):
+        raise VerificationError(f"{display_path(source)}: arbitrated CPU clock is disconnected")
+    if not connected(controls["RESET"].get("loc", ""), ports["RESET"]):
+        raise VerificationError(f"{display_path(source)}: RESET is disconnected")
+    if not connected(controls["STEP"].get("loc", ""), f"({gate_x - 50},{gate_y + 20})"):
+        raise VerificationError(f"{display_path(source)}: STEP does not reach clock arbitration")
+    if (not connected(clock.get("loc", ""), f"({run_x - 50},{run_y - 20})")
+            or not connected(controls["RUN"].get("loc", ""),
+                             f"({run_x - 50},{run_y + 20})")
+            or not connected(run_gate.get("loc", ""),
+                             f"({gate_x - 50},{gate_y - 20})")):
+        raise VerificationError(f"{display_path(source)}: RUN does not reach clock arbitration")
+
+    required_outputs = {
+        "PRINT_VALUE", "NEXT_PC", "ADDRESS", "PRINT_ENABLE", "HALTED",
+        "HALTED_WITH_ERROR", "ERROR_OVF", "ERROR_DIV0", "ERROR_ADDR",
+        "ERROR_INV", "ERROR_ILL", "ERROR_INPUT",
+    }
+    probes = {
+        attributes[id(component)].get("label"): component
+        for component in panel.findall("comp[@name='Pin']")
+        if attributes[id(component)].get("type") == "output"
+    }
+    missing = sorted(required_outputs - set(probes))
+    disconnected = sorted(label for label in required_outputs
+                          if label in probes and not connected(
+                              ports[label], probes[label].get("loc", "")))
+    if missing or disconnected:
+        raise VerificationError(
+            f"{display_path(source)}: operator observations differ; "
+            f"missing={missing}, disconnected={disconnected}"
+        )
+
+
 def pin_locations(circuit: ET.Element) -> dict[str, str]:
     """Map public pin labels to their authored electrical endpoints."""
     return {_pin_label(pin): pin.get("loc", "")
@@ -1666,6 +1766,7 @@ def verify(root: Path = ROOT) -> list[str]:
             circuits, wires = verify_circuit(path)
             circuit_count += circuits
             wire_count += wires
+        verify_operator_panel()
         opcode_count, fixture_count = verify_contracts()
         return [
             f"JSON: {len(json_files)} files valid",
