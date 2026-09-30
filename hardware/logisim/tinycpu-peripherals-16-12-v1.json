@@ -273,7 +273,7 @@
       ],
       "disable_on_accept": true,
       "restore_mask_on_return": true,
-      "wiring_sha256": "23b0de8793014550243ec33d8cb1890f1f5850959838750771af56deb8924974",
+      "wiring_sha256": "36c58b3841ae3aef819c495b0b116d3ee7adb984cb19a510303e77c118c5a7e8",
       "verified_paths": [
         "request_to_level_register",
         "request_level_clock_and_reset",

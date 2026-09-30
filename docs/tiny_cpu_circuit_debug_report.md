@@ -4442,3 +4442,15 @@ Gemäß Stop-Regel wurde dieser neue Unterschied nicht repariert und die Matrix
 nicht über `reset-states` hinaus geöffnet. Das nächste Paket untersucht nur
 die Reset-Trigger der Controllerregister und vereinheitlicht sie erst nach
 einem portbezogenen Nachweis.
+
+### Redundanter Eingang der Pending-Next-State-Stufe
+
+Die visuelle Kontrolle der Annahmereparatur hat am beibehaltenen ODER
+`PENDING_SET_OR_HOLD` eine irreführende Doppelverdrahtung sichtbar gemacht:
+Beide Eingänge waren mit demselben Ausgang von
+`PENDING_HOLD_UNTIL_ACCEPT` verbunden. Das ist wegen `x OR x = x` zwar
+elektrisch funktionsfähig, verschleiert aber die Next-State-Logik. Seit die
+gemeinsame Quelle aus Flankenimpuls und gespeichertem Pending-Zustand bereits
+vor diesem UND liegt, wird der zweite ODER-Eingang fachlich nicht mehr
+benötigt. Er ist nun explizit mit `0` verbunden. Ein Strukturtest schützt die
+Nullquelle und die Entfernung der redundanten Rückführung.

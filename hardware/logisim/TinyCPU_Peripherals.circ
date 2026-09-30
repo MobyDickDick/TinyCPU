@@ -715,6 +715,7 @@
       <a name="width" val="12"/>
     </comp>
     <comp lib="0" loc="(800,240)" name="Constant"/>
+    <comp lib="0" loc="(700,380)" name="Constant"/>
     <comp lib="0" loc="(820,1100)" name="Constant">
       <a name="value" val="0x1"/>
     </comp>
@@ -966,8 +967,7 @@
     <wire from="(600,960)" to="(620,960)"/>
     <wire from="(630,700)" to="(630,720)"/>
     <wire from="(650,250)" to="(720,250)"/>
-    <wire from="(650,380)" to="(740,380)"/>
-    <wire from="(650,380)" to="(650,400)"/>
+    <wire from="(700,380)" to="(740,380)"/>
     <wire from="(650,400)" to="(740,400)"/>
     <wire from="(650,560)" to="(740,560)"/>
     <wire from="(650,680)" to="(770,680)"/>
