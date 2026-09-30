@@ -4518,3 +4518,34 @@ Bei der zweiten Interruptannahme bleibt `INTERRUPT_ENABLED=1` statt auf `0` zu
 wechseln. Gemäß Stop-Regel wurde dieser neue Maskenbefund nicht in demselben
 Paket repariert. Das nächste Diagnosepaket verfolgt ausschließlich den
 Masken-Next-State bei der zweiten Annahme in den Vektoren 15 bis 16.
+
+
+#### Annahmepriorität des Interruptmasken-Zustands
+
+- **Ausgangsstand:** `425f41f`
+- **Datum:** 30. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Die Diagnose von `reset-states` bestätigte den ersten Unterschied weiterhin
+in Vektor 16: Handlerzustand, Rückkehradresse und Rückkehrgültigkeit bewiesen
+die zweite Annahme, nur `INTERRUPT_ENABLED` blieb gesetzt. Der bisherige
+Masken-Next-State verknüpfte Aktivierung, gültige Rückkehr und Haltezweig durch
+ein ODER. Nur der Haltezweig war mit `NOT INTERRUPT_ACCEPT` gesperrt; ein im
+selben Takt noch sichtbarer Aktivierungsimpuls konnte die vertraglich höher
+priorisierte Annahme daher überstimmen.
+
+Die kleinste Reparatur ergänzt hinter `MASK_NEXT` das benannte UND
+`MASK_ACCEPT_PRIORITY`. Sein invertierter Annahmeeingang sperrt den gesamten
+Masken-Folgewert, bevor er das Zustandsregister erreicht. Die vom Autor
+geänderte Anordnung blieb erhalten; lediglich beim Speichern verlorene
+Konstantenwerte und Multiplexerbezeichnungen wurden wiederhergestellt und die
+Regressionen auf die vorhandenen Leitungsverläufe nachgeführt. Vertrag und ein
+gezielter Mutationstest schützen den neuen Prioritätspfad.
+
+Der elektrische Lauf unter `/tmp/ap18-mask-priority/matrix/system` wiederholt
+zuerst `output-valid-write`, `output-invalid-write`,
+`masked-request-unmask-return`, `disable-interrupts` und `reset-states`. Alle
+fünf Fälle bestehen; der Lauf öffnet danach gemäß Stop-Regel die restliche
+Matrix. Auch `illegal-return` und `invalid-vector` bestehen. Damit sind alle
+sieben elektrischen AP-18-Systemfixtures erstmals gemeinsam grün und die
+elektrische Systemintegration ist abgeschlossen.

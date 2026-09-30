@@ -1433,7 +1433,7 @@ def verify_system_circuit() -> None:
         "RETURN_VALID_HOLD", "RETURN_VALID_NEXT", "HANDLER_HOLD",
         "HANDLER_NEXT", "RETURN_ADDRESS_CAPTURE", "RETURN_ADDRESS_NEXT",
         "RETURN_ADDRESS_CLEAR", "RETURN_ADDRESS_CLEAR_PENDING",
-        "SYNCHRONOUS_RESET_TRIGGER",
+        "SYNCHRONOUS_RESET_TRIGGER", "MASK_ACCEPT_PRIORITY",
     }
     if not required_interrupt_labels <= interrupt_labels:
         raise VerificationError(
@@ -1464,14 +1464,14 @@ def verify_system_circuit() -> None:
         (wire.get("from"), wire.get("to")) for wire in interrupt.findall("wire")
     }
     required_synchronous_reset_wires = {
-        ("(530,100)", "(730,100)"),
-        ("(530,120)", "(730,120)"),
-        ("(730,120)", "(840,120)"),
-        ("(760,110)", "(860,110)"),
-        ("(860,110)", "(860,280)"),
+        ("(530,50)", "(730,50)"),
+        ("(530,70)", "(710,70)"),
+        ("(710,70)", "(730,70)"),
+        ("(760,60)", "(860,60)"),
+        ("(860,60)", "(860,230)"),
     }
     if (not required_synchronous_reset_wires <= interrupt_wires
-            or ("(530,100)", "(860,100)") in interrupt_wires):
+            or ("(530,50)", "(860,50)") in interrupt_wires):
         raise VerificationError(
             f"{display_path(system.circuit_path)}: InterruptController reset trigger "
             "differs from contract"
@@ -1490,7 +1490,8 @@ def verify_system_circuit() -> None:
         "accept_source_combines_edge_and_pending",
         "accept_requires_request_enabled_boundary_and_idle", "accept_state_output",
         "pending_cleared_on_accept", "mask_set_by_enable_or_return",
-        "mask_cleared_by_disable_or_accept", "mask_state_hold",
+        "mask_cleared_by_disable_or_accept", "mask_accept_has_priority",
+        "mask_state_hold",
         "mask_clock_and_reset", "mask_state_output",
         "return_address_captured_on_accept",
         "return_address_cleared_on_valid_return",
