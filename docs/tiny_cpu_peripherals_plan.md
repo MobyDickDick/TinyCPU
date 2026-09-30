@@ -1071,3 +1071,32 @@ wird. Die eingecheckte Schaltung blieb gemäß Stop-Regel unverändert. Das
 nächste enge Diagnosepaket prüft nur die Bildung dieses Selektors aus
 `LOAD_ADR`; die geschützte Darstellung von `FetchDecodeControls` darf dabei
 nicht umgezeichnet werden.
+
+## Rückkehradresse nach gültiger Interrupt-Rückkehr
+
+Die Akkumulator-Speicheranforderung wird nun außerhalb der geschützten
+`FetchDecodeControls`-Darstellung korrekt aus `LOAD_ADR`, `LOAD_ADR_REG` und
+`LOAD_REG_OFF` gebildet. Damit bestehen `output-valid-write` und
+`output-invalid-write`. Der anschließend geöffnete Fall
+`masked-request-unmask-return` stoppt bei der gültigen Rückkehr: Ab Vektor 8
+bleibt `RET_ADDR=0x001`, obwohl der Vertrag nach dem Verlassen des Handlers
+`0x000` erwartet.
+
+Eine ausschließlich unter `/tmp` passiv instrumentierte Projektkopie zeigt
+den Ablauf an den benannten Controllergrenzen. `INTERRUPT_ACCEPT` ist in den
+Vektoren 2 und 3 aktiv und übernimmt an der folgenden steigenden Flanke den
+korrekten `NEXT_PC=0x001`. `RETURN_FROM_INTERRUPT_REQUEST` ist in den
+Vektoren 6 und 7 aktiv; an der folgenden Flanke werden
+`RET_ADDR_VALID` und `IN_INTERRUPT_HANDLER` korrekt gelöscht, der
+Adresszustand hält jedoch weiter `0x001`. Der gleichzeitig anliegende
+`NEXT_PC=0xff2` wird nicht übernommen. Damit sind Rückkehradressquelle,
+Interruptannahme und die Löschung des Validitätszustands nicht der erste
+Unterschied. Der 12-Bit-Adresszustand besitzt ausschließlich die
+Übernahmefreigabe für `INTERRUPT_ACCEPT` und keinen Rücksetzpfad für die
+gültige Rückkehr.
+
+Gemäß Stop-Regel wurde die Schaltung in diesem Diagnosepaket nicht verändert.
+Das nächste Reparaturpaket ergänzt ausschließlich den fehlenden
+`VALID_RETURN`-Löschpfad des Rückkehradressregisters. Danach wird zuerst
+`masked-request-unmask-return` wiederholt; weitere Systemfälle werden erst bei
+dessen Erfolg geöffnet.

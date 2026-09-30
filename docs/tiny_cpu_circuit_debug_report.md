@@ -4306,3 +4306,42 @@ Gemäß Stop-Regel wurde dieser neue Unterschied nicht repariert und kein
 weiterer Systemfall ausgeführt. Das nächste Diagnosepaket verfolgt
 ausschließlich die Rückkehradressquelle und ihre Registerfreigabe zwischen der
 maskierten Interruptanforderung und dem Entmasken in Vektor 8.
+
+#### Registerpfad der Rückkehradresse
+
+- **Ausgangsstand:** `962b55d`
+- **Datum:** 30. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Der fokussierte Systemlauf wurde zunächst unverändert wiederholt.
+`output-valid-write` und `output-invalid-write` bestehen; der Lauf stoppt
+weiterhin in `masked-request-unmask-return` ab Vektor 8 mit
+`RET_ADDR=0x001` statt `0x000`. Laufzeit: 5,2 Sekunden. Fixture,
+Simulatorausgabe und Diagnoseindex liegen unter
+`/tmp/ap18-ret-addr-diagnosis/system/masked-request-unmask-return`.
+
+Für die angekündigte Rückverfolgung erhielt ausschließlich die gesicherte
+Projektkopie unter `/tmp/ap18-ret-probe` drei passive Ausgänge an den
+benannten Grenzen `INTERRUPT_ACCEPT`, `RETURN_FROM_INTERRUPT_REQUEST` und
+`NEXT_PC`. Die eingecheckte Schaltung blieb unverändert. Der gepinnte
+Headless-Vektorlauf benötigte 3,7 Sekunden und belegt folgenden Ablauf:
+
+| Vektoren | `INTERRUPT_ACCEPT` | `RETURN_FROM_INTERRUPT_REQUEST` | `NEXT_PC` | Zustand nach der folgenden steigenden Flanke |
+|---:|---:|---:|---:|---|
+| 2–3 | `1` | `0` | `0x001` | `RET_ADDR=0x001`, `RET_ADDR_VALID=1` |
+| 6–7 | `0` | `1` | `0xff1` | gültige Rückkehr steht an |
+| 8–9 | `0` | `0` | `0xff2` | `RET_ADDR=0x001`, `RET_ADDR_VALID=0` |
+
+Die Annahmequelle liefert somit den vertraglich richtigen Rückkehrwert und
+das Register übernimmt ihn genau bei der Interruptannahme. Bei der gültigen
+Rückkehr werden Validitäts- und Handlerzustand korrekt gelöscht, während der
+12-Bit-Adresszustand mangels eines `VALID_RETURN`-Löschpfads seinen alten Wert
+hält; der abweichende laufende `NEXT_PC` wird dabei ebenfalls nicht
+versehentlich übernommen. Der erste Unterschied liegt damit an der
+Next-State-/Freigabelogik des Rückkehradressregisters, nicht an der
+CPU-seitigen `NEXT_PC`-Quelle oder an der Annahmefreigabe.
+
+Gemäß Stop-Regel wurde keine Reparatur vorgenommen und kein weiterer
+Systemfall ausgeführt. Das nächste Paket ergänzt ausschließlich einen
+`VALID_RETURN`-Löschpfad für den 12-Bit-Adresszustand und wiederholt danach
+zuerst `masked-request-unmask-return`.
