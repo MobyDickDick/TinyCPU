@@ -4345,3 +4345,14 @@ Gemäß Stop-Regel wurde keine Reparatur vorgenommen und kein weiterer
 Systemfall ausgeführt. Das nächste Paket ergänzt ausschließlich einen
 `VALID_RETURN`-Löschpfad für den 12-Bit-Adresszustand und wiederholt danach
 zuerst `masked-request-unmask-return`.
+
+## AP-18: Löschpfad der Rückkehradresse
+
+Der auf `987a7ba` dokumentierte Unterschied von `RET_ADDR` ist behoben. Eine
+Capture-Auswahl hält beziehungsweise übernimmt die 12-Bit-Adresse, die
+Rückkehrauswahl führt bei `VALID_RETURN` den Nullwert, und ein eigener
+Ein-Bit-Zustand verzögert das Löschen bis zur zustandsändernden Taktflanke. Der
+fokussierte Fall `masked-request-unmask-return` besteht danach ebenso wie
+`disable-interrupts`. Die weiter geöffnete Matrix stoppt erstmals in
+`reset-states` an Vektor 6; dieser neue Befund ist die Grenze des nächsten
+Diagnosepakets.

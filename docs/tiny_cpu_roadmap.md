@@ -354,6 +354,11 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Validitäts- sowie Handlerzustand, lässt `RET_ADDR` jedoch mangels eines
   `VALID_RETURN`-Löschpfads auf `0x001` statt `0x000`. Als Nächstes wird
   ausschließlich dieser Löschpfad des 12-Bit-Rückkehradressregisters ergänzt.
+  Dieser Pfad ist inzwischen als taktsynchron verzögerte, vertraglich und per
+  Mutationstest geschützte Next-State-Löschung umgesetzt;
+  `masked-request-unmask-return` und der folgende Deaktivierungsfall bestehen.
+  Der nächste Matrixabbruch liegt nun in `reset-states` an Vektor 6 und wird
+  als eigenes Diagnosepaket auf die Controllerzustände eingegrenzt.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
