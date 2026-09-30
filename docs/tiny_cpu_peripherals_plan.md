@@ -1,6 +1,6 @@
 # Vorschlag: Peripherie und Integration
 
-**Status: in Umsetzung (elektrische Systemintegration ausstehend).** Dieses Dokument trifft
+**Status: abgeschlossen.** Dieses Dokument trifft
 die nach AP 17 noch offene Produktentscheidung. Die Richtung **Peripherie und Integration** wird als
 **AP 18** ausgewählt. Das Paket ergänzt genau einen speicherabgebildeten
 Ausgabeport und eine externe, maskierbare Interruptquelle. Weitere Geräte und

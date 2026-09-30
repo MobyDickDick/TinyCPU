@@ -273,7 +273,7 @@
       ],
       "disable_on_accept": true,
       "restore_mask_on_return": true,
-      "wiring_sha256": "3c80d71c39256a4b162a35aef6644961d6e42d033391fe4a5a67c204f8adc14d",
+      "wiring_sha256": "20138c68de0986e9f2c9959a4a92f74019b8f8ed107cce458253b0ee9626c964",
       "verified_paths": [
         "request_to_level_register",
         "request_level_clock_and_reset",
@@ -288,6 +288,7 @@
         "pending_cleared_on_accept",
         "mask_set_by_enable_or_return",
         "mask_cleared_by_disable_or_accept",
+        "mask_accept_has_priority",
         "mask_state_hold",
         "mask_clock_and_reset",
         "mask_state_output",

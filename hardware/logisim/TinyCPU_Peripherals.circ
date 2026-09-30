@@ -718,7 +718,9 @@
       <a name="width" val="12"/>
     </comp>
     <comp lib="0" loc="(800,180)" name="Constant"/>
-    <comp lib="0" loc="(820,1120)" name="Constant"/>
+    <comp lib="0" loc="(820,1120)" name="Constant">
+      <a name="value" val="0x1"/>
+    </comp>
     <comp lib="1" loc="(1050,1090)" name="OR Gate">
       <a name="label" val="RETURN_ADDRESS_CLEAR"/>
       <a name="labelfont" val="SansSerif plain 9"/>
@@ -796,6 +798,12 @@
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="size" val="30"/>
     </comp>
+    <comp lib="1" loc="(810,570)" name="AND Gate">
+      <a name="label" val="MASK_ACCEPT_PRIORITY"/>
+      <a name="labelfont" val="SansSerif plain 9"/>
+      <a name="negate1" val="true"/>
+      <a name="size" val="30"/>
+    </comp>
     <comp lib="1" loc="(770,860)" name="OR Gate">
       <a name="label" val="RETURN_VALID_NEXT"/>
       <a name="labelfont" val="SansSerif plain 9"/>
@@ -810,9 +818,11 @@
       <a name="width" val="12"/>
     </comp>
     <comp lib="2" loc="(670,700)" name="Multiplexer">
+      <a name="label" val="RETURN_ADDRESS_CAPTURE"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="2" loc="(800,710)" name="Multiplexer">
+      <a name="label" val="RETURN_ADDRESS_NEXT"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="5" loc="(1050,680)" name="Register">
@@ -989,7 +999,12 @@
     <wire from="(750,720)" to="(770,720)"/>
     <wire from="(760,60)" to="(860,60)"/>
     <wire from="(770,410)" to="(880,410)"/>
-    <wire from="(770,570)" to="(880,570)"/>
+    <wire from="(770,570)" to="(770,560)"/>
+    <wire from="(770,560)" to="(780,560)"/>
+    <wire from="(630,590)" to="(630,620)"/>
+    <wire from="(630,620)" to="(770,620)"/>
+    <wire from="(770,580)" to="(770,620)"/>
+    <wire from="(810,570)" to="(880,570)"/>
     <wire from="(770,860)" to="(880,860)"/>
     <wire from="(770,980)" to="(880,980)"/>
     <wire from="(780,730)" to="(780,760)"/>

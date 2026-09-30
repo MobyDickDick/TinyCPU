@@ -211,3 +211,13 @@ Annahmelogik, nicht am externen Anforderungspegel oder Flankendetektor. Die
 Schaltung blieb unverändert; als nächstes wird ausschließlich dieser Übergang
 repariert und danach zunächst `reset-states` samt den vier zuvor bestandenen
 Systemfällen wiederholt.
+
+
+Die anschließenden Pakete haben diesen Übergang, den taktsynchronen Reset und
+zuletzt die Maskenpriorität bei einer erneuten Interruptannahme repariert. Ein
+benanntes Prioritätsgatter sperrt nun den gesamten Masken-Next-State bei
+`INTERRUPT_ACCEPT`; dadurch kann ein gleichzeitig noch sichtbarer
+Aktivierungsimpuls die vertragliche Deaktivierung nicht mehr überstimmen. Nach
+der Wiederholung der vier zuvor bestandenen Fälle und `reset-states` besteht
+erstmals auch die vollständige elektrische Systemmatrix mit allen sieben
+Fixtures. Die elektrische AP-18-Systemintegration ist damit abgeschlossen.
