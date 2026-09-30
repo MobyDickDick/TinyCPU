@@ -235,7 +235,7 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="RAM_WRITE_ENABLE"/>
     </comp>
-    <comp lib="0" loc="(680,510)" name="Splitter">
+    <comp lib="0" loc="(700,560)" name="Splitter">
       <a name="bit1" val="0"/>
       <a name="bit10" val="0"/>
       <a name="bit11" val="0"/>
@@ -266,57 +266,57 @@
       <a name="label" val="READ_VALID"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(860,240)" name="Pin">
+    <comp lib="0" loc="(860,260)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="WRITE_VALUE"/>
       <a name="type" val="output"/>
       <a name="width" val="16"/>
     </comp>
-    <comp lib="0" loc="(860,270)" name="Pin">
+    <comp lib="0" loc="(860,290)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="WRITE_VALID"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(860,290)" name="Pin">
+    <comp lib="0" loc="(860,310)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="WRITE_ENABLE"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(860,310)" name="Pin">
+    <comp lib="0" loc="(860,330)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="INSTRUCTION_BOUNDARY"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(860,330)" name="Pin">
+    <comp lib="0" loc="(860,350)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="ENABLE_INTERRUPTS_REQUEST"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(860,350)" name="Pin">
+    <comp lib="0" loc="(860,370)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="DISABLE_INTERRUPTS_REQUEST"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(860,370)" name="Pin">
+    <comp lib="0" loc="(860,390)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="RETURN_FROM_INTERRUPT_REQUEST"/>
       <a name="type" val="output"/>
     </comp>
-    <comp lib="0" loc="(860,480)" name="Pin">
+    <comp lib="0" loc="(860,490)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="NEXT_PC"/>
       <a name="type" val="output"/>
       <a name="width" val="12"/>
     </comp>
-    <comp lib="0" loc="(860,520)" name="Pin">
+    <comp lib="0" loc="(860,540)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="facing" val="west"/>
       <a name="label" val="ADDRESS"/>
@@ -347,40 +347,34 @@
     <wire from="(420,160)" to="(440,160)"/>
     <wire from="(660,180)" to="(860,180)"/>
     <wire from="(660,200)" to="(840,200)"/>
-    <wire from="(660,260)" to="(820,260)"/>
-    <wire from="(660,280)" to="(800,280)"/>
-    <wire from="(660,300)" to="(780,300)"/>
-    <wire from="(660,320)" to="(760,320)"/>
-    <wire from="(660,340)" to="(740,340)"/>
-    <wire from="(660,360)" to="(720,360)"/>
-    <wire from="(660,380)" to="(700,380)"/>
-    <wire from="(660,520)" to="(830,520)"/>
-    <wire from="(830,470)" to="(830,520)"/>
-    <wire from="(830,470)" to="(850,470)"/>
-    <wire from="(850,470)" to="(850,480)"/>
-    <wire from="(850,480)" to="(860,480)"/>
-    <wire from="(660,540)" to="(670,540)"/>
-    <wire from="(670,510)" to="(670,540)"/>
-    <wire from="(670,510)" to="(680,510)"/>
-    <wire from="(700,370)" to="(700,380)"/>
-    <wire from="(700,370)" to="(860,370)"/>
-    <wire from="(700,490)" to="(840,490)"/>
-    <wire from="(720,350)" to="(720,360)"/>
-    <wire from="(720,350)" to="(860,350)"/>
-    <wire from="(740,330)" to="(740,340)"/>
-    <wire from="(740,330)" to="(860,330)"/>
-    <wire from="(760,310)" to="(760,320)"/>
-    <wire from="(760,310)" to="(860,310)"/>
-    <wire from="(780,290)" to="(780,300)"/>
-    <wire from="(780,290)" to="(860,290)"/>
-    <wire from="(800,270)" to="(800,280)"/>
-    <wire from="(800,270)" to="(860,270)"/>
-    <wire from="(820,240)" to="(820,260)"/>
-    <wire from="(820,240)" to="(860,240)"/>
+    <wire from="(660,260)" to="(860,260)"/>
+    <wire from="(660,280)" to="(840,280)"/>
+    <wire from="(660,300)" to="(820,300)"/>
+    <wire from="(660,320)" to="(790,320)"/>
+    <wire from="(660,340)" to="(770,340)"/>
+    <wire from="(660,360)" to="(750,360)"/>
+    <wire from="(660,380)" to="(730,380)"/>
+    <wire from="(660,520)" to="(680,520)"/>
+    <wire from="(660,540)" to="(690,540)"/>
+    <wire from="(680,490)" to="(680,520)"/>
+    <wire from="(680,490)" to="(860,490)"/>
+    <wire from="(690,540)" to="(690,560)"/>
+    <wire from="(690,560)" to="(700,560)"/>
+    <wire from="(720,540)" to="(860,540)"/>
+    <wire from="(730,380)" to="(730,390)"/>
+    <wire from="(730,390)" to="(860,390)"/>
+    <wire from="(750,360)" to="(750,370)"/>
+    <wire from="(750,370)" to="(860,370)"/>
+    <wire from="(770,340)" to="(770,350)"/>
+    <wire from="(770,350)" to="(860,350)"/>
+    <wire from="(790,320)" to="(790,330)"/>
+    <wire from="(790,330)" to="(860,330)"/>
+    <wire from="(820,300)" to="(820,310)"/>
+    <wire from="(820,310)" to="(860,310)"/>
     <wire from="(840,200)" to="(840,210)"/>
     <wire from="(840,210)" to="(860,210)"/>
-    <wire from="(840,490)" to="(840,520)"/>
-    <wire from="(840,520)" to="(860,520)"/>
+    <wire from="(840,280)" to="(840,290)"/>
+    <wire from="(840,290)" to="(860,290)"/>
   </circuit>
   <circuit name="OutputPort">
     <a name="appearance" val="logisim_evolution"/>
