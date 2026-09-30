@@ -347,7 +347,13 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Datapath und Export anschließend korrekt speichern beziehungsweise
   weiterreichen. Als Nächstes wird ausschließlich die Bildung von
   `FetchDecodeControls.ACC_MEMORY_REQUEST` für `LOAD_ADR` geprüft; die
-  geschützte Darstellung wird dabei nicht umgezeichnet.
+  geschützte Darstellung wurde dabei nicht umgezeichnet. Die reparierte
+  Auswahl lässt inzwischen beide Ausgabefälle bestehen. Der nächste
+  Matrixabbruch ist auf den Rückkehradresszustand eingegrenzt: Die
+  Interruptannahme speichert korrekt `0x001`, und eine gültige Rückkehr löscht
+  Validitäts- sowie Handlerzustand, lässt `RET_ADDR` jedoch mangels eines
+  `VALID_RETURN`-Löschpfads auf `0x001` statt `0x000`. Als Nächstes wird
+  ausschließlich dieser Löschpfad des 12-Bit-Rückkehradressregisters ergänzt.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
