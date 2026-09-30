@@ -1426,7 +1426,8 @@ def verify_system_circuit() -> None:
         for item in component.findall("a[@name='label']")
     }
     required_interrupt_labels = {
-        "RISING_EDGE_DETECT", "INTERRUPT_ACCEPT_GATE", "ILL_RET_GATE",
+        "RISING_EDGE_DETECT", "INTERRUPT_ACCEPT_SOURCE",
+        "INTERRUPT_ACCEPT_GATE", "ILL_RET_GATE",
         "PENDING_SET_OR_HOLD", "PENDING_HOLD_UNTIL_ACCEPT",
         "MASK_HOLD", "MASK_NEXT", "VALID_RETURN_GATE",
         "RETURN_VALID_HOLD", "RETURN_VALID_NEXT", "HANDLER_HOLD",
@@ -1472,7 +1473,8 @@ def verify_system_circuit() -> None:
         "request_to_level_register", "request_level_clock_and_reset",
         "previous_level_inversion", "rising_edge_detection",
         "pending_set_or_hold", "pending_clock_and_reset", "pending_state_output",
-        "accept_requires_pending_enabled_boundary_and_idle", "accept_state_output",
+        "accept_source_combines_edge_and_pending",
+        "accept_requires_request_enabled_boundary_and_idle", "accept_state_output",
         "pending_cleared_on_accept", "mask_set_by_enable_or_return",
         "mask_cleared_by_disable_or_accept", "mask_state_hold",
         "mask_clock_and_reset", "mask_state_output",

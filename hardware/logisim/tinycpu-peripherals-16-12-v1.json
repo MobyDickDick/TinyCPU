@@ -273,7 +273,7 @@
       ],
       "disable_on_accept": true,
       "restore_mask_on_return": true,
-      "wiring_sha256": "6f671f3d609a67c16e21ec6d8241def9031ef20034729f094599d5d5f8da7762",
+      "wiring_sha256": "23b0de8793014550243ec33d8cb1890f1f5850959838750771af56deb8924974",
       "verified_paths": [
         "request_to_level_register",
         "request_level_clock_and_reset",
@@ -282,7 +282,8 @@
         "pending_set_or_hold",
         "pending_clock_and_reset",
         "pending_state_output",
-        "accept_requires_pending_enabled_boundary_and_idle",
+        "accept_source_combines_edge_and_pending",
+        "accept_requires_request_enabled_boundary_and_idle",
         "accept_state_output",
         "pending_cleared_on_accept",
         "mask_set_by_enable_or_return",

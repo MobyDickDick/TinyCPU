@@ -4404,3 +4404,41 @@ liegt zwischen `RISING_EDGE_DETECT` und der Annahmebildung. Gemäß Stop-Regel
 wurde in diesem Diagnosepaket keine funktionale Reparatur vorgenommen. Das
 nächste Paket ändert ausschließlich diesen Übergang und wiederholt danach
 zuerst `reset-states` sowie die vier bereits bestandenen Systemfälle.
+
+#### Annahme des aktuellen Flankenimpulses
+
+- **Ausgangsstand:** `8d50e27`
+- **Datum:** 30. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Die topologische Vorprüfung des neu angeordneten `TinyCPUMain` fand zwei
+semantische Verluste, ohne die Anordnung zurückzusetzen: Die Konstante der
+Ladegültigkeitsauswahl hatte ihren Wert `1` verloren, und der Ausgang von
+`ACC_MEMORY_REQUEST_SELECT` war mit dem nicht mehr verwendeten
+`ACC_MEMORY_REQUEST`-Ausgang kurzgeschlossen. Der Konstantenwert wurde am
+verschobenen Bauteil ergänzt und der Ausgang des vorhandenen Auswahlgatters
+auf einem eigenen Leitungsweg zum Gültigkeitsmultiplexer geführt. Kontakt- und
+Offline-Prüfung bestehen danach wieder; `output-invalid-write` liefert wieder
+den erwarteten gehaltenen Ausgabewert.
+
+Die angekündigte Reparatur ergänzt im `InterruptController` das benannte ODER
+`INTERRUPT_ACCEPT_SOURCE`. Es führt den gespeicherten Pending-Zustand und den
+aktuellen Ausgang von `RISING_EDGE_DETECT` zusammen. Derselbe kombinierte Wert
+wird vor dem Pending-Register mit `NOT INTERRUPT_ACCEPT` verknüpft, damit eine
+sofort angenommene Flanke nicht gleichzeitig als neue Pending-Anforderung
+gespeichert wird. `FetchDecodeControls` blieb unverändert. Der neue Pfad ist
+im versionierten Verdrahtungsvertrag enthalten; ein Mutationstest entfernt
+gezielt seinen Flankeneingang.
+
+Im elektrischen Lauf unter `/tmp/ap18-accept-repair` bestehen erneut
+`output-valid-write`, `output-invalid-write`,
+`masked-request-unmask-return` und `disable-interrupts`. In `reset-states`
+sind Pending, Maske, Handler, Rückkehradresse und Rückkehrgültigkeit nun bis
+Vektor 8 korrekt. Der erste Unterschied verschiebt sich auf Vektor 9: Bei
+`RESET=1` und `CLK=0` löschen die Zustände asynchron, während das Fixture den
+vorherigen Zustand noch bis zur nächsten steigenden Flanke erwartet.
+
+Gemäß Stop-Regel wurde dieser neue Unterschied nicht repariert und die Matrix
+nicht über `reset-states` hinaus geöffnet. Das nächste Paket untersucht nur
+die Reset-Trigger der Controllerregister und vereinheitlicht sie erst nach
+einem portbezogenen Nachweis.
