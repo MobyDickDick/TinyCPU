@@ -1174,3 +1174,18 @@ nicht über `reset-states` hinaus geöffnet. Als nächstes wird ausschließlich
 die Annahmebildung so korrigiert, dass eine an der Instruktionsgrenze erkannte
 Flanke im selben zustandsändernden Takt angenommen wird; danach werden zuerst
 `reset-states` und die vier zuvor bestandenen Fälle wiederholt.
+
+## Annahme im erkannten Takt
+
+Die Annahmebildung kombiniert jetzt die aktuelle erkannte Flanke mit einem
+bereits gespeicherten Pending-Zustand. Der Pending-Next-State wird aus dieser
+gemeinsamen Quelle gebildet und bei gleichzeitiger Annahme gelöscht, sodass
+die aktuelle Flanke weder um einen Takt verzögert noch erneut gespeichert
+wird. Ein semantischer Mutationstest und der aktualisierte
+Verdrahtungsfingerprint schützen diesen Übergang.
+
+Die vier zuvor bestandenen Systemfälle sind erneut grün. `reset-states` stimmt
+nun bis einschließlich Vektor 8; der erste verbleibende Unterschied liegt in
+Vektor 9 am asynchronen Löschen bei aktivem Reset und niedrigem Takt. Gemäß
+Stop-Regel ist das nächste Paket ausschließlich auf die Reset-Trigger der
+Controllerzustände begrenzt.

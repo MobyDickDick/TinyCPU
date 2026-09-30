@@ -723,6 +723,11 @@
       <a name="labelfont" val="SansSerif plain 9"/>
       <a name="size" val="30"/>
     </comp>
+    <comp lib="1" loc="(1080,270)" name="OR Gate">
+      <a name="label" val="INTERRUPT_ACCEPT_SOURCE"/>
+      <a name="labelfont" val="SansSerif plain 9"/>
+      <a name="size" val="30"/>
+    </comp>
     <comp lib="1" loc="(1200,340)" name="AND Gate">
       <a name="inputs" val="4"/>
       <a name="label" val="INTERRUPT_ACCEPT_GATE"/>
@@ -872,6 +877,12 @@
     <wire from="(1040,490)" to="(1040,550)"/>
     <wire from="(1040,550)" to="(1380,550)"/>
     <wire from="(1050,1070)" to="(1080,1070)"/>
+    <wire from="(1080,270)" to="(1100,270)"/>
+    <wire from="(610,270)" to="(1080,270)"/>
+    <wire from="(610,270)" to="(610,390)"/>
+    <wire from="(610,390)" to="(620,390)"/>
+    <wire from="(1100,270)" to="(1100,330)"/>
+    <wire from="(1100,330)" to="(1170,330)"/>
     <wire from="(1080,750)" to="(1080,1070)"/>
     <wire from="(1110,690)" to="(1120,690)"/>
     <wire from="(1120,650)" to="(1120,690)"/>
@@ -941,7 +952,6 @@
     <wire from="(590,240)" to="(610,240)"/>
     <wire from="(590,330)" to="(590,390)"/>
     <wire from="(590,330)" to="(970,330)"/>
-    <wire from="(590,390)" to="(620,390)"/>
     <wire from="(600,490)" to="(1040,490)"/>
     <wire from="(600,490)" to="(600,550)"/>
     <wire from="(600,550)" to="(620,550)"/>
@@ -956,6 +966,8 @@
     <wire from="(600,960)" to="(620,960)"/>
     <wire from="(630,700)" to="(630,720)"/>
     <wire from="(650,250)" to="(720,250)"/>
+    <wire from="(650,380)" to="(740,380)"/>
+    <wire from="(650,380)" to="(650,400)"/>
     <wire from="(650,400)" to="(740,400)"/>
     <wire from="(650,560)" to="(740,560)"/>
     <wire from="(650,680)" to="(770,680)"/>
@@ -967,8 +979,7 @@
     <wire from="(710,550)" to="(740,550)"/>
     <wire from="(710,940)" to="(710,950)"/>
     <wire from="(710,950)" to="(740,950)"/>
-    <wire from="(720,250)" to="(720,380)"/>
-    <wire from="(720,380)" to="(740,380)"/>
+    <wire from="(720,250)" to="(1000,250)"/>
     <wire from="(720,510)" to="(720,540)"/>
     <wire from="(720,540)" to="(740,540)"/>
     <wire from="(750,700)" to="(770,700)"/>
@@ -1028,9 +1039,12 @@
     <wire from="(940,960)" to="(1140,960)"/>
     <wire from="(960,800)" to="(960,840)"/>
     <wire from="(960,840)" to="(1160,840)"/>
-    <wire from="(970,330)" to="(1170,330)"/>
+    <wire from="(970,280)" to="(1050,280)"/>
+    <wire from="(970,280)" to="(970,330)"/>
     <wire from="(970,330)" to="(970,390)"/>
     <wire from="(970,390)" to="(1380,390)"/>
     <wire from="(980,170)" to="(980,220)"/>
+    <wire from="(1000,250)" to="(1000,260)"/>
+    <wire from="(1000,260)" to="(1050,260)"/>
   </circuit>
 </project>

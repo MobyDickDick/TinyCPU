@@ -615,3 +615,10 @@ beobachteten Bedienhürden und grenzt eine mögliche Bedienseite mit Reset,
 Einzelschritt, Laufsteuerung und verständlichen Zustandsanzeigen ab. Er ist
 noch kein umgesetztes oder nummeriertes Arbeitspaket und erteilt insbesondere
 keinen impliziten Auftrag zur Änderung der geprüften Übersichtsseite.
+
+Der Übergang ist inzwischen repariert: Aktuelle Flanke und gespeicherte
+Anforderung speisen gemeinsam die Annahme, ohne eine angenommene Flanke erneut
+als Pending-Zustand abzulegen. Die vier vorherigen Systemfälle bestehen;
+`reset-states` erreicht nun Vektor 9. Der nächste begrenzte Schritt untersucht
+ausschließlich das dort zu frühe Löschen der Controllerzustände bei aktivem
+Reset und niedrigem Takt.
