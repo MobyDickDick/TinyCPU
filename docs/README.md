@@ -202,3 +202,12 @@ inzwischen eingegrenzt: Die Annahme erfolgt einen steigenden Takt zu spät und
 Ein-Bit-Zustände bei erneutem Reset bereits in der niedrigen Taktphase, der
 Adresszustand dagegen erst an der steigenden Flanke. Als nächstes werden nur
 Flankenerkennung und Annahmesignal um Vektoren 5 bis 8 passiv verfolgt.
+
+Diese passive Messung ist abgeschlossen: `RISING_EDGE_DETECT` wird in Vektor 5
+noch vor der ersten steigenden Flanke aktiv, `INTERRUPT_ACCEPT` dagegen erst
+nach dem Speichern des Pending-Zustands in Vektor 6. Der belegte Unterschied
+liegt damit in der verzögerten Übergabe des Flankenimpulses an die
+Annahmelogik, nicht am externen Anforderungspegel oder Flankendetektor. Die
+Schaltung blieb unverändert; als nächstes wird ausschließlich dieser Übergang
+repariert und danach zunächst `reset-states` samt den vier zuvor bestandenen
+Systemfällen wiederholt.

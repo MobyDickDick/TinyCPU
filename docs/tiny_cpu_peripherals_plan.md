@@ -1146,3 +1146,31 @@ Unterschied auf die zeitliche Abstimmung von Flankenerkennung,
 eingegrenzt. Gemäß Stop-Regel wurde keine funktionale Reparatur vorgenommen.
 Als nächstes werden ausschließlich `REQUEST_LEVEL`, `RISING_EDGE_DETECT` und
 `INTERRUPT_ACCEPT` um Vektoren 5 bis 8 passiv instrumentiert.
+
+## Passive Messung der Interruptannahme
+
+Eine ausschließlich temporär instrumentierte Projektkopie führt die drei
+angekündigten Signale als Beobachtungsausgänge heraus; die eingecheckte
+Schaltung und insbesondere `FetchDecodeControls` blieben unverändert. Der
+fokussierte Lauf von `reset-states` liefert für die erste Anforderung:
+
+| Vektor | `CLK` | `INTERRUPT_REQUEST` | `REQUEST_LEVEL` | `RISING_EDGE_DETECT` | `INTERRUPT_ACCEPT` |
+|---:|---:|---:|---:|---:|---:|
+| 5 | `0` | `1` | `0` | `1` | `0` |
+| 6 | `1` | `1` | `1` | `0` | `1` |
+| 7 | `0` | `0` | `1` | `0` | `1` |
+| 8 | `1` | `0` | `0` | `0` | `0` |
+
+Damit erkennt die kombinatorische Flankenstufe die Anforderung bereits in
+Vektor 5 korrekt. Der Annahmepfad verwendet jedoch den erst an der steigenden
+Flanke gespeicherten Pending-Zustand: `INTERRUPT_ACCEPT` wird deshalb erst
+nach dieser Flanke in Vektor 6 aktiv und kann die übrigen Zustandsregister erst
+an der nächsten steigenden Flanke ändern. Der erste Unterschied liegt somit
+nicht im externen Anforderungspegel oder im Flankendetektor, sondern in der
+um einen Takt verzögerten Übergabe des erkannten Impulses an die Annahmelogik.
+
+Gemäß Stop-Regel wurde keine funktionale Reparatur vorgenommen und die Matrix
+nicht über `reset-states` hinaus geöffnet. Als nächstes wird ausschließlich
+die Annahmebildung so korrigiert, dass eine an der Instruktionsgrenze erkannte
+Flanke im selben zustandsändernden Takt angenommen wird; danach werden zuerst
+`reset-states` und die vier zuvor bestandenen Fälle wiederholt.

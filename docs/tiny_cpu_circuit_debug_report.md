@@ -4375,3 +4375,32 @@ Ein-Bit-Register bereits während `CLK=0`, das Adressregister dagegen erst an
 der folgenden steigenden Flanke. Es wurde keine funktionale Schaltung geändert.
 Der nächste begrenzte Lauf instrumentiert ausschließlich `REQUEST_LEVEL`,
 `RISING_EDGE_DETECT` und `INTERRUPT_ACCEPT` in den Vektoren 5 bis 8.
+
+#### Flankenerkennung und Annahmeimpuls
+
+- **Ausgangsstand:** `7757155`
+- **Datum:** 30. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Der unveränderte fokussierte Systemlauf besteht erneut bis einschließlich
+`disable-interrupts` und stoppt in `reset-states` ab Vektor 6. Anschließend
+wurden nur in einer temporären Projektkopie passive Ausgänge für
+`REQUEST_LEVEL`, `RISING_EDGE_DETECT` und `INTERRUPT_ACCEPT` ergänzt. Die
+eingecheckten Schaltungen wurden nicht verändert.
+
+| Vektor | `CLK` | Anforderung | `REQUEST_LEVEL` | `RISING_EDGE_DETECT` | `INTERRUPT_ACCEPT` |
+|---:|---:|---:|---:|---:|---:|
+| 5 | `0` | `1` | `0` | `1` | `0` |
+| 6 | `1` | `1` | `1` | `0` | `1` |
+| 7 | `0` | `0` | `1` | `0` | `1` |
+| 8 | `1` | `0` | `0` | `0` | `0` |
+
+Die Eingangssynchronisierung und der benannte Flankendetektor liefern damit
+den erwarteten Impuls bereits vor der ersten steigenden Flanke. Die
+Annahmelogik reagiert aber erst auf das dadurch gesetzte Pending-Register;
+`INTERRUPT_ACCEPT` erscheint folglich erst nach dieser Flanke und erreicht die
+zustandsändernden Register einen Takt zu spät. Der erste abweichende Übergang
+liegt zwischen `RISING_EDGE_DETECT` und der Annahmebildung. Gemäß Stop-Regel
+wurde in diesem Diagnosepaket keine funktionale Reparatur vorgenommen. Das
+nächste Paket ändert ausschließlich diesen Übergang und wiederholt danach
+zuerst `reset-states` sowie die vier bereits bestandenen Systemfälle.
