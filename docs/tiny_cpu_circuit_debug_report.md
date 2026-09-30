@@ -4454,3 +4454,35 @@ gemeinsame Quelle aus Flankenimpuls und gespeichertem Pending-Zustand bereits
 vor diesem UND liegt, wird der zweite ODER-Eingang fachlich nicht mehr
 benötigt. Er ist nun explizit mit `0` verbunden. Ein Strukturtest schützt die
 Nullquelle und die Entfernung der redundanten Rückführung.
+
+#### Reset-Trigger der Controllerregister
+
+- **Ausgangsstand:** `ffff2fc`
+- **Datum:** 30. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Die Offline-Vorprüfung des manuell angepassten Controllerblatts fand zunächst
+erneut verlorene semantische Attribute. Die Nullquelle von
+`PENDING_SET_OR_HOLD` führte ohne explizites Attribut Logisims Standardwert
+`1`, die verzögerte Rückkehradresslöschung hatte ihren Wert `1` verloren und
+die beiden Rückkehradress-Multiplexer ihre vertraglichen Bezeichnungen. Nach
+der kleinsten Korrektur am bestehenden Layout und der Wiederanbindung der
+Annahmequellen-Rückführung bestehen Offline-Prüfung sowie
+`output-valid-write`, `output-invalid-write`,
+`masked-request-unmask-return` und `disable-interrupts` wieder. Der fokussierte
+Systemlauf dauerte 10,6 Sekunden und legte seine Nachweise unter
+`/tmp/ap18-reset-trigger-diagnosis/system` ab.
+
+`reset-states` stimmt weiterhin bis einschließlich Vektor 8 und weicht zuerst
+an Vektor 9 ab. Bei `RESET=1` und `CLK=0` meldet Logisim bereits
+`IN_INTERRUPT_HANDLER=0`, `RET_ADDR=0x000` und `RET_ADDR_VALID=0`; erwartet
+werden bis zur nächsten steigenden Flanke noch `1`, `0x001` und `1`. Die
+sichtbare Reset-Schiene erreicht die Reset-Kontakte der Zustandsregister
+direkt. Sie besitzt weder eine Taktqualifizierung noch eine Auswahl in der
+jeweiligen Next-State-Stufe. Der abweichende Übergang ist damit dem
+asynchronen Register-Reset zugeordnet.
+
+Es wurde noch keine funktionale Reset-Reparatur vorgenommen. Das nächste
+begrenzte Paket ändert ausschließlich diese Reset-Trigger in eine synchrone
+Next-State-Löschung und wiederholt danach zuerst `reset-states` sowie die vier
+vorher bestandenen Systemfälle.
