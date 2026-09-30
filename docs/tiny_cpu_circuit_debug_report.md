@@ -4128,3 +4128,46 @@ und ersetzt damit die beiden falschen `PRINT_ADDRESS_*`-Rückwege in der
 `CPUIntegrationBoundary`. Anschließend wird zuerst `output-valid-write`
 wiederholt; die vollständige Systemmatrix bleibt bis zu dessen Erfolg
 geschlossen.
+
+#### Reparatur der Systemoszillation
+
+- **Ausgangsstand:** `595dba9`
+- **Datum:** 30. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+`TinyCPUMain` exportiert die beiden Ausgänge der eingebetteten `Memory`-Instanz
+jetzt vor der externen Auswahl als `RAW_MEMORY_VALUE` und
+`RAW_MEMORY_VALID`. Die `CPUIntegrationBoundary` führt diese Rohsignale zu
+`READ_VALUE` und `READ_VALID`; die kombinatorischen Rückwege über
+`PRINT_ADDRESS_VALUE` und `PRINT_ADDRESS_VALID` sind damit entfernt. Andere
+Kern-, Speicher-, Port- oder Interruptpfade wurden nicht fachlich verändert.
+
+Der maschinenlesbare Systemvertrag enthält die neuen Pins. Der Verifier folgt
+der generierten Kernbox über Pinbezeichnungen statt über feste Ausgangszeilen
+und prüft zusätzlich beide direkten Verbindungen von `Memory`. Ein gezielter
+Mutationstest entfernt nacheinander jeden dieser Exporte und erwartet den
+benannten Vertragsfehler.
+
+```bash
+scripts/test-offline.sh
+
+LOGISIM_JAR="$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 --system tinycpu-peripherals-16-12-v1 \
+  --system-only --trace-output /tmp/unused-core.tsv \
+  --matrix-output /tmp/ap18-raw-memory-repair
+```
+
+Der Offline-Lauf besteht. Im elektrischen Lauf besteht erstmals
+`output-valid-write` vollständig und ohne oszillierende Zustände. Die dadurch
+geöffnete Matrix erreicht `output-invalid-write` und stoppt dort an Vektor 8:
+`OUTPUT_PORT_VALUE` ist `0x0014`, erwartet wird der zuvor gespeicherte Wert
+`0x0017`. Das Diagnosepaket liegt unter
+`/tmp/ap18-raw-memory-repair/system/output-invalid-write` und enthält Vektor,
+injizierte Projekte, Simulatorausgabe und `diagnostic.json`.
+
+Die dokumentierte Oszillationsursache ist damit elektrisch behoben. Gemäß
+Stop-Regel bleibt der neue, nicht oszillierende Unterschied unrepariert. Das
+nächste Paket misst ausschließlich `WRITE_VALUE`, `WRITE_VALID` und
+`WRITE_ENABLE` vor dem `OutputPort` sowie dessen Registerfreigabe im achten
+Vektor von `output-invalid-write`.
