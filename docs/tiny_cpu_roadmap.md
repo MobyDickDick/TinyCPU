@@ -361,8 +361,11 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   als eigenes Diagnosepaket auf die Controllerzustände eingegrenzt. Die
   Zustandsfolge zeigt nun eine um eine steigende Flanke verspätete
   Interruptannahme sowie ein asynchrones Löschen der Ein-Bit-Zustände gegenüber
-  dem erst an der Flanke gelöschten Adresszustand. Als nächstes werden nur
-  `REQUEST_LEVEL`, `RISING_EDGE_DETECT` und `INTERRUPT_ACCEPT` passiv gemessen.
+  dem erst an der Flanke gelöschten Adresszustand. Die passive Folgemessung
+  zeigt `RISING_EDGE_DETECT` bereits vor der ersten steigenden Flanke, während
+  `INTERRUPT_ACCEPT` erst danach aus dem gespeicherten Pending-Zustand entsteht.
+  Als nächstes wird ausschließlich diese verzögerte Übergabe an die
+  Annahmelogik repariert.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
