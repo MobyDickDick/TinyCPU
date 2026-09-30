@@ -375,6 +375,10 @@
       <a name="inputs" val="3"/>
       <a name="label" val="MEMORY_WRITE_REQUEST"/>
     </comp>
+    <comp lib="1" loc="(2050,2250)" name="OR Gate">
+      <a name="inputs" val="3"/>
+      <a name="label" val="ACC_MEMORY_REQUEST_SELECT"/>
+    </comp>
     <comp lib="2" loc="(1150,750)" name="Multiplexer">
       <a name="width" val="16"/>
     </comp>
@@ -483,7 +487,9 @@
     <wire from="(1430,1770)" to="(2210,1770)"/>
     <wire from="(1430,1830)" to="(3590,1830)"/>
     <wire from="(1430,1850)" to="(3590,1850)"/>
-    <wire from="(1430,1890)" to="(1730,1890)"/>
+    <wire from="(1430,1470)" to="(1910,1470)"/>
+    <wire from="(1430,1490)" to="(1930,1490)"/>
+    <wire from="(1510,1510)" to="(1950,1510)"/>
     <wire from="(1430,1910)" to="(1750,1910)"/>
     <wire from="(1430,1930)" to="(1770,1930)"/>
     <wire from="(1430,1950)" to="(1790,1950)"/>
@@ -577,6 +583,15 @@
     <wire from="(1890,1050)" to="(2140,1050)"/>
     <wire from="(1890,1310)" to="(1890,1500)"/>
     <wire from="(1890,1500)" to="(2880,1500)"/>
+    <wire from="(1910,1470)" to="(1910,2230)"/>
+    <wire from="(1910,2230)" to="(2000,2230)"/>
+    <wire from="(1930,1490)" to="(1930,2250)"/>
+    <wire from="(1930,2250)" to="(2000,2250)"/>
+    <wire from="(1950,1510)" to="(1950,2270)"/>
+    <wire from="(1950,2270)" to="(2000,2270)"/>
+    <wire from="(2030,1010)" to="(2070,1010)"/>
+    <wire from="(2050,2250)" to="(2070,2250)"/>
+    <wire from="(2070,1010)" to="(2070,2250)"/>
     <wire from="(1910,1290)" to="(1910,1380)"/>
     <wire from="(1910,1380)" to="(2560,1380)"/>
     <wire from="(1950,790)" to="(1950,970)"/>

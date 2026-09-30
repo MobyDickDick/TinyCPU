@@ -4261,3 +4261,48 @@ Gemäß Stop-Regel wurde noch keine Reparatur vorgenommen. Das nächste Paket
 prüft ausschließlich die vorhandene Bildung von `ACC_MEMORY_REQUEST` für
 `LOAD_ADR` und darf erst nach einem portbezogenen Nachweis die kleinste
 Verbindungsänderung außerhalb der geschützten Darstellung vornehmen.
+
+#### Reparatur der Akkumulator-Speicheranforderung
+
+- **Ausgangsstand:** `27636e8`
+- **Datum:** 30. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Die portbezogene Prüfung bestätigt den angekündigten Unterschied: Der
+vorhandene Ausgang `FetchDecodeControls.ACC_MEMORY_REQUEST` wird innerhalb der
+geschützten Darstellung von `LD_REG_ADR`, `STORE_ADR` und `STORE_ADR_REG`
+gebildet. Er kann deshalb für `LOAD_ADR` nicht aktiv werden. Die drei bereits
+vorhandenen, einzeln benannten Ausgänge `LOAD_ADR`, `LOAD_ADR_REG` und
+`LOAD_REG_OFF` dekodieren dagegen genau die drei Speicherladebefehle des
+Akkumulators.
+
+Die Reparatur verändert `FetchDecodeControls` nicht. Auf `TinyCPUMain` führt
+ein neuer sichtbarer Drei-Eingang-ODER `ACC_MEMORY_REQUEST_SELECT` ausschließlich
+diese drei Ladeausgänge zusammen und treibt damit den unveränderten
+Speichergültigkeitsselektor. Der bisherige falsche Steuerpin bleibt an der
+geschützten Box erhalten, ist außerhalb davon aber vom Selektor getrennt. Der
+Verifier folgt den drei benannten Quellports und dem Gate-Ausgang elektrisch;
+ein Mutationstest unterbricht gezielt einen Gate-Eingang und erwartet den
+benannten Vertragsfehler.
+
+```bash
+scripts/test-offline.sh
+
+LOGISIM_JAR="$PWD/.venv/Include/logisim-evolution-4.1.0-all.jar" \
+PYTHONPATH=src python3 src/tiny_cpu_logisim.py \
+  --profile tinycpu-16-12 --system tinycpu-peripherals-16-12-v1 \
+  --system-only --trace-output /tmp/unused-core.tsv \
+  --matrix-output /tmp/ap18-acc-memory-repair --timeout 20
+```
+
+Der Offline-Lauf besteht. Im elektrischen Lauf bestehen erstmals sowohl
+`output-valid-write` als auch `output-invalid-write`; damit ist der zuvor
+belegte ungültige Akkumulator-Ladepfad repariert. Die dadurch weiter geöffnete
+Matrix erreicht `masked-request-unmask-return` und stoppt dort an Vektor 8:
+`RET_ADDR` ist `0x001`, erwartet wird `0x000`. Das Diagnosepaket liegt unter
+`/tmp/ap18-acc-memory-repair/system/masked-request-unmask-return`.
+
+Gemäß Stop-Regel wurde dieser neue Unterschied nicht repariert und kein
+weiterer Systemfall ausgeführt. Das nächste Diagnosepaket verfolgt
+ausschließlich die Rückkehradressquelle und ihre Registerfreigabe zwischen der
+maskierten Interruptanforderung und dem Entmasken in Vektor 8.

@@ -955,6 +955,22 @@ def verify_system_circuit() -> None:
         raise VerificationError("AP-18 CPU load-validity selectors differ from contract")
     memory_out, memory_default, memory_selected, memory_control = \
         terminals[id(memory_candidates[0])]
+    memory_request_selectors = [
+        component for component in core_definition.findall("comp[@name='OR Gate']")
+        if _pin_label(component) == "ACC_MEMORY_REQUEST_SELECT"
+    ]
+    if len(memory_request_selectors) != 1:
+        raise VerificationError("AP-18 CPU accumulator memory request selector is missing")
+    memory_request_selector = memory_request_selectors[0]
+    selector_x, selector_y = point(
+        memory_request_selector.get("loc", ""),
+        source=LOGISIM / str(core_library),
+    )
+    memory_request_inputs = (
+        f"({selector_x - 50},{selector_y - 20})",
+        f"({selector_x - 50},{selector_y})",
+        f"({selector_x - 50},{selector_y + 20})",
+    )
     constants = {}
     for component in core_definition.findall("comp[@name='Constant']"):
         attributes = {
@@ -963,10 +979,22 @@ def verify_system_circuit() -> None:
         constants.setdefault(attributes.get("value", "0x0"), []).append(
             component.get("loc")
         )
+    memory_request_paths = tuple(
+        core_connected(controls_ports[label], terminal)
+        for label, terminal in zip(
+            ("LOAD_ADR", "LOAD_ADR_REG", "LOAD_REG_OFF"),
+            memory_request_inputs,
+        )
+    ) + (
+        core_connected(memory_request_selector.get("loc", ""), memory_control),
+    )
+    if not all(memory_request_paths):
+        raise VerificationError(
+            "AP-18 CPU accumulator memory request sources differ from contract"
+        )
     validity_paths = (
         any(core_connected(point, memory_default) for point in constants.get("0x1", ())),
         core_connected(memory_valid_output, memory_selected),
-        core_connected(controls_ports["ACC_MEMORY_REQUEST"], memory_control),
         core_connected(memory_out, not_default),
         core_connected(datapath_ports["ACC_VALID_OUT"], not_selected),
         core_connected(controls_ports["INVERT"], not_control),
