@@ -956,6 +956,33 @@ class CircuitVerificationTests(unittest.TestCase):
             ):
                 VERIFY.verify_system_circuit()
 
+    def test_ap18_accumulator_memory_request_uses_load_decoder_outputs(self) -> None:
+        root = MODULE_PATH.parents[1]
+        source = root / "hardware" / "logisim"
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        shutil.copytree(source, temporary / "logisim")
+        circuit = temporary / "logisim" / "TinyCPU.circ"
+        project = ET.parse(circuit)
+        main = project.getroot().find("circuit[@name='TinyCPUMain']")
+        self.assertIsNotNone(main)
+        gate = _component_by_label(main, "ACC_MEMORY_REQUEST_SELECT")
+        _remove_wire_at(main, _component_terminal(gate, -50, -20))
+        project.write(circuit, encoding="utf-8", xml_declaration=True)
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+             mock.patch.object(
+                 VERIFY,
+                 "load_system_profile",
+                 return_value=replace(
+                     system,
+                     circuit_path=temporary / "logisim" / "TinyCPU_Peripherals.circ",
+                 ),
+             ):
+            with self.assertRaisesRegex(
+                VERIFY.VerificationError, "accumulator memory request sources"
+            ):
+                VERIFY.verify_system_circuit()
+
     def test_ap18_cpu_integration_requires_address_width_adapter(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
@@ -965,8 +992,13 @@ class CircuitVerificationTests(unittest.TestCase):
         project = ET.parse(circuit)
         boundary = project.getroot().find("circuit[@name='CPUIntegrationBoundary']")
         self.assertIsNotNone(boundary)
-        splitter = boundary.find("comp[@name='Splitter'][@loc='(680,510)']")
-        self.assertIsNotNone(splitter)
+        splitter = next(
+            component for component in boundary.findall("comp[@name='Splitter']")
+            if {
+                attribute.get("name"): attribute.get("val")
+                for attribute in component.findall("a")
+            }.get("incoming") == "16"
+        )
         incoming = next(item for item in splitter.findall("a")
                         if item.get("name") == "incoming")
         incoming.set("val", "12")
