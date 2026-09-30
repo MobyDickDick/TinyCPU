@@ -1027,3 +1027,28 @@ Diagnosepaket verfolgt deshalb ausschließlich Schreibwert, Schreibgültigkeit
 und Schreibfreigabe dieses ungültigen Schreibversuchs bis zum
 `OutputPort`-Register. Die übrigen Systemfälle bleiben bis zu diesem Befund
 geschlossen.
+
+## Schreibsignale des ungültigen Ausgabeversuchs
+
+Der angekündigte Vergleich wurde mit passiven Ausgängen in einer
+ausschließlich unter `/tmp` instrumentierten Kopie des gesicherten
+`output-invalid-write`-Fixtures ausgeführt. Beim ersten gültigen Store führen
+`WRITE_VALUE=0x0017`, `WRITE_VALID=1` und `WRITE_ENABLE=1`. Beim späteren
+Store des ungültigen Speicherwerts führen die drei Eingänge vor
+`OutputMemoryPath` in den Vektoren 6 und 7 dagegen
+`WRITE_VALUE=0x0014`, `WRITE_VALID=1` und `WRITE_ENABLE=1`. Die unmittelbar
+aus `WRITE_VALID AND WRITE_ENABLE` gebildete Registerfreigabe ist damit `1`;
+an der folgenden steigenden Flanke übernimmt das Ausgaberegister folgerichtig
+`0x0014`. Ab Vektor 8 ist `WRITE_ENABLE=0`, die fehlerhafte Übernahme ist zu
+diesem Zeitpunkt jedoch bereits erfolgt.
+
+Damit sind weder der Ausgaberegister-Dateneingang noch seine Freigabeleitung
+der erste Unterschied. Die Freigabe reagiert korrekt auf ihre beiden
+Eingänge; abweichend ist bereits die CPU-seitig exportierte
+Schreibgültigkeit, die nach `LOAD_ADDRESS(20)` weiterhin `1` statt `0` führt.
+Gemäß Stop-Regel wurde keine eingecheckte Schaltung verändert und die
+Systemmatrix bleibt beim zweiten Fall geschlossen. Das nächste enge
+Diagnosepaket verfolgt ausschließlich `EXTERNAL_WRITE_VALID` vom öffentlichen
+Kernpin rückwärts bis `Datapath.ACC_VALID_OUT` und dessen Ladepfad während
+`LOAD_ADDRESS(20)`. Erst der erste dort abweichende benannte Port darf eine
+Reparatur auslösen.

@@ -334,8 +334,13 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   `output-valid-write` besteht dadurch ohne oszillierende Zustände. Die nun
   weiter geöffnete Matrix stoppt bei `output-invalid-write`, weil der
   Ausgabeport ab Vektor 8 `0x0014` statt des zuvor gespeicherten Werts
-  `0x0017` hält. Als Nächstes wird ausschließlich dieser ungültige
-  Schreibversuch an den drei Port-Schreibsignalen eingegrenzt.
+  `0x0017` hält. Der ungültige Schreibversuch ist inzwischen an den drei
+  Port-Schreibsignalen eingegrenzt: `WRITE_VALUE=0x0014`, `WRITE_VALID=1` und
+  `WRITE_ENABLE=1` aktivieren die korrekt gebildete Registerfreigabe und
+  erklären die Übernahme vollständig. Der erste Unterschied liegt damit an der
+  bereits CPU-seitig falschen Schreibgültigkeit. Als Nächstes wird
+  ausschließlich `EXTERNAL_WRITE_VALID` bis `Datapath.ACC_VALID_OUT` und dessen
+  Ladepfad während `LOAD_ADDRESS(20)` zurückverfolgt.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
