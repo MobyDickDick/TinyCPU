@@ -4171,3 +4171,43 @@ Stop-Regel bleibt der neue, nicht oszillierende Unterschied unrepariert. Das
 nächste Paket misst ausschließlich `WRITE_VALUE`, `WRITE_VALID` und
 `WRITE_ENABLE` vor dem `OutputPort` sowie dessen Registerfreigabe im achten
 Vektor von `output-invalid-write`.
+
+#### Schreibsignale vor dem Ausgaberegister
+
+- **Ausgangsstand:** `6274ea6`
+- **Datum:** 30. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Zuerst wurde der unveränderte fokussierte Systemlauf wiederholt. Er besteht
+weiterhin für `output-valid-write` und stoppt in `output-invalid-write` bei
+Vektor 8 mit `OUTPUT_PORT_VALUE=0x0014` statt `0x0017`. Laufzeit: 5,2 Sekunden;
+die reproduzierbaren Eingaben und Ausgaben liegen unter
+`/tmp/ap18-next/system/output-invalid-write`.
+
+Anschließend wurden in einer ausschließlich unter `/tmp/ap18-write-probe`
+liegenden Projektkopie drei passive Top-Level-Ausgänge an die Eingänge
+`WRITE_VALUE`, `WRITE_VALID` und `WRITE_ENABLE` von `OutputMemoryPath`
+geführt. Weder die eingecheckte Schaltung noch `FetchDecodeControls` wurden
+dabei verändert. Der gepinnte Headless-Vektorlauf benötigte 2,6 Sekunden und
+lieferte folgende relevante Post-Edge-Werte:
+
+| Vektor | WRITE_VALUE | WRITE_VALID | WRITE_ENABLE | OUTPUT_PORT_VALUE |
+|---:|---:|---:|---:|---:|
+| 2–3 | `0x0017` | `1` | `1` | `0x0017` nach der Schreibflanke |
+| 6–7 | `0x0014` | `1` | `1` | `0x0014` nach der Schreibflanke |
+| 8–10 | `0x0017` | `1` | `0` | `0x0014` |
+
+Da die Registerfreigabe in `OutputMemoryPath` unmittelbar
+`WRITE_VALID AND WRITE_ENABLE` ist und ohne weitere Logik an beide
+Register-Enable-Eingänge führt, beträgt sie während des ungültigen Stores
+nachweislich `1`. Der beobachtete Zustandswechsel an der folgenden Flanke
+bestätigt die Freigabe auch am Register. Datenpfad und Freigabelogik des
+Ausgabeports verhalten sich damit konsistent zu ihren Eingängen.
+
+Der erste benannte Unterschied liegt bereits am CPU-seitigen
+`WRITE_VALID`/`EXTERNAL_WRITE_VALID`: Nach `LOAD_ADDRESS(20)` wird der Wert
+`0x0014` korrekt exportiert, seine Gültigkeit bleibt aber fälschlich `1`.
+Gemäß Stop-Regel wurde keine Reparatur vorgenommen und kein weiterer
+Systemfall ausgeführt. Das nächste Diagnosepaket verfolgt nur diesen
+Gültigkeitspfad vom öffentlichen Kernpin zu `Datapath.ACC_VALID_OUT` und
+dessen Ladepfad während `LOAD_ADDRESS(20)`.
