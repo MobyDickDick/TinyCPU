@@ -340,7 +340,14 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   erklären die Übernahme vollständig. Der erste Unterschied liegt damit an der
   bereits CPU-seitig falschen Schreibgültigkeit. Als Nächstes wird
   ausschließlich `EXTERNAL_WRITE_VALID` bis `Datapath.ACC_VALID_OUT` und dessen
-  Ladepfad während `LOAD_ADDRESS(20)` zurückverfolgt.
+  Ladepfad während `LOAD_ADDRESS(20)` zurückverfolgt. Diese Rückverfolgung ist
+  inzwischen abgeschlossen: Die ausgewählte Speichergültigkeit liegt korrekt
+  als `0` an, doch `ACC_MEMORY_REQUEST` bleibt bei aktivem `LOAD_ADR` auf `0`.
+  Deshalb wählt die Ladegültigkeitsstufe die Immediate-Konstante `1`, die
+  Datapath und Export anschließend korrekt speichern beziehungsweise
+  weiterreichen. Als Nächstes wird ausschließlich die Bildung von
+  `FetchDecodeControls.ACC_MEMORY_REQUEST` für `LOAD_ADR` geprüft; die
+  geschützte Darstellung wird dabei nicht umgezeichnet.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

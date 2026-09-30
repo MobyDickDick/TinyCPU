@@ -1052,3 +1052,22 @@ Diagnosepaket verfolgt ausschließlich `EXTERNAL_WRITE_VALID` vom öffentlichen
 Kernpin rückwärts bis `Datapath.ACC_VALID_OUT` und dessen Ladepfad während
 `LOAD_ADDRESS(20)`. Erst der erste dort abweichende benannte Port darf eine
 Reparatur auslösen.
+
+## Gültigkeitsauswahl bei `LOAD_ADDRESS(20)`
+
+Die angekündigte elektrische Rückverfolgung ist abgeschlossen. Eine nur unter
+`/tmp` instrumentierte Kopie legt für den ungültigen Lesezugriff die
+ausgewählte Speichergültigkeit `0` an. Vor der Ladeflanke sind `LOAD_ADR=1`
+und `ACC_LOAD=1`, aber `ACC_MEMORY_REQUEST=0`. Dadurch wählt die erste Stufe
+der Ladegültigkeitsauswahl die Immediate-Konstante `1`; dieser Wert erreicht
+unverändert `Datapath.VALID_IN`, wird als `ACC_VALID_OUT=1` gespeichert und
+schließlich korrekt als `EXTERNAL_WRITE_VALID=1` exportiert.
+
+Damit sind weder der externe Speichergültigkeitseingang noch die drei
+Auswahlstufen, das Datapath-Register oder der Exportpfad der erste
+Unterschied. Abweichend ist bereits der benannte Ausgang
+`FetchDecodeControls.ACC_MEMORY_REQUEST`, der während `LOAD_ADR` nicht aktiv
+wird. Die eingecheckte Schaltung blieb gemäß Stop-Regel unverändert. Das
+nächste enge Diagnosepaket prüft nur die Bildung dieses Selektors aus
+`LOAD_ADR`; die geschützte Darstellung von `FetchDecodeControls` darf dabei
+nicht umgezeichnet werden.
