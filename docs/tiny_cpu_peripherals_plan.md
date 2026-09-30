@@ -1100,3 +1100,23 @@ Das nächste Reparaturpaket ergänzt ausschließlich den fehlenden
 `VALID_RETURN`-Löschpfad des Rückkehradressregisters. Danach wird zuerst
 `masked-request-unmask-return` wiederholt; weitere Systemfälle werden erst bei
 dessen Erfolg geöffnet.
+
+## Synchrones Löschen der Rückkehradresse
+
+Der fehlende Löschpfad ist nun ergänzt. Die Rückkehradresse besitzt eine
+explizite Next-State-Auswahl: Bei der Annahme wird weiterhin `NEXT_PC`
+übernommen, ohne Annahme wird der gespeicherte Wert gehalten und eine gültige
+Rückkehr wählt den Nullwert. Ein taktsynchrones, zurücksetzbares
+`RETURN_ADDRESS_CLEAR_PENDING`-Register verzögert den kombinatorischen
+Rückkehrimpuls bis zur zustandsändernden Flanke; sein Ausgang löscht nur das
+12-Bit-Rückkehradressregister. Dadurch bleibt `RET_ADDR` während des
+Rückkehrbefehls stabil und wird zusammen mit Validitäts- und Handlerzustand
+erst nach der steigenden Flanke sichtbar null.
+
+Der Offline-Vertrag benennt Capture-, Next-State- und Löschstufe, nimmt den
+zusätzlichen Ein-Bit-Zustand in die Registerbilanz auf und schützt die neue
+Rückführung mit einem Leitungs-Mutationstest. Elektrisch bestehen danach
+`output-valid-write`, `output-invalid-write`,
+`masked-request-unmask-return` und `disable-interrupts`. Der erstmals geöffnete
+Fall `reset-states` stoppt an Vektor 6. Als nächstes wird ausschließlich seine
+Reset-Sequenz an den benannten Controllerzuständen verfolgt.

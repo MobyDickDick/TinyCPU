@@ -263,7 +263,8 @@
         "pending": 1,
         "in_handler": 1,
         "return_address": 12,
-        "return_address_valid": 1
+        "return_address_valid": 1,
+        "return_clear_pending": 1
       },
       "priority": [
         "reset",
@@ -272,7 +273,7 @@
       ],
       "disable_on_accept": true,
       "restore_mask_on_return": true,
-      "wiring_sha256": "3a9bbf1a6403e751f782af83f8931e9910e8879b55544317e48ab8acc001d270",
+      "wiring_sha256": "7139e7bbb7599fb4717417ceb741838ca329005d82668046fcc7d400bd6ecb83",
       "verified_paths": [
         "request_to_level_register",
         "request_level_clock_and_reset",
@@ -290,6 +291,7 @@
         "mask_clock_and_reset",
         "mask_state_output",
         "return_address_captured_on_accept",
+        "return_address_cleared_on_valid_return",
         "return_address_valid_set_on_accept",
         "return_address_valid_cleared_on_valid_return",
         "return_address_valid_held_without_valid_return",

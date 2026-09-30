@@ -1430,7 +1430,8 @@ def verify_system_circuit() -> None:
         "PENDING_SET_OR_HOLD", "PENDING_HOLD_UNTIL_ACCEPT",
         "MASK_HOLD", "MASK_NEXT", "VALID_RETURN_GATE",
         "RETURN_VALID_HOLD", "RETURN_VALID_NEXT", "HANDLER_HOLD",
-        "HANDLER_NEXT",
+        "HANDLER_NEXT", "RETURN_ADDRESS_CAPTURE", "RETURN_ADDRESS_NEXT",
+        "RETURN_ADDRESS_CLEAR", "RETURN_ADDRESS_CLEAR_PENDING",
     }
     if not required_interrupt_labels <= interrupt_labels:
         raise VerificationError(
@@ -1476,6 +1477,7 @@ def verify_system_circuit() -> None:
         "mask_cleared_by_disable_or_accept", "mask_state_hold",
         "mask_clock_and_reset", "mask_state_output",
         "return_address_captured_on_accept",
+        "return_address_cleared_on_valid_return",
         "return_address_valid_set_on_accept", "return_state_clock_and_reset",
         "return_address_valid_cleared_on_valid_return",
         "return_address_valid_held_without_valid_return",
