@@ -4211,3 +4211,53 @@ Gemäß Stop-Regel wurde keine Reparatur vorgenommen und kein weiterer
 Systemfall ausgeführt. Das nächste Diagnosepaket verfolgt nur diesen
 Gültigkeitspfad vom öffentlichen Kernpin zu `Datapath.ACC_VALID_OUT` und
 dessen Ladepfad während `LOAD_ADDRESS(20)`.
+
+#### Gültigkeitspfad des ungültigen Speicherladens
+
+- **Ausgangsstand:** `7ad907b`
+- **Datum:** 30. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Der unveränderte fokussierte Systemlauf wurde zunächst erneut ausgeführt.
+`output-valid-write` besteht, `output-invalid-write` stoppt weiterhin bei
+Vektor 8 mit `OUTPUT_PORT_VALUE=0x0014` statt `0x0017`. Laufzeit: 5,7
+Sekunden; Fixture, Diagnoseindex und unveränderte Simulatorausgabe liegen
+unter `/tmp/ap18-valid-trace/system/output-invalid-write`.
+
+Für die angekündigte Rückverfolgung wurde ausschließlich die dort erzeugte
+Kernkopie unter `/tmp/ap18-validity-probe` passiv instrumentiert. Der direkte
+Kernlauf legt am additiven Speichereingang `VALUE=0x0014`, `VALID=0` und
+`USE_EXTERNAL_MEMORY=1` an. Zusätzliche Ausgänge beobachten
+`Datapath.ACC_VALID_OUT`, `Datapath.VALID_IN`, die drei Stufen der
+Ladegültigkeitsauswahl, deren ausgewählten Speichereingang sowie `LOAD_ADR`,
+`ACC_MEMORY_REQUEST` und `ACC_LOAD`. Die eingecheckte Schaltung und
+insbesondere `FetchDecodeControls` wurden nicht verändert. Der gepinnte
+Vektorlauf benötigte 2,7 Sekunden.
+
+Vor der steigenden `LOAD_ADDRESS(20)`-Flanke in Vektor 4 und der folgenden
+Low-Phase in Vektor 5 gilt:
+
+| Signal | Wert |
+|---|---:|
+| ausgewählte Speichergültigkeit | `0` |
+| `LOAD_ADR` | `1` |
+| `ACC_LOAD` | `1` |
+| `ACC_MEMORY_REQUEST` | `0` |
+| Ausgang der Speichergültigkeitsauswahl | `1` |
+| `Datapath.VALID_IN` | `1` |
+
+Nach der Flanke führt `Datapath.ACC_VALID_OUT` folgerichtig `1`; der bereits
+topologisch und elektrisch bestätigte Exportpfad gibt dasselbe Bit als
+`EXTERNAL_WRITE_VALID` weiter. Die nachgelagerten NOT- und INPUT-Auswahlen
+reichen den falschen Wert lediglich unverändert durch. Damit sind Export,
+Gültigkeitsregister, Speicher-Validitätsquelle und die drei Multiplexer nicht
+der erste Unterschied. Er liegt am benannten Selektorsignal
+`FetchDecodeControls.ACC_MEMORY_REQUEST`: Es bleibt während des aktiven
+`LOAD_ADR` fälschlich `0`, sodass die erste Auswahl ihre für unmittelbare
+Werte bestimmte konstante Gültigkeit `1` statt der Speichergültigkeit `0`
+übernimmt.
+
+Gemäß Stop-Regel wurde noch keine Reparatur vorgenommen. Das nächste Paket
+prüft ausschließlich die vorhandene Bildung von `ACC_MEMORY_REQUEST` für
+`LOAD_ADR` und darf erst nach einem portbezogenen Nachweis die kleinste
+Verbindungsänderung außerhalb der geschützten Darstellung vornehmen.
