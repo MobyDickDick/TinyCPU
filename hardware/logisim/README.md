@@ -1562,3 +1562,20 @@ Bit), nicht automatisch Verdrahtungsfehler. Ein tatsächlicher Fehler ist als
 `E`, ein undefinierter Wert als `U` sichtbar. Deshalb darf eine optische
 Farbbeurteilung künftig weder als Fehlerdiagnose noch als Reparaturnachweis
 dienen.
+## Operator-Panel (AP 21)
+
+`TinyCPU_Operator.circ` ist eine additive Bedienansicht und importiert den
+geprüften Kern aus `TinyCPU.circ`; die Hauptschaltung wird dafür nicht
+umgezeichnet. Öffnen Sie das Projekt mit Logisim-evolution 4.1.0. Setzen Sie
+`RESET` auf `1`, schalten Sie `STEP` einmal von `0` auf `1` und zurück und
+geben Sie danach `RESET` frei. Jeder weitere vollständige `STEP`-Wechsel führt
+genau eine steigende CPU-Flanke aus. Alternativ aktiviert `RUN` den langsamen
+Takt; `STEP` soll dabei auf `0` bleiben.
+
+`PRINT_VALUE` ist nur zusammen mit `PRINT_ENABLE=1` gültig. `HALTED` zeigt den
+Normalhalt, `HALTED_WITH_ERROR` den regulären Fehlerhalt, und die sechs
+`ERROR_*`-Anzeigen benennen die jeweilige Ursache. `U` bedeutet unbekannt und
+`E` einen elektrischen Konflikt; beide Werte sind Fehler der Bedienung oder
+Verdrahtung und kein erfolgreicher Fehlerhalt. Die automatische Taktabnahme
+läuft mit `scripts/test-logisim-operator.py` und als Teil des vollständigen
+`scripts/test-logisim.sh`.
