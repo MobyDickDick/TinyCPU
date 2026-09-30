@@ -4549,3 +4549,25 @@ fünf Fälle bestehen; der Lauf öffnet danach gemäß Stop-Regel die restliche
 Matrix. Auch `illegal-return` und `invalid-vector` bestehen. Damit sind alle
 sieben elektrischen AP-18-Systemfixtures erstmals gemeinsam grün und die
 elektrische Systemintegration ist abgeschlossen.
+
+#### Pending-Flanke statt neutraler Nullkonstante
+
+- **Ausgangsstand:** `c3fc33e`
+- **Datum:** 30. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Die beanstandete Nullkonstante am ersten Eingang von
+`PENDING_SET_OR_HOLD` war keine notwendige ODER-Beschaltung. Sie neutralisierte
+den Eingang vollständig. Damit konnte der Haltezweig zwar einen vorhandenen
+Pending-Zustand bewahren, eine neue Flanke bei deaktivierter Interruptmaske
+aber nicht in das Pending-Register schreiben.
+
+Die kleinste funktionale Korrektur entfernt die Konstante und führt
+`RISING_EDGE_DETECT` über `PENDING_EDGE_WHEN_DISABLED` an den frei gewordenen
+ODER-Eingang. Das neue UND sperrt den Flankenpfad bei aktiver Maske; eine dann
+an der Instruktionsgrenze unmittelbar angenommene Flanke wird folglich nicht
+noch einmal gespeichert. Bei deaktivierter Maske wird sie dagegen bis zum
+späteren Entmaskieren gehalten. Ein Strukturtest prüft beide Eingangspfade,
+und der aktualisierte Komponentenfingerprint schützt die vollständige
+Verdrahtung. Die sieben elektrischen AP-18-Systemfixtures bestehen danach
+erneut gemeinsam.

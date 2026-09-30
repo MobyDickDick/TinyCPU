@@ -221,3 +221,10 @@ Aktivierungsimpuls die vertragliche Deaktivierung nicht mehr überstimmen. Nach
 der Wiederholung der vier zuvor bestandenen Fälle und `reset-states` besteht
 erstmals auch die vollständige elektrische Systemmatrix mit allen sieben
 Fixtures. Die elektrische AP-18-Systemintegration ist damit abgeschlossen.
+
+Die anschließende Sichtprüfung hat außerdem die wirkungslose Beschaltung von
+`PENDING_SET_OR_HOLD` mit einer Nullkonstante korrigiert. Eine erkannte Flanke
+wird jetzt bei deaktivierter Maske über `PENDING_EDGE_WHEN_DISABLED` in den
+Pending-Zustand übernommen, während eine unmittelbar angenommene Flanke nicht
+erneut gespeichert wird. Strukturtest, Verdrahtungsfingerprint und die
+vollständige elektrische Systemmatrix sichern die Korrektur ab.

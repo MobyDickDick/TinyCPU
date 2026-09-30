@@ -1234,3 +1234,21 @@ Unterschied erscheint in Vektor 16 am Maskenzustand der zweiten
 Interruptannahme. Dieser Befund bleibt gemäß Stop-Regel dem nächsten,
 ausschließlich auf `MASK_NEXT` begrenzten Diagnosepaket vorbehalten.
 
+
+## Pending-Übernahme einer maskierten Flanke
+
+Die nachträgliche Sichtprüfung des Interruptcontrollers hat einen echten
+Verdrahtungsfehler aufgedeckt: Ein Eingang von `PENDING_SET_OR_HOLD` war mit
+`0` verbunden. Das ODER-Gatter war dadurch für diesen Zweig wirkungslos, und
+eine bei deaktivierter Interruptmaske eintreffende Flanke konnte nicht neu in
+den Pending-Zustand übernommen werden. Die bisherige Matrix traf diesen
+isolierten Übergang nicht direkt, weil ihr Maskierungsfall bereits einen
+gespeicherten Zustand weiterführte.
+
+Der Konstantenzweig ist entfernt. `RISING_EDGE_DETECT` führt nun über das
+benannte Gatter `PENDING_EDGE_WHEN_DISABLED` zum ersten ODER-Eingang; dessen
+zweiter Eingang bleibt der vorhandene Haltepfad. Die Maskeninvertierung sorgt
+dafür, dass eine im selben Takt angenommene Flanke nicht nach der Annahme erneut
+gespeichert wird. Der Komponentenvertrag, der Verdrahtungsfingerprint und ein
+gezielter Strukturtest schützen Flanken-, Masken- und Pending-Pfad. Danach
+bestehen erneut alle sieben elektrischen Systemfixtures.
