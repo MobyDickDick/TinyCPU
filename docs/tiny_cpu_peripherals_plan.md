@@ -1189,3 +1189,33 @@ nun bis einschließlich Vektor 8; der erste verbleibende Unterschied liegt in
 Vektor 9 am asynchronen Löschen bei aktivem Reset und niedrigem Takt. Gemäß
 Stop-Regel ist das nächste Paket ausschließlich auf die Reset-Trigger der
 Controllerzustände begrenzt.
+
+## Reset-Trigger der Controllerzustände
+
+Vor der angekündigten Messung mussten drei beim letzten manuellen Speichern
+verlorene Attribute und ein unterbrochener Rückführungsweg am beibehaltenen
+Layout wiederhergestellt werden. Insbesondere ist der unbenutzte Eingang von
+`PENDING_SET_OR_HOLD` nun ausdrücklich mit dem Wert `0` statt mit Logisims
+Standardwert `1` verbunden. Die beiden Rückkehradress-Multiplexer tragen
+wieder ihre vertraglichen Bezeichnungen, und die verzögerte Löschkonstante
+führt wieder `1`. Ein Regressionstest prüft den Nullwert jetzt zusätzlich zum
+vorhandenen Leitungsnachweis. Danach bestehen die vier vor `reset-states`
+liegenden elektrischen Fälle wieder.
+
+Der fokussierte Lauf reproduziert den verbleibenden ersten Unterschied an
+Vektor 9: `RESET=1` liegt bereits bei `CLK=0` an. Trotzdem löschen
+`IN_INTERRUPT_HANDLER`, `RET_ADDR` und `RET_ADDR_VALID` sofort auf null,
+obwohl der Referenzzustand bis zur nächsten steigenden Flanke noch den
+angenommenen Interrupt (`1`, `0x001`, `1`) hält. Die sichtbare Reset-Schiene
+führt den externen Pegel unmittelbar an die Reset-Kontakte der
+Controllerregister; es gibt zwischen Pin und Register keinen Takt- oder
+Next-State-Selektor. Damit ist der erste abweichende benannte Übergang als
+asynchroner Register-Reset nachgewiesen und nicht mehr nur aus den öffentlichen
+Zustandsausgängen abgeleitet.
+
+Gemäß Stop-Regel wurde der Resetpfad in diesem Diagnosepaket noch nicht
+funktional geändert und die Matrix nicht über `reset-states` hinaus geöffnet.
+Das nächste Paket ersetzt ausschließlich die unmittelbaren Reset-Trigger der
+gehaltenen Interruptzustände durch eine taktsynchrone Next-State-Löschung;
+danach werden zuerst `reset-states` und anschließend die vier zuvor grünen
+Fälle wiederholt.

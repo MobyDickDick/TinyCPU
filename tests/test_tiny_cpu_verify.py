@@ -1381,7 +1381,7 @@ class CircuitVerificationTests(unittest.TestCase):
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
         circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(720,250)" to="(1000,250)"/>', "", 1),
+            '<wire from="(670,250)" to="(1000,250)"/>', "", 1),
             encoding="utf-8",
         )
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
@@ -1406,7 +1406,10 @@ class CircuitVerificationTests(unittest.TestCase):
         interrupt = root.find("circuit[@name='InterruptController']")
         self.assertIsNotNone(interrupt)
         constants = {
-            component.get("loc")
+            component.get("loc"): {
+                item.get("name"): item.get("val")
+                for item in component.findall("a")
+            }
             for component in interrupt.findall("comp[@name='Constant']")
         }
         wires = {
@@ -1414,6 +1417,7 @@ class CircuitVerificationTests(unittest.TestCase):
             for wire in interrupt.findall("wire")
         }
         self.assertIn("(700,380)", constants)
+        self.assertEqual(constants["(700,380)"].get("value"), "0x0")
         self.assertIn(("(700,380)", "(740,380)"), wires)
         self.assertNotIn(("(650,380)", "(740,380)"), wires)
         self.assertNotIn(("(650,380)", "(650,400)"), wires)
@@ -1521,7 +1525,7 @@ class CircuitVerificationTests(unittest.TestCase):
         }
         self.assertTrue({
             ("(560,300)", "(560,410)"),
-            ("(580,530)", "(580,740)"),
+            ("(600,530)", "(600,740)"),
             ("(820,860)", "(820,980)"),
             ("(840,730)", "(840,880)"),
             ("(860,900)", "(860,1030)"),

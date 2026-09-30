@@ -619,6 +619,7 @@ keinen impliziten Auftrag zur Änderung der geprüften Übersichtsseite.
 Der Übergang ist inzwischen repariert: Aktuelle Flanke und gespeicherte
 Anforderung speisen gemeinsam die Annahme, ohne eine angenommene Flanke erneut
 als Pending-Zustand abzulegen. Die vier vorherigen Systemfälle bestehen;
-`reset-states` erreicht nun Vektor 9. Der nächste begrenzte Schritt untersucht
-ausschließlich das dort zu frühe Löschen der Controllerzustände bei aktivem
-Reset und niedrigem Takt.
+`reset-states` erreicht nun Vektor 9. Das dort zu frühe Löschen ist inzwischen
+auf die unmittelbar angesteuerten asynchronen Reset-Kontakte der
+Controllerregister zurückgeführt. Der nächste begrenzte Schritt ersetzt nur
+diese Trigger durch eine taktsynchrone Next-State-Löschung.
