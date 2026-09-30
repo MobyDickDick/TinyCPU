@@ -718,9 +718,7 @@
       <a name="width" val="12"/>
     </comp>
     <comp lib="0" loc="(800,240)" name="Constant"/>
-    <comp lib="0" loc="(820,1100)" name="Constant">
-      <a name="value" val="0x1"/>
-    </comp>
+    <comp lib="0" loc="(820,1100)" name="Constant"/>
     <comp lib="1" loc="(1050,1070)" name="OR Gate">
       <a name="label" val="RETURN_ADDRESS_CLEAR"/>
       <a name="labelfont" val="SansSerif plain 9"/>
@@ -807,13 +805,9 @@
       <a name="width" val="12"/>
     </comp>
     <comp lib="2" loc="(670,680)" name="Multiplexer">
-      <a name="label" val="RETURN_ADDRESS_CAPTURE"/>
-      <a name="labelfont" val="SansSerif plain 9"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="2" loc="(800,690)" name="Multiplexer">
-      <a name="label" val="RETURN_ADDRESS_NEXT"/>
-      <a name="labelfont" val="SansSerif plain 9"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="5" loc="(1050,660)" name="Register">
@@ -882,9 +876,6 @@
     <wire from="(1040,490)" to="(1040,550)"/>
     <wire from="(1040,550)" to="(1380,550)"/>
     <wire from="(1050,1070)" to="(1080,1070)"/>
-    <wire from="(610,270)" to="(1080,270)"/>
-    <wire from="(610,270)" to="(610,390)"/>
-    <wire from="(610,390)" to="(640,390)"/>
     <wire from="(1080,270)" to="(1140,270)"/>
     <wire from="(1080,750)" to="(1080,1070)"/>
     <wire from="(1110,320)" to="(1110,330)"/>
@@ -892,6 +883,7 @@
     <wire from="(1110,690)" to="(1120,690)"/>
     <wire from="(1120,650)" to="(1120,690)"/>
     <wire from="(1120,690)" to="(1270,690)"/>
+    <wire from="(1140,150)" to="(1140,270)"/>
     <wire from="(1140,270)" to="(1140,320)"/>
     <wire from="(1140,320)" to="(1170,320)"/>
     <wire from="(1140,360)" to="(1140,920)"/>
@@ -943,6 +935,9 @@
     <wire from="(560,820)" to="(560,940)"/>
     <wire from="(560,820)" to="(700,820)"/>
     <wire from="(560,940)" to="(710,940)"/>
+    <wire from="(580,150)" to="(1140,150)"/>
+    <wire from="(580,150)" to="(580,390)"/>
+    <wire from="(580,390)" to="(640,390)"/>
     <wire from="(600,1080)" to="(880,1080)"/>
     <wire from="(600,170)" to="(600,240)"/>
     <wire from="(600,170)" to="(980,170)"/>
