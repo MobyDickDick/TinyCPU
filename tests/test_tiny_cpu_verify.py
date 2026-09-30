@@ -1398,6 +1398,26 @@ class CircuitVerificationTests(unittest.TestCase):
             ):
                 VERIFY.verify_system_circuit()
 
+    def test_ap18_pending_next_state_has_no_redundant_or_input(self) -> None:
+        """The unused input of the retained pending OR stage is tied low."""
+        root = ET.parse(
+            MODULE_PATH.parents[1] / "hardware" / "logisim" / "TinyCPU_Peripherals.circ"
+        ).getroot()
+        interrupt = root.find("circuit[@name='InterruptController']")
+        self.assertIsNotNone(interrupt)
+        constants = {
+            component.get("loc")
+            for component in interrupt.findall("comp[@name='Constant']")
+        }
+        wires = {
+            (wire.get("from"), wire.get("to"))
+            for wire in interrupt.findall("wire")
+        }
+        self.assertIn("(700,380)", constants)
+        self.assertIn(("(700,380)", "(740,380)"), wires)
+        self.assertNotIn(("(650,380)", "(740,380)"), wires)
+        self.assertNotIn(("(650,380)", "(650,400)"), wires)
+
     def test_ap18_interrupt_controller_requires_return_capture_wiring(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
