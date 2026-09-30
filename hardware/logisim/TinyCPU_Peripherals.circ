@@ -711,8 +711,11 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="CLK"/>
     </comp>
-    <comp lib="0" loc="(700,400)" name="Constant">
-      <a name="value" val="0x0"/>
+    <comp lib="1" loc="(700,400)" name="AND Gate">
+      <a name="label" val="PENDING_EDGE_WHEN_DISABLED"/>
+      <a name="labelfont" val="SansSerif plain 9"/>
+      <a name="negate1" val="true"/>
+      <a name="size" val="30"/>
     </comp>
     <comp lib="0" loc="(750,720)" name="Constant">
       <a name="width" val="12"/>
@@ -967,6 +970,9 @@
     <wire from="(600,880)" to="(630,880)"/>
     <wire from="(620,510)" to="(1040,510)"/>
     <wire from="(620,510)" to="(620,570)"/>
+    <wire from="(620,510)" to="(650,510)"/>
+    <wire from="(650,410)" to="(650,510)"/>
+    <wire from="(650,410)" to="(670,410)"/>
     <wire from="(620,570)" to="(640,570)"/>
     <wire from="(620,670)" to="(1120,670)"/>
     <wire from="(620,670)" to="(620,690)"/>
@@ -979,6 +985,8 @@
     <wire from="(620,980)" to="(640,980)"/>
     <wire from="(650,720)" to="(650,740)"/>
     <wire from="(670,280)" to="(1040,280)"/>
+    <wire from="(690,280)" to="(690,390)"/>
+    <wire from="(670,390)" to="(690,390)"/>
     <wire from="(670,420)" to="(740,420)"/>
     <wire from="(670,580)" to="(740,580)"/>
     <wire from="(670,700)" to="(770,700)"/>

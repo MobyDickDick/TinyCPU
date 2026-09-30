@@ -1436,29 +1436,24 @@ class CircuitVerificationTests(unittest.TestCase):
             ):
                 VERIFY.verify_system_circuit()
 
-    def test_ap18_pending_next_state_has_no_redundant_or_input(self) -> None:
-        """The unused input of the retained pending OR stage is tied low."""
+    def test_ap18_pending_next_state_includes_current_request_edge(self) -> None:
+        """A masked request edge must be stored instead of being tied low."""
         root = ET.parse(
             MODULE_PATH.parents[1] / "hardware" / "logisim" / "TinyCPU_Peripherals.circ"
         ).getroot()
         interrupt = root.find("circuit[@name='InterruptController']")
         self.assertIsNotNone(interrupt)
-        constants = {
-            component.get("loc"): {
-                item.get("name"): item.get("val")
-                for item in component.findall("a")
-            }
-            for component in interrupt.findall("comp[@name='Constant']")
-        }
         wires = {
             (wire.get("from"), wire.get("to"))
             for wire in interrupt.findall("wire")
         }
-        self.assertIn("(700,400)", constants)
-        self.assertEqual(constants["(700,400)"].get("value"), "0x0")
+        self.assertIn(("(670,280)", "(1040,280)"), wires)
+        self.assertIn(("(690,280)", "(690,390)"), wires)
+        self.assertIn(("(670,390)", "(690,390)"), wires)
+        self.assertIn(("(620,510)", "(650,510)"), wires)
+        self.assertIn(("(650,410)", "(670,410)"), wires)
         self.assertIn(("(700,400)", "(740,400)"), wires)
-        self.assertNotIn(("(650,400)", "(740,400)"), wires)
-        self.assertNotIn(("(650,400)", "(650,420)"), wires)
+        self.assertIn(("(770,410)", "(880,410)"), wires)
 
     def test_ap18_interrupt_controller_requires_return_capture_wiring(self) -> None:
         root = MODULE_PATH.parents[1]
