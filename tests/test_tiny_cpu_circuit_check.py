@@ -357,6 +357,38 @@ class CircuitCheckTests(unittest.TestCase):
             "COMPACT input at (170, 110) has an undriven wire ending at (700, 180)"
         ])
 
+    def test_even_input_gate_uses_grid_aligned_terminals(self):
+        circuit = ET.fromstring("""
+          <circuit name="Connected">
+            <comp lib="1" loc="(200,120)" name="AND Gate">
+              <a name="inputs" val="4"/><a name="label" val="COMPACT"/>
+              <a name="size" val="30"/>
+            </comp>
+            <comp lib="0" loc="(100,100)" name="Constant"/>
+            <wire from="(100,100)" to="(170,100)"/>
+            <comp lib="0" loc="(100,110)" name="Constant"/>
+            <wire from="(100,110)" to="(170,110)"/>
+            <comp lib="0" loc="(100,130)" name="Constant"/>
+            <wire from="(100,130)" to="(170,130)"/>
+            <comp lib="0" loc="(100,140)" name="Constant"/>
+            <wire from="(100,140)" to="(170,140)"/>
+          </circuit>
+        """)
+        self.assertEqual(inspect_circuit(circuit), [])
+
+    def test_negated_gate_input_accounts_for_inverter_bubble(self):
+        circuit = ET.fromstring("""
+          <circuit name="Connected">
+            <comp lib="1" loc="(200,120)" name="AND Gate">
+              <a name="inputs" val="4"/><a name="label" val="COMPACT"/>
+              <a name="negate3" val="true"/><a name="size" val="30"/>
+            </comp>
+            <comp lib="0" loc="(100,140)" name="Constant"/>
+            <wire from="(100,140)" to="(160,140)"/>
+          </circuit>
+        """)
+        self.assertEqual(inspect_circuit(circuit), [])
+
     def test_detects_wire_stopping_before_multiplexer_contacts(self):
         circuit = ET.fromstring("""
           <circuit name="Broken">

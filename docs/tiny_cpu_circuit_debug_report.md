@@ -4356,3 +4356,22 @@ fokussierte Fall `masked-request-unmask-return` besteht danach ebenso wie
 `disable-interrupts`. Die weiter geöffnete Matrix stoppt erstmals in
 `reset-states` an Vektor 6; dieser neue Befund ist die Grenze des nächsten
 Diagnosepakets.
+
+#### Reset-Zeitfolge des Interruptcontrollers
+
+Der neu gezeichnete Stand wurde ausschließlich topologisch geprüft und nicht
+auf alte Bauteilpositionen zurückgesetzt. Die beim Speichern entfallenen
+semantischen Attribute wurden am vorhandenen Layout ergänzt; anschließend
+bestehen Offline-Vertrag, Kontaktprüfung und die vier vor `reset-states`
+liegenden Systemfälle.
+
+Der elektrische Lauf unter `/tmp/ap18-reset-diagnosis/system/reset-states`
+reproduziert Vektor 6 als ersten Unterschied. Die Anforderung setzt zunächst
+nur `INTERRUPT_PENDING`; die Annahme wirkt erst an der nächsten steigenden
+Flanke. Dadurch wechseln Maske, Pending, Handler und Validität einen Takt zu
+spät, und das Rückkehradressregister übernimmt den dann aktuellen statt des
+erwarteten vorherigen `NEXT_PC`. Beim erneut aktivierten Reset löschen die
+Ein-Bit-Register bereits während `CLK=0`, das Adressregister dagegen erst an
+der folgenden steigenden Flanke. Es wurde keine funktionale Schaltung geändert.
+Der nächste begrenzte Lauf instrumentiert ausschließlich `REQUEST_LEVEL`,
+`RISING_EDGE_DETECT` und `INTERRUPT_ACCEPT` in den Vektoren 5 bis 8.

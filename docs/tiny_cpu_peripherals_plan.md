@@ -1120,3 +1120,29 @@ Rückführung mit einem Leitungs-Mutationstest. Elektrisch bestehen danach
 `masked-request-unmask-return` und `disable-interrupts`. Der erstmals geöffnete
 Fall `reset-states` stoppt an Vektor 6. Als nächstes wird ausschließlich seine
 Reset-Sequenz an den benannten Controllerzuständen verfolgt.
+
+## Reset-Sequenz der Interruptzustände
+
+Der fokussierte Lauf bestätigt zunächst die vom Autor neu angeordnete
+Topologie: Nach Ergänzung der beim Speichern verlorenen Konstantenwerte und
+Bauteilbezeichnungen bestehen Offline-Vertrag, Kontaktprüfung und die vier
+bereits geöffneten elektrischen Systemfälle. Die Schaltung wurde dabei nicht
+auf frühere Positionen zurückgesetzt; der Fingerprint und die gezielten
+Mutationstests folgen dem neu gezeichneten Stand.
+
+`reset-states` reproduziert den ersten Unterschied weiterhin an Vektor 6. Beim
+ersten Takt mit anliegender Interruptanforderung hält die Schaltung noch
+`INTERRUPT_ENABLED=1` und `INTERRUPT_PENDING=1`; Handler-, Rückkehradress- und
+Validitätszustand bleiben noch gelöscht. Erst am folgenden steigenden Takt
+werden Handler und Validität gesetzt und Maske sowie Pending gelöscht. Die
+Rückkehradresse wird dadurch einen Takt zu spät aus dem dann anliegenden
+`NEXT_PC` übernommen. Derselbe Ablauf wiederholt sich nach dem ersten Reset.
+
+Zusätzlich löschen die drei Ein-Bit-Zustände bei erneut aktivem `RESET` bereits
+in der niedrigen Taktphase (Vektoren 9 und 19), während der 12-Bit-Adresszustand
+erst mit der folgenden steigenden Flanke gelöscht wird. Damit ist der erste
+Unterschied auf die zeitliche Abstimmung von Flankenerkennung,
+`INTERRUPT_ACCEPT` und den uneinheitlichen Resetzeitpunkt der Controllerregister
+eingegrenzt. Gemäß Stop-Regel wurde keine funktionale Reparatur vorgenommen.
+Als nächstes werden ausschließlich `REQUEST_LEVEL`, `RISING_EDGE_DETECT` und
+`INTERRUPT_ACCEPT` um Vektoren 5 bis 8 passiv instrumentiert.
