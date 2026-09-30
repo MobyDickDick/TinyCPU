@@ -273,7 +273,7 @@
       ],
       "disable_on_accept": true,
       "restore_mask_on_return": true,
-      "wiring_sha256": "16f3957e257086bfb9930d10ffae049f188bef2b542e77527c2bbd394f700a51",
+      "wiring_sha256": "3c80d71c39256a4b162a35aef6644961d6e42d033391fe4a5a67c204f8adc14d",
       "verified_paths": [
         "request_to_level_register",
         "request_level_clock_and_reset",
@@ -304,7 +304,8 @@
         "valid_return_selects_target",
         "selected_target_output",
         "return_state_clock_and_reset",
-        "return_state_outputs"
+        "return_state_outputs",
+        "synchronous_reset_trigger"
       ]
     }
   },

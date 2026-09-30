@@ -1433,6 +1433,7 @@ def verify_system_circuit() -> None:
         "RETURN_VALID_HOLD", "RETURN_VALID_NEXT", "HANDLER_HOLD",
         "HANDLER_NEXT", "RETURN_ADDRESS_CAPTURE", "RETURN_ADDRESS_NEXT",
         "RETURN_ADDRESS_CLEAR", "RETURN_ADDRESS_CLEAR_PENDING",
+        "SYNCHRONOUS_RESET_TRIGGER",
     }
     if not required_interrupt_labels <= interrupt_labels:
         raise VerificationError(
@@ -1462,6 +1463,19 @@ def verify_system_circuit() -> None:
     interrupt_wires = {
         (wire.get("from"), wire.get("to")) for wire in interrupt.findall("wire")
     }
+    required_synchronous_reset_wires = {
+        ("(530,100)", "(730,100)"),
+        ("(530,120)", "(730,120)"),
+        ("(730,120)", "(840,120)"),
+        ("(760,110)", "(860,110)"),
+        ("(860,110)", "(860,280)"),
+    }
+    if (not required_synchronous_reset_wires <= interrupt_wires
+            or ("(530,100)", "(860,100)") in interrupt_wires):
+        raise VerificationError(
+            f"{display_path(system.circuit_path)}: InterruptController reset trigger "
+            "differs from contract"
+        )
     # The controller is a deliberately hand-routed state machine.  Its
     # versioned canonical wire list lets a visual redraw be reviewed once and
     # then protects every branch, including long feedback paths which cannot
@@ -1489,6 +1503,7 @@ def verify_system_circuit() -> None:
         "return_address_selected_on_valid_return",
         "valid_return_selects_target", "selected_target_output",
         "return_state_outputs",
+        "synchronous_reset_trigger",
     }
     if (wire_fingerprint != interrupt_contract.get("wiring_sha256")
             or set(interrupt_contract.get("verified_paths", []))
