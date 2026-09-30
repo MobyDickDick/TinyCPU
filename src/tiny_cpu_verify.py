@@ -1434,6 +1434,7 @@ def verify_system_circuit() -> None:
         "HANDLER_NEXT", "RETURN_ADDRESS_CAPTURE", "RETURN_ADDRESS_NEXT",
         "RETURN_ADDRESS_CLEAR", "RETURN_ADDRESS_CLEAR_PENDING",
         "SYNCHRONOUS_RESET_TRIGGER", "MASK_ACCEPT_PRIORITY",
+        "PENDING_EDGE_WHEN_DISABLED",
     }
     if not required_interrupt_labels <= interrupt_labels:
         raise VerificationError(
@@ -1487,6 +1488,7 @@ def verify_system_circuit() -> None:
         "request_to_level_register", "request_level_clock_and_reset",
         "previous_level_inversion", "rising_edge_detection",
         "pending_set_or_hold", "pending_clock_and_reset", "pending_state_output",
+        "pending_edge_stored_while_disabled",
         "accept_source_combines_edge_and_pending",
         "accept_requires_request_enabled_boundary_and_idle", "accept_state_output",
         "pending_cleared_on_accept", "mask_set_by_enable_or_return",
