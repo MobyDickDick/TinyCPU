@@ -4486,3 +4486,35 @@ Es wurde noch keine funktionale Reset-Reparatur vorgenommen. Das nächste
 begrenzte Paket ändert ausschließlich diese Reset-Trigger in eine synchrone
 Next-State-Löschung und wiederholt danach zuerst `reset-states` sowie die vier
 vorher bestandenen Systemfälle.
+
+#### Taktsynchroner Reset-Trigger des Interruptcontrollers
+
+- **Ausgangsstand:** `11a9267`
+- **Datum:** 30. September 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Die vom Schaltungsautor angepassten Leitungsverläufe wurden beibehalten. Vor
+der funktionalen Änderung wurden lediglich die beim regulären Speichern
+entfallenen Werte der beiden Konstanten und die Bezeichnungen der beiden
+Rückkehradress-Multiplexer wieder ergänzt. Derselbe semantische Verlust der
+Konstante für die CPU-Ladegültigkeit wurde auch in `TinyCPU.circ` ergänzt; es
+wurde keine dieser Leitungen auf einen früheren Verlauf zurückgesetzt.
+
+Der Reset-Eingang der Controllerregister wird nun durch das benannte UND
+`SYNCHRONOUS_RESET_TRIGGER` mit `CLK` qualifiziert. Der bestehende gemeinsame
+Resetbaum ab seinem ersten Registerabzweig bleibt dabei unverändert. Ein
+gezielter Mutationstest trennt den Takteingang dieses Gatters und verlangt den
+benannten Vertragsfehler; der kanonische Verdrahtungsfingerprint schützt die
+ergänzten fünf Segmente.
+
+Die Offline-Suite besteht. Im elektrischen Lauf unter
+`/tmp/ap18-sync-reset2/system` bestehen erneut `output-valid-write`,
+`output-invalid-write`, `masked-request-unmask-return` und
+`disable-interrupts`. `reset-states` stimmt nun erstmals über beide
+Resetflanken hinweg: Die Zustände bleiben bei `RESET=1` und `CLK=0` in den
+Vektoren 9 und 19 erhalten und werden jeweils an der folgenden steigenden
+Flanke gelöscht. Der erste verbleibende Unterschied liegt erst in Vektor 16:
+Bei der zweiten Interruptannahme bleibt `INTERRUPT_ENABLED=1` statt auf `0` zu
+wechseln. Gemäß Stop-Regel wurde dieser neue Maskenbefund nicht in demselben
+Paket repariert. Das nächste Diagnosepaket verfolgt ausschließlich den
+Masken-Next-State bei der zweiten Annahme in den Vektoren 15 bis 16.

@@ -1219,3 +1219,18 @@ Das nächste Paket ersetzt ausschließlich die unmittelbaren Reset-Trigger der
 gehaltenen Interruptzustände durch eine taktsynchrone Next-State-Löschung;
 danach werden zuerst `reset-states` und anschließend die vier zuvor grünen
 Fälle wiederholt.
+
+## Taktsynchroner Reset-Trigger
+
+Der gemeinsame Resetbaum des Interruptcontrollers wird nun ausschließlich
+über den benannten, mit `CLK` qualifizierten `SYNCHRONOUS_RESET_TRIGGER`
+angesteuert. Dadurch halten die Zustände während der niedrigen Resetphase und
+werden an der folgenden steigenden Flanke gemeinsam gelöscht. Die bestehende,
+vom Schaltungsautor angepasste Verdrahtung blieb ab dem ersten Registerabzweig
+unverändert; Vertrag, Fingerprint und Mutationstest sichern die neue
+Qualifizierung. Die vier zuvor bestandenen Fälle bleiben grün, und
+`reset-states` überschreitet beide früheren Resetabweichungen. Der erste neue
+Unterschied erscheint in Vektor 16 am Maskenzustand der zweiten
+Interruptannahme. Dieser Befund bleibt gemäß Stop-Regel dem nächsten,
+ausschließlich auf `MASK_NEXT` begrenzten Diagnosepaket vorbehalten.
+
