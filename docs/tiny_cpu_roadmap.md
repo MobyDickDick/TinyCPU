@@ -358,7 +358,11 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   Mutationstest geschützte Next-State-Löschung umgesetzt;
   `masked-request-unmask-return` und der folgende Deaktivierungsfall bestehen.
   Der nächste Matrixabbruch liegt nun in `reset-states` an Vektor 6 und wird
-  als eigenes Diagnosepaket auf die Controllerzustände eingegrenzt.
+  als eigenes Diagnosepaket auf die Controllerzustände eingegrenzt. Die
+  Zustandsfolge zeigt nun eine um eine steigende Flanke verspätete
+  Interruptannahme sowie ein asynchrones Löschen der Ein-Bit-Zustände gegenüber
+  dem erst an der Flanke gelöschten Adresszustand. Als nächstes werden nur
+  `REQUEST_LEVEL`, `RISING_EDGE_DETECT` und `INTERRUPT_ACCEPT` passiv gemessen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 

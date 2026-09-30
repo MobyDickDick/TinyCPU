@@ -715,7 +715,9 @@
       <a name="width" val="12"/>
     </comp>
     <comp lib="0" loc="(800,240)" name="Constant"/>
-    <comp lib="0" loc="(820,1100)" name="Constant"/>
+    <comp lib="0" loc="(820,1100)" name="Constant">
+      <a name="value" val="0x1"/>
+    </comp>
     <comp lib="1" loc="(1050,1070)" name="OR Gate">
       <a name="label" val="RETURN_ADDRESS_CLEAR"/>
       <a name="labelfont" val="SansSerif plain 9"/>
@@ -797,9 +799,13 @@
       <a name="width" val="12"/>
     </comp>
     <comp lib="2" loc="(650,680)" name="Multiplexer">
+      <a name="label" val="RETURN_ADDRESS_CAPTURE"/>
+      <a name="labelfont" val="SansSerif plain 9"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="2" loc="(800,690)" name="Multiplexer">
+      <a name="label" val="RETURN_ADDRESS_NEXT"/>
+      <a name="labelfont" val="SansSerif plain 9"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="5" loc="(1050,660)" name="Register">

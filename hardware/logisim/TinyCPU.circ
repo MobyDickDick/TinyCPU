@@ -164,7 +164,9 @@
     <comp lib="0" loc="(1820,470)" name="Constant">
       <a name="value" val="0x0"/>
     </comp>
-    <comp lib="0" loc="(1970,950)" name="Constant"/>
+    <comp lib="0" loc="(1970,950)" name="Constant">
+      <a name="value" val="0x1"/>
+    </comp>
     <comp lib="0" loc="(2010,400)" name="Pin">
       <a name="appearance" val="classic"/>
       <a name="label" val="ILL_RET"/>

@@ -195,8 +195,19 @@ def _gate_inputs(component: ET.Element) -> list[Point]:
     x, y = _point(component.get("loc", ""))
     size = int(attributes.get("size", "50"))
     spacing = 10 if size == 30 else 20
-    return [(x - size, y + spacing * index - spacing * (count - 1) // 2)
-            for index in range(count)]
+    if count % 2:
+        offsets = [spacing * (index - count // 2) for index in range(count)]
+    else:
+        # Logisim keeps an empty grid interval on the gate centre line for an
+        # even input count.  In particular, a compact four-input gate uses
+        # -20, -10, +10 and +20 rather than half-grid contacts.
+        offsets = [spacing * (index - count // 2 + (index >= count // 2))
+                   for index in range(count)]
+    return [
+        (x - size - (10 if attributes.get(f"negate{index}") == "true" else 0),
+         y + offset)
+        for index, offset in enumerate(offsets)
+    ]
 
 
 def _multiplexer_inputs(component: ET.Element) -> list[Point]:

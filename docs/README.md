@@ -196,4 +196,9 @@ Der fehlende Löschpfad der Interrupt-Rückkehradresse ist als taktsynchron
 verzögerter Next-State-Pfad ergänzt und gegen Leitungsänderungen geschützt.
 Die elektrischen Systemfälle bestehen nun bis einschließlich
 `disable-interrupts`. Der nächste dokumentierte Schritt untersucht
-`reset-states` ab seinem ersten Unterschied an Vektor 6.
+`reset-states` ab seinem ersten Unterschied an Vektor 6. Dieser Schritt ist
+inzwischen eingegrenzt: Die Annahme erfolgt einen steigenden Takt zu spät und
+übernimmt deshalb auch die Rückkehradresse verspätet; außerdem löschen die
+Ein-Bit-Zustände bei erneutem Reset bereits in der niedrigen Taktphase, der
+Adresszustand dagegen erst an der steigenden Flanke. Als nächstes werden nur
+Flankenerkennung und Annahmesignal um Vektoren 5 bis 8 passiv verfolgt.
