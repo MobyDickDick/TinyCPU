@@ -1,6 +1,11 @@
-# TinyCPU-Dokumentation
+# TinyCPU documentation
 
-Dieses Verzeichnis enthält ausschließlich Dokumentation zur TinyCPU:
+Start here:
+
+- [`tiny_cpu_quickstart.md`](tiny_cpu_quickstart.md): a beginner-friendly explanation and first run
+- [`tiny_cpu_development_directions.md`](tiny_cpu_development_directions.md): evaluated ideas, scope boundaries, and a recommended next step
+
+Reference and project records:
 
 - [`tiny_cpu.md`](tiny_cpu.md): Architektur, Befehlssatz und Simulator
 - [`tiny_cpu_alu_sketch.md`](tiny_cpu_alu_sketch.md): Entwurf der ALU
