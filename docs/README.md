@@ -20,6 +20,7 @@ Dieses Verzeichnis enthält ausschließlich Dokumentation zur TinyCPU:
 - [`tiny_cpu_compatibility.md`](tiny_cpu_compatibility.md): Kompatibilitätsregeln
 - [`tiny_cpu_1_0_release_plan.md`](tiny_cpu_1_0_release_plan.md): Releaseplan für TinyCPU 1.0
 - [`tiny_cpu_1_0_release_notes.md`](tiny_cpu_1_0_release_notes.md): Release Notes für TinyCPU 1.0
+- [`tiny_cpu_1_1_release_notes.md`](tiny_cpu_1_1_release_notes.md): Release Notes für TinyCPU 1.1
 
 Die Dokumentation der Logisim-Implementierung befindet sich ergänzend unter
 [`hardware/logisim/README.md`](../hardware/logisim/README.md).

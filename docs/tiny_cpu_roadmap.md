@@ -101,6 +101,12 @@ ausdrücklich auf eine interaktive Umgebung verschobene manuelle GUI-Kurztest;
 er ist kein eigenständiges Arbeitspaket und darf nicht durch einen
 nicht-interaktiven Lauf als erledigt ausgegeben werden.
 
+Der daraus entstandene additive Projektstand ist als **TinyCPU 1.1.0**
+versioniert. `VERSION`, der maschinenlesbare Releasevertrag und die
+[Release Notes](tiny_cpu_1_1_release_notes.md) benennen denselben Stand. Die
+Veröffentlichung des signierten Tags erfolgt erst auf dem zusammengeführten,
+vollständig abgenommenen Release-Commit.
+
 Sinnvolle neue Pakete waren zunächst Produktentscheidungen für
 eine spätere Version und keine Restarbeiten an 1.0. Bevor dafür
 Implementierungsarbeit beginnt, soll ein eigener Vorschlag genau eine der
