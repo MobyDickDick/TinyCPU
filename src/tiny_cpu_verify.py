@@ -185,18 +185,44 @@ def verify_operator_panel() -> None:
     gate_x, gate_y = point(clock_gate.get("loc", ""), source=source)
     run_x, run_y = point(run_gate.get("loc", ""), source=source)
     # A default two-input east-facing OR gate uses inputs 20 pixels above/below its
-    # location. Its output must be the sole net reaching the core clock.
+    # location. The inputs are commutative: a manual redraw may exchange STEP and
+    # RUN without changing the circuit. Its output must remain the sole net
+    # reaching the core clock.
     if not connected(clock_gate.get("loc", ""), ports["CLK"]):
         raise VerificationError(f"{display_path(source)}: arbitrated CPU clock is disconnected")
     if not connected(controls["RESET"].get("loc", ""), ports["RESET"]):
         raise VerificationError(f"{display_path(source)}: RESET is disconnected")
-    if not connected(controls["STEP"].get("loc", ""), f"({gate_x - 50},{gate_y + 20})"):
+    clock_inputs = {
+        f"({gate_x - 50},{gate_y - 20})",
+        f"({gate_x - 50},{gate_y + 20})",
+    }
+    step_inputs = {
+        terminal for terminal in clock_inputs
+        if connected(controls["STEP"].get("loc", ""), terminal)
+    }
+    run_inputs = {
+        terminal for terminal in clock_inputs
+        if connected(run_gate.get("loc", ""), terminal)
+    }
+    if len(step_inputs) != 1:
         raise VerificationError(f"{display_path(source)}: STEP does not reach clock arbitration")
-    if (not connected(clock.get("loc", ""), f"({run_x - 50},{run_y - 20})")
-            or not connected(controls["RUN"].get("loc", ""),
-                             f"({run_x - 50},{run_y + 20})")
-            or not connected(run_gate.get("loc", ""),
-                             f"({gate_x - 50},{gate_y - 20})")):
+    run_gate_inputs = {
+        f"({run_x - 50},{run_y - 20})",
+        f"({run_x - 50},{run_y + 20})",
+    }
+    run_control_inputs = {
+        terminal for terminal in run_gate_inputs
+        if connected(controls["RUN"].get("loc", ""), terminal)
+    }
+    run_clock_inputs = {
+        terminal for terminal in run_gate_inputs
+        if connected(clock.get("loc", ""), terminal)
+    }
+    if (len(run_control_inputs) != 1
+            or len(run_clock_inputs) != 1
+            or run_control_inputs == run_clock_inputs
+            or len(run_inputs) != 1
+            or step_inputs == run_inputs):
         raise VerificationError(f"{display_path(source)}: RUN does not reach clock arbitration")
 
     required_outputs = {
@@ -1565,11 +1591,10 @@ def verify_system_circuit() -> None:
         (wire.get("from"), wire.get("to")) for wire in interrupt.findall("wire")
     }
     required_synchronous_reset_wires = {
-        ("(530,50)", "(730,50)"),
-        ("(530,70)", "(710,70)"),
-        ("(710,70)", "(730,70)"),
-        ("(760,60)", "(860,60)"),
-        ("(860,60)", "(860,230)"),
+        ("(530,50)", "(880,50)"),
+        ("(530,70)", "(860,70)"),
+        ("(860,70)", "(880,70)"),
+        ("(910,60)", "(1010,60)"),
     }
     if (not required_synchronous_reset_wires <= interrupt_wires
             or ("(530,50)", "(860,50)") in interrupt_wires):

@@ -21,6 +21,19 @@ for profile in "${profiles[@]}"; do
   fi
 done
 
+system_args=(--profile tinycpu-16-12
+             --system tinycpu-peripherals-16-12-v1
+             --system-only
+             --trace-output "$OUTPUT/tinycpu-peripherals-16-12-v1/core-unused.tsv"
+             --matrix-output "$OUTPUT/tinycpu-peripherals-16-12-v1/system-matrix"
+             --jobs "${LOGISIM_JOBS:-1}")
+if [[ -n "${LOGISIM_JAR:-}" ]]; then
+  system_args+=(--jar "$LOGISIM_JAR")
+fi
+if ! PYTHONPATH=src python3 src/tiny_cpu_logisim.py "${system_args[@]}"; then
+  failed+=(tinycpu-peripherals-16-12-v1)
+fi
+
 if ! PYTHONPATH=src python3 scripts/test-logisim-operator.py; then
   failed+=(operator-panel)
 fi
@@ -30,4 +43,5 @@ if (( ${#failed[@]} )); then
   exit 1
 fi
 
-printf 'electrical profile acceptance passed: %s\n' "${profiles[*]}"
+printf 'electrical acceptance passed: %s, tinycpu-peripherals-16-12-v1, operator-panel\n' \
+  "${profiles[*]}"

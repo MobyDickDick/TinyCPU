@@ -1252,3 +1252,23 @@ dafür, dass eine im selben Takt angenommene Flanke nicht nach der Annahme erneu
 gespeichert wird. Der Komponentenvertrag, der Verdrahtungsfingerprint und ein
 gezielter Strukturtest schützen Flanken-, Masken- und Pending-Pfad. Danach
 bestehen erneut alle sieben elektrischen Systemfixtures.
+
+## Nachprüfung der neu gespeicherten Zeichnung
+
+Die auf Commit `3352c4e` neu gespeicherte Zeichnung vertauscht am Operator-
+Panel lediglich die Eingänge der kommutativen AND- und OR-Gatter. Der Prüfer
+folgt deshalb nun der Netzkonnektivität statt einer festen Eingangsreihenfolge.
+Im Interruptcontroller wurden die beim Speichern verlorenen Bezeichnungen der
+beiden Rückkehradress-Multiplexer ergänzt und der um zehn Rasterpunkte am Pin
+`IN_INTERRUPT_HANDLER` vorbeilaufende Ausgang minimal bis zum vorhandenen Pin
+geführt. Die übrige Anordnung blieb unverändert.
+
+Der elektrische Unterschied in `masked-request-unmask-return` war auf zwei beim
+Redraw verlorene Übergänge eingegrenzt. `PENDING_HOLD_UNTIL_ACCEPT` endete vor
+dem negierten Eingang von `PENDING_EDGE_WHEN_DISABLED`; der bestehende Ausgang
+des Interruptziel-Multiplexers verlief außerdem zehn Rasterpunkte am Pin
+`INTERRUPT_TARGET_PC` vorbei. Beide Übergänge sind mit kurzen rechtwinkligen
+Abzweigen im aktuellen Layout geschlossen. Die vollständige Systemmatrix
+besteht danach wieder mit allen sieben Fixtures. Strukturtests sichern sowohl
+den Pending-Zweig als auch den vollständigen Zielausgang bis zum vorhandenen
+Pin; Kern, Operator-Panel und die übrige Anordnung blieben unverändert.
