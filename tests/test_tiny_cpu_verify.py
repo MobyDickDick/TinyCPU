@@ -1448,6 +1448,8 @@ class CircuitVerificationTests(unittest.TestCase):
             for wire in interrupt.findall("wire")
         }
         self.assertIn(("(670,280)", "(740,280)"), wires)
+        self.assertIn(("(700,390)", "(700,420)"), wires)
+        self.assertIn(("(700,390)", "(780,390)"), wires)
         self.assertIn(("(740,280)", "(740,360)"), wires)
         self.assertIn(("(740,360)", "(780,360)"), wires)
         self.assertIn(("(810,370)", "(880,370)"), wires)
@@ -1544,6 +1546,20 @@ class CircuitVerificationTests(unittest.TestCase):
             with self.assertRaisesRegex(VERIFY.VerificationError,
                                         "InterruptController wiring"):
                 VERIFY.verify_system_circuit()
+
+    def test_ap18_interrupt_target_reaches_public_pin(self) -> None:
+        root = ET.parse(
+            MODULE_PATH.parents[1] / "hardware" / "logisim" / "TinyCPU_Peripherals.circ"
+        ).getroot()
+        interrupt = root.find("circuit[@name='InterruptController']")
+        self.assertIsNotNone(interrupt)
+        wires = {
+            (wire.get("from"), wire.get("to"))
+            for wire in interrupt.findall("wire")
+        }
+        self.assertIn(("(1510,780)", "(1530,780)"), wires)
+        self.assertIn(("(1530,770)", "(1530,780)"), wires)
+        self.assertIn(("(1530,770)", "(1550,770)"), wires)
 
     def test_ap18_interrupt_controller_routing_corridors_are_bounded(self) -> None:
         """Visual routing rails stop at their first and last electrical branch."""

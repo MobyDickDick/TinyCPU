@@ -1263,13 +1263,12 @@ beiden Rückkehradress-Multiplexer ergänzt und der um zehn Rasterpunkte am Pin
 `IN_INTERRUPT_HANDLER` vorbeilaufende Ausgang minimal bis zum vorhandenen Pin
 geführt. Die übrige Anordnung blieb unverändert.
 
-Offline bestehen danach Topologie, Kontakte und 179 Regressionstests. Die
-erstmals in das gemeinsame `scripts/test-logisim.sh` aufgenommene AP-18-Matrix
-öffnet jedoch einen funktionalen Unterschied: `output-valid-write` und
-`output-invalid-write` bestehen, `masked-request-unmask-return` stoppt dagegen
-an Vektor 6. `INTERRUPT_ENABLED`, `IN_INTERRUPT_HANDLER`, `RET_ADDR` und
-`RET_ADDR_VALID` werden dort elektrisch fehlerhaft (`E`). Deshalb ist AP 18
-weiter offen und der Stand darf noch nicht als Interrupt-Release getaggt
-werden. Das nächste enge Diagnosepaket verfolgt ausschließlich die vier
-Controllerzustände an der Rückkehrflanke; Kern, Operator-Panel und Layout
-bleiben dabei unverändert.
+Der elektrische Unterschied in `masked-request-unmask-return` war auf zwei beim
+Redraw verlorene Übergänge eingegrenzt. `PENDING_HOLD_UNTIL_ACCEPT` endete vor
+dem negierten Eingang von `PENDING_EDGE_WHEN_DISABLED`; der bestehende Ausgang
+des Interruptziel-Multiplexers verlief außerdem zehn Rasterpunkte am Pin
+`INTERRUPT_TARGET_PC` vorbei. Beide Übergänge sind mit kurzen rechtwinkligen
+Abzweigen im aktuellen Layout geschlossen. Die vollständige Systemmatrix
+besteht danach wieder mit allen sieben Fixtures. Strukturtests sichern sowohl
+den Pending-Zweig als auch den vollständigen Zielausgang bis zum vorhandenen
+Pin; Kern, Operator-Panel und die übrige Anordnung blieben unverändert.
