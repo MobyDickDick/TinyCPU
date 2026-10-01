@@ -129,6 +129,25 @@ def _multiplexer_driven_by(circuit: ET.Element, pin_label: str,
 
 
 class CircuitVerificationTests(unittest.TestCase):
+    def test_release_version_matches_machine_readable_contract(self) -> None:
+        self.assertEqual(VERIFY.verify_release_version(), "1.1.0")
+
+    def test_release_version_mismatch_is_rejected(self) -> None:
+        temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        logisim = temporary / "hardware" / "logisim"
+        logisim.mkdir(parents=True)
+        (temporary / "VERSION").write_text("1.1.0\n", encoding="utf-8")
+        (logisim / "tinycpu-release-v1.json").write_text(json.dumps({
+            "release_version": "1.0.0",
+            "compatibility_series": "1.x",
+        }), encoding="utf-8")
+        original_root, original_logisim = VERIFY.ROOT, VERIFY.LOGISIM
+        VERIFY.ROOT, VERIFY.LOGISIM = temporary, logisim
+        self.addCleanup(setattr, VERIFY, "ROOT", original_root)
+        self.addCleanup(setattr, VERIFY, "LOGISIM", original_logisim)
+        with self.assertRaisesRegex(VERIFY.VerificationError, "differs from VERSION"):
+            VERIFY.verify_release_version()
+
     def test_pin_handoffs_reject_crossed_address_and_ram_value_widths(self) -> None:
         interfaces = {
             "CPU": {"ADDRESS": {"direction": "output", "bits": 12}},

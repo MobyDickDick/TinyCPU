@@ -1,8 +1,13 @@
 {
   "schema_version": 1,
-  "release_version": "1.0.0",
+  "release_version": "1.1.0",
   "compatibility_series": "1.x",
   "release_state": "contract-frozen",
+  "additive_features": [
+    "symbolic-debugger",
+    "memory-mapped-output-and-interrupt-system",
+    "operator-panel"
+  ],
   "hardware": {
     "profile": "hardware/logisim/tinycpu-16-12.json",
     "profile_schema_version": 1,

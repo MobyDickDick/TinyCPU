@@ -76,6 +76,30 @@ def load_json(path: Path) -> object:
         raise VerificationError(f"{display_path(path)}: invalid JSON: {exc}") from exc
 
 
+def verify_release_version() -> str:
+    """Require the human- and machine-readable project versions to agree."""
+    version_path = ROOT / "VERSION"
+    contract_path = LOGISIM / "tinycpu-release-v1.json"
+    try:
+        version = version_path.read_text(encoding="utf-8").strip()
+    except OSError as exc:
+        raise VerificationError(f"{display_path(version_path)}: cannot read version: {exc}") from exc
+    if re.fullmatch(r"[1-9]\d*\.\d+\.\d+", version) is None:
+        raise VerificationError(f"{display_path(version_path)}: invalid semantic version {version!r}")
+    contract = load_json(contract_path)
+    if not isinstance(contract, dict):
+        raise VerificationError(f"{display_path(contract_path)}: release contract must be an object")
+    if contract.get("release_version") != version:
+        raise VerificationError(
+            f"{display_path(contract_path)}: release version differs from VERSION"
+        )
+    if contract.get("compatibility_series") != f"{version.split('.', 1)[0]}.x":
+        raise VerificationError(
+            f"{display_path(contract_path)}: compatibility series differs from VERSION"
+        )
+    return version
+
+
 def point(value: str, *, source: Path) -> tuple[int, int]:
     match = LOCATION.fullmatch(value)
     if not match:
@@ -1792,9 +1816,11 @@ def verify(root: Path = ROOT) -> list[str]:
             circuit_count += circuits
             wire_count += wires
         verify_operator_panel()
+        release_version = verify_release_version()
         opcode_count, fixture_count = verify_contracts()
         return [
             f"JSON: {len(json_files)} files valid",
+            f"Release: TinyCPU {release_version} metadata consistent",
             f"Logisim: {len(circuit_files)} files, {circuit_count} circuits, {wire_count} orthogonal wires valid",
             f"Contracts: {opcode_count} opcodes and {fixture_count} sticky-error fixtures consistent",
         ]
