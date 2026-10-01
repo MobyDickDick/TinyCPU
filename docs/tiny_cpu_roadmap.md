@@ -89,12 +89,17 @@ intern gekennzeichneten Diagnoseartefakte.
 Damit gibt es weiterhin **kein notwendiges nächstes Arbeitspaket**, um TinyCPU
 betriebsfähig zu machen. Die Richtung **Entwicklungswerkzeuge** wurde als
 [AP 16: symbolischer TinyCPU-Debugger](tiny_cpu_debugger_plan.md) umgesetzt.
-Für die optionale Weiterentwicklung ist nun **Weitere Hardwareprofile** als
+Für die optionale Weiterentwicklung ist **Weitere Hardwareprofile** als
 [AP 17: zweites TinyCPU-Hardwareprofil](tiny_cpu_profiles_plan.md) ausgewählt
-und abgeschlossen. Die verbleibende Richtung **Peripherie und Integration**
-ist als [AP 18](tiny_cpu_peripherals_plan.md) mit einer einzelnen
-Interruptquelle und einem Ausgabeport ausgewählt und messbar abgegrenzt; ihre
-Implementierung ist noch offen.
+und abgeschlossen. Die dritte Richtung **Peripherie und Integration** ist als
+[AP 18](tiny_cpu_peripherals_plan.md) mit einer einzelnen Interruptquelle und
+einem Ausgabeport umgesetzt und elektrisch abgenommen. Das additive
+[AP 21: Operator-Panel](tiny_cpu_operator_panel_plan.md) ist ebenfalls
+umgesetzt und automatisch geprüft. Damit ist derzeit kein weiteres
+nummeriertes Arbeitspaket zur Implementierung dokumentiert. Offen ist nur der
+ausdrücklich auf eine interaktive Umgebung verschobene manuelle GUI-Kurztest;
+er ist kein eigenständiges Arbeitspaket und darf nicht durch einen
+nicht-interaktiven Lauf als erledigt ausgegeben werden.
 
 Sinnvolle neue Pakete waren zunächst Produktentscheidungen für
 eine spätere Version und keine Restarbeiten an 1.0. Bevor dafür
@@ -110,10 +115,9 @@ messbare Abnahmekriterien festlegen:
    klar abgegrenzte Geräte ergänzen, ohne die 1.x-Schnittstellen stillschweigend
    zu verändern.
 
-Die erste Auswahlentscheidung wurde mit AP 16 umgesetzt, die zweite mit AP 17.
-Der eigene AP-18-Vorschlag trifft nun auch die dritte Auswahlentscheidung, ohne
-bereits Bus- oder Peripherieimplementierung vorwegzunehmen. Die abgeschlossenen
-AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
+Die erste Auswahlentscheidung wurde mit AP 16 umgesetzt, die zweite mit AP 17
+und die dritte mit AP 18. AP 21 ergänzt ausschließlich die Bedienansicht. Die
+abgeschlossenen früheren Pakete werden dadurch nicht wieder geöffnet.
 
 - [x] **AP 1: Hardwarevertrag einfrieren:** Das Profil
   `hardware/logisim/tinycpu-16-12.json` beschreibt den Vertrag;
