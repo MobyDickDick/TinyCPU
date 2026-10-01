@@ -4571,3 +4571,29 @@ späteren Entmaskieren gehalten. Ein Strukturtest prüft beide Eingangspfade,
 und der aktualisierte Komponentenfingerprint schützt die vollständige
 Verdrahtung. Die sieben elektrischen AP-18-Systemfixtures bestehen danach
 erneut gemeinsam.
+
+#### Abnahme der nachträglich angepassten Interruptcontroller-Anordnung
+
+- **Ausgangsstand:** `3b75bce`
+- **Datum:** 1. Oktober 2026
+- **Simulator:** Logisim-evolution 4.1.0
+
+Die anschließende manuelle Anpassung von `TinyCPU_Peripherals.circ` hat die
+Leitungsführung des Maskenpfads verschoben und den zuvor konstanten Eingang
+der verzögerten Rückkehrgültigkeitslöschung an die vorhandene Rückkopplung
+angebunden. Die Topologieprüfung fand dabei keine offenen Kontakte,
+Mehrfachtreiber oder Breitenfehler. Beim Speichern waren jedoch die beiden
+vertraglich benötigten Bezeichnungen `RETURN_ADDRESS_CAPTURE` und
+`RETURN_ADDRESS_NEXT` verloren gegangen. Sie wurden an den unverändert
+vorhandenen Multiplexern wiederhergestellt, ohne die neue Anordnung
+zurückzuzeichnen.
+
+Der kanonische Verdrahtungsfingerprint beschreibt nun die geprüfte neue
+Leitungsführung. Die Offline-Suite einschließlich aller gezielten
+Interrupt-Mutationstests besteht. Der anschließende elektrische Systemlauf
+unter `/tmp/ap18-redraw-audit/system-matrix` führt alle sieben Fixtures
+`output-valid-write`, `output-invalid-write`,
+`masked-request-unmask-return`, `disable-interrupts`, `reset-states`,
+`illegal-return` und `invalid-vector` erfolgreich gegen das VM-Modell aus.
+Damit ist die nachträglich angepasste Anordnung funktional abgenommen; aus ihr
+ergibt sich kein weiterer AP-18-Reparaturschritt.

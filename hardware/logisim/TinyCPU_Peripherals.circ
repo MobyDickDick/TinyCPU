@@ -818,9 +818,11 @@
       <a name="width" val="12"/>
     </comp>
     <comp lib="2" loc="(680,710)" name="Multiplexer">
+      <a name="label" val="RETURN_ADDRESS_CAPTURE"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="2" loc="(870,720)" name="Multiplexer">
+      <a name="label" val="RETURN_ADDRESS_NEXT"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="5" loc="(1030,1080)" name="Register">

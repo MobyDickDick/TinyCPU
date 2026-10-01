@@ -228,3 +228,10 @@ wird jetzt bei deaktivierter Maske über `PENDING_EDGE_WHEN_DISABLED` in den
 Pending-Zustand übernommen, während eine unmittelbar angenommene Flanke nicht
 erneut gespeichert wird. Strukturtest, Verdrahtungsfingerprint und die
 vollständige elektrische Systemmatrix sichern die Korrektur ab.
+
+Auch die danach manuell angepasste Anordnung des Interruptcontrollers ist
+abgenommen. Zwei beim Speichern verlorene Multiplexerbezeichnungen wurden
+wiederhergestellt, der Verdrahtungsfingerprint auf die geprüfte Leitungsführung
+fortgeschrieben und alle sieben elektrischen Systemfixtures erneut erfolgreich
+gegen das VM-Modell ausgeführt. Für AP 18 bleibt damit kein dokumentierter
+elektrischer Reparaturschritt offen.

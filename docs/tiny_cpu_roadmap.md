@@ -192,7 +192,7 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   profilbezogenen Simulator-Gate automatisiert. Die gemeinsame Endabnahme
   führt beide Profile bei jedem Push, Pull Request und Merge-Queue-Lauf aus
   und bewahrt ihre Tabellen getrennt auf.
-- [ ] **AP 18: Peripherie und Integration:** Der abgegrenzte Vorschlag legt
+- [x] **AP 18: Peripherie und Integration:** Der abgegrenzte Vorschlag legt
   Ausgabeport, Interruptmodell, Kompatibilitätsfolgen, Vertragsartefakte und
   elektrische Abnahmekriterien fest. Systemprofil, erweitertes Maschinenformat
   und Trace-Schema sind versioniert und werden gemeinsam validiert. Assembler,
@@ -365,8 +365,12 @@ AP 1 bis AP 17 werden dadurch nicht wieder geöffnet.
   dem erst an der Flanke gelöschten Adresszustand. Die passive Folgemessung
   zeigt `RISING_EDGE_DETECT` bereits vor der ersten steigenden Flanke, während
   `INTERRUPT_ACCEPT` erst danach aus dem gespeicherten Pending-Zustand entsteht.
-  Als nächstes wird ausschließlich diese verzögerte Übergabe an die
-  Annahmelogik repariert.
+  Die verzögerte Übergabe, die taktsynchrone Resetbehandlung, die
+  Maskenpriorität und das Speichern einer maskierten Anforderungsflanke sind
+  inzwischen repariert. Nach der letzten manuellen Anordnungsänderung wurden
+  verlorene Bauteilbezeichnungen wiederhergestellt und die neue Leitungsführung
+  in den Verdrahtungsvertrag übernommen. Offline-Suite und alle sieben
+  elektrischen Systemfixtures bestehen; AP 18 ist damit abgeschlossen.
 
 ## Abgeschlossenes Arbeitspaket: AP 12 – Hardware-Abschluss
 
