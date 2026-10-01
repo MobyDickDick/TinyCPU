@@ -235,3 +235,10 @@ wiederhergestellt, der Verdrahtungsfingerprint auf die geprüfte Leitungsführun
 fortgeschrieben und alle sieben elektrischen Systemfixtures erneut erfolgreich
 gegen das VM-Modell ausgeführt. Für AP 18 bleibt damit kein dokumentierter
 elektrischer Reparaturschritt offen.
+
+Auch darüber hinaus ist derzeit kein weiteres nummeriertes Arbeitspaket zur
+Implementierung dokumentiert. Der einzige verbleibende Nachweis ist der in
+AP 21 ausdrücklich verschobene, manuelle GUI-Kurztest in einer interaktiven
+Umgebung; er ist kein eigenständiges Folgepaket. Ein neues Arbeitspaket muss
+daher zuerst mit Umfang, Kompatibilitätsfolgen und messbaren Abnahmekriterien
+dokumentiert werden, bevor weitere Produktänderungen beginnen.
