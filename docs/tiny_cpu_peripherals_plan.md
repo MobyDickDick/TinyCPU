@@ -1252,3 +1252,24 @@ dafür, dass eine im selben Takt angenommene Flanke nicht nach der Annahme erneu
 gespeichert wird. Der Komponentenvertrag, der Verdrahtungsfingerprint und ein
 gezielter Strukturtest schützen Flanken-, Masken- und Pending-Pfad. Danach
 bestehen erneut alle sieben elektrischen Systemfixtures.
+
+## Nachprüfung der neu gespeicherten Zeichnung
+
+Die auf Commit `3352c4e` neu gespeicherte Zeichnung vertauscht am Operator-
+Panel lediglich die Eingänge der kommutativen AND- und OR-Gatter. Der Prüfer
+folgt deshalb nun der Netzkonnektivität statt einer festen Eingangsreihenfolge.
+Im Interruptcontroller wurden die beim Speichern verlorenen Bezeichnungen der
+beiden Rückkehradress-Multiplexer ergänzt und der um zehn Rasterpunkte am Pin
+`IN_INTERRUPT_HANDLER` vorbeilaufende Ausgang minimal bis zum vorhandenen Pin
+geführt. Die übrige Anordnung blieb unverändert.
+
+Offline bestehen danach Topologie, Kontakte und 179 Regressionstests. Die
+erstmals in das gemeinsame `scripts/test-logisim.sh` aufgenommene AP-18-Matrix
+öffnet jedoch einen funktionalen Unterschied: `output-valid-write` und
+`output-invalid-write` bestehen, `masked-request-unmask-return` stoppt dagegen
+an Vektor 6. `INTERRUPT_ENABLED`, `IN_INTERRUPT_HANDLER`, `RET_ADDR` und
+`RET_ADDR_VALID` werden dort elektrisch fehlerhaft (`E`). Deshalb ist AP 18
+weiter offen und der Stand darf noch nicht als Interrupt-Release getaggt
+werden. Das nächste enge Diagnosepaket verfolgt ausschließlich die vier
+Controllerzustände an der Rückkehrflanke; Kern, Operator-Panel und Layout
+bleiben dabei unverändert.

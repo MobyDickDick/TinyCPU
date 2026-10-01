@@ -819,9 +819,11 @@
       <a name="width" val="12"/>
     </comp>
     <comp lib="2" loc="(680,710)" name="Multiplexer">
+      <a name="label" val="RETURN_ADDRESS_CAPTURE"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="2" loc="(870,720)" name="Multiplexer">
+      <a name="label" val="RETURN_ADDRESS_NEXT"/>
       <a name="width" val="12"/>
     </comp>
     <comp lib="5" loc="(1030,1080)" name="Register">
@@ -930,7 +932,9 @@
     <wire from="(1290,380)" to="(1310,380)"/>
     <wire from="(1290,950)" to="(1290,990)"/>
     <wire from="(1290,950)" to="(1350,950)"/>
-    <wire from="(1290,990)" to="(1550,990)"/>
+    <wire from="(1290,990)" to="(1530,990)"/>
+    <wire from="(1530,980)" to="(1530,990)"/>
+    <wire from="(1530,980)" to="(1550,980)"/>
     <wire from="(1310,870)" to="(1310,940)"/>
     <wire from="(1310,870)" to="(1540,870)"/>
     <wire from="(1310,940)" to="(1350,940)"/>
