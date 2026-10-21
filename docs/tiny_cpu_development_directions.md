@@ -9,6 +9,15 @@ break before changing the accepted machine.
 
 ## Recommendation
 
+The review on 21 October 2026 identified gaps in core trace verification,
+division overflow handling, documentation, and Windows tests. Address the open
+[AP 22 quality work packages](tiny_cpu_quality_work_packages.md) before choosing
+another feature experiment. Earlier acceptance records do not establish the
+full state parity currently missing from the core gate. The operator panel
+from AP 21 is already implemented; its manual GUI smoke test remains open.
+The feature recommendations below record possible directions rather than the
+current required next task.
+
 First complete only the deferred manual GUI smoke test and preserve the current
 release as a baseline. If work resumes, implement an **operator/trace panel** as
 the next small project. It directly answers the need to watch TinyCPU work,

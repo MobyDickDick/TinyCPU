@@ -42,6 +42,7 @@ abdeckt und Ausgabe, Haltzustand, Register, Speicher-Validität und Fehlerflags
 | **19. Systematische Schaltungsdiagnose** | Die aktuelle `TinyCPU.circ` in zehn reproduzierbaren Aufgaben von Umgebung und Fetch bis zur vollständigen elektrischen Regression untersuchen und nur belegte Netzfehler minimal reparieren. | Ein frischer Checkout besteht Offline-, 16/12-Matrix- und GUI-Kurzabnahme; jeder behobene Fehler ist auf die erste abweichende Flanke und benannte Ports zurückgeführt. |
 | **20. Wiederherstellung der CPU-Profile** | Den aktuellen 8/8-Breitenfehler und die ausbleibenden Kernhalte beider Profile isolieren, minimal reparieren und gegen Redraw-Regressionen absichern. | Offline-Gate, Kerntraces und vollständige elektrische ISA-/Fehlermatrizen bestehen für 16/12 und 8/8; ein GUI-Kurztest bestätigt den Kandidaten. |
 | **21. Operator-Panel** | Eine additive Bedienansicht mit Reset, Einzelschritt, langsamem Lauf und benannten Zustandsanzeigen ergänzen, ohne `TinyCPUMain` umzuzeichnen. | Ein einziger arbitrierter Taktpfad und alle sichtbaren Kernzustände sind strukturell geprüft; ein elektrischer Vektor belegt genau eine STEP-Flanke ohne Wiederholung bei gehaltenem Eingang. |
+| **22. Qualitätsbefunde und belastbare Abnahme (offen)** | Tatsächlichen Kernzustandsvergleich ergänzen, Divisionsüberlauf klären, Dokumentation und Windows-Testfehler korrigieren und den Kandidaten neu abnehmen. | Die [Aufgaben 22.1 bis 22.5](tiny_cpu_quality_work_packages.md) besitzen reproduzierbare Nachweise; eine optionale Aufgabe ordnet Eigenständigkeit und Nutzen ein. |
 
 ## Abhängigkeiten und Reihenfolge
 
@@ -77,6 +78,14 @@ elektrischen Matrizen. Die acht Pakete und ihre Abnahmebedingungen stehen im
 
 ### Funktionsstatus und weitere Planung
 
+**Aktueller Nachtrag vom 21. Oktober 2026:** Die Projektbewertung hat eine
+Lücke im behaupteten taktweisen Kernvergleich, einen Divisionsgrenzfall und
+Dokumentations-/Testfehler gefunden. Die folgenden Abschlussvermerke geben
+den bisherigen Projektstand wieder; sie ersetzen nicht die nun offene
+[Qualitätsabnahme AP 22](tiny_cpu_quality_work_packages.md). Insbesondere prüft
+die aktuelle Kernmatrix den erwarteten Halt, aber keine vollständige
+Zustandsparität mit der VM. AP 22 hat Vorrang vor neuen Funktionserweiterungen.
+
 TinyCPU ist im eingefrorenen 1.0-Zielprofil **voll funktionsfähig**: Die
 16-Bit-Daten-/12-Bit-Adress-Schaltung implementiert alle 50 Opcodes, wird im
 realen, gepinnten Logisim-evolution elektrisch gegen die Python-VM geprüft und
@@ -86,8 +95,9 @@ Erweiterung einer Lehr-CPU. Insbesondere verspricht die Hardware keine anderen
 Busbreiten, keine Drittanbieter-Schaltungsvarianten und keine Stabilität der als
 intern gekennzeichneten Diagnoseartefakte.
 
-Damit gibt es weiterhin **kein notwendiges nächstes Arbeitspaket**, um TinyCPU
-betriebsfähig zu machen. Die Richtung **Entwicklungswerkzeuge** wurde als
+Der bisherige Abschlussstand sah kein notwendiges nächstes Arbeitspaket vor;
+die neuen Qualitätsbefunde werden jetzt in AP 22 bearbeitet. Die Richtung
+**Entwicklungswerkzeuge** wurde als
 [AP 16: symbolischer TinyCPU-Debugger](tiny_cpu_debugger_plan.md) umgesetzt.
 Für die optionale Weiterentwicklung ist **Weitere Hardwareprofile** als
 [AP 17: zweites TinyCPU-Hardwareprofil](tiny_cpu_profiles_plan.md) ausgewählt
@@ -95,10 +105,9 @@ und abgeschlossen. Die dritte Richtung **Peripherie und Integration** ist als
 [AP 18](tiny_cpu_peripherals_plan.md) mit einer einzelnen Interruptquelle und
 einem Ausgabeport umgesetzt und elektrisch abgenommen. Das additive
 [AP 21: Operator-Panel](tiny_cpu_operator_panel_plan.md) ist ebenfalls
-umgesetzt und automatisch geprüft. Damit ist derzeit kein weiteres
-nummeriertes Arbeitspaket zur Implementierung dokumentiert. Offen ist nur der
-ausdrücklich auf eine interaktive Umgebung verschobene manuelle GUI-Kurztest;
-er ist kein eigenständiges Arbeitspaket und darf nicht durch einen
+umgesetzt und automatisch geprüft. Als nächstes nummeriertes Arbeitspaket
+ist nun AP 22 offen. Zusätzlich bleibt der ausdrücklich auf eine interaktive
+Umgebung verschobene manuelle GUI-Kurztest offen; er darf nicht durch einen
 nicht-interaktiven Lauf als erledigt ausgegeben werden.
 
 Der daraus entstandene additive Projektstand ist als **TinyCPU 1.1.0**

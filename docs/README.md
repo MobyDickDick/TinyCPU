@@ -14,6 +14,7 @@ Reference and project records:
 - [`tiny_cpu_instruction_status.md`](tiny_cpu_instruction_status.md): aktuell nachgewiesener Funktionsstand aller Befehle
 - [`logisim_diagnostics_known_issues.md`](logisim_diagnostics_known_issues.md): bekannte Besonderheiten der Diagnoseschaltungen
 - [`tiny_cpu_roadmap.md`](tiny_cpu_roadmap.md): Hardware-Arbeitsplan
+- [`tiny_cpu_quality_work_packages.md`](tiny_cpu_quality_work_packages.md): offene Qualitätsaufgaben aus der Projektbewertung (AP 22), mit Prioritäten und Abnahmekriterien
 - [`tiny_cpu_debugger_plan.md`](tiny_cpu_debugger_plan.md): abgegrenzter Vorschlag für AP 16 (symbolisches Debugging)
 - [`tiny_cpu_debugger.md`](tiny_cpu_debugger.md): Bedienung und JSON-Vertrag des symbolischen Debuggers
 - [`tiny_cpu_profiles_plan.md`](tiny_cpu_profiles_plan.md): abgegrenzter Vorschlag für AP 17 (zweites Hardwareprofil)
@@ -242,9 +243,11 @@ fortgeschrieben und alle sieben elektrischen Systemfixtures erneut erfolgreich
 gegen das VM-Modell ausgeführt. Für AP 18 bleibt damit kein dokumentierter
 elektrischer Reparaturschritt offen.
 
-Auch darüber hinaus ist derzeit kein weiteres nummeriertes Arbeitspaket zur
-Implementierung dokumentiert. Der einzige verbleibende Nachweis ist der in
-AP 21 ausdrücklich verschobene, manuelle GUI-Kurztest in einer interaktiven
-Umgebung; er ist kein eigenständiges Folgepaket. Ein neues Arbeitspaket muss
-daher zuerst mit Umfang, Kompatibilitätsfolgen und messbaren Abnahmekriterien
-dokumentiert werden, bevor weitere Produktänderungen beginnen.
+Die Projektbewertung vom 21. Oktober 2026 hat weitere Qualitätsbefunde
+aufgenommen. Das neue [AP 22](tiny_cpu_quality_work_packages.md) sammelt den
+fehlenden vollständigen Kernzustandsvergleich, den Divisionsüberlauf,
+Dokumentationsmängel, einen Windows-Testfehler und die anschließende erneute
+Abnahme als offene Aufgaben. Frühere Abschlussvermerke belegen nur den damals
+tatsächlich ausgeführten Prüfumfang. AP 22 hat Vorrang vor weiteren
+Funktionserweiterungen. Zusätzlich bleibt der in AP 21 ausdrücklich
+verschobene manuelle GUI-Kurztest in einer interaktiven Umgebung offen.
