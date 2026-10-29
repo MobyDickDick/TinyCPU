@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-"""Run the pinned Logisim-evolution load and electrical table gate.
+"""Run pinned Logisim-evolution with mandatory electrical core/VM comparison.
 
-The launcher deliberately keeps the simulator boundary small.  It selects the
-project from the hardware profile, creates an autonomous temporary copy and
-stores Logisim's unmodified table output as evidence.  The table is required
-to reach the normal-halt output; a project which merely parses is not accepted
-as an electrical run.
+Settled pre/post-edge snapshots, RAM and terminal events are compared for the
+core program and each ISA fixture. The change-driven table launcher remains
+available for diagnostics; reaching halt alone cannot pass the core gate.
 """
 
 from __future__ import annotations
@@ -27,6 +25,7 @@ from tiny_cpu_profiles import DEFAULT_PROFILE, load_profile
 from tiny_cpu_assembler import Instruction, Program, assemble, encode_program, opcode_table
 from tiny_cpu_systems import load_system_profile
 from tiny_cpu_vm import TinyCPU
+from tiny_cpu_core_trace import CoreMismatch, compare_trace, expected_trace, write_probes
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -251,23 +250,74 @@ def run_trace(project: Path, jar: Path, java: str, output: Path, timeout: int) -
 def run_core_acceptance(
     source: Path, profile, jar: Path, java: str, output: Path, timeout: int,
 ) -> None:
-    """Run AP 20.4's minimal fetch fixture twice and require determinism."""
+    """Compare two minimal fetch runs and AP 5's original countdown to the VM."""
     program = assemble(CORE_ACCEPTANCE_SOURCE, profile)
-    words = encode_program(program)
-    if _expected_halt_output(program) != "HALTED":
-        raise LogisimError("core acceptance fixture does not normally halt in the VM")
+    traces = []
+    for run in (1, 2):
+        trace = output if run == 1 else output.with_name(output.stem + "-repeat.tsv")
+        run_core_comparison(source, profile, program, tuple(encode_program(program)),
+                            jar, java, trace, timeout, f"core-{run}")
+        traces.append(trace.read_bytes())
+    if traces[0] != traces[1]:
+        raise LogisimError("independent core traces are not deterministic")
+    kernel = assemble((ROOT / "hardware/logisim/ap5_countdown.tcpu").read_text(
+        encoding="utf-8"), profile)
+    run_core_comparison(source, profile, kernel, tuple(encode_program(kernel)),
+                        jar, java, output.with_name(output.stem + "-countdown.tsv"),
+                        timeout, "ap5-countdown")
 
-    with tempfile.TemporaryDirectory(prefix="tinycpu-core-") as directory:
-        directory_path = Path(directory)
-        traces = []
-        for run in (1, 2):
-            project = directory_path / f"run-{run}-{source.name}"
-            trace = output if run == 1 else directory_path / "repeat.tsv"
-            autonomous_project(source, project, profile.top_circuit, words)
-            run_trace(project, jar, java, trace, timeout)
-            traces.append(trace.read_bytes())
-        if traces[0] != traces[1]:
-            raise LogisimError("independent core traces are not deterministic")
+
+def run_core_comparison(
+    source: Path, profile, program: Program, words: tuple[int, ...],
+    jar: Path, java: str, output: Path, timeout: int, fixture: str,
+) -> None:
+    """Export real settled electrical states and compare every fixture to VM.
+
+    Reproduction inputs and unmodified stdout/stderr survive both success and
+    failure. The legacy change-driven table launcher is diagnostic only.
+    """
+    expected = expected_trace(program)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    evidence = (output.with_suffix("") if output.suffix
+                else output.with_name(output.name + "-evidence"))
+    evidence.mkdir(parents=True, exist_ok=True)
+    project = evidence / source.name
+    tree = ET.parse(source)
+    _inject_rom(tree.getroot(), source, words)
+    tree.write(project, encoding="utf-8", xml_declaration=True)
+    probes = evidence / "probes.tsv"
+    write_probes(probes)
+    (evidence / "expected.json").write_text(
+        json.dumps(expected, indent=2) + "\n", encoding="utf-8")
+    (evidence / "inputs.json").write_text(json.dumps({
+        "mode": "standalone-internal-ram",
+        "INPUT": {"value": 0, "valid": False,
+                  "reason": "core has no public INPUT value/valid ports"},
+    }, indent=2) + "\n", encoding="utf-8")
+    command = [java, "-Djava.awt.headless=true", "--class-path", str(jar.resolve()),
+               str(ROOT / "scripts/LogisimCoreTrace.java"), profile.top_circuit,
+               str(project.resolve()), str(probes.resolve()), str(len(expected) // 2 + 1)]
+    (evidence / "command.json").write_text(
+        json.dumps(command, indent=2) + "\n", encoding="utf-8")
+    diagnostic = evidence / "diagnostic.json"
+    diagnostic.unlink(missing_ok=True)
+    # Stream directly to files: timeout and process failure retain the real
+    # partial observations without buffering or a second simulator run.
+    with output.open("wb") as stdout, (evidence / "stderr.txt").open("wb") as stderr:
+        try:
+            result = subprocess.run(command, stdout=stdout, stderr=stderr,
+                                    timeout=timeout, check=False)
+        except subprocess.TimeoutExpired as exc:
+            raise LogisimError(f"fixture {fixture}: trace timed out; evidence: {output}") from exc
+    try:
+        compare_trace(output.read_text(encoding="utf-8"), expected)
+    except CoreMismatch as exc:
+        diagnostic.write_text(json.dumps({"fixture": fixture, **vars(exc)}, indent=2)
+                              + "\n", encoding="utf-8")
+        raise LogisimError(f"fixture {fixture}: {exc}; evidence: {output}") from exc
+    if result.returncode:
+        raise LogisimError(f"fixture {fixture}: exporter exited {result.returncode}; "
+                           f"evidence: {evidence}")
 
 
 def _unexpected_halt_reached(
@@ -367,36 +417,26 @@ def run_matrix(
         raise LogisimError(f"{matrix_path}: duplicate fixture id")
     output.mkdir(parents=True, exist_ok=True)
     total = len(cases)
-    runs: list[tuple[int, dict[str, object], tuple[int, ...], str]] = []
+    runs: list[tuple[int, dict[str, object], tuple[int, ...], Program]] = []
     for index, case in enumerate(cases, start=1):
         program = _matrix_program(case, profile)
         words = tuple(case.get("raw_words") or encode_program(program))
-        # Validate the fixture independently in the reference model. Logisim's
-        # table logger is change-driven, so its row count is not an edge count:
-        # consecutive clock edges with identical observed outputs are folded.
-        _expected_edges(program)
-        runs.append((index, case, words, _expected_halt_output(program)))
+        expected_trace(program)
+        runs.append((index, case, words, program))
 
-    def run_case(run: tuple[int, dict[str, object], tuple[int, ...], str]) -> None:
-        index, case, words, halt_output = run
+    def run_case(run: tuple[int, dict[str, object], tuple[int, ...], Program]) -> None:
+        index, case, words, program = run
         # Report when a worker actually starts the JVM, not when work is merely
         # queued, so the heartbeat continues throughout a parallel matrix run.
         print(
             f"electrical matrix: {profile.name} [{index}/{total}] {case['id']}",
             flush=True,
         )
-        with tempfile.TemporaryDirectory(prefix="tinycpu-matrix-") as directory:
-            project = Path(directory) / source.name
-            autonomous_project(
-                source, project, profile.top_circuit, words,
-                halt_output=halt_output,
-            )
-            try:
-                run_trace(project, jar, java, output / f"{case['id']}.tsv", timeout)
-            except LogisimError as exc:
-                raise LogisimError(
-                    f"{profile.name} fixture {case['id']}: {exc}"
-                ) from exc
+        try:
+            run_core_comparison(source, profile, program, words, jar, java,
+                                output / f"{case['id']}.tsv", timeout, str(case['id']))
+        except LogisimError as exc:
+            raise LogisimError(f"{profile.name} fixture {case['id']}: {exc}") from exc
 
     # Do not queue the whole matrix behind a single worker: ThreadPoolExecutor
     # continues with later queued calls after an early failure. That made a
@@ -626,7 +666,7 @@ def main(argv: list[str] | None = None) -> int:
         jar = resolve_jar(args.jar)
         if not args.system_only:
             source = ROOT / "hardware" / "logisim" / profile.circuit
-            print(f"electrical trace: {profile.name} core (2 runs)", flush=True)
+            print(f"electrical trace: {profile.name} core (2 minimal runs + countdown)", flush=True)
             run_core_acceptance(
                 source, profile, jar, args.java, args.trace_output, args.timeout
             )

@@ -86,6 +86,17 @@ den bisherigen Projektstand wieder; sie ersetzen nicht die nun offene
 die aktuelle Kernmatrix den erwarteten Halt, aber keine vollständige
 Zustandsparität mit der VM. AP 22 hat Vorrang vor neuen Funktionserweiterungen.
 
+**Elektrischer Nachtrag vom 29. Oktober 2026:** AP 22.1 hat den verpflichtenden
+Flankenvergleich inzwischen implementiert und reale Abweichungen nachgewiesen:
+59 von 61 vorhandenen ISA-/Fehler-Fixtures sowie das Countdown-Kernprogramm
+scheitern. Zwei Minimalkernläufe und die elektrische Negativkontrolle bestehen.
+Damit ist die folgende historische Funktionsfreigabe für den aktuellen Stand
+nicht bestätigt. AP 22.1 bleibt zur Behebung und erneuten Abnahme offen.
+Der nächste begrenzte Reparaturschritt gilt `ACC_WRITE_REQUEST` bei
+`STORE_ADDRESS`; Nachweise und Eingabegrenzen stehen im
+[Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-elektrischer-kernvergleich-am-29-oktober-2026)
+und im [Flankenvertrag](tiny_cpu_core_trace.md).
+
 TinyCPU ist im eingefrorenen 1.0-Zielprofil **voll funktionsfähig**: Die
 16-Bit-Daten-/12-Bit-Adress-Schaltung implementiert alle 50 Opcodes, wird im
 realen, gepinnten Logisim-evolution elektrisch gegen die Python-VM geprüft und

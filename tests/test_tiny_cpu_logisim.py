@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -420,45 +421,44 @@ class LogisimLauncherTests(unittest.TestCase):
         halt_error = next(case for case in cases if case["id"] == "halt-error")
         self.assertEqual(halt_error["program"], "LOAD_CONST(1)\nHALT_ERROR()\n")
 
-    def test_core_acceptance_injects_minimal_rom_twice(self):
+    def test_core_acceptance_compares_minimal_rom_twice(self):
         profile = load_profile("tinycpu-16-12")
-        source = ROOT / "hardware/logisim/TinyCPU.circ"
         seen_words = []
 
-        def record_project(source, destination, top, rom_words=None, halt_output="HALTED"):
-            seen_words.append(rom_words)
-            destination.write_text("temporary project", encoding="utf-8")
-
-        def deterministic_trace(project, jar, java, output, timeout):
-            output.write_bytes(b"0\t0\n3\t1\n")
+        def deterministic_comparison(source, profile, program, words, jar, java,
+                                     output, timeout, fixture):
+            seen_words.append(words)
+            output.write_bytes(b"checked electrical trace\n")
 
         with tempfile.TemporaryDirectory() as directory, patch(
-            "tiny_cpu_logisim.autonomous_project", side_effect=record_project
-        ), patch("tiny_cpu_logisim.run_trace", side_effect=deterministic_trace):
+            "tiny_cpu_logisim.run_core_comparison", side_effect=deterministic_comparison
+        ):
             run_core_acceptance(
-                source, profile, Path("logisim.jar"), "java",
-                Path(directory) / "core.tsv", 20,
+                ROOT / "hardware/logisim/TinyCPU.circ", profile,
+                Path("logisim.jar"), "java", Path(directory) / "core.tsv", 20,
             )
-
-        self.assertEqual(seen_words, [(0x230003, 0x360000)] * 2)
+        self.assertEqual(len(seen_words), 3)
+        self.assertEqual(seen_words[:2], [(0x230003, 0x360000)] * 2)
+        self.assertEqual(seen_words[2], (0x23ffff, 0x290065, 0x230003, 0x290064,
+                                         0x340000, 0x00ffff, 0x290064, 0x1f0004,
+                                         0x360000))
 
     def test_core_acceptance_rejects_nondeterministic_runs(self):
         profile = load_profile("tinycpu-16-12")
         traces = iter((b"first\n", b"second\n"))
 
-        def differing_trace(project, jar, java, output, timeout):
+        def differing_trace(source, profile, program, words, jar, java,
+                            output, timeout, fixture):
             output.write_bytes(next(traces))
 
         with tempfile.TemporaryDirectory() as directory, patch(
-            "tiny_cpu_logisim.autonomous_project"
-        ), patch("tiny_cpu_logisim.run_trace", side_effect=differing_trace):
+            "tiny_cpu_logisim.run_core_comparison", side_effect=differing_trace
+        ):
             with self.assertRaisesRegex(LogisimError, "not deterministic"):
                 run_core_acceptance(
                     ROOT / "hardware/logisim/TinyCPU.circ", profile,
                     Path("logisim.jar"), "java", Path(directory) / "core.tsv", 20,
                 )
-
-
 
     def test_change_driven_table_is_not_mistaken_for_an_edge_count(self):
         # Logisim emits values, not a synthetic column-name header. Successful
@@ -1281,7 +1281,7 @@ class LogisimLauncherTests(unittest.TestCase):
         profile = load_profile("tinycpu-16-12")
         output = StringIO()
         with tempfile.TemporaryDirectory() as directory, patch(
-            "tiny_cpu_logisim.run_trace"
+            "tiny_cpu_logisim.run_core_comparison"
         ) as trace, redirect_stdout(output):
             count = run_matrix(
                 ROOT / "hardware/logisim/TinyCPU.circ",
@@ -1314,7 +1314,7 @@ class LogisimLauncherTests(unittest.TestCase):
                 barrier.wait(timeout=5)
 
         with tempfile.TemporaryDirectory() as directory, patch(
-            "tiny_cpu_logisim.run_trace", side_effect=synchronized_trace
+            "tiny_cpu_logisim.run_core_comparison", side_effect=synchronized_trace
         ) as trace, redirect_stdout(StringIO()):
             count = run_matrix(
                 ROOT / "hardware/logisim/TinyCPU.circ",
@@ -1331,18 +1331,19 @@ class LogisimLauncherTests(unittest.TestCase):
     def test_matrix_error_identifies_the_failing_fixture(self):
         profile = load_profile("tinycpu-16-12")
 
-        def fail_first(_project, _jar, _java, output, _timeout):
+        def fail_first(_source, _profile, _program, _words, _jar, _java,
+                       output, _timeout, _fixture):
             if output.stem == "load-const":
                 raise LogisimError("trace timed out")
 
         attempted = []
 
         def record_and_fail(*args):
-            attempted.append(args[3].stem)
+            attempted.append(args[6].stem)
             fail_first(*args)
 
         with tempfile.TemporaryDirectory() as directory, patch(
-            "tiny_cpu_logisim.run_trace", side_effect=record_and_fail
+            "tiny_cpu_logisim.run_core_comparison", side_effect=record_and_fail
         ), redirect_stdout(StringIO()):
             with self.assertRaisesRegex(
                 LogisimError, "tinycpu-16-12 fixture load-const: trace timed out"
@@ -1384,7 +1385,7 @@ class LogisimLauncherTests(unittest.TestCase):
             vendored = Path(directory) / "vendor" / "missing.jar"
             local_env = Path(directory) / ".venv" / "Include" / "missing.jar"
             with patch("tiny_cpu_logisim.Path.home", return_value=Path(directory)):
-                with self.assertRaisesRegex(LogisimError, str(vendored)):
+                with self.assertRaisesRegex(LogisimError, re.escape(str(vendored))):
                     resolve_jar(None, vendored=vendored, local_env=local_env)
 
 

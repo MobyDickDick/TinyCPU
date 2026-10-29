@@ -21,6 +21,11 @@ for profile in "${profiles[@]}"; do
   fi
 done
 
+if ! PYTHONPATH=src python3 scripts/test-logisim-core-mutation.py \
+    --output "$OUTPUT/core-mutation"; then
+  failed+=(core-mutation)
+fi
+
 system_args=(--profile tinycpu-16-12
              --system tinycpu-peripherals-16-12-v1
              --system-only

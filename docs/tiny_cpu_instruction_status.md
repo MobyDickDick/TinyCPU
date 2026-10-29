@@ -1,6 +1,22 @@
 # Funktionsstand der TinyCPU-Befehle
 
-**Stand:** 20. September 2026
+**Aktueller Stand: 29. Oktober 2026 — elektrische Kernabnahme fehlgeschlagen.**
+
+Der neue vollständige Kernvergleich aus AP 22.1 findet im aktuellen Stand
+`9d60c94` Abweichungen in 59 von 61 unveränderten Fixtures. Nur `halt` und
+`halt-error` bestehen den vollständigen Vergleich. Auch die Countdown-Fixture
+scheitert. Der Minimalkern `LOAD_CONST(3); HALT` besteht zweimal.
+Die bisherigen grünen Haltprüfungen belegen keine vollständige Zustandsparität;
+die unten stehende Tabelle ist ein historischer Abschlussvermerk vom
+20. September 2026 und keine aktuelle Funktionsfreigabe.
+
+Details und der erste begrenzte Reparaturschritt stehen im
+[AP-22.1-Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-elektrischer-kernvergleich-am-29-oktober-2026).
+Der [Beobachtungsvertrag](tiny_cpu_core_trace.md) beschreibt die neue Prüfung
+und ihre noch offene Grenze für gültige Eingaben. Der manuelle GUI-Test bleibt
+ebenfalls offen.
+
+## Historischer Abschlussstand vom 20. September 2026
 
 ## Kurzantwort
 

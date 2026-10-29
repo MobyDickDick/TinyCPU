@@ -4597,3 +4597,111 @@ unter `/tmp/ap18-redraw-audit/system-matrix` führt alle sieben Fixtures
 `illegal-return` und `invalid-vector` erfolgreich gegen das VM-Modell aus.
 Damit ist die nachträglich angepasste Anordnung funktional abgenommen; aus ihr
 ergibt sich kein weiterer AP-18-Reparaturschritt.
+
+## AP 22.1: elektrischer Kernvergleich am 29. Oktober 2026
+
+**Ausgangs-Commit:** `9d60c94189a997f661259156b138b7dac5c6d007`.
+Geprüft wurden dessen unveränderte Hardwaredateien mit den noch nicht
+committeten AP-22.1-Änderungen an Exporter, Comparator, Tests und Gate.
+Das ist kein Nachweis eines bereits committeten Releasekandidaten und kein
+frischer Checkout im Sinne von 22.5. Die bereits vorhandene, unversionierte
+AP-22-Planungsdatei wurde um diesen Fortschritt ergänzt.
+
+Umgebung: Windows, PowerShell, Python **3.14.5**, OpenJDK **27+35-2325**,
+Logisim-evolution **4.1.0** aus
+`.venv/Include/logisim-evolution-4.1.0-all.jar`.
+JAR-SHA256:
+`fe6386a3217a591bcc311a4eda49e1f43a389b499dd3d0f6f40f344fc85f2577`.
+Java lag nicht im Suchpfad; verwendet wurde
+`C:/Program Files/jdk-27/bin/java.exe`. Die Ausführung benötigte Zugriff auf
+die normalen Java-Einstellungen in der Windows-Registry. Es wurde kein
+Simulator heruntergeladen und keine Schaltungszeichnung verändert.
+
+### Neue Vergleichsbasis
+
+`LogisimCoreTrace.java` steuert Flanken und exportiert bestehende benannte
+Pins sowie den vollständigen Wert-/Gültigkeits-RAM. Die VM-Erwartungen werden
+erst außerhalb des Simulators verglichen. Der genaue
+[Beobachtungsvertrag](tiny_cpu_core_trace.md) unterscheidet kombinatorische
+Ereignisse vor der Flanke und Registerzustände danach. Der verpflichtende
+Kernlauf verwendet diesen Vergleich für zwei unabhängige Minimalkernläufe,
+die ursprüngliche AP-5-Countdown-Fixture und jede der 61 Matrixfixtures.
+Der alte änderungsgetriebene Tabellenlogger ist kein Abnahmeersatz mehr.
+
+### Ausgeführte Prüfungen und Artefakte
+
+Die Befehle liefen im Projektverzeichnis. Vor den Python-Aufrufen war
+`$env:PYTHONPATH='src'` gesetzt. Für die Offline-Tests wurden außerdem
+`TMP` und `TEMP` auf das vorhandene `artifacts/review-tmp` gesetzt.
+
+| Prüfung | Befehl | Ergebnis und Nachweise |
+|---|---|---|
+| Offline-Verträge | `python src/tiny_cpu_verify.py` | Exit 0; 50 Opcodes, sechs Sticky-Error-Fixtures und 24 Logisim-Dateien konsistent. |
+| Schaltungsstruktur | `python scripts/check-logisim-circuit.py` | Exit 0; keine neue Strukturverletzung. Diese Prüfung beweist keine Zustandsparität. |
+| Windows-Unit-Suite | `python -m unittest discover -s tests -v` | Exit 0; 196 Tests ohne Skip. Ausgabe: `artifacts/ap22-1/offline-tests.txt`. Der Windows-Literalpfadtest verwendet nun `re.escape()`. Linux-CI wurde lokal nicht ausgeführt. |
+| Verpflichtender Kernvergleich | `python src/tiny_cpu_logisim.py --java 'C:/Program Files/jdk-27/bin/java.exe' --trace-output artifacts/ap22-1/final/core.tsv --matrix-output artifacts/ap22-1/final/matrix` | Exit 1; beide Minimalkernläufe bestehen und sind bytegleich. Countdown scheitert an Flanke 2, `post`, `ACC`: Soll 65535, Ist 0. Rohdaten und `diagnostic.json`: `artifacts/ap22-1/final/core-countdown.tsv` und Nachbarordner. |
+| Alle Matrixfälle, nur Diagnose | `python artifacts/ap22-1/run_matrix_audit.py` | Exit 1; alle 61 Fälle elektrisch exportiert, 59 Abweichungen, nur `halt` und `halt-error` bestehen. Das im Artefaktordner erhaltene Hilfsskript ruft ausdrücklich `run_matrix(..., jobs=4)` auf und umgeht nur für diese Bestandsaufnahme den vorher bereits roten Countdown. Zusammenfassung: `artifacts/ap22-1/audit-summary.json`; jeder Rohtrace und seine Eingaben liegen unter `artifacts/ap22-1/audit/`. Das ist keine bestandene Abnahme. |
+| Elektrische Negativkontrolle | `python scripts/test-logisim-core-mutation.py --java 'C:/Program Files/jdk-27/bin/java.exe' --output artifacts/ap22-1/mutation` | Exit 0; unverändertes `LOAD_CONST(3); HALT` besteht. Ein nur in der Kopie vor das Akkumulatorladen eingefügter 16-Bit-Inverter liefert 65532 statt 3. Der Vergleich lehnt an Flanke 1, `post`, `ACC` ab; der tatsächlich exportierte Normalhalt bleibt 1 und Fehlerhalt 0. `artifacts/ap22-1/mutation/proof.json`, `correct.tsv`, `wrong.tsv` und beide Reproduktionsordner bleiben erhalten. |
+
+Die schmalen neuen Regressionen prüfen unter anderem falsche Ergebnisse bei
+korrektem Halt, Registergültigkeit, alle sechs Fehlerflags, Ausgabeereignisse,
+Speicherschreiben mit anschließendem Lesen, zusätzliche/fehlende/verdoppelte
+Flanken, undefinierte Werte auch auf inaktiven Bussen, Exporterfehler und die
+Erhaltung partieller Rohdaten bei Timeout. Die Negativkontrolle ist außerdem
+im verpflichtenden `scripts/test-logisim.sh` eingehängt.
+
+### Erster Befund und nächster begrenzter Reparaturschritt
+
+Der Countdown führt an PC 1 `STORE_ADDRESS(101)` aus. Vor Flanke 2 ist der
+Akkumulator korrekt `65535` (`-1`) mit Gültigkeit 1. Der Speicherbefehl soll
+ihn unverändert lassen. Tatsächlich wird nach der Flanke `0 VALID` geladen.
+Ein zusätzlicher, rein beobachtender Lauf mit benannten internen Ports liefert:
+
+| Signal vor Flanke 2 | Soll | Elektrisch beobachtet |
+|---|---:|---:|
+| `FetchDecodeControls.STORE_ADR` | 1 | 1 |
+| `FetchDecodeControls.LOAD_CONST` | 0 | 0 |
+| `FetchDecodeControls.ACC_WRITE_REQUEST` | 0 | 1 |
+| `Datapath.ACC_LOAD` | 0 | 1 |
+| `Datapath.DATA_IN` | für STORE ohne Schreibwirkung | 0 |
+| `Memory.WRITE_ENABLE` | 1 | 1 |
+
+Die falsche Ladeanforderung liegt also bereits an der benannten Decodergrenze
+vor und wird bis zum Akkumulator weitergegeben. Das beweist noch nicht, welches
+einzelne interne Gatter oder welche Leitung verantwortlich ist. Der nächste
+Reparaturschritt verfolgt ausschließlich die Erzeugung von
+`ACC_WRITE_REQUEST` bei `STORE_ADDRESS`, ergänzt eine fokussierte Regression
+und nimmt erst danach die kleinste belegte Änderung vor. Die Darstellungsregel
+aus `hardware/logisim/AGENTS.md` gilt unverändert; ein Redraw ist nicht erlaubt.
+
+Der Zusatzexport ist unter `artifacts/ap22-1/handoff.tsv` und
+`handoff-probes.tsv` erhalten. Exakter Befehl:
+
+```powershell
+& 'C:/Program Files/jdk-27/bin/java.exe' '-Djava.awt.headless=true' `
+  --class-path .venv/Include/logisim-evolution-4.1.0-all.jar `
+  scripts/LogisimCoreTrace.java TinyCPUMain `
+  artifacts/ap22-1/final/core-countdown/TinyCPU.circ `
+  artifacts/ap22-1/handoff-probes.tsv 20 `
+  > artifacts/ap22-1/handoff.tsv 2> artifacts/ap22-1/handoff-stderr.txt
+```
+
+Dieser Zusatzlauf endet mit Exit 1 ohne Terminalereignis innerhalb 20 Flanken;
+er dient ausschließlich der ersten Decoder-/Ladeanforderungsdiagnose.
+
+Unabhängig davon zeigt `load-const` an Flanke 2, `pre`, bereits
+`PRINT_ENABLE=0` statt 1, obwohl das Programm normal anhält. Andere Fixtures
+belegen weitere Register-, Ergebnis- und Flagabweichungen. Sie sind pro Fixture
+mit erster Fehlerstelle erhalten und werden nicht durch eine gemeinsame,
+unbelegte Verdrahtungsänderung repariert.
+
+### Verbleibende Abnahme
+
+AP 22.1 bleibt offen, bis Kernprogramm und gesamte Matrix mit dem neuen
+Vergleich bestehen. Der Kern bietet momentan keine öffentlichen Eingabepins
+für Wert und Gültigkeit; bislang wird nur ausdrücklich fehlende Eingabe
+(`0 INVALID`, leere VM-Queue) geprüft. Ein elektrischer Nachweis gültiger
+Eingaben, die getrennte Divisionsgrenzfallkorrektur aus 22.2, der frische
+Kandidatenlauf aus 22.5 und die manuelle GUI-Kurzabnahme sind nicht erledigt.
+Historische grüne Halt-/Strukturprüfungen werden nicht nachträglich als
+vollständige Kernzustandsparität umgedeutet.
