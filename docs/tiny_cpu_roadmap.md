@@ -92,10 +92,20 @@ Flankenvergleich inzwischen implementiert und reale Abweichungen nachgewiesen:
 scheitern. Zwei Minimalkernläufe und die elektrische Negativkontrolle bestehen.
 Damit ist die folgende historische Funktionsfreigabe für den aktuellen Stand
 nicht bestätigt. AP 22.1 bleibt zur Behebung und erneuten Abnahme offen.
-Der nächste begrenzte Reparaturschritt gilt `ACC_WRITE_REQUEST` bei
-`STORE_ADDRESS`; Nachweise und Eingabegrenzen stehen im
+Der damals nächste begrenzte Reparaturschritt galt `ACC_WRITE_REQUEST` bei
+`STORE_ADDRESS`; die ursprünglichen Nachweise und Eingabegrenzen stehen im
 [Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-elektrischer-kernvergleich-am-29-oktober-2026)
 und im [Flankenvertrag](tiny_cpu_core_trace.md).
+
+**Nachtrag vom 30. Oktober 2026:** Der direkte STORE-Zweig zur
+Akkumulator-Ladeanforderung ist repariert und durch elektrische Positiv- und
+Negativkontrollen gesichert; alle 196 Offline-Unit-Tests bestehen. Der
+Countdown erreicht nun den ersten Unterschied erst an Flanke 5, `pre`,
+bei `PRINT_ENABLE` (Soll `1`, Ist `0`). Als nächster begrenzter Schritt wird
+ausschließlich der `PRINT`-Decode bis zum öffentlichen Ausgabe-Enable passiv
+verfolgt. Die vollständige Kernabnahme bleibt offen; die Matrix wurde nach
+diesem ersten Fehler nicht erneut geöffnet. Details stehen im
+[neuen Diagnoseabschnitt](tiny_cpu_circuit_debug_report.md#ap-221-store_address-ladeanforderung-am-30-oktober-2026).
 
 TinyCPU ist im eingefrorenen 1.0-Zielprofil **voll funktionsfähig**: Die
 16-Bit-Daten-/12-Bit-Adress-Schaltung implementiert alle 50 Opcodes, wird im

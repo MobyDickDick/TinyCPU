@@ -4705,3 +4705,98 @@ Eingaben, die getrennte Divisionsgrenzfallkorrektur aus 22.2, der frische
 Kandidatenlauf aus 22.5 und die manuelle GUI-Kurzabnahme sind nicht erledigt.
 Historische grüne Halt-/Strukturprüfungen werden nicht nachträglich als
 vollständige Kernzustandsparität umgedeutet.
+
+## AP 22.1: STORE_ADDRESS-Ladeanforderung am 30. Oktober 2026
+
+**Ausgangs-Commit:** `fbad965046a4ded29870559648a6e1bdaf09a25e`;
+der Arbeitsbaum war vor Beginn sauber. Geprüft wurde danach dieser Stand mit
+der hier beschriebenen, noch nicht committeten Reparatur und Regression.
+Das ist kein frischer Releasekandidatenlauf nach 22.5.
+
+Umgebung: Windows/PowerShell, Python **3.14.5**, OpenJDK **27+35-2325**,
+Logisim-evolution **4.1.0** aus
+`.venv/Include/logisim-evolution-4.1.0-all.jar`, SHA256
+`fe6386a3217a591bcc311a4eda49e1f43a389b499dd3d0f6f40f344fc85f2577`.
+Die elektrischen Läufe erhielten Zugriff auf die lokalen Java-Einstellungen
+in der Windows-Registry; der erste eingeschränkte Versuch scheiterte daran.
+Es wurde kein Simulator heruntergeladen.
+
+### Fehlernachweis und kleinste Reparatur
+
+Der erweiterte elektrische Decodertest lehnt die unveränderte Schaltung bei
+Opcode `0x29` ab: `ACC_WRITE_REQUEST` ist `1` statt `0`. Die neue fokussierte
+Kernfixture `LOAD_CONST(-1); STORE_ADDRESS(101); HALT` reproduziert außerdem
+den bisherigen Unterschied an Flanke 2, `post`, `ACC`: Soll `65535`, Ist `0`.
+Beide Nachweise liegen vor der Schaltungsänderung vor.
+
+Der ausschließlich lesende Helfer
+`artifacts/ap22-1-acc-request/DecodeContacts.java` löst das vorhandene Gatter
+über `ACC_LOAD_REQUEST` auf und liest seine tatsächlichen Kontakte mit der
+Logisim-API. Bei explizitem `OPCODE=0x29` führt nur der mit `STORE_ADR`
+verbundene Eingang `1`; alle anderen 17 Eingänge führen `0`, der Ausgang `1`.
+Die vorhandenen Leitungen verbinden genau diesen Eingang direkt mit dem
+öffentlichen `STORE_ADR`-Netz. Das grenzt den Defekt auf diesen Zweig ein.
+
+Die Reparatur entfernt ausschließlich dessen zwei abzweigende Segmente und
+setzt am bisherigen Gatterkontakt eine explizite Ein-Bit-Nullkonstante
+`ACC_STORE_DISABLED`. Sie hält den Eingang neutral und definiert, ohne die
+Eingangszahl, das Gatter oder einen vorhandenen Pin zu verschieben. Alle
+anderen Bauteilpositionen und Leitungsverläufe bleiben erhalten, insbesondere
+das öffentliche Store-Signal und der eigentliche Speicher-Schreibpfad.
+Die eigenständige Diagnoseschaltung besitzt diesen integrierten
+Akkumulator-Anforderungszweig nicht und wurde nicht verändert.
+
+### Ausgeführte Prüfungen
+
+Alle Befehle liefen im Projektverzeichnis. Gemeinsame PowerShell-Umgebung:
+
+```powershell
+$env:PYTHONPATH='src'
+$env:JAVA='C:/Program Files/jdk-27/bin/java.exe'
+$env:LOGISIM_JAR=(Resolve-Path .venv/Include/logisim-evolution-4.1.0-all.jar).Path
+$env:TEMP=(Resolve-Path artifacts/review-tmp).Path
+$env:TMP=$env:TEMP
+```
+
+| Prüfung | Exakter Befehl | Ergebnis und Artefakte unter `artifacts/ap22-1-acc-request/` |
+|---|---|---|
+| Decoder vor Reparatur | `python scripts/test-logisim-decode.py` | Exit 1; Opcode 41, `ACC_WRITE_REQUEST`: Soll 0, Ist 1. `decode-store-before.txt`. |
+| Kernfixture vor Reparatur | `python scripts/test-logisim-store.py --output artifacts/ap22-1-acc-request/before` | Exit 1; Flanke 2, `post`, `ACC`: Soll 65535, Ist 0. `store-before.txt`, `before/negative.tsv` und Reproduktionsordner. |
+| Passive Gatterdiagnose | `& $env:JAVA '-Djava.awt.headless=true' --class-path $env:LOGISIM_JAR artifacts/ap22-1-acc-request/DecodeContacts.java hardware/logisim/TinyCPU.circ` | Exit 0; alle 18 Eingänge und der Ausgang erfasst. `contacts-before.txt`. |
+| Decoder nach Reparatur | `python scripts/test-logisim-decode.py` | Exit 0; alle 64 Decoderzeilen einschließlich der neuen STORE-Halteprüfung bestehen. `decode-after.txt`. Die übrigen Akkumulator-Anforderungsterme sind damit nicht vollständig geprüft. |
+| Fokussierte Regression nach Reparatur | `python scripts/test-logisim-store.py --output artifacts/ap22-1-acc-request/after` | Exit 0; negative und gültige Null bleiben im Akkumulator erhalten, RAM-Wert/-Gültigkeit und Halt stimmen vollständig. Die nur in einer Kopie auf 1 gesetzte neutrale Konstante wird an Flanke 2, `post`, `ACC` abgelehnt. `store-after.txt`, `after/proof.json`, `negative.tsv`, `valid-zero.tsv`, `wrong.tsv` und jeweilige Reproduktionsordner. |
+| Offline-Verträge | `python src/tiny_cpu_verify.py` | Exit 0; 50 Opcodes, sechs Sticky-Error-Fixtures und 24 Logisim-Dateien konsistent. `verify.txt`. |
+| Schaltungsstruktur | `python scripts/check-logisim-circuit.py` | Exit 0. `structure.txt`. |
+| Windows-Unit-Suite | `python -m unittest discover -s tests -v` | Exit 0; 196 Tests ohne Skip in 31,294 Sekunden. `offline-tests.txt`. Linux-CI wurde nicht neu ausgeführt. |
+| Verpflichtender Kernlauf | `python src/tiny_cpu_logisim.py --java 'C:/Program Files/jdk-27/bin/java.exe' --jar .venv/Include/logisim-evolution-4.1.0-all.jar --trace-output artifacts/ap22-1-acc-request/final/core.tsv --matrix-output artifacts/ap22-1-acc-request/final/matrix` | Exit 1; beide Minimalkernläufe bestehen und sind bytegleich. Countdown stimmt bis einschließlich Flanke 4 vollständig; erster Unterschied an Flanke 5, `pre`, `PRINT_ENABLE`: Soll 1, Ist 0. `core-after.txt`, `final/core-countdown.tsv`, `final/core-countdown/diagnostic.json` und Reproduktionsordner. |
+
+Die STORE-Regression ist zusätzlich in `scripts/test-logisim.sh` eingebunden,
+damit sie auch bei einem weiterhin roten Countdown separat ausgeführt und
+ihre Evidenz vom vorhandenen CI-Artefaktschritt aufbewahrt wird. Das gesamte
+Shell-Gate wurde hier nicht ausgeführt; seine übrigen System-/Operatorläufe
+werden damit nicht als neu abgenommen ausgewiesen.
+
+### Grenzen und nächster begrenzter Schritt
+
+Die beiden Countdown-Stores erhalten jetzt `65535 VALID` beziehungsweise
+`3 VALID`; der RAM enthält anschließend `101:65535:1` und `100:3:1`.
+Die Reparatur des dokumentierten STORE-Ladeanforderungszweigs ist damit
+abgenommen. AP 22.1 insgesamt bleibt offen.
+
+Ein zusätzlicher elektrischer Versuch mit `STORE_ADDRESS(101); HALT` bei
+anfänglich ungültigem Akkumulator findet an Flanke 1, `post`, `ERROR_INV`
+weiterhin `0` statt `1`. Die vollständig erhaltene Evidenz liegt unter
+`after/invalid-zero.tsv` und `after/invalid-zero/diagnostic.json`. Dieser
+separate Fehlerflagbefund wurde nicht repariert und nicht durch eine gelockerte
+Vergleichsregel zum Erfolg erklärt. Die verpflichtende neue STORE-Regression
+ist ausdrücklich auf die beiden gültigen Akkumulatorfälle begrenzt.
+
+Gemäß Stop-Regel wurde nach dem ersten neuen Countdown-Unterschied weder
+die vollständige ISA-/Fehlermatrix noch eine weitere Signalkette repariert.
+Als nächstes wird ausschließlich bei Flanke 5, `pre`, das benannte
+`FetchDecodeControls.PRINT` über seine Weitergabe bis zum öffentlichen
+`TinyCPUMain.PRINT_ENABLE` passiv verglichen. Die bestehende Decoderprüfung
+allein belegt keine korrekte Weitergabe im laufenden Kern. Erst der erste
+abweichende benannte Anschluss erlaubt eine weitere minimale Reparatur.
+Gültige externe Eingaben, die übrigen offenen Matrixbefunde, AP 22.2 bis 22.5
+und die manuelle GUI-Kurzabnahme bleiben offen.

@@ -1992,6 +1992,10 @@
       <a name="inputs" val="18"/>
       <a name="label" val="ACC_LOAD_REQUEST"/>
     </comp>
+    <comp lib="0" loc="(1420,1750)" name="Constant">
+      <a name="label" val="ACC_STORE_DISABLED"/>
+      <a name="value" val="0x0"/>
+    </comp>
     <comp lib="1" loc="(1570,1240)" name="OR Gate">
       <a name="label" val="RESERVED_OPCODE_SET_ILL"/>
     </comp>
@@ -2159,9 +2163,7 @@
     <wire from="(1250,1100)" to="(1250,1760)"/>
     <wire from="(1250,1100)" to="(1700,1100)"/>
     <wire from="(1250,1760)" to="(1420,1760)"/>
-    <wire from="(1260,1080)" to="(1260,1750)"/>
     <wire from="(1260,1080)" to="(1700,1080)"/>
-    <wire from="(1260,1750)" to="(1420,1750)"/>
     <wire from="(1270,1060)" to="(1270,1740)"/>
     <wire from="(1270,1060)" to="(1700,1060)"/>
     <wire from="(1270,1740)" to="(1420,1740)"/>

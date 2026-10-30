@@ -1,6 +1,29 @@
 # AP 22: Qualitätsbefunde und belastbare Abnahme
 
-**Stand:** 29. Oktober 2026. **Status:** in Bearbeitung; elektrische Abnahme offen.
+**Stand:** 30. Oktober 2026. **Status:** in Bearbeitung; elektrische Abnahme offen.
+
+## Fortschritt am 30. Oktober 2026
+
+Der begrenzte Reparaturschritt für `ACC_WRITE_REQUEST` bei `STORE_ADDRESS`
+ist abgeschlossen. Der elektrisch belegte direkte Zweig von `STORE_ADR`
+zum ODER `ACC_LOAD_REQUEST` wurde entfernt; eine explizite Null hält den
+freigewordenen Eingang definiert, ohne das Gatter oder seine übrigen Anschlüsse
+zu verschieben. Der erweiterte Decodertest und der neue verpflichtende
+`scripts/test-logisim-store.py` sichern gültiges Speichern mit `-1` und `0`
+sowie die Ablehnung einer absichtlich wieder aktivierten Ladeanforderung ab.
+Offline-Verträge, Strukturprüfung und alle 196 Windows-Unit-Tests bestehen.
+
+Der erneut ausgeführte Countdown stimmt nun bis einschließlich Flanke 4
+vollständig mit der VM überein. Sein erster Unterschied liegt an Flanke 5,
+`pre`, bei `PRINT_ENABLE`: Soll `1`, Ist `0`. Der nächste begrenzte Schritt
+verfolgt ausschließlich den dortigen `PRINT`-Decode bis zum öffentlichen
+Ausgabe-Enable; erst ein benannter erster Unterschied darf eine Reparatur
+auslösen. Eine zusätzliche Diagnose mit ungültigem Akkumulator zeigt weiterhin
+ein fehlendes `INV`-Flag beim Speichern und bleibt als separater Befund offen.
+Die gesamte Matrix wurde nach dem roten Countdown gemäß Stop-Regel nicht
+erneut geöffnet; die 59 Abweichungen unten sind die Bestandsaufnahme vom
+29. Oktober, keine neue Zählung. 22.1 bleibt offen. Reproduktion und Grenzen
+stehen im [neuen Diagnoseabschnitt](tiny_cpu_circuit_debug_report.md#ap-221-store_address-ladeanforderung-am-30-oktober-2026).
 
 ## Fortschritt am 29. Oktober 2026
 
@@ -8,9 +31,9 @@
 für Minimalkern, AP-5-Countdown und alle 61 bestehenden Matrixfixtures.
 Die elektrische Negativkontrolle besteht: Ein verfälschtes Ergebnis wird trotz
 Normalhalt erkannt. Die unveränderte Schaltung besteht die neue Abnahme jedoch
-nicht: Countdown und 59 der 61 Matrixfixtures weichen ab. Der nächste begrenzte
-Reparaturschritt verfolgt ausschließlich `ACC_WRITE_REQUEST` bei
-`STORE_ADDRESS`, bevor weitere Fehlerpfade repariert werden. Gültige externe
+nicht: Countdown und 59 der 61 Matrixfixtures weichen ab. Der damals nächste
+begrenzte Reparaturschritt für `ACC_WRITE_REQUEST` bei `STORE_ADDRESS` ist
+oben mit seinem neuen Nachweisstand fortgeschrieben. Gültige externe
 Eingaben sind mangels öffentlicher Kernpins noch nicht elektrisch prüfbar.
 22.1 bleibt deshalb offen. Nachweise stehen im
 [Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-elektrischer-kernvergleich-am-29-oktober-2026),

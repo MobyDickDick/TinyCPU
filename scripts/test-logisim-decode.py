@@ -76,6 +76,10 @@ def expected_row(code: int, opcodes: dict[str, dict[str, object]]) -> dict[str, 
     mnemonic = str(instruction["mnemonic"])
     family = mnemonic.split("_", 1)[0]
     arithmetic = family in {"ADD", "SUB", "MUL", "DIV", "AND", "OR", "XOR"}
+    # AP 22.1's bounded STORE_ADDRESS repair. Other accumulator-request
+    # terms still need their own electrical diagnosis before repair.
+    if mnemonic == "STORE_ADDRESS":
+        row["ACC_WRITE_REQUEST"] = 0
     if arithmetic:
         row[f"{family}_OPERAND"] = 1
     if mnemonic in DIRECT:
@@ -115,7 +119,7 @@ def main() -> int:
             raise LogisimError(f"{source.name}: decode table failed: {result.stderr.strip()}")
         lines = [line.split() for line in result.stdout.splitlines() if line.strip()]
         if (not lines or not lines[0] or lines[0][0] != "OPCODE"
-                or not set(OUTPUTS).issubset(lines[0])):
+                or not (set(OUTPUTS) | {"ACC_WRITE_REQUEST"}).issubset(lines[0])):
             raise LogisimError(
                 f"{source.name}: unexpected decode-table header: {lines[0] if lines else 'empty'}"
             )
@@ -127,7 +131,8 @@ def main() -> int:
                 raise LogisimError(f"{source.name}: malformed decode row {code}: {' '.join(cells)}")
             expected = expected_row(code, opcodes)
             actual = dict(zip(actual_header[1:], cells[1:]))
-            differences = [name for name in OUTPUTS if actual[name] != str(expected[name])]
+            differences = [f"{name} (expected {value}, actual {actual[name]})"
+                           for name, value in expected.items() if actual[name] != str(value)]
             if differences:
                 raise LogisimError(
                     f"{source.name}: opcode {code}: mismatched outputs {', '.join(differences)}"

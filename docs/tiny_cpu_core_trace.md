@@ -1,10 +1,14 @@
 # Elektrischer Kernvergleich (AP 22.1)
 
-**Stand: 29. Oktober 2026.** Der Vergleich ist im verpflichtenden Gate aktiv.
-Die Schaltung besteht die Abnahme derzeit nicht: Der Minimalkern besteht,
-das AP-5-Kernprogramm und 59 der 61 ISA-/Fehler-Fixtures weichen ab.
-Die erste Abweichung und Reproduktion stehen im
-[Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-elektrischer-kernvergleich-am-29-oktober-2026).
+**Stand: 30. Oktober 2026.** Der Vergleich ist im verpflichtenden Gate aktiv.
+Die Schaltung besteht die Abnahme derzeit nicht. Nach der begrenzten
+`STORE_ADDRESS`-Reparatur bestehen beide Minimalkernläufe und die neue
+STORE-Regression einschließlich Negativkontrolle. Der Countdown scheitert
+erstmals an Flanke 5, `pre`, bei `PRINT_ENABLE` (Soll `1`, Ist `0`). Die
+Bestandsaufnahme mit 59 Abweichungen in 61 ISA-/Fehler-Fixtures stammt vom
+29. Oktober; die Matrix wurde nach dem neuen ersten Fehler nicht wiederholt.
+Reproduktion und nächste Diagnose stehen im
+[Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-store_address-ladeanforderung-am-30-oktober-2026).
 
 ## Ausführung
 
@@ -106,3 +110,18 @@ Das Gate muss an Flanke 1, `post`, Signal `ACC` ablehnen. Das ist eine
 Mutation des Ergebnisdatenpfads, kein Additions-/Divisionsgrenzfallnachweis.
 Originalschaltungen bleiben bytegleich. `proof.json` dokumentiert sowohl
 die erfolgreiche unveränderte Kontrolle als auch die abgelehnte Mutation.
+
+Die ergänzende verpflichtende STORE-Regression läuft separat:
+
+```bash
+PYTHONPATH=src python scripts/test-logisim-store.py
+```
+
+Sie prüft `LOAD_CONST(-1); STORE_ADDRESS(101); HALT` und den gleichen Ablauf
+mit gültiger `0` vollständig gegen die VM, einschließlich Akkumulatorhalten,
+Speicherwert und -gültigkeit sowie Halt. Anschließend setzt sie ausschließlich
+in einer Kopie die benannte neutrale Konstante `ACC_STORE_DISABLED` auf `1`.
+Der Vergleich muss dann an Flanke 2, `post`, `ACC` (Soll `65535`, Ist `0`)
+ablehnen. Das ist eine Negativkontrolle der fehlerhaften Ladeanforderung;
+sie verdrahtet keine historische Zeichnung zurück. Ungültiges Speichern und
+andere Decoderterme sind damit nicht vollständig abgenommen.

@@ -26,6 +26,11 @@ if ! PYTHONPATH=src python3 scripts/test-logisim-core-mutation.py \
   failed+=(core-mutation)
 fi
 
+if ! PYTHONPATH=src python3 scripts/test-logisim-store.py \
+    --output "$OUTPUT/store-acc-hold"; then
+  failed+=(store-acc-hold)
+fi
+
 system_args=(--profile tinycpu-16-12
              --system tinycpu-peripherals-16-12-v1
              --system-only
