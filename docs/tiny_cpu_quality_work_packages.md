@@ -2,7 +2,31 @@
 
 **Stand:** 30. Oktober 2026. **Status:** in Bearbeitung; elektrische Abnahme offen.
 
-## Fortschritt am 30. Oktober 2026
+## Fortschritt am 30. Oktober 2026: PRINT-Weitergabe
+
+Der nächste begrenzte Schritt aus 22.1 ist abgeschlossen. Der passive Vergleich
+zeigt `FetchDecodeControls.PRINT=1`, aber `TinyCPUMain.PRINT_ENABLE=0` vor
+Countdown-Flanke 5. Die Logisim-API bestätigt, dass die bisherige Leitung am
+Kontakt `SET_DIV0` statt an `PRINT` beginnt. Ausschließlich dieser Top-Level-
+Zweig ist nun direkt mit `PRINT` verbunden; die Decoderzeichnung blieb
+unverändert. Eine neue verpflichtende elektrische Regression prüft positive,
+negative und gültige Nullausgaben, aufeinanderfolgende Ereignisse und einen
+Lauf ohne PRINT. Ein in einer Kopie unterdrückter Impuls wird trotz Normalhalt
+abgelehnt. Der bisherige PRINT-Strukturtest verwendete eine veraltete feste
+Portzeile; er löst den Anschluss jetzt anhand der tatsächlichen benannten Pins
+auf. Ein zusätzlicher Mutationstest sichert die Offline-Prüfung ab.
+
+Alle 197 Windows-Unit-Tests, Offline-Verträge, Strukturprüfung und die bisherigen
+STORE-/Rechenergebnis-Negativkontrollen bestehen. Beide Minimalkernläufe sind
+erneut identisch. Der Countdown stimmt bis einschließlich Flanke 5 vollständig
+mit der VM überein; der erste Unterschied liegt nun an Flanke 6, `post`, bei
+`ERROR_INV`: Soll `0`, Ist `1`. Die Matrix wurde deshalb nicht erneut geöffnet.
+Als nächstes wird ausschließlich die Erzeugung und Übernahme von
+`ErrorFlags.SET_INV` um diese Flanke passiv verfolgt. AP 22.1 bleibt offen.
+Befehle, Rohdaten und Grenzen stehen im
+[PRINT-Diagnoseabschnitt](tiny_cpu_circuit_debug_report.md#ap-221-print-weitergabe-am-30-oktober-2026).
+
+## Vorheriger Fortschritt am 30. Oktober 2026: STORE_ADDRESS
 
 Der begrenzte Reparaturschritt für `ACC_WRITE_REQUEST` bei `STORE_ADDRESS`
 ist abgeschlossen. Der elektrisch belegte direkte Zweig von `STORE_ADR`

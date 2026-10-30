@@ -5,17 +5,19 @@
 Die Bestandsaufnahme des vollständigen Kernvergleichs aus AP 22.1 vom
 29. Oktober am Ausgangsstand `9d60c94` fand Abweichungen in 59 von 61
 unveränderten Fixtures; nur `halt` und `halt-error` bestanden. Nach der
-begrenzten Reparatur von `ACC_WRITE_REQUEST` bei `STORE_ADDRESS` bestehen
-die gezielten gültigen Speicherfälle und ihre elektrische Negativkontrolle.
-Der Countdown scheitert jetzt erstmals an Flanke 5, `pre`, bei
-`PRINT_ENABLE` (Soll `1`, Ist `0`). Die gesamte Matrix wurde nicht erneut
-geöffnet. Der Minimalkern `LOAD_CONST(3); HALT` besteht weiterhin zweimal.
+begrenzten Reparatur von `ACC_WRITE_REQUEST` bei `STORE_ADDRESS` und der
+PRINT-Weitergabe bestehen die gezielten gültigen Speicher- und Ausgabefälle
+samt elektrischen Negativkontrollen. Alle 197 Windows-Unit-Tests bestehen.
+Der Countdown stimmt bis einschließlich Flanke 5 vollständig überein und
+scheitert jetzt erstmals an Flanke 6, `post`, bei `ERROR_INV` (Soll `0`, Ist
+`1`). Die gesamte Matrix wurde nicht erneut geöffnet. Der Minimalkern
+`LOAD_CONST(3); HALT` besteht weiterhin zweimal mit identischen Rohtraces.
 Die bisherigen grünen Haltprüfungen belegen keine vollständige Zustandsparität;
 die unten stehende Tabelle ist ein historischer Abschlussvermerk vom
 20. September 2026 und keine aktuelle Funktionsfreigabe.
 
 Details und der erste begrenzte Reparaturschritt stehen im
-[AP-22.1-Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-store_address-ladeanforderung-am-30-oktober-2026).
+[AP-22.1-Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-print-weitergabe-am-30-oktober-2026).
 Der [Beobachtungsvertrag](tiny_cpu_core_trace.md) beschreibt die neue Prüfung
 und ihre noch offene Grenze für gültige Eingaben. Der manuelle GUI-Test bleibt
 ebenfalls offen.

@@ -687,6 +687,11 @@ def verify_system_circuit() -> None:
     )
     controls_ports = generated_symbol_ports(controls_definition, controls_instance)
 
+    # AP 22.1: the public PRINT event must follow the PRINT decode, rather
+    # than an unrelated error-set output of the same generated symbol.
+    if not core_connected(controls_ports["PRINT"], core_pin_locations["PRINT_ENABLE"]):
+        raise VerificationError("CPU PRINT forwarding from decoder to PRINT_ENABLE differs")
+
     # FetchDecode exports the complete 22-bit instruction word.  The authored
     # splitter must pass its six high opcode bits to FetchDecodeControls.  Find
     # that splitter by its electrical neighbours and bit mapping, rather than

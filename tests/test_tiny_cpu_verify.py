@@ -948,6 +948,31 @@ class CircuitVerificationTests(unittest.TestCase):
             ):
                 VERIFY.verify_system_circuit()
 
+    def test_core_print_enable_rejects_disconnected_or_wrong_decoder_source(self) -> None:
+        root = MODULE_PATH.parents[1]
+        for replacement in (None, "SET_DIV0"):
+            with self.subTest(replacement=replacement):
+                temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+                shutil.copytree(root / "hardware/logisim", temporary / "logisim")
+                circuit = temporary / "logisim/TinyCPU.circ"
+                project = ET.parse(circuit)
+                main = project.getroot().find("circuit[@name='TinyCPUMain']")
+                ports = _subcircuit_ports(project.getroot(), main, "FETCH_DECODE_CONTROLS")
+                wire = next(item for item in main.findall("wire")
+                            if ports["PRINT"] in {item.get("from"), item.get("to")})
+                if replacement is None:
+                    main.remove(wire)
+                else:
+                    end = "from" if wire.get("from") == ports["PRINT"] else "to"
+                    wire.set(end, ports[replacement])
+                project.write(circuit, encoding="utf-8", xml_declaration=True)
+                system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+                with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+                     mock.patch.object(VERIFY, "load_system_profile", return_value=replace(
+                         system, circuit_path=temporary / "logisim/TinyCPU_Peripherals.circ")):
+                    with self.assertRaisesRegex(VERIFY.VerificationError, "CPU PRINT forwarding"):
+                        VERIFY.verify_system_circuit()
+
     def test_ap18_memory_write_request_uses_store_decoder_outputs(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"

@@ -1,14 +1,15 @@
 # Elektrischer Kernvergleich (AP 22.1)
 
 **Stand: 30. Oktober 2026.** Der Vergleich ist im verpflichtenden Gate aktiv.
-Die Schaltung besteht die Abnahme derzeit nicht. Nach der begrenzten
-`STORE_ADDRESS`-Reparatur bestehen beide Minimalkernläufe und die neue
-STORE-Regression einschließlich Negativkontrolle. Der Countdown scheitert
-erstmals an Flanke 5, `pre`, bei `PRINT_ENABLE` (Soll `1`, Ist `0`). Die
+Die Schaltung besteht die Abnahme derzeit nicht. Nach den begrenzten
+`STORE_ADDRESS`- und PRINT-Reparaturen bestehen beide Minimalkernläufe und
+die STORE-/PRINT-Regressionen einschließlich Negativkontrollen. Der Countdown
+stimmt bis einschließlich Flanke 5 vollständig mit der VM überein und scheitert
+erstmals an Flanke 6, `post`, bei `ERROR_INV` (Soll `0`, Ist `1`). Die
 Bestandsaufnahme mit 59 Abweichungen in 61 ISA-/Fehler-Fixtures stammt vom
 29. Oktober; die Matrix wurde nach dem neuen ersten Fehler nicht wiederholt.
 Reproduktion und nächste Diagnose stehen im
-[Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-store_address-ladeanforderung-am-30-oktober-2026).
+[Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-print-weitergabe-am-30-oktober-2026).
 
 ## Ausführung
 
@@ -125,3 +126,19 @@ Der Vergleich muss dann an Flanke 2, `post`, `ACC` (Soll `65535`, Ist `0`)
 ablehnen. Das ist eine Negativkontrolle der fehlerhaften Ladeanforderung;
 sie verdrahtet keine historische Zeichnung zurück. Ungültiges Speichern und
 andere Decoderterme sind damit nicht vollständig abgenommen.
+
+Die ebenfalls verpflichtende PRINT-Regression läuft separat:
+
+```bash
+PYTHONPATH=src python scripts/test-logisim-print.py
+```
+
+Sie vergleicht `LOAD_CONST(3); PRINT(); HALT`, den gleichen Ablauf mit `-1`,
+gültige Null mit zwei aufeinanderfolgenden PRINT-Befehlen und einen Lauf ohne
+PRINT vollständig mit der VM. Damit werden Enable, Wert, Gültigkeit,
+Akkumulatorhalten und Normalhalt gemeinsam geprüft. Anschließend trennt sie
+ausschließlich in einer Kopie den über benannte Pins aufgelösten PRINT-Zweig
+und legt ihn auf Null. Der Vergleich muss an Flanke 2, `pre`, `PRINT_ENABLE`
+(Soll `1`, Ist `0`) ablehnen, während Normalhalt erhalten bleibt. Original-
+schaltung, Rohdaten und `proof.json` werden entsprechend geprüft beziehungsweise
+aufbewahrt. Ungültige Ausgabe und `PRINT_ADDRESS` sind damit nicht abgenommen.

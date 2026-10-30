@@ -108,7 +108,7 @@ def _subcircuit_ports(project, circuit, instance_label):
 
 
 def _controls_port(circuit, label):
-    """Resolve a control terminal by its row in the authored symbol."""
+    """Legacy row map; diagnosed paths must use _subcircuit_ports instead."""
     instance = _component_by_label(circuit, "FETCH_DECODE_CONTROLS")
     rows = (
         "ADD_OPERAND", "SUB_OPERAND", None, None, None, None, None, None,
@@ -116,7 +116,7 @@ def _controls_port(circuit, label):
         "JUMP_ADR", "JUMP_ZERO", "JUMP_NOT_ZERO", "JUMP_NEGATIVE",
         "JUMP_ERROR", "JUMP_NOT_ERROR", None, None, None, None, None, None,
         "STORE_ADR", "STORE_ADR_REG", "STORE_REG_OFF", None,
-        "PRINT", "PRINT_ADR", None, None, None, "SET_ILL", "SET_INPUT",
+        None, "PRINT_ADR", None, None, None, "SET_ILL", "SET_INPUT",
         None, None, "HALT", "HALT_ERROR",
     )
     return _point_offset(instance, y=rows.index(label) * 20)
@@ -928,7 +928,8 @@ class LogisimLauncherTests(unittest.TestCase):
 
         # Follow the complete net between the named component terminals.
         self.assertTrue(
-            _wire_path_exists(main, _controls_port(main, "PRINT"), print_enable.get("loc")),
+            _wire_path_exists(main, _subcircuit_ports(
+                root, main, "FETCH_DECODE_CONTROLS")["PRINT"], print_enable.get("loc")),
             "FetchDecodeControls.PRINT does not reach TinyCPUMain.PRINT_ENABLE",
         )
 
