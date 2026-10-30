@@ -119,6 +119,19 @@ ausschließlich `ErrorFlags.SET_INV` bis zur Flagübernahme passiv verfolgt.
 Die Matrix und die vollständige Kernabnahme bleiben offen; Nachweise stehen im
 [PRINT-Diagnoseabschnitt](tiny_cpu_circuit_debug_report.md#ap-221-print-weitergabe-am-30-oktober-2026).
 
+**Dritter Nachtrag vom 30. Oktober 2026:** Der CI-Befund an Countdown-Flanke 6
+ist durch die elektrisch belegte Korrektur von Konstantenselektor und
+Immediate-Datenquelle behoben; der vollständige Countdown besteht. Die danach
+geöffnete Matrix belegte zusätzlich die fehlende Speicherladeanforderung, deren
+drei Decoderzweige einzeln korrigiert und im 64-Zeilen-Test abgesichert sind.
+`load-const` und `load-address` bestehen. Die nächste Abweichung ist
+`load-address-register`, Flanke 3, `post`, `ACC`: Soll `7`, Ist `20`.
+198 Windows-Unit-Tests, alle sieben Systemfixtures, Operator-Panel und die
+gezielten elektrischen Regressionen bestehen. Der neue Registerbefund bleibt
+ein getrennter Diagnoseschritt; AP 22.1 und die vollständige Kernfreigabe bleiben
+offen. Die [Nachweise](tiny_cpu_circuit_debug_report.md#ap-221-countdown-operandenauswahl-und-speicherladeanforderung-am-30-oktober-2026)
+benennen Zwischenstände und den nächsten passiven Vergleich.
+
 TinyCPU ist im eingefrorenen 1.0-Zielprofil **voll funktionsfähig**: Die
 16-Bit-Daten-/12-Bit-Adress-Schaltung implementiert alle 50 Opcodes, wird im
 realen, gepinnten Logisim-evolution elektrisch gegen die Python-VM geprüft und

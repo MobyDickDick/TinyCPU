@@ -4920,3 +4920,158 @@ Treibernetz einschließlich der benannten Quellen `OPERATIONS_INSTANCE/INVALID_O
 und `FETCH_DECODE_CONTROLS/SET_INV`. Erst der erste abweichende benannte Anschluss
 erlaubt eine minimale Reparatur. Vorher darf weder der Flagzustand noch die
 VM-Erwartung angepasst werden.
+
+## AP 22.1: Countdown-Operandenauswahl und Speicherladeanforderung am 30. Oktober 2026
+
+**Ausgangs-Commit:** `94a4d4f` (`Fix PRINT event forwarding and add electrical regression`);
+der Arbeitsbaum war vor Beginn sauber. Die folgenden Ergebnisse beziehen sich
+auf diesen Stand mit den hier beschriebenen Reparaturen und Regressionen,
+nicht auf einen frischen Releasekandidaten nach 22.5. Anlass war der auch in CI
+gemeldete Countdown-Unterschied an Flanke 6, `post`, `ERROR_INV`: Soll `0`,
+Ist `1`. Java- oder Workflowänderungen beheben diesen Kernfehler nicht.
+
+Umgebung unverändert: Windows/PowerShell, Python **3.14.5**, OpenJDK
+**27+35-2325**, Logisim-evolution **4.1.0** aus
+`.venv/Include/logisim-evolution-4.1.0-all.jar`, SHA256
+`fe6386a3217a591bcc311a4eda49e1f43a389b499dd3d0f6f40f344fc85f2577`.
+Die elektrischen Läufe erhielten wie zuvor Zugriff auf die lokalen
+Java-Einstellungen. Es wurde kein Simulator heruntergeladen.
+
+### Erster Schritt: Ursache des falschen INV-Flags
+
+Die passive Beobachtung der benannten Flagpins bestätigt vor Flanke 6
+`SET_INV=1`, `CLEAR_ERROR=0` und nach der korrekten steigenden Flanke
+`INV_OUT=1`. Der Flagzustand folgt also seinem Eingang. Der erste falsche
+Wert stammt bereits aus `Operations.INVALID_OPERAND=1`, während
+`FetchDecodeControls.SET_INV=0` bleibt.
+
+Die anschließende Beobachtung grenzt die Operandenauswahl ein:
+`CONST_ARGUMENT=1`, aber `Operations.CONST_OPERAND=0`; der Eingang folgt
+stattdessen dem inaktiven `ADDR_REG_ARGUMENT`. Bei gültigem Akkumulator bleibt
+deshalb `ADD_OPERATION.INPUT_VALID=0`. Die Top-Level-Verbindung ist nach
+diesem Nachweis vom falschen auf den tatsächlichen Konstantendecode umgelegt.
+
+Der daraufhin wiederholte fokussierte Vergleich meldet nun `ACC=3` statt `2`.
+Eine zweite passive Messung im selben Datenpfad zeigt
+`Operations.IMMEDIATE_VALUE=0` und `ADD_OPERATION.RIGHT=0`, obwohl der
+Instruktionsoperand `0xffff` am bisherigen `MEMORY_VALUE` anliegt. Der
+Immediate-Eingang war mit dem RAM-Lesewert verbunden. Ausschließlich dieser
+Abzweig führt jetzt den unteren 16-Bit-Instruktionsoperanden; die bestehende
+Leitung zur effektiven Adresse bleibt durch eine explizite Verzweigung erhalten.
+
+Der neue `scripts/test-logisim-immediate.py` reproduziert vor der Reparatur
+`LOAD_CONST(3); ADD_CONST(-1); HALT` mit dem ursprünglichen INV-Fehler. Danach
+bestehen dieses Programm und `LOAD_CONST(-1); ADD_CONST(1); HALT` vollständig
+gegen die VM. Zwei getrennte Kopien unterdrücken entweder den Selektor oder
+die Immediate-Daten. Der erste Fall wird an Flanke 2, `post`, `ERROR_INV`
+(Soll `0`, Ist `1`), der zweite bei `ACC` (Soll `2`, Ist `3`) abgelehnt.
+Die Originalschaltung bleibt bytegleich. Die Offline-Verifikation und ein
+Mutationstest prüfen zusätzlich beide benannten Verbindungen. Logisims API
+bestätigt für den vorhandenen südgerichteten Instruktionssplitter mit Abstand 2
+den 16-Bit-Kontakt bei x+30/y+20 und den 6-Bit-Kontakt bei x+10/y+20; die bisher
+unbenutzte falsche Annahme zum unteren Kontakt im Verifier ist berichtigt.
+
+**Ergebnis:** Beide identischen Minimalkernläufe und erstmals der vollständige
+Countdown bestehen. Der gemeldete CI-Befund ist damit behoben.
+
+### Getrennter Folgeschritt: LOAD_ADDRESS
+
+Die anschließend seriell gestartete Matrix besteht `load-const` und stoppt
+bei `load-address`, Flanke 4, `post`, `ACC`: Soll `7`, Ist `20`. Die passive
+Messung zeigt vor der Flanke `LOAD_ADR=1`, RAM-Wert `7 VALID`, aber
+`ACC_MEMORY_REQUEST=0`; der Datenpfad reicht deshalb den Adressoperanden `20`
+weiter. Der um diese Anforderung erweiterte Decodertest lehnt vor der nächsten
+Schaltungsänderung Opcode `0x24` mit Soll `1`, Ist `0` ab.
+
+Die drei Quellen am vorhandenen `ACC_MEMORY_SELECT`-ODER waren
+`LD_REG_ADR`, `STORE_ADR` und `STORE_ADR_REG`. Die erhaltene Schaltungskopie vor
+der Reparatur und die aktuelle Schaltung werden zusätzlich mit der lesenden
+Logisim-API-Diagnose `LoadContacts.java` verglichen: Vorher aktivieren nur
+`0x28`, `0x29` und `0x2a` jeweils einen Eingang, danach ausschließlich die
+zugehörigen Speicherlade-Codes `0x24`, `0x25` und `0x26`. Sechs betroffene
+Leitungssegmente verbinden jetzt diese vorhandenen Load-Zweige mit denselben
+Gatterkontakten. Kein Gatter, Pin oder Bauteil ist verschoben; sämtliche übrigen
+Leitungswege und die eigenständige Diagnoseschaltung bleiben erhalten.
+Der gesamte 64-Zeilen-Decodertest und `load-address` bestehen danach.
+
+Die bestehende STORE-Negativkontrolle erkennt den absichtlich wieder
+eingeschalteten Akkumulator-Schreibvorgang weiterhin an derselben Flanke und
+demselben Signal. Nach der korrigierten Ladeauswahl ist der dabei fälschlich
+geladene inaktive Buswert jedoch `101` statt der früheren `0`. Die Kontrolle
+verlangt weiterhin exakt Flanke 2, `post`, Signal `ACC`, Soll `65535` und einen
+abweichenden definierten Wert; sie protokolliert den tatsächlichen Istwert.
+Beide unveränderten Positivkontrollen müssen vorher vollständig bestehen.
+Damit wird kein Maschinen-Sollwert gelockert und kein Fehler übersprungen.
+
+### Reproduktion und Ergebnisse
+
+Alle Befehle liefen im Projektverzeichnis. Gemeinsame PowerShell-Umgebung:
+
+```powershell
+$env:PYTHONPATH='src'
+$env:JAVA='C:/Program Files/jdk-27/bin/java.exe'
+$env:LOGISIM_JAR=(Resolve-Path .venv/Include/logisim-evolution-4.1.0-all.jar).Path
+$env:TEMP=(Resolve-Path artifacts/review-tmp).Path
+$env:TMP=$env:TEMP
+```
+
+Die passiven Exporte verwenden jeweils
+`& $env:JAVA '-Djava.awt.headless=true' --class-path $env:LOGISIM_JAR scripts/LogisimCoreTrace.java TinyCPUMain PROJEKT PROBES MAX_EDGES`.
+Unter `artifacts/ap22-1-flags/` bleiben folgende Kombinationen erhalten;
+alle fünf Läufe enden mit Exit 0:
+
+| Rohtrace | Projekt | Probes | MAX_EDGES |
+|---|---|---|---:|
+| `before.tsv` | `artifacts/ap22-1-print/final/core-countdown/TinyCPU.circ` | `artifacts/ap22-1-flags/probes.tsv` | 20 |
+| `operations-before.tsv` | dasselbe Projekt | `artifacts/ap22-1-flags/operations-probes.tsv` | 20 |
+| `select-before.tsv` | dasselbe Projekt | `artifacts/ap22-1-flags/select-probes.tsv` | 20 |
+| `data-after.tsv` | `artifacts/ap22-1-flags/after/countdown-add/TinyCPU.circ` | `artifacts/ap22-1-flags/data-probes.tsv` | 5 |
+| `load-before.tsv` | `artifacts/ap22-1-flags/final/matrix/load-address/TinyCPU.circ` | `artifacts/ap22-1-flags/load-probes.tsv` | 10 |
+
+Die erste Projektkopie enthält den unveränderten Ausgangsstand; die Kopie
+unter `after/` nur die Selektorkorrektur. Die Kopie unter `final/` enthält
+beide Operandenkorrekturen, aber noch die alte Speicherladeanforderung.
+
+| Prüfung | Exakter Befehl | Ergebnis und Artefakte unter `artifacts/ap22-1-flags/` |
+|---|---|---|
+| Fokussierter Fehlernachweis | `python scripts/test-logisim-immediate.py --output artifacts/ap22-1-flags/before` | Exit 1; Flanke 2, `post`, `ERROR_INV`: Soll 0, Ist 1. `regression-before.txt`, `before/countdown-add.tsv` und Reproduktionsordner. |
+| Zwischenstand nach Selektorkorrektur | `python scripts/test-logisim-immediate.py --output artifacts/ap22-1-flags/after` | Exit 1; Flanke 2, `post`, `ACC`: Soll 2, Ist 3. `regression-after.txt`, `after/countdown-add.tsv` und Reproduktionsordner. |
+| Operandenauswahl am finalen Stand | `python scripts/test-logisim-immediate.py --output artifacts/ap22-1-flags/checks/immediate` | Exit 0; beide Positivfälle und beide unabhängigen Negativkontrollen bestehen. `immediate-final.txt`, `checks/immediate/proof.json` und Rohtraces. |
+| Decoder vor/nach Load-Reparatur | `python scripts/test-logisim-decode.py` | Zuerst Exit 1 bei Opcode 36, `ACC_MEMORY_REQUEST`, danach Exit 0 für alle 64 Zeilen. `decode-before.txt`, `decode-after.txt`. |
+| Lesende Gatter-/Kontaktdiagnose | `& $env:JAVA '-Djava.awt.headless=true' --class-path $env:LOGISIM_JAR artifacts/ap22-1-flags/LoadContacts.java PROJEKT` | Beide Exit 0; `PROJEKT` ist zuerst `artifacts/ap22-1-flags/final/matrix/load-address/TinyCPU.circ`, danach `hardware/logisim/TinyCPU.circ`. `load-contacts-before.txt`, `load-contacts-after.txt` und Helferquelle. |
+| Offline-Verträge | `python src/tiny_cpu_verify.py` | Exit 0; 50 Opcodes, sechs Sticky-Error-Fixtures, 24 Logisim-Dateien konsistent. `verify.txt`. |
+| Schaltungsstruktur | `python scripts/check-logisim-circuit.py` | Exit 0. `structure.txt`. |
+| Windows-Unit-Suite | `python -m unittest discover -s tests -v` | Exit 0; 198 Tests ohne Skip in 20,385 Sekunden nach der letzten Leitungsreparatur. `offline-tests.txt`. Linux-CI wurde lokal nicht ausgeführt. |
+| Kern nach Operandenkorrektur | `python src/tiny_cpu_logisim.py --java 'C:/Program Files/jdk-27/bin/java.exe' --jar .venv/Include/logisim-evolution-4.1.0-all.jar --trace-output artifacts/ap22-1-flags/final/core.tsv --matrix-output artifacts/ap22-1-flags/final/matrix` | Exit 1 erst bei `load-address`, Flanke 4, `post`, `ACC`: Soll 7, Ist 20. Countdown besteht vollständig. `core-after.txt`, `final/` mit Rohdaten und Diagnose. |
+| Kern nach Load-Reparatur | `python src/tiny_cpu_logisim.py --java 'C:/Program Files/jdk-27/bin/java.exe' --jar .venv/Include/logisim-evolution-4.1.0-all.jar --trace-output artifacts/ap22-1-flags/after-load/core.tsv --matrix-output artifacts/ap22-1-flags/after-load/matrix` | Exit 1 erst bei `load-address-register`, Flanke 3, `post`, `ACC`: Soll 7, Ist 20. Minimalkern zweimal identisch, Countdown sowie `load-const` und `load-address` bestehen. `core-after-load.txt`, `after-load/` mit Rohdaten und Diagnose. |
+| STORE | `python scripts/test-logisim-store.py --output artifacts/ap22-1-flags/checks/store` | Exit 0; zwei Positivfälle und unerlaubter Schreibvorgang als Negativkontrolle. `store-final.txt`, `checks/store/proof.json`. |
+| PRINT | `python scripts/test-logisim-print.py --output artifacts/ap22-1-flags/checks/print` | Exit 0; alle Positivfälle und unterdrückter Impuls als Negativkontrolle. `print-final.txt`, `checks/print/proof.json`. |
+| Rechenergebnis-Negativkontrolle | `python scripts/test-logisim-core-mutation.py --output artifacts/ap22-1-flags/checks/core-mutation` | Exit 0. `mutation-final.txt`, `checks/core-mutation/proof.json`. |
+| Vollständige Systemmatrix | `python src/tiny_cpu_logisim.py --java 'C:/Program Files/jdk-27/bin/java.exe' --jar .venv/Include/logisim-evolution-4.1.0-all.jar --profile tinycpu-16-12 --system tinycpu-peripherals-16-12-v1 --system-only --trace-output artifacts/ap22-1-flags/system-unused.tsv --matrix-output artifacts/ap22-1-flags/checks/system` | Exit 0; alle sieben Peripherie-/Interruptfixtures bestehen. `system-final.txt`, `checks/system/system/` mit Vektoren und Projektkopien. |
+| Operator-Panel | `python scripts/test-logisim-operator.py` | Exit 0; ein STEP erzeugt genau eine Flanke, gehaltener Eingang wiederholt sie nicht. `operator-final.txt`. Kein manueller GUI-Nachweis. |
+
+Immediate-Regression und erweiterter Decodertest sind zusätzlich im
+verpflichtenden `scripts/test-logisim.sh` eingehängt. Die einzelnen elektrischen
+Gatebestandteile wurden hier mit der Windows-Laufzeit ausgeführt; das Shell-Gate
+als Ganzes wurde nicht aufgerufen. `change-audit.json` vergleicht die Schaltung
+gegen den Ausgangs-Commit: Alle Bauteile und Pins sind unverändert, ausschließlich
+die belegten Top-Level-Operandenzweige und sechs Zweige am Decoder-ODER ändern sich.
+
+### Verbleibender erster Fehler und Stop-Regel
+
+Der neue erste Unterschied gehört zu einem getrennten Registerpfad:
+`load-address-register` führt an PC 2 `LOAD_ADDRESS_REGISTER_CONST(20)` aus.
+Nach Flanke 3 soll `ACC=7` gehalten und `AR=20 VALID` geladen sein. Der Trace
+zeigt stattdessen `ACC=20 VALID`, während `AR=0 INVALID` bleibt. Der Comparator
+stoppt beim ersten Signal `ACC`; spätere Fixtures wurden nicht geöffnet und
+die gesamte 61er-Matrix bleibt ausdrücklich rot.
+
+Als nächstes werden `FETCH_DECODE_CONTROLS/LD_REG_CONST`, `ACC_WRITE_REQUEST`,
+`DATAPATH_INSTANCE/ACC_LOAD` und die benannten Ladefreigabe-, Wert- und
+Gültigkeitseingänge von `ADDRESS_PATH` vor und nach Flanke 3 passiv verglichen.
+Erst der erste dort belegte falsche Anschluss erlaubt eine weitere minimale
+Reparatur. In diesem Schritt werden keine anderen Akkumulator-Anforderungsterme,
+Adressregistersignale oder VM-Erwartungen auf Verdacht geändert. AP 22.1, die
+gültige externe Eingabe, weitere Matrixbefunde, AP 22.2 bis 22.5 und die manuelle
+GUI-Abnahme bleiben offen. Die 59 Abweichungen vom 29. Oktober sind weiterhin
+eine historische Bestandsaufnahme und keine neue vollständige Matrixzählung.

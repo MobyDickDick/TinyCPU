@@ -29,7 +29,7 @@ OUTPUTS = (
     "SET_OVF", "SET_DIV0", "SET_ADDR", "SET_INV", "SET_ILL", "SET_INPUT",
     "CLEAR_ERROR", "INPUT", "PRINT", "PRINT_ADR", "HALT", "HALT_ERROR",
     "INVALID_OPERAND", "ENABLE_INTERRUPTS_REQUEST",
-    "DISABLE_INTERRUPTS_REQUEST", "RETURN_FROM_INTERRUPT_REQUEST",
+    "DISABLE_INTERRUPTS_REQUEST", "RETURN_FROM_INTERRUPT_REQUEST", "ACC_MEMORY_REQUEST",
 )
 
 DIRECT = {
@@ -80,6 +80,9 @@ def expected_row(code: int, opcodes: dict[str, dict[str, object]]) -> dict[str, 
     # terms still need their own electrical diagnosis before repair.
     if mnemonic == "STORE_ADDRESS":
         row["ACC_WRITE_REQUEST"] = 0
+    if mnemonic in {"LOAD_ADDRESS", "LOAD_ADDRESS_REGISTER",
+                    "LOAD_ADDRESS_REGISTER_PLUS_OFFSET"}:
+        row["ACC_MEMORY_REQUEST"] = 1
     if arithmetic:
         row[f"{family}_OPERAND"] = 1
     if mnemonic in DIRECT:

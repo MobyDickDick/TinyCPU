@@ -36,6 +36,15 @@ if ! PYTHONPATH=src python3 scripts/test-logisim-print.py \
   failed+=(print-forwarding)
 fi
 
+if ! PYTHONPATH=src python3 scripts/test-logisim-immediate.py \
+    --output "$OUTPUT/immediate-operand"; then
+  failed+=(immediate-operand)
+fi
+
+if ! PYTHONPATH=src python3 scripts/test-logisim-decode.py; then
+  failed+=(decode)
+fi
+
 system_args=(--profile tinycpu-16-12
              --system tinycpu-peripherals-16-12-v1
              --system-only

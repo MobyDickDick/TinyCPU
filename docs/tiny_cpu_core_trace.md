@@ -1,15 +1,15 @@
 # Elektrischer Kernvergleich (AP 22.1)
 
 **Stand: 30. Oktober 2026.** Der Vergleich ist im verpflichtenden Gate aktiv.
-Die Schaltung besteht die Abnahme derzeit nicht. Nach den begrenzten
-`STORE_ADDRESS`- und PRINT-Reparaturen bestehen beide Minimalkernläufe und
-die STORE-/PRINT-Regressionen einschließlich Negativkontrollen. Der Countdown
-stimmt bis einschließlich Flanke 5 vollständig mit der VM überein und scheitert
-erstmals an Flanke 6, `post`, bei `ERROR_INV` (Soll `0`, Ist `1`). Die
+Die Schaltung besteht die vollständige Abnahme derzeit nicht. Nach den
+Operandenauswahl- und Speicherlade-Reparaturen bestehen beide identischen
+Minimalkernläufe, der vollständige Countdown und die Fixtures `load-const`
+und `load-address`. Die erste Abweichung liegt nun in `load-address-register`
+an Flanke 3, `post`, bei `ACC` (Soll `7`, Ist `20`). Die
 Bestandsaufnahme mit 59 Abweichungen in 61 ISA-/Fehler-Fixtures stammt vom
-29. Oktober; die Matrix wurde nach dem neuen ersten Fehler nicht wiederholt.
+29. Oktober; die neue serielle Matrix stoppt bei der dritten Fixture.
 Reproduktion und nächste Diagnose stehen im
-[Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-print-weitergabe-am-30-oktober-2026).
+[Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-countdown-operandenauswahl-und-speicherladeanforderung-am-30-oktober-2026).
 
 ## Ausführung
 
@@ -122,8 +122,11 @@ Sie prüft `LOAD_CONST(-1); STORE_ADDRESS(101); HALT` und den gleichen Ablauf
 mit gültiger `0` vollständig gegen die VM, einschließlich Akkumulatorhalten,
 Speicherwert und -gültigkeit sowie Halt. Anschließend setzt sie ausschließlich
 in einer Kopie die benannte neutrale Konstante `ACC_STORE_DISABLED` auf `1`.
-Der Vergleich muss dann an Flanke 2, `post`, `ACC` (Soll `65535`, Ist `0`)
-ablehnen. Das ist eine Negativkontrolle der fehlerhaften Ladeanforderung;
+Der Vergleich muss dann an Flanke 2, `post`, `ACC` (Soll `65535`, abweichender
+definierter Istwert) ablehnen und den tatsächlichen falschen Wert in
+`proof.json` festhalten. Nach der korrigierten Speicherladeauswahl ist dieser
+Wert `101`; der frühere inaktive Buswert `0` ist kein Maschinenvertrag.
+Das ist eine Negativkontrolle der fehlerhaften Ladeanforderung;
 sie verdrahtet keine historische Zeichnung zurück. Ungültiges Speichern und
 andere Decoderterme sind damit nicht vollständig abgenommen.
 
@@ -142,3 +145,20 @@ und legt ihn auf Null. Der Vergleich muss an Flanke 2, `pre`, `PRINT_ENABLE`
 (Soll `1`, Ist `0`) ablehnen, während Normalhalt erhalten bleibt. Original-
 schaltung, Rohdaten und `proof.json` werden entsprechend geprüft beziehungsweise
 aufbewahrt. Ungültige Ausgabe und `PRINT_ADDRESS` sind damit nicht abgenommen.
+
+Die verpflichtende Immediate-Regression läuft separat:
+
+```bash
+PYTHONPATH=src python scripts/test-logisim-immediate.py
+```
+
+Sie vergleicht `LOAD_CONST(3); ADD_CONST(-1); HALT` sowie eine Addition mit
+gültigem Nullergebnis vollständig mit der VM. Eine Kopie unterdrückt nur den
+Konstantenselektor und muss an Flanke 2, `post`, `ERROR_INV` abgelehnt werden.
+Eine zweite Kopie ersetzt nur `Operations.IMMEDIATE_VALUE` durch Null und muss
+an derselben Flanke bei `ACC` (Soll `2`, Ist `3`) scheitern. Originalschaltung,
+Rohtraces und `proof.json` werden entsprechend geprüft beziehungsweise erhalten.
+Der ebenfalls verpflichtende `scripts/test-logisim-decode.py` prüft nun auch
+`ACC_MEMORY_REQUEST` für sämtliche 64 Opcodezeilen, insbesondere seine drei
+Speicherlade-Terme. Die übrigen offenen Register- und Fehlerfälle sind durch
+diese gezielten Prüfungen nicht freigegeben.

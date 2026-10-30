@@ -973,6 +973,33 @@ class CircuitVerificationTests(unittest.TestCase):
                     with self.assertRaisesRegex(VERIFY.VerificationError, "CPU PRINT forwarding"):
                         VERIFY.verify_system_circuit()
 
+    def test_core_constant_operand_rejects_wrong_selector_and_missing_data(self) -> None:
+        root = MODULE_PATH.parents[1]
+        for broken in ("selector", "data"):
+            with self.subTest(broken=broken):
+                temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+                shutil.copytree(root / "hardware/logisim", temporary / "logisim")
+                circuit = temporary / "logisim/TinyCPU.circ"
+                project = ET.parse(circuit)
+                main = project.getroot().find("circuit[@name='TinyCPUMain']")
+                controls = _subcircuit_ports(project.getroot(), main, "FETCH_DECODE_CONTROLS")
+                operations = _subcircuit_ports(project.getroot(), main, "OPERATIONS_INSTANCE")
+                if broken == "selector":
+                    wire = next(item for item in main.findall("wire")
+                                if controls["CONST_ARGUMENT"] in
+                                {item.get("from"), item.get("to")})
+                    end = "from" if wire.get("from") == controls["CONST_ARGUMENT"] else "to"
+                    wire.set(end, controls["ADDR_REG_ARGUMENT"])
+                else:
+                    _remove_wire_at(main, operations["IMMEDIATE_VALUE"])
+                project.write(circuit, encoding="utf-8", xml_declaration=True)
+                system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+                with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+                     mock.patch.object(VERIFY, "load_system_profile", return_value=replace(
+                         system, circuit_path=temporary / "logisim/TinyCPU_Peripherals.circ")):
+                    with self.assertRaisesRegex(VERIFY.VerificationError, "CPU constant operand"):
+                        VERIFY.verify_system_circuit()
+
     def test_ap18_memory_write_request_uses_store_decoder_outputs(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"

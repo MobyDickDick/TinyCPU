@@ -61,14 +61,15 @@ def main() -> int:
         mismatch = exc.__cause__
         if not (isinstance(mismatch, CoreMismatch) and mismatch.edge == 2
                 and mismatch.phase == "post" and mismatch.signal == "ACC"
-                and mismatch.expected == 65535 and mismatch.actual == 0):
+                and mismatch.expected == 65535 and mismatch.actual != 65535):
             raise
+        mutation_actual = mismatch.actual
     else:
         raise LogisimError("re-enabled accumulator write during STORE unexpectedly passed")
     (args.output / "proof.json").write_text(json.dumps({
         "controls_passed": list(cases), "mutation_rejected": True,
         "edge": 2, "phase": "post", "signal": "ACC",
-        "expected": 65535, "actual": 0,
+        "expected": 65535, "actual": mutation_actual,
     }, indent=2) + "\n", encoding="utf-8")
     print("STORE_ADDRESS accumulator hold passed: negative and valid zero; "
           "re-enabled load request rejected")

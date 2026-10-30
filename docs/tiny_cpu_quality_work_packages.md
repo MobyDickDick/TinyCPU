@@ -2,7 +2,39 @@
 
 **Stand:** 30. Oktober 2026. **Status:** in Bearbeitung; elektrische Abnahme offen.
 
-## Fortschritt am 30. Oktober 2026: PRINT-Weitergabe
+## Fortschritt am 30. Oktober 2026: Countdown und Speicherladeauswahl
+
+Der aus CI gemeldete Countdown-Fehler an Flanke 6 ist repariert. Der passive
+Flagvergleich führt den falschen `SET_INV` auf die Operandenauswahl zurück:
+`CONST_ARGUMENT=1` erreicht `Operations.CONST_OPERAND` nicht, weil dort
+`ADDR_REG_ARGUMENT` angeschlossen ist. Außerdem erhält `IMMEDIATE_VALUE` den
+RAM-Wert statt des Instruktionsoperanden. Beide Anschlüsse sind nach getrennten
+elektrischen Messungen minimal korrigiert. Eine neue verpflichtende Regression
+prüft die Countdown-Addition, gültige Null und zwei unabhängige Mutationen von
+Selektor und Datenleitung. Der gesamte Countdown besteht jetzt gegen die VM.
+
+Die danach seriell geöffnete Matrix belegte einen separaten Fehler bei
+`LOAD_ADDRESS`: `ACC_MEMORY_REQUEST` blieb bei gültigem RAM-Wert aus. Die drei
+Eingangszweige des vorhandenen Decoder-ODERs wählen jetzt die drei Speicherlade-
+Decodes. Bauteile, Pins und übrige Leitungen blieben erhalten. Der erweiterte
+64-Zeilen-Decodertest und die Fixture `load-address` bestehen. Die STORE-
+Negativkontrolle prüft weiterhin den unerlaubten Akkumulator-Schreibvorgang;
+der konkrete falsche Wert auf dem inaktiven Ladebus wird nun protokolliert,
+statt den früher zufälligen Buswert `0` vorauszusetzen.
+
+198 Windows-Unit-Tests, Offline-Verträge, Strukturprüfung, beide identischen
+Minimalkernläufe, Countdown, alle sieben Systemfixtures, Operator-Panel sowie
+PRINT-/STORE-/Rechenergebnis- und Immediate-Negativkontrollen bestehen. Die
+Kernmatrix stoppt nun bei ihrer dritten Fixture `load-address-register` an
+Flanke 3, `post`, `ACC`: Soll `7`, Ist `20`. Dort wird
+`LOAD_ADDRESS_REGISTER_CONST(20)` ausgeführt; der Trace zeigt außerdem ein
+unverändertes Adressregister. Der nächste getrennte Schritt vergleicht zunächst
+`LD_REG_CONST`, `ACC_WRITE_REQUEST`, `Datapath.ACC_LOAD` und die Ladeeingänge
+von `AddressPath` passiv. Eine vollständige Kernfreigabe wird nicht behauptet.
+Die [Nachweise](tiny_cpu_circuit_debug_report.md#ap-221-countdown-operandenauswahl-und-speicherladeanforderung-am-30-oktober-2026)
+enthalten alle Zwischenstände und Grenzen.
+
+## Vorheriger Fortschritt am 30. Oktober 2026: PRINT-Weitergabe
 
 Der nächste begrenzte Schritt aus 22.1 ist abgeschlossen. Der passive Vergleich
 zeigt `FetchDecodeControls.PRINT=1`, aber `TinyCPUMain.PRINT_ENABLE=0` vor
