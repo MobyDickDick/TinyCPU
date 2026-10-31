@@ -43,6 +43,7 @@ abdeckt und Ausgabe, Haltzustand, Register, Speicher-Validität und Fehlerflags
 | **20. Wiederherstellung der CPU-Profile** | Den aktuellen 8/8-Breitenfehler und die ausbleibenden Kernhalte beider Profile isolieren, minimal reparieren und gegen Redraw-Regressionen absichern. | Offline-Gate, Kerntraces und vollständige elektrische ISA-/Fehlermatrizen bestehen für 16/12 und 8/8; ein GUI-Kurztest bestätigt den Kandidaten. |
 | **21. Operator-Panel** | Eine additive Bedienansicht mit Reset, Einzelschritt, langsamem Lauf und benannten Zustandsanzeigen ergänzen, ohne `TinyCPUMain` umzuzeichnen. | Ein einziger arbitrierter Taktpfad und alle sichtbaren Kernzustände sind strukturell geprüft; ein elektrischer Vektor belegt genau eine STEP-Flanke ohne Wiederholung bei gehaltenem Eingang. |
 | **22. Qualitätsbefunde und belastbare Abnahme (offen)** | Tatsächlichen Kernzustandsvergleich ergänzen, Divisionsüberlauf klären, Dokumentation und Windows-Testfehler korrigieren und den Kandidaten neu abnehmen. | Die [Aufgaben 22.1 bis 22.5](tiny_cpu_quality_work_packages.md) besitzen reproduzierbare Nachweise; eine optionale Aufgabe ordnet Eigenständigkeit und Nutzen ein. |
+| **23. Modulare CPU-Übersicht (umgesetzt)** | Auf ausdrücklichen Benutzerwunsch die oberste Ebene auf acht Funktionsboxen, öffentliche Pins und Leitungen beschränken; Detailverdrahtung in fachlichen Teilkreisen kapseln. | [Architektur, Übersicht und Nachweise](tiny_cpu_modularity_plan.md); öffentliche Schnittstelle und bisherige Teilkreisdefinitionen erhalten, 61 Kern- und sieben Systemfixtures sowie Negativkontrollen bestanden. |
 
 ## Abhängigkeiten und Reihenfolge
 
@@ -131,6 +132,33 @@ gezielten elektrischen Regressionen bestehen. Der neue Registerbefund bleibt
 ein getrennter Diagnoseschritt; AP 22.1 und die vollständige Kernfreigabe bleiben
 offen. Die [Nachweise](tiny_cpu_circuit_debug_report.md#ap-221-countdown-operandenauswahl-und-speicherladeanforderung-am-30-oktober-2026)
 benennen Zwischenstände und den nächsten passiven Vergleich.
+
+**Nachtrag vom 31. Oktober 2026:** Der passive Vergleich und die lesende
+Gatterdiagnose belegen den unerlaubten `LD_REG_CONST`-Zweig zur
+Akkumulator-Ladeanforderung. Ausschließlich dieser Zweig ist durch eine
+explizite Null ersetzt. Der erweiterte Decodertest besteht für alle 64 Zeilen
+und lehnt den in einer Kopie wiederhergestellten Fehler elektrisch ab.
+Der Akkumulator hält jetzt korrekt `7 VALID`; der Kernvergleich stoppt
+anschließend bei `load-address-register`, Flanke 3, `post`, `AR`: Soll `20`,
+Ist `0`. Alle bisherigen Offline-, System-, Operator- und fokussierten
+elektrischen Prüfungen bestehen erneut. Als nächstes wird ausschließlich der
+Resetpfad von `AddressPath` verfolgt. AP 22.1 bleibt offen; die
+[Nachweise](tiny_cpu_circuit_debug_report.md#ap-221-akkumulatorhalten-bei-adressregister-konstante-am-31-oktober-2026)
+grenzen diesen abgeschlossenen Teilschritt von den übrigen Registerpfaden ab.
+
+**Weiterer Nachtrag vom 31. Oktober 2026:** Der CI-Registerbefund und die danach
+seriell belegten Adressierungs-, Gültigkeits- und Fehlersteuerungsfehler sind
+repariert. Beide identischen Minimalkernläufe, Countdown und erstmals alle
+61 bestehenden ISA-/Fehlerfixtures bestehen mit vollständigem
+Zustandsvergleich. Alle sieben Systemfixtures, Operator-Panel und die
+fokussierten Negativkontrollen bestehen ebenfalls. Die Windows-Suite umfasst
+201 Tests. Ein zusätzlicher VM-Regressionstest sichert die direkte
+Adressierung beim Laden des Adressregisters aus RAM. Die neue verpflichtende
+Registerregression deckt auch unterschiedliche und negative Offsets ab.
+AP 22.1 bleibt wegen gültiger externer Eingaben offen; AP 22.2 und 22.5 sind
+weiterhin nicht abgeschlossen. Die
+[Nachweise](tiny_cpu_circuit_debug_report.md#ap-221-registerpfade-und-vollständige-61-fall-abnahme-am-31-oktober-2026)
+trennen die bestandene vorhandene Matrix von diesen Abdeckungsgrenzen.
 
 TinyCPU ist im eingefrorenen 1.0-Zielprofil **voll funktionsfähig**: Die
 16-Bit-Daten-/12-Bit-Adress-Schaltung implementiert alle 50 Opcodes, wird im

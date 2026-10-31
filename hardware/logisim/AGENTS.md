@@ -1,3 +1,23 @@
+# Verbindliche Struktur der CPU-Übersicht
+
+`TinyCPUMain` ist ausschließlich eine Übersicht aus fachlich benannten
+Funktionsboxen, öffentlichen Anschlusspins und deren Leitungen. Einzelne
+Gatter, Multiplexer, Splitter, Konstanten, Register, RAMs, Tunnel und Probes
+gehören in die zuständigen Teilkreise. Neue Fehlerkorrekturen dürfen diese
+Abstraktionsgrenze nicht wieder auflösen. Diagnoseanzeigen gehören in eine
+eigene Diagnosebox. Steuersignale dürfen als benannter, dokumentierter Bus
+zwischen Funktionsboxen geführt und ausschließlich darin aufgeteilt werden.
+
+Diese vom Benutzer am 31. Oktober 2026 ausdrücklich gewünschte
+Modularisierung erlaubt das Umstrukturieren der Übersicht und das Extrahieren
+fachlicher Teilkreise (AP 23). Sie ersetzt dafür die historischen Verbote
+einer Neuanordnung der obersten Ebene. Öffentliche Kernpins, ISA, Taktbezug
+und Verhalten bleiben erhalten; die vollständigen elektrischen Gates und
+Negativkontrollen müssen anschließend wieder bestehen. Ein bloßer Wrapper
+um die gesamte bisherige Übersicht erfüllt diese Regel nicht.
+
+Die folgende Schutzregel für den handgezeichneten Decoder bleibt bestehen.
+
 # Verbindliche Darstellungsregel für `FetchDecodeControls`
 
 `FetchDecodeControls` ist eine bewusst von Hand gestaltete Schaltung. **Ihre

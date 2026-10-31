@@ -66,7 +66,9 @@ class TinyCPU:
 
     def _address(self, instruction: Instruction) -> int | None:
         name, operand = instruction.mnemonic, signed(instruction.operand, self.profile.data_bits)
-        if "ADDRESS_REGISTER" in name and not name.startswith("LOAD_ADDRESS_REGISTER_CONST"):
+        if "ADDRESS_REGISTER" in name and name not in {
+            "LOAD_ADDRESS_REGISTER_CONST", "LOAD_ADDRESS_REGISTER_ADDRESS",
+        }:
             if not self.address_register_valid:
                 self._error("INV")
                 return None

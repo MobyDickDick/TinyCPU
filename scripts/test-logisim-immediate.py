@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import os
 import sys
@@ -17,6 +18,7 @@ from tiny_cpu_assembler import assemble, encode_program
 from tiny_cpu_core_trace import CoreMismatch
 from tiny_cpu_logisim import LogisimError, resolve_jar, run_core_comparison
 from tiny_cpu_profiles import load_profile
+from tiny_cpu_hierarchy import find_core_instance
 from tiny_cpu_verify import generated_symbol_ports
 
 
@@ -24,11 +26,8 @@ def suppress_selector(source: Path, destination: Path) -> None:
     """Drive the existing selection branch low only in a temporary copy."""
     tree = ET.parse(source)
     root = tree.getroot()
-    main = root.find("circuit[@name='TinyCPUMain']")
+    main, instance = find_core_instance(root, "FETCH_DECODE_CONTROLS")
     definition = root.find("circuit[@name='FetchDecodeControls']")
-    instance = next(component for component in main.findall("comp")
-                    if component.find("a[@name='label'][@val='FETCH_DECODE_CONTROLS']")
-                    is not None)
     terminal = generated_symbol_ports(definition, instance)["CONST_ARGUMENT"]
     wires = [wire for wire in main.findall("wire")
              if terminal in {wire.get("from"), wire.get("to")}]
@@ -46,11 +45,8 @@ def suppress_immediate(source: Path, destination: Path) -> None:
     """Replace only the Operations immediate data input with a 16-bit zero."""
     tree = ET.parse(source)
     root = tree.getroot()
-    main = root.find("circuit[@name='TinyCPUMain']")
+    main, instance = find_core_instance(root, "OPERATIONS_INSTANCE")
     definition = root.find("circuit[@name='Operations']")
-    instance = next(component for component in main.findall("comp")
-                    if component.find("a[@name='label'][@val='OPERATIONS_INSTANCE']")
-                    is not None)
     terminal = generated_symbol_ports(definition, instance)["IMMEDIATE_VALUE"]
     wires = [wire for wire in main.findall("wire")
              if terminal in {wire.get("from"), wire.get("to")}]
@@ -96,11 +92,16 @@ def main() -> int:
     except LogisimError as exc:
         mismatch = exc.__cause__
         if not (isinstance(mismatch, CoreMismatch) and mismatch.edge == 2
-                and mismatch.phase == "post" and mismatch.signal == "ERROR_INV"
-                and mismatch.expected == 0 and mismatch.actual == 1):
+                and mismatch.phase == "post" and mismatch.signal == "ACC"
+                and mismatch.expected == 2 and mismatch.actual == 0):
             raise
     else:
         raise LogisimError("suppressed constant operand selector unexpectedly passed")
+    with (args.output / "wrong.tsv").open(encoding="utf-8") as trace:
+        rejected = next(row for row in csv.DictReader(trace, delimiter="\t")
+                        if row["edge"] == "2" and row["phase"] == "post")
+    if rejected["ACC_VALID"] != "0" or rejected["ERROR_INV"] != "1":
+        raise LogisimError("suppressed selector must produce 0 INVALID with INV set")
     wrong_data = args.output / "immediate-suppressed.circ"
     suppress_immediate(source, wrong_data)
     try:
@@ -120,7 +121,8 @@ def main() -> int:
     (args.output / "proof.json").write_text(json.dumps({
         "controls_passed": list(cases), "mutation_rejected": True,
         "source_unchanged": True, "edge": 2, "phase": "post",
-        "signal": "ERROR_INV", "expected": 0, "actual": 1,
+        "signal": "ACC", "expected": 2, "actual": 0,
+        "acc_valid": 0, "error_inv": 1,
         "data_mutation_rejected": True,
         "data_mismatch": {"edge": 2, "phase": "post", "signal": "ACC",
                           "expected": 2, "actual": 3},

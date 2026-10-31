@@ -6,6 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from tiny_cpu_circuit_check import inspect_circuit, inspect_project, repair_project
 from tiny_cpu_wire_contacts import inspect_circuit as inspect_wire_contacts
+from tiny_cpu_hierarchy import CORE_UNITS
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -87,6 +88,7 @@ class CircuitCheckTests(unittest.TestCase):
         self.assertFalse(any(
             component.get("name") == "Tunnel"
             for circuit in root.findall("circuit")
+            if circuit.get("name") not in CORE_UNITS
             for component in circuit.findall("comp")
         ))
         self.assertGreater(len(decoder.findall("wire")), 0)
@@ -102,7 +104,7 @@ class CircuitCheckTests(unittest.TestCase):
     def test_memory_write_or_third_input_is_driven_by_store_reg_offset(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(circuit for circuit in root.findall("circuit")
-                    if circuit.get("name") == "TinyCPUMain")
+                    if circuit.get("name") == "MemoryUnit")
         definitions = {circuit.get("name"): circuit
                        for circuit in root.findall("circuit")}
         self.assertEqual(inspect_circuit(main, definitions), [])
@@ -357,6 +359,24 @@ class CircuitCheckTests(unittest.TestCase):
             "COMPACT input at (170, 110) has an undriven wire ending at (700, 180)"
         ])
 
+    def test_public_input_drives_gate_and_distant_multiplexer_fanout(self):
+        circuit = ET.fromstring("""
+          <circuit name="Fanout">
+            <comp lib="0" loc="(100,100)" name="Pin"/>
+            <comp lib="1" loc="(200,120)" name="AND Gate"/>
+            <comp lib="2" loc="(800,180)" name="Multiplexer"/>
+            <wire from="(100,100)" to="(150,100)"/>
+            <wire from="(150,100)" to="(700,100)"/>
+            <wire from="(700,100)" to="(700,170)"/>
+            <wire from="(700,170)" to="(770,170)"/>
+            <wire from="(700,190)" to="(770,190)"/>
+          </circuit>
+        """)
+        self.assertEqual(inspect_circuit(circuit), [])
+        circuit.remove(circuit.find("comp[@name='Pin']"))
+        self.assertTrue(any("undriven wire" in issue.message
+                            for issue in inspect_circuit(circuit)))
+
     def test_even_input_gate_uses_grid_aligned_terminals(self):
         circuit = ET.fromstring("""
           <circuit name="Connected">
@@ -418,7 +438,7 @@ class CircuitCheckTests(unittest.TestCase):
     def test_main_external_memory_multiplexers_reach_their_contacts(self):
         root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(circuit for circuit in root.findall("circuit")
-                    if circuit.get("name") == "TinyCPUMain")
+                    if circuit.get("name") == "MemoryUnit")
         definitions = {circuit.get("name"): circuit
                        for circuit in root.findall("circuit")}
         self.assertEqual(inspect_circuit(main, definitions), [])

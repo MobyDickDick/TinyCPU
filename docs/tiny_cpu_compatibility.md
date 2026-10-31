@@ -20,6 +20,19 @@ Wortbreite und Laufzeitsemantik bleiben unverändert. Ein Release darf erst
 wieder als kompatibel qualifiziert werden, nachdem die elektrische Abnahme
 mit dieser einen normativen Tabelle erfolgreich war.
 
+## Korrektur des direkten Adressregisterladens am 31. Oktober 2026
+
+`LOAD_ADDRESS_REGISTER_ADDRESS(address)` liest die durch den Operanden
+bezeichnete Speicherzelle und übernimmt deren Wert in das Adressregister.
+Der frühere VM-Zwischenstand verwendete versehentlich das alte Adressregister
+als Leseadresse und konnte deshalb selbst bei gültigem direkten Operanden
+fehlschlagen. Diese Implementierung ist an die unveränderte Operandenart
+`address` des v1-Maschinenvertrags angeglichen. Opcode, ROM-Format und
+Assemblersyntax ändern sich nicht; eine neue Maschinenformatversion ist
+dafür nicht erforderlich. Programme, die sich auf die irrtümliche indirekte
+VM-Adressierung verlassen haben, zeigen nach dieser Fehlerkorrektur ein
+anderes Verhalten. Der Fehler wird nicht als zugesicherte v1-Semantik erhalten.
+
 Patch releases may fix implementations without changing observable machine
 behaviour. Minor releases may add opcodes or CLI options only where the v1
 format has reserved capacity and existing programs and commands retain their

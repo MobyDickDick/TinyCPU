@@ -17,17 +17,15 @@ from tiny_cpu_assembler import assemble, encode_program
 from tiny_cpu_core_trace import CoreMismatch
 from tiny_cpu_logisim import LogisimError, resolve_jar, run_core_comparison
 from tiny_cpu_profiles import load_profile
+from tiny_cpu_hierarchy import find_core_instance
 from tiny_cpu_verify import generated_symbol_ports
 
 
 def suppress_print(source: Path, destination: Path) -> None:
     """Disconnect the named PRINT source and drive its branch low in a copy."""
     tree = ET.parse(source)
-    main = tree.getroot().find("circuit[@name='TinyCPUMain']")
+    main, instance = find_core_instance(tree.getroot(), "FETCH_DECODE_CONTROLS")
     definition = tree.getroot().find("circuit[@name='FetchDecodeControls']")
-    instance = next(component for component in main.findall("comp")
-                    if component.find("a[@name='label'][@val='FETCH_DECODE_CONTROLS']")
-                    is not None)
     terminal = generated_symbol_ports(definition, instance)["PRINT"]
     wires = [wire for wire in main.findall("wire")
              if terminal in {wire.get("from"), wire.get("to")}]
@@ -59,6 +57,8 @@ def main() -> int:
         "negative": "LOAD_CONST(-1)\nPRINT()\nHALT()\n",
         "valid-zero": "LOAD_CONST(0)\nPRINT()\nPRINT()\nHALT()\n",
         "no-print": "LOAD_CONST(3)\nHALT()\n",
+        "invalid-print": "PRINT()\nHALT()\n",
+        "print-address": "LOAD_CONST(7)\nSTORE_ADDRESS(20)\nPRINT_ADDRESS(20)\nHALT()\n",
     }
     for name, code in cases.items():
         program = assemble(code, profile)
@@ -94,7 +94,8 @@ def main() -> int:
         "expected": 1, "actual": 0,
     }, indent=2) + "\n", encoding="utf-8")
     print("PRINT forwarding passed: positive, negative, valid zero, consecutive events "
-          "and no-print control; suppressed pulse rejected despite normal halt")
+          "and no-print control, invalid attempt and memory print; "
+          "suppressed pulse rejected despite normal halt")
     return 0
 
 

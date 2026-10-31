@@ -1,15 +1,15 @@
 # Elektrischer Kernvergleich (AP 22.1)
 
-**Stand: 30. Oktober 2026.** Der Vergleich ist im verpflichtenden Gate aktiv.
-Die Schaltung besteht die vollständige Abnahme derzeit nicht. Nach den
-Operandenauswahl- und Speicherlade-Reparaturen bestehen beide identischen
-Minimalkernläufe, der vollständige Countdown und die Fixtures `load-const`
-und `load-address`. Die erste Abweichung liegt nun in `load-address-register`
-an Flanke 3, `post`, bei `ACC` (Soll `7`, Ist `20`). Die
-Bestandsaufnahme mit 59 Abweichungen in 61 ISA-/Fehler-Fixtures stammt vom
-29. Oktober; die neue serielle Matrix stoppt bei der dritten Fixture.
-Reproduktion und nächste Diagnose stehen im
-[Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-countdown-operandenauswahl-und-speicherladeanforderung-am-30-oktober-2026).
+**Stand: 31. Oktober 2026.** Der Vergleich ist im verpflichtenden Gate aktiv.
+Beide identischen Minimalkernläufe, der vollständige Countdown und alle
+61 bestehenden ISA-/Fehlerfixtures bestehen jetzt mit vollständigem
+Pre-/Post-Zustandsvergleich. Der CI-Fehler bei `load-address-register` ist
+behoben; auch die danach einzeln geöffneten Pfade sind korrigiert und erneut
+abgenommen. Die Bestandsaufnahme mit 59 Abweichungen vom 29. Oktober ist
+historisch. Gültige externe Eingaben, weitere arithmetische Grenzen aus 22.2
+und die Neuabnahme aus frischem Checkout nach 22.5 bleiben offen. Reproduktion
+und Abdeckungsgrenzen stehen im
+[Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-registerpfade-und-vollständige-61-fall-abnahme-am-31-oktober-2026).
 
 ## Ausführung
 
@@ -35,6 +35,14 @@ keinen Zustandsvergleich. `run_core_acceptance()` prüft den Minimalkern
 zweimal auf Parität und Determinismus sowie die ursprüngliche Countdown-Fixture.
 
 ## Beobachtungsvertrag
+
+Seit AP 23 stehen die bestehenden Zustandsbausteine in benannten
+Funktionsboxen. Die Messpfade beginnen deshalb beispielsweise mit
+`FETCH_UNIT/FETCH_DECODE`, `ACCUMULATOR_UNIT/DATAPATH_INSTANCE` oder
+`MEMORY_UNIT/MEMORY_INSTANCE`. Spalten, Breiten, Flankenbezug und VM-Sollwerte
+bleiben unverändert. Die Abnahme führt die modularisierte Schaltung aus;
+eine für Offline-Verdrahtungsprüfungen erzeugte Analyseansicht wird niemals
+als elektrische Ersatzschaltung verwendet.
 
 `scripts/LogisimCoreTrace.java` öffnet mit den öffentlichen APIs der gepinnten
 JAR eine ROM-Kopie und steuert den Eingang `CLK` selbst. Der Export erhält
@@ -144,7 +152,8 @@ ausschließlich in einer Kopie den über benannte Pins aufgelösten PRINT-Zweig
 und legt ihn auf Null. Der Vergleich muss an Flanke 2, `pre`, `PRINT_ENABLE`
 (Soll `1`, Ist `0`) ablehnen, während Normalhalt erhalten bleibt. Original-
 schaltung, Rohdaten und `proof.json` werden entsprechend geprüft beziehungsweise
-aufbewahrt. Ungültige Ausgabe und `PRINT_ADDRESS` sind damit nicht abgenommen.
+aufbewahrt. Zwei zusätzliche Positivkontrollen prüfen inzwischen auch einen
+ungültigen PRINT-Versuch mit INV-Übernahme und `PRINT_ADDRESS` aus gültigem RAM.
 
 Die verpflichtende Immediate-Regression läuft separat:
 
@@ -154,7 +163,10 @@ PYTHONPATH=src python scripts/test-logisim-immediate.py
 
 Sie vergleicht `LOAD_CONST(3); ADD_CONST(-1); HALT` sowie eine Addition mit
 gültigem Nullergebnis vollständig mit der VM. Eine Kopie unterdrückt nur den
-Konstantenselektor und muss an Flanke 2, `post`, `ERROR_INV` abgelehnt werden.
+Konstantenselektor und muss an Flanke 2, `post`, `ACC` (Soll `2`, Ist `0`)
+abgelehnt werden. Die Rohdaten müssen zusätzlich `ACC_VALID=0` und
+`ERROR_INV=1` belegen: Die reparierte Ergebnisgültigkeit macht den Fehler nun
+bereits am kanonischen ungültigen Nullergebnis sichtbar.
 Eine zweite Kopie ersetzt nur `Operations.IMMEDIATE_VALUE` durch Null und muss
 an derselben Flanke bei `ACC` (Soll `2`, Ist `3`) scheitern. Originalschaltung,
 Rohtraces und `proof.json` werden entsprechend geprüft beziehungsweise erhalten.
@@ -162,3 +174,20 @@ Der ebenfalls verpflichtende `scripts/test-logisim-decode.py` prüft nun auch
 `ACC_MEMORY_REQUEST` für sämtliche 64 Opcodezeilen, insbesondere seine drei
 Speicherlade-Terme. Die übrigen offenen Register- und Fehlerfälle sind durch
 diese gezielten Prüfungen nicht freigegeben.
+
+Der Decodertest prüft außerdem `ACC_WRITE_REQUEST=0` für
+`LOAD_ADDRESS_REGISTER_CONST` (`0x27`). Eine gesonderte Kopie entfernt nur die
+neutrale Konstante `ACC_LD_REG_CONST_DISABLED` und stellt den belegten
+`LD_REG_CONST`-Zweig zur Akkumulator-Ladeanforderung wieder her. Die gesamte
+64-Zeilen-Prüfung muss dann ausschließlich an Opcode `0x27` bei
+`ACC_WRITE_REQUEST` (Soll `0`, Ist `1`) ablehnen. Unveränderte Quelle,
+Projektkopien, Befehle und beide Rohtraces werden unter `artifacts/decode/`
+beziehungsweise dem mit `--output` gewählten Pfad festgehalten. Dieser Nachweis
+betrifft das Akkumulatorhalten. Die zusätzliche verpflichtende Prüfung
+`scripts/test-logisim-address-register.py` vergleicht neun Programme für
+Konstanten, Halten, erneutes Laden, Registerlesen/-schreiben, positive und
+negative Offsets sowie das Laden aus RAM vollständig mit der VM. Fünf Kopien
+erzwingen einen aktiven Reset, unterdrücken Laden beziehungsweise
+Registerauswahl, verfälschen den Datenwert oder aktivieren den falschen Carry
+bei negativem Offset. Jede muss am festgelegten ersten Unterschied scheitern.
+Rohtraces, Projektkopien und `proof.json` bleiben unter dem `--output`-Pfad.
