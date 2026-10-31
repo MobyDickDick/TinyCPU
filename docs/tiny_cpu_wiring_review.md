@@ -1,5 +1,40 @@
 # Topologische Nachprüfung von TinyCPUMain
 
+## Prüfung des Neuzeichnungsstands `0089e68`
+
+Die erneute Anschlussprüfung der kompakteren Übersicht findet drei offene
+öffentliche Ausgänge: `PRINT_ENABLE`, `PRINT_ADDRESS_ENABLE` und `HALTED`.
+Die zugehörigen Leitungen von `FetchUnit.PRINT`, `FetchUnit.PRINT_ADDR` und
+`FetchUnit.HALT` endeten noch rechts neben den versetzten Ausgangspins und
+jeweils eine Rasterzeile oberhalb des Anschlusses. Der bestehende benannte
+Porttest schlug vor der Korrektur für alle drei Signale fehl
+(`artifacts/wiring-review-0089e68/hierarchy-before.txt`).
+
+Die drei waagerechten Leitungen enden jetzt kurz vor den Ausgangspins und
+erreichen diese über je einen kurzen Knick. Die freien Rasterzeilen zwischen
+den langen Leitungen und die aktuelle Pinanordnung bleiben erhalten. Alle
+41 Komponenten einschließlich ihrer Positionen und Attribute sowie sämtliche
+Teilkreisdefinitionen sind unverändert. Die Übersicht enthält durch die sechs
+kurzen Anschlusssegmente 285 statt 279 Leitungssegmente.
+
+Alle benannten Portnetze stimmen danach vollständig mit Referenz `6ab7c89`
+überein. Weitere fehlerhafte Verbindungen wurden nicht gefunden. Der
+unveränderte freigegebene Topologie-Fingerabdruck wird wieder erreicht:
+`0d7893c6fbc0869006a4bd8ffa96313c405fac87719787ca1e71a3348159f980`.
+Der Nachweis liegt unter `artifacts/wiring-review-0089e68/topology-proof.json`;
+der Logisim-Zeichenexport `after.png` wurde gesichtet.
+
+Offline-Verifier, statischer Leitungstest, alle 212 Python-Tests und Logisims
+Prüfung auf elektrische Fehlerwerte für Kern und Peripherie bestehen
+(`verify.txt`, `structure.txt`, `unit-after.txt`, `electrical.txt` im selben
+Nachweisverzeichnis).
+
+Auch Countdown und alle 61 elektrischen Kernfixtures, die sieben
+Peripheriefälle, der STEP-Takttest sowie die Kern-, STORE-, PRINT-, Immediate-,
+Decoder- und Registerpfadprüfungen einschließlich ihrer Negativkontrollen
+bestehen (`core.txt`, `system.txt`, `operator.txt`, `core-mutation.txt`,
+`store.txt`, `print.txt`, `immediate.txt`, `decode.txt`, `address-register.txt`).
+
 ## Erneute Prüfung des Neuzeichnungsstands `1648040`
 
 Am 31. Oktober 2026 wurde die anschließend erneut gezeichnete Übersicht
