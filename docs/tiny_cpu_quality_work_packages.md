@@ -1,8 +1,37 @@
 # AP 22: Qualitätsbefunde und belastbare Abnahme
 
-**Stand:** 30. Oktober 2026. **Status:** in Bearbeitung; elektrische Abnahme offen.
+**Stand:** 31. Oktober 2026. **Status:** in Bearbeitung; elektrische Abnahme offen.
 
-## Fortschritt am 30. Oktober 2026: Countdown und Speicherladeauswahl
+## Fortschritt am 31. Oktober 2026: Akkumulatorhalten bei Adressregister-Konstante
+
+Der nächste begrenzte Schritt aus 22.1 ist abgeschlossen. Die passive Messung
+bestätigt bei `LOAD_ADDRESS_REGISTER_CONST(20)` vor Flanke 3 fälschlich
+`ACC_WRITE_REQUEST=1` und `Datapath.ACC_LOAD=1`. Die lesende Kontaktdiagnose
+belegt den direkten `LD_REG_CONST`-Zweig zum vorhandenen `ACC_LOAD_REQUEST`-ODER.
+Nur dieser Zweig wurde entfernt und sein Gattereingang auf explizite Null
+gelegt; bestehende Bauteile, Pins und übrige Leitungswege blieben unverändert.
+Der erweiterte 64-Zeilen-Decodertest prüft die unterdrückte Anforderung und
+lehnt eine Kopie mit wiederhergestelltem Fehlerzweig elektrisch ab.
+
+Offline-Verträge, Strukturprüfung, alle 198 Windows-Unit-Tests, beide
+identischen Minimalkernläufe, Countdown, die ersten beiden Kernfixtures,
+alle sieben Systemfixtures, Operator-Panel und die bisherigen elektrischen
+Negativkontrollen bestehen. Der Akkumulator hält an der betroffenen Flanke
+jetzt korrekt `7 VALID`. Die serielle Kernmatrix stoppt danach bei derselben
+Fixture `load-address-register`, Flanke 3, `post`, `AR`: Soll `20`, Ist `0`.
+22.1 bleibt offen; spätere Fixtures wurden gemäß Stop-Regel nicht geöffnet.
+
+Die passive Messung zeigt außerdem ein dauerhaft aktives
+`AddressPath.ADDRESS_PATH_STARTUP_RESET`, einen Ladeeingang, der bisher der
+Akkumulatoranforderung folgt, und `ADDRESS_IN=1` statt des Operanden `20`.
+Diese getrennten Adressregisterpfade wurden nicht mitrepariert. Der nächste
+begrenzte Schritt verfolgt zunächst ausschließlich den Resetpfad vom
+öffentlichen `RESET` zum benannten Eingang von `AddressPath`, bevor dessen
+kleinste belegte Reparatur und erneute Abnahme erfolgen. Befehle, Rohdaten und
+Grenzen stehen im
+[Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-akkumulatorhalten-bei-adressregister-konstante-am-31-oktober-2026).
+
+## Vorheriger Fortschritt am 30. Oktober 2026: Countdown und Speicherladeauswahl
 
 Der aus CI gemeldete Countdown-Fehler an Flanke 6 ist repariert. Der passive
 Flagvergleich führt den falschen `SET_INV` auf die Operandenauswahl zurück:

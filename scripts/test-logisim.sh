@@ -41,7 +41,7 @@ if ! PYTHONPATH=src python3 scripts/test-logisim-immediate.py \
   failed+=(immediate-operand)
 fi
 
-if ! PYTHONPATH=src python3 scripts/test-logisim-decode.py; then
+if ! PYTHONPATH=src python3 scripts/test-logisim-decode.py --output "$OUTPUT/decode"; then
   failed+=(decode)
 fi
 

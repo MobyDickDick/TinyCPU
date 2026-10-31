@@ -1,15 +1,17 @@
 # Elektrischer Kernvergleich (AP 22.1)
 
-**Stand: 30. Oktober 2026.** Der Vergleich ist im verpflichtenden Gate aktiv.
+**Stand: 31. Oktober 2026.** Der Vergleich ist im verpflichtenden Gate aktiv.
 Die Schaltung besteht die vollständige Abnahme derzeit nicht. Nach den
 Operandenauswahl- und Speicherlade-Reparaturen bestehen beide identischen
 Minimalkernläufe, der vollständige Countdown und die Fixtures `load-const`
 und `load-address`. Die erste Abweichung liegt nun in `load-address-register`
-an Flanke 3, `post`, bei `ACC` (Soll `7`, Ist `20`). Die
-Bestandsaufnahme mit 59 Abweichungen in 61 ISA-/Fehler-Fixtures stammt vom
+an Flanke 3, `post`, bei `AR` (Soll `20`, Ist `0`). Der unerlaubte
+Akkumulator-Schreibvorgang bei `LOAD_ADDRESS_REGISTER_CONST` ist inzwischen
+elektrisch belegt und minimal repariert; der Akkumulator hält jetzt `7 VALID`.
+Die Bestandsaufnahme mit 59 Abweichungen in 61 ISA-/Fehler-Fixtures stammt vom
 29. Oktober; die neue serielle Matrix stoppt bei der dritten Fixture.
 Reproduktion und nächste Diagnose stehen im
-[Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-countdown-operandenauswahl-und-speicherladeanforderung-am-30-oktober-2026).
+[Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-akkumulatorhalten-bei-adressregister-konstante-am-31-oktober-2026).
 
 ## Ausführung
 
@@ -162,3 +164,14 @@ Der ebenfalls verpflichtende `scripts/test-logisim-decode.py` prüft nun auch
 `ACC_MEMORY_REQUEST` für sämtliche 64 Opcodezeilen, insbesondere seine drei
 Speicherlade-Terme. Die übrigen offenen Register- und Fehlerfälle sind durch
 diese gezielten Prüfungen nicht freigegeben.
+
+Der Decodertest prüft außerdem `ACC_WRITE_REQUEST=0` für
+`LOAD_ADDRESS_REGISTER_CONST` (`0x27`). Eine gesonderte Kopie entfernt nur die
+neutrale Konstante `ACC_LD_REG_CONST_DISABLED` und stellt den belegten
+`LD_REG_CONST`-Zweig zur Akkumulator-Ladeanforderung wieder her. Die gesamte
+64-Zeilen-Prüfung muss dann ausschließlich an Opcode `0x27` bei
+`ACC_WRITE_REQUEST` (Soll `0`, Ist `1`) ablehnen. Unveränderte Quelle,
+Projektkopien, Befehle und beide Rohtraces werden unter `artifacts/decode/`
+beziehungsweise dem mit `--output` gewählten Pfad festgehalten. Dieser Nachweis
+betrifft das Akkumulatorhalten; Laden und Reset des Adressregisters sind damit
+weiterhin nicht abgenommen.

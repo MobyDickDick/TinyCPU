@@ -132,6 +132,19 @@ ein getrennter Diagnoseschritt; AP 22.1 und die vollständige Kernfreigabe bleib
 offen. Die [Nachweise](tiny_cpu_circuit_debug_report.md#ap-221-countdown-operandenauswahl-und-speicherladeanforderung-am-30-oktober-2026)
 benennen Zwischenstände und den nächsten passiven Vergleich.
 
+**Nachtrag vom 31. Oktober 2026:** Der passive Vergleich und die lesende
+Gatterdiagnose belegen den unerlaubten `LD_REG_CONST`-Zweig zur
+Akkumulator-Ladeanforderung. Ausschließlich dieser Zweig ist durch eine
+explizite Null ersetzt. Der erweiterte Decodertest besteht für alle 64 Zeilen
+und lehnt den in einer Kopie wiederhergestellten Fehler elektrisch ab.
+Der Akkumulator hält jetzt korrekt `7 VALID`; der Kernvergleich stoppt
+anschließend bei `load-address-register`, Flanke 3, `post`, `AR`: Soll `20`,
+Ist `0`. Alle bisherigen Offline-, System-, Operator- und fokussierten
+elektrischen Prüfungen bestehen erneut. Als nächstes wird ausschließlich der
+Resetpfad von `AddressPath` verfolgt. AP 22.1 bleibt offen; die
+[Nachweise](tiny_cpu_circuit_debug_report.md#ap-221-akkumulatorhalten-bei-adressregister-konstante-am-31-oktober-2026)
+grenzen diesen abgeschlossenen Teilschritt von den übrigen Registerpfaden ab.
+
 TinyCPU ist im eingefrorenen 1.0-Zielprofil **voll funktionsfähig**: Die
 16-Bit-Daten-/12-Bit-Adress-Schaltung implementiert alle 50 Opcodes, wird im
 realen, gepinnten Logisim-evolution elektrisch gegen die Python-VM geprüft und

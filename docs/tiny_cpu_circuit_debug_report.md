@@ -5075,3 +5075,106 @@ Adressregistersignale oder VM-Erwartungen auf Verdacht geändert. AP 22.1, die
 gültige externe Eingabe, weitere Matrixbefunde, AP 22.2 bis 22.5 und die manuelle
 GUI-Abnahme bleiben offen. Die 59 Abweichungen vom 29. Oktober sind weiterhin
 eine historische Bestandsaufnahme und keine neue vollständige Matrixzählung.
+
+## AP 22.1: Akkumulatorhalten bei Adressregister-Konstante am 31. Oktober 2026
+
+**Ausgangs-Commit:** `668afe05f0aba0d0b2ddee288a7d40497330f083`
+(`Fix countdown operand forwarding and memory-load selection`); der Arbeitsbaum
+war vor Beginn sauber. Bearbeitet ist der danach dokumentierte begrenzte
+Schritt zur ersten Abweichung bei `load-address-register`, Flanke 3, `post`,
+`ACC`: Soll `7`, Ist `20`. Die Ergebnisse gelten für diesen Ausgangsstand mit
+der unten beschriebenen Reparatur, nicht für eine neue Endabnahme nach 22.5.
+
+Umgebung: Windows/PowerShell, Python **3.14.5**, OpenJDK **27+35-2325**,
+Logisim-evolution **4.1.0**, lokale JAR
+`.venv/Include/logisim-evolution-4.1.0-all.jar`, SHA256
+`fe6386a3217a591bcc311a4eda49e1f43a389b499dd3d0f6f40f344fc85f2577`.
+Die elektrischen Läufe benötigten wie zuvor Zugriff auf die lokalen
+Java-Einstellungen. Ein erster Sandboxversuch brach bei der Initialisierung
+der Windows-Java-Preferences ab und ist kein elektrischer Befund; die unten
+genannten Messungen wurden anschließend erfolgreich exportiert.
+
+### Fehlernachweis und kleinste Reparatur
+
+Die passive Messung an der unveränderten ROM-Kopie der dritten Fixture zeigt
+vor Flanke 3 `LD_REG_CONST=1`, `ACC_WRITE_REQUEST=1` und
+`Datapath.ACC_LOAD=1`. Nach der Flanke wird der bisherige Akkumulator `7 VALID`
+unerlaubt mit `20 VALID` überschrieben. Der um `ACC_WRITE_REQUEST=0` für
+Opcode `0x27` erweiterte Decodertest scheitert vor jeder Schaltungsänderung
+gezielt mit Soll `0`, Ist `1`.
+
+Die lesende Logisim-Kontaktdiagnose `RegisterContacts.java` bestätigt für
+`0x27` genau den aktiven Eingang des vorhandenen `ACC_LOAD_REQUEST`-ODERs am
+Ende des `LD_REG_CONST`-Zweigs. Nur dessen zwei Leitungssegmente werden
+entfernt. Die neue benannte Nullkonstante `ACC_LD_REG_CONST_DISABLED` hält den
+freigewordenen Eingang definiert. Das Gatter, seine Eingangsanzahl, sämtliche
+bisherigen Bauteile und Pins sowie alle anderen Leitungswege bleiben erhalten.
+Die eigenständige Decoder-Diagnoseschaltung wird nicht verändert.
+`change-audit.json` bestätigt genau diese Änderung gegenüber dem Ausgangsstand.
+
+Der verpflichtende `scripts/test-logisim-decode.py` prüft weiterhin alle
+64 Opcodezeilen. Zusätzlich entfernt er nur in einer Schaltungskopie die neue
+Nullkonstante und stellt den zuvor belegten `LD_REG_CONST`-Zweig anhand des
+benannten Quellpins, seines Leitungsabzweigs und des freigehaltenen Kontakts
+wieder her. Die vollständige Tabelle wird dann gezielt bei Opcode `0x27`,
+`ACC_WRITE_REQUEST` (Soll `0`, Ist `1`) abgelehnt. Die Originalschaltung bleibt
+bytegleich; Projektkopien, exakte Befehle, Rohtraces und `proof.json` bleiben
+unter dem neuen `--output`-Verzeichnis erhalten. Das Shell-Gate gibt dieses
+Verzeichnis nun explizit mit an.
+
+### Reproduktion und Ergebnisse
+
+Gemeinsame PowerShell-Umgebung im Projektverzeichnis:
+
+```powershell
+$env:PYTHONPATH='src'
+$env:JAVA='C:/Program Files/jdk-27/bin/java.exe'
+$env:LOGISIM_JAR=(Resolve-Path .venv/Include/logisim-evolution-4.1.0-all.jar).Path
+$env:TEMP=(Resolve-Path artifacts/review-tmp).Path
+$env:TMP=$env:TEMP
+```
+
+Alle folgenden Artefaktangaben sind relativ zu `artifacts/ap22-1-register/`.
+
+| Prüfung | Exakter Befehl | Ergebnis und Artefakte |
+|---|---|---|
+| Passiver Vergleich vor Reparatur | `& $env:JAVA '-Djava.awt.headless=true' --class-path $env:LOGISIM_JAR scripts/LogisimCoreTrace.java TinyCPUMain artifacts/ap22-1-flags/after-load/matrix/load-address-register/TinyCPU.circ artifacts/ap22-1-register/probes.tsv 12` | Exit 0; `before.tsv`, `before-stderr.txt`; benannte Lade-, Daten-, Gültigkeits-, Takt- und Resetpins. |
+| Lesende Gatterdiagnose | `& $env:JAVA '-Djava.awt.headless=true' --class-path $env:LOGISIM_JAR artifacts/ap22-1-register/RegisterContacts.java hardware/logisim/TinyCPU.circ` | Exit 0 vor Reparatur; `contacts-before.txt` und Helferquelle. |
+| Decoder vor Reparatur | `python scripts/test-logisim-decode.py` | Exit 1; Opcode 39, `ACC_WRITE_REQUEST`: Soll 0, Ist 1. `decode-before.txt`. |
+| Decoder nach Reparatur und Negativkontrolle | `python scripts/test-logisim-decode.py --output artifacts/ap22-1-register/checks/decode` | Exit 0; alle 64 Zeilen bestehen, wiederhergestellter Fehlerzweig abgelehnt. `decode-after.txt`, `checks/decode/` mit Rohtraces und `proof.json`. |
+| Offline-Verträge | `python src/tiny_cpu_verify.py` | Exit 0; 50 Opcodes, sechs Sticky-Error-Fixtures und 24 Logisim-Dateien konsistent. `verify.txt`. |
+| Schaltungsstruktur | `python scripts/check-logisim-circuit.py` | Exit 0; `structure.txt`. |
+| Windows-Unit-Suite | `python -m unittest discover -s tests -v` | Exit 0; 198 Tests ohne Skip in 29,684 Sekunden. `offline-tests.txt`. Linux-CI wurde nicht lokal ausgeführt. |
+| Kernvergleich | `python src/tiny_cpu_logisim.py --java $env:JAVA --jar $env:LOGISIM_JAR --trace-output artifacts/ap22-1-register/final/core.tsv --matrix-output artifacts/ap22-1-register/final/matrix` | Exit 1 erst bei `load-address-register`, Flanke 3, `post`, `AR`: Soll 20, Ist 0. Beide Minimalkernläufe identisch, Countdown, `load-const` und `load-address` bestehen. `core-after.txt`, `final/` mit Rohdaten und Diagnose. |
+| Passiver Vergleich nach Reparatur | `& $env:JAVA '-Djava.awt.headless=true' --class-path $env:LOGISIM_JAR scripts/LogisimCoreTrace.java TinyCPUMain artifacts/ap22-1-register/final/matrix/load-address-register/TinyCPU.circ artifacts/ap22-1-register/probes.tsv 12` | Exit 0; `after.tsv`, `after-stderr.txt`. Vor Flanke 3 sind beide Akkumulator-Ladeanforderungen 0; danach bleibt `ACC=7 VALID`. |
+| STORE | `python scripts/test-logisim-store.py --output artifacts/ap22-1-register/checks/store` | Exit 0; beide Positivfälle und Negativkontrolle. `store-final.txt`, `checks/store/`. |
+| PRINT | `python scripts/test-logisim-print.py --output artifacts/ap22-1-register/checks/print` | Exit 0; Positivfälle und Negativkontrolle. `print-final.txt`, `checks/print/`. |
+| Immediate-Auswahl | `python scripts/test-logisim-immediate.py --output artifacts/ap22-1-register/checks/immediate` | Exit 0; Positivfälle und beide Negativkontrollen. `immediate-final.txt`, `checks/immediate/`. |
+| Rechenergebnis-Negativkontrolle | `python scripts/test-logisim-core-mutation.py --output artifacts/ap22-1-register/checks/core-mutation` | Exit 0; `core-mutation-final.txt`, `checks/core-mutation/`. |
+| Vollständige Systemmatrix | `python src/tiny_cpu_logisim.py --java $env:JAVA --jar $env:LOGISIM_JAR --profile tinycpu-16-12 --system tinycpu-peripherals-16-12-v1 --system-only --trace-output artifacts/ap22-1-register/system-unused.tsv --matrix-output artifacts/ap22-1-register/checks/system` | Exit 0; alle sieben Fixtures bestehen. `system-final.txt`, `checks/system/system/`. |
+| Operator-Panel | `python scripts/test-logisim-operator.py` | Exit 0; `operator-final.txt`. Automatischer STEP-Nachweis, keine manuelle GUI-Abnahme. |
+
+`checks.json` bewahrt zusätzlich Befehle und Exitcodes der sechs zuletzt
+genannten Regressionen auf. Die elektrischen Komponenten des Gates wurden
+einzeln mit der Windows-Laufzeit ausgeführt; das Shell-Gate als Ganzes wurde
+nicht aufgerufen.
+
+### Nächster abgegrenzter Schritt
+
+Der erste Kernunterschied liegt jetzt beim Adressregisterwert `AR` statt beim
+Akkumulator. Die passive Messung zeigt zudem
+`AddressPath.ADDRESS_PATH_STARTUP_RESET=1` in sämtlichen Phasen, obwohl der
+Exporter den öffentlichen Reset vor dem ersten `pre` deaktiviert. Vor Flanke 3
+liegt `AR_LOAD` nach der Akkumulatorreparatur auf `0`, `ADDRESS_IN` bleibt `1`
+statt `20`; Gültigkeit und Takt sind definiert. Diese Befunde betreffen
+separate Signalwege und wurden in diesem Reparaturschritt nicht verändert.
+
+Als nächstes wird ausschließlich der Resetpfad vom öffentlichen `RESET` bis
+`AddressPath.ADDRESS_PATH_STARTUP_RESET` einschließlich seines tatsächlichen
+Treibernetzes passiv verglichen. Erst der dort benannte erste Unterschied
+erlaubt die kleinste Resetkorrektur. Danach laufen zuerst die fokussierte
+Resetprüfung, Offline-Suite, beide Minimalkernläufe, Countdown und die serielle
+Matrix bis zum nächsten ersten Unterschied. Ladefreigabe und Datenauswahl des
+Adressregisters bleiben getrennte Folgeschritte. AP 22.1, gültige externe
+Eingaben, AP 22.2 bis 22.5 und die manuelle GUI-Abnahme bleiben offen; spätere
+Kernfixtures wurden gemäß Stop-Regel nicht geöffnet.
