@@ -116,12 +116,17 @@ class HierarchyTests(unittest.TestCase):
         faults, branch, fetch = ports("FaultUnit"), ports("BranchUnit"), ports("FetchUnit")
         public = {attributes(p)["label"]: p.get("loc") for p in main.findall("comp[@name='Pin']")}
         sources = [faults[n] for n in ("ADDR", "DIV0", "ILL", "INPUT", "INV", "OVF")]
-        sources.append(fetch["ERROR_HALT"])
+        sources.extend(fetch[name] for name in ("ERROR_HALT", "HALT", "PRINT_ADDR", "PRINT"))
         for name in ("ADDR", "DIV0", "ILL", "INPUT", "INV", "OVF"):
             with self.subTest(signal=name):
                 self.assertTrue(wire_path_exists(main, faults[name], branch[name]))
                 self.assertTrue(wire_path_exists(main, faults[name], public[f"ERROR_{name}"]))
         self.assertTrue(wire_path_exists(main, fetch["ERROR_HALT"], public["HALTED_WITH_ERROR"]))
+        for source, destination in (("HALT", "HALTED"),
+                                    ("PRINT_ADDR", "PRINT_ADDRESS_ENABLE"),
+                                    ("PRINT", "PRINT_ENABLE")):
+            with self.subTest(signal=source):
+                self.assertTrue(wire_path_exists(main, fetch[source], public[destination]))
         for index, source in enumerate(sources):
             for other in sources[index + 1:]:
                 self.assertFalse(wire_path_exists(main, source, other))

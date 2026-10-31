@@ -1,5 +1,46 @@
 # Topologische Nachprüfung von TinyCPUMain
 
+## Erneute Prüfung des Neuzeichnungsstands `1648040`
+
+Am 31. Oktober 2026 wurde die anschließend erneut gezeichnete Übersicht
+vollständig anhand ihrer benannten Anschlüsse geprüft. Drei Leitungswege
+wichen von der freigegebenen elektrischen Struktur ab:
+
+| Signal | Fehler im Neuzeichnungsstand | Korrektur |
+|---|---|---|
+| `FetchUnit.HALT` | Mit `FaultUnit.ADDR` verbunden; `HALTED` offen | Eigenständige Leitung zu `HALTED` |
+| `FetchUnit.PRINT_ADDR` | Mit `FaultUnit.INV` verbunden; `PRINT_ADDRESS_ENABLE` offen | Eigenständige Leitung zu `PRINT_ADDRESS_ENABLE` |
+| `BranchUnit.OVF` | Mit dem INPUT-Fehlernetz verbunden | Rückführung vom OVF-Fehlernetz |
+
+Es wurden ausschließlich diese Leitungswege angepasst. Alle 41 Komponenten
+einschließlich Positionen und Attribute bleiben erhalten. Die Übersicht hat
+286 statt 288 Leitungssegmente. Sämtliche nachfolgenden Teilkreisdefinitionen,
+einschließlich `FetchDecodeControls`, sind bytegenau unverändert.
+
+Der vollständige Vergleich aller benannten Portnetze mit Referenz `f7bdc87`
+stimmt überein. Auch der unveränderte Referenz-Fingerabdruck
+`0d7893c6fbc0869006a4bd8ffa96313c405fac87719787ca1e71a3348159f980`
+wird wieder erreicht. Die bestehende Regression prüft zusätzlich die getrennten
+HALT-, PRINT- und PRINT_ADDRESS-Netze sowie deren öffentliche Ausgänge; sie
+schlug vor der Schaltungskorrektur fehl und besteht danach.
+
+Nachweise liegen lokal unter `artifacts/wiring-review-repeat/`:
+
+- Offline-Verifier und statischer Leitungstest über alle Projektdateien bestanden.
+- Alle 212 Python-Tests bestanden (`unit-after.txt`).
+- Logisim meldet definierte elektrische Ausgänge für Kern und Peripherie (`electrical.txt`).
+- Countdown und alle 61 elektrischen Kernfixtures bestanden (`core.txt`).
+- Kern-, STORE-, PRINT-, Immediate-, Decoder- und Registerpfadprüfungen
+  einschließlich aller vorgesehenen Negativkontrollen bestanden
+  (`core-mutation.txt`, `store.txt`, `print.txt`, `immediate.txt`, `decode.txt`,
+  `address-register.txt`).
+- Alle sieben Peripheriefälle sowie der STEP-Takttest bestanden
+  (`system.txt`, `operator.txt`).
+- Komponenten-, Teilkreis- und Anschlussvergleich: `topology-proof.json`;
+  gesichteter Logisim-Zeichenexport: `after.png`.
+
+## Vorherige Prüfung des Neuzeichnungsstands `171d99f`
+
 Am 31. Oktober 2026 wurde der manuell neu gezeichnete Stand `171d99f`
 (im Ausgangscheckout `d760452`) anhand benannter Bauteilanschlüsse geprüft.
 Die aktuelle Anordnung bleibt erhalten; es wurde kein älteres Layout
