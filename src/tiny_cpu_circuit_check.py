@@ -233,6 +233,13 @@ def _undriven_gate_input_issues(
     segments = [(_point(w.get("from", "")), _point(w.get("to", "")))
                 for w in circuit.findall("wire")]
     drivers = _drivers(circuit, definitions)
+    # A public input or constant is a real source even when its fanout reaches
+    # a distant primitive input, rather than ending at a component's ``loc``.
+    drivers += [_Driver(_point(component.get("loc", "")), component.get("name", ""))
+                for component in circuit.findall("comp")
+                if component.get("name") == "Constant"
+                or (component.get("name") == "Pin"
+                    and _attributes(component).get("type", "input") == "input")]
     gate_kinds = {
         "AND Gate", "OR Gate", "XOR Gate", "NAND Gate", "NOR Gate", "NOT Gate",
     }

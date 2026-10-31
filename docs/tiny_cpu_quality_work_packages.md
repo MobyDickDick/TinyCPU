@@ -1,8 +1,41 @@
 # AP 22: Qualitätsbefunde und belastbare Abnahme
 
-**Stand:** 31. Oktober 2026. **Status:** in Bearbeitung; elektrische Abnahme offen.
+**Stand:** 31. Oktober 2026. **Status:** 61 elektrische Kernfixtures abgenommen;
+gültige externe Eingaben und weitere Qualitätsaufgaben offen.
 
-## Fortschritt am 31. Oktober 2026: Akkumulatorhalten bei Adressregister-Konstante
+## Fortschritt am 31. Oktober 2026: Registerpfade und vollständige Kernmatrix
+
+Der aus CI gemeldete Registerfehler ist behoben. Nach jeder separat gemessenen
+Reparatur wurde die Abnahme bis zum nächsten ersten Unterschied fortgesetzt.
+Jetzt bestehen beide identischen Minimalkernläufe, der Countdown und erstmals
+alle 61 unveränderten ISA-/Fehlerfixtures mit vollständigem Pre-/Post-Vergleich.
+Auch alle sieben Systemfixtures, Operator-Panel, Decoder und die bisherigen
+elektrischen Negativkontrollen bestehen. Die Windows-Suite umfasst 201 Tests.
+
+Korrigiert sind Reset, Ladefreigabe, Datenquelle und Registeradressauswahl,
+die Auswahl von Offset und RAM-Operanden, unerlaubte Akkumulator-Schreibimpulse
+bei Register- und Store-Befehlen, NOT-Aktivierung und -Gültigkeit sowie die
+Ergebnisgültigkeit von MUL und ADD. Als ungültig erkannte Ergebnisse werden mit
+Wert null und gelöschter Gültigkeit übernommen. CLEAR_ERROR hält Registerwerte
+und löscht Flags erst an seiner Flanke; INPUT und PRINT setzen die passenden
+Fehler statt ILL. PRINT_ADDRESS wird vom richtigen Decoderpin gespeist.
+Die Darstellung von `FetchDecodeControls` wurde nicht neu angeordnet.
+
+Ein gesondert nachgewiesener VM-Fehler ist ebenfalls korrigiert:
+`LOAD_ADDRESS_REGISTER_ADDRESS(address)` liest den direkten Adressoperanden,
+unabhängig vom alten Adressregister. Ein Test mit zwei unterschiedlichen
+Ausgangszuständen legt den Sollwert unabhängig von der VM fest. Die neue
+verpflichtende Registerregression prüft neun Programme und fünf unabhängige
+Mutationen, einschließlich negativer Offsets.
+
+22.1 bleibt wegen der fehlenden gültigen externen Eingabe offen. Als nächster
+Schritt wird deren elektrische Schnittstelle und Abnahme abgegrenzt; 22.2
+kann nun auf dem bestandenen bestehenden Kernvergleich aufbauen. Dies ist
+keine Endabnahme aus frischem Checkout nach 22.5 und kein manueller GUI-Test.
+Befehle, Zwischenstände und Abdeckungsgrenzen stehen im
+[Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-registerpfade-und-vollständige-61-fall-abnahme-am-31-oktober-2026).
+
+## Vorheriger Fortschritt am 31. Oktober 2026: Akkumulatorhalten bei Adressregister-Konstante
 
 Der nächste begrenzte Schritt aus 22.1 ist abgeschlossen. Die passive Messung
 bestätigt bei `LOAD_ADDRESS_REGISTER_CONST(20)` vor Flanke 3 fälschlich
@@ -174,7 +207,7 @@ Defektnachweis für eine konkrete Leitung oder ein bestimmtes Bauteil.
 - [x] Das tatsächlich beobachtbare Trace-Schema und den Bezug auf steigende
   Taktflanken festlegen. Logisims nur bei Änderungen ausgegebene Tabellenzeilen
   dürfen nicht ungeprüft als Instruktionsschritte gezählt werden.
-- [ ] Für das Kernprogramm und alle 61 bestehenden ISA-/Fehler-Fixtures die
+- [x] Für das Kernprogramm und alle 61 bestehenden ISA-/Fehler-Fixtures die
   elektrischen Zustände gegen die VM vergleichen: PC, Akkumulator und
   Adressregister samt Gültigkeit, alle Fehlerflags, Ausgabeereignisse mit
   Wert/Gültigkeit sowie Normal- und Fehlerhalt. Speicheränderungen müssen
@@ -192,6 +225,13 @@ Soll- und Istwert und bewahrt die elektrischen Rohdaten auf. Ein unveränderter
 korrekter Lauf besteht; der absichtlich falsche Rechenlauf scheitert.
 
 ### 22.2 Divisionsüberlauf und arithmetische Grenzen klären — hohe Priorität
+
+Zusätzlicher elektrischer Befund vom 31. Oktober: `16384 * 2` liefert im
+isolierten Operationsbaustein `0x8000 VALID` mit `OVF=0`, obwohl das
+mathematische Ergebnis außerhalb des 16-Bit-Bereichs liegt. Dieser Grenzfall
+gehört nicht zu den bestehenden 61 Fixtures und bleibt in 22.2 offen; die
+bestandene Kernmatrix ist kein Nachweis sämtlicher arithmetischer Grenzen.
+Rohbefund: `artifacts/ap22-1-address-path/mul-boundary-known.json`.
 
 - [ ] Den obigen Grenzfall als fokussierte Regression festhalten und das
   Sollverhalten vor einer Implementierungsänderung dokumentieren. Nach dem

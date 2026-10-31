@@ -145,6 +145,20 @@ Resetpfad von `AddressPath` verfolgt. AP 22.1 bleibt offen; die
 [Nachweise](tiny_cpu_circuit_debug_report.md#ap-221-akkumulatorhalten-bei-adressregister-konstante-am-31-oktober-2026)
 grenzen diesen abgeschlossenen Teilschritt von den übrigen Registerpfaden ab.
 
+**Weiterer Nachtrag vom 31. Oktober 2026:** Der CI-Registerbefund und die danach
+seriell belegten Adressierungs-, Gültigkeits- und Fehlersteuerungsfehler sind
+repariert. Beide identischen Minimalkernläufe, Countdown und erstmals alle
+61 bestehenden ISA-/Fehlerfixtures bestehen mit vollständigem
+Zustandsvergleich. Alle sieben Systemfixtures, Operator-Panel und die
+fokussierten Negativkontrollen bestehen ebenfalls. Die Windows-Suite umfasst
+201 Tests. Ein zusätzlicher VM-Regressionstest sichert die direkte
+Adressierung beim Laden des Adressregisters aus RAM. Die neue verpflichtende
+Registerregression deckt auch unterschiedliche und negative Offsets ab.
+AP 22.1 bleibt wegen gültiger externer Eingaben offen; AP 22.2 und 22.5 sind
+weiterhin nicht abgeschlossen. Die
+[Nachweise](tiny_cpu_circuit_debug_report.md#ap-221-registerpfade-und-vollständige-61-fall-abnahme-am-31-oktober-2026)
+trennen die bestandene vorhandene Matrix von diesen Abdeckungsgrenzen.
+
 TinyCPU ist im eingefrorenen 1.0-Zielprofil **voll funktionsfähig**: Die
 16-Bit-Daten-/12-Bit-Adress-Schaltung implementiert alle 50 Opcodes, wird im
 realen, gepinnten Logisim-evolution elektrisch gegen die Python-VM geprüft und

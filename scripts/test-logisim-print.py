@@ -59,6 +59,8 @@ def main() -> int:
         "negative": "LOAD_CONST(-1)\nPRINT()\nHALT()\n",
         "valid-zero": "LOAD_CONST(0)\nPRINT()\nPRINT()\nHALT()\n",
         "no-print": "LOAD_CONST(3)\nHALT()\n",
+        "invalid-print": "PRINT()\nHALT()\n",
+        "print-address": "LOAD_CONST(7)\nSTORE_ADDRESS(20)\nPRINT_ADDRESS(20)\nHALT()\n",
     }
     for name, code in cases.items():
         program = assemble(code, profile)
@@ -94,7 +96,8 @@ def main() -> int:
         "expected": 1, "actual": 0,
     }, indent=2) + "\n", encoding="utf-8")
     print("PRINT forwarding passed: positive, negative, valid zero, consecutive events "
-          "and no-print control; suppressed pulse rejected despite normal halt")
+          "and no-print control, invalid attempt and memory print; "
+          "suppressed pulse rejected despite normal halt")
     return 0
 
 

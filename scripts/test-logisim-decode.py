@@ -77,10 +77,13 @@ def expected_row(code: int, opcodes: dict[str, dict[str, object]]) -> dict[str, 
     mnemonic = str(instruction["mnemonic"])
     family = mnemonic.split("_", 1)[0]
     arithmetic = family in {"ADD", "SUB", "MUL", "DIV", "AND", "OR", "XOR"}
-    # AP 22.1's bounded STORE_ADDRESS and address-register-constant repairs.
-    # Other request terms still need their own electrical diagnosis.
-    if mnemonic in {"STORE_ADDRESS", "LOAD_ADDRESS_REGISTER_CONST"}:
+    # Hold/write requirements diagnosed in AP 22.1's complete core traces.
+    if mnemonic in {"STORE_ADDRESS", "STORE_ADDRESS_REGISTER",
+                    "STORE_ADDRESS_REGISTER_PLUS_OFFSET", "LOAD_ADDRESS_REGISTER_CONST",
+                    "LOAD_ADDRESS_REGISTER_ADDRESS", "CLEAR_ERROR"}:
         row["ACC_WRITE_REQUEST"] = 0
+    if mnemonic == "INPUT":
+        row["ACC_WRITE_REQUEST"] = 1
     if mnemonic in {"LOAD_ADDRESS", "LOAD_ADDRESS_REGISTER",
                     "LOAD_ADDRESS_REGISTER_PLUS_OFFSET"}:
         row["ACC_MEMORY_REQUEST"] = 1

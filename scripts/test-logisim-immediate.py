@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import os
 import sys
@@ -96,11 +97,16 @@ def main() -> int:
     except LogisimError as exc:
         mismatch = exc.__cause__
         if not (isinstance(mismatch, CoreMismatch) and mismatch.edge == 2
-                and mismatch.phase == "post" and mismatch.signal == "ERROR_INV"
-                and mismatch.expected == 0 and mismatch.actual == 1):
+                and mismatch.phase == "post" and mismatch.signal == "ACC"
+                and mismatch.expected == 2 and mismatch.actual == 0):
             raise
     else:
         raise LogisimError("suppressed constant operand selector unexpectedly passed")
+    with (args.output / "wrong.tsv").open(encoding="utf-8") as trace:
+        rejected = next(row for row in csv.DictReader(trace, delimiter="\t")
+                        if row["edge"] == "2" and row["phase"] == "post")
+    if rejected["ACC_VALID"] != "0" or rejected["ERROR_INV"] != "1":
+        raise LogisimError("suppressed selector must produce 0 INVALID with INV set")
     wrong_data = args.output / "immediate-suppressed.circ"
     suppress_immediate(source, wrong_data)
     try:
@@ -120,7 +126,8 @@ def main() -> int:
     (args.output / "proof.json").write_text(json.dumps({
         "controls_passed": list(cases), "mutation_rejected": True,
         "source_unchanged": True, "edge": 2, "phase": "post",
-        "signal": "ERROR_INV", "expected": 0, "actual": 1,
+        "signal": "ACC", "expected": 2, "actual": 0,
+        "acc_valid": 0, "error_inv": 1,
         "data_mutation_rejected": True,
         "data_mismatch": {"edge": 2, "phase": "post", "signal": "ACC",
                           "expected": 2, "actual": 3},

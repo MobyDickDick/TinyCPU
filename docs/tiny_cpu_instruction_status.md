@@ -1,26 +1,23 @@
 # Funktionsstand der TinyCPU-Befehle
 
-**Aktueller Stand: 31. Oktober 2026 — elektrische Kernabnahme weiterhin offen.**
+**Aktueller Stand: 31. Oktober 2026 — alle 61 bestehenden Kernfixtures bestehen.**
 
 Die Bestandsaufnahme des vollständigen Kernvergleichs aus AP 22.1 vom
 29. Oktober am Ausgangsstand `9d60c94` fand Abweichungen in 59 von 61
 unveränderten Fixtures; nur `halt` und `halt-error` bestanden. Nach den
-begrenzten Reparaturen an STORE, PRINT, Immediate-Operandenauswahl,
-Speicherladeanforderung und Akkumulatorhalten bei Adressregister-Konstanten
-bestehen die gezielten Regressionen samt elektrischen
-Negativkontrollen und alle 198 Windows-Unit-Tests. Der vollständige Countdown
-und die ersten beiden Matrixfixtures `load-const` und `load-address` bestehen.
-Die serielle Matrix stoppt nun bei `load-address-register`, Flanke 3, `post`,
-`AR` (Soll `20`, Ist `0`); der Akkumulator hält jetzt korrekt `7 VALID`.
-Der Minimalkern `LOAD_CONST(3); HALT` besteht
-weiterhin zweimal mit identischen Rohtraces. Alle sieben Systemfixtures und
-die automatische Operator-Panel-Abnahme wurden erneut erfolgreich ausgeführt.
-Die bisherigen grünen Haltprüfungen belegen keine vollständige Zustandsparität;
-die unten stehende Tabelle ist ein historischer Abschlussvermerk vom
-20. September 2026 und keine aktuelle Funktionsfreigabe.
+einzeln elektrisch belegten Reparaturen bestehen jetzt dieselben 61 Fixtures
+mit vollständigem Zustandsvergleich gegen die VM sowie der Countdown und
+zweimal der deterministische Minimalkern. Der gemeldete Registerfehler ist
+behoben; der Vergleich wurde danach bis zum letzten Fehlerfall fortgesetzt.
+Alle sieben Systemfixtures, Operator-Panel, die erweiterten fokussierten
+Regressionen und Negativkontrollen bestehen ebenfalls. Die Windows-Suite
+umfasst 201 Tests. Diese Abnahme deckt die bestehende Matrix ab; gültige
+externe Eingaben, weitere arithmetische Grenzen aus AP 22.2 und die erneute
+Releaseabnahme nach AP 22.5 bleiben offen. Die Tabelle unten bleibt als
+historischer Abschlussvermerk vom 20. September 2026 gekennzeichnet.
 
-Details und der erste begrenzte Reparaturschritt stehen im
-[AP-22.1-Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-akkumulatorhalten-bei-adressregister-konstante-am-31-oktober-2026).
+Details und Nachweise stehen im
+[AP-22.1-Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-registerpfade-und-vollständige-61-fall-abnahme-am-31-oktober-2026).
 Der [Beobachtungsvertrag](tiny_cpu_core_trace.md) beschreibt die neue Prüfung
 und ihre noch offene Grenze für gültige Eingaben. Der manuelle GUI-Test bleibt
 ebenfalls offen.

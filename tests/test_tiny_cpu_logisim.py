@@ -240,7 +240,7 @@ class LogisimLauncherTests(unittest.TestCase):
             _wire_path_exists(main, _pin_location(main, "ILL_RET"), upper_input)
         )
         self.assertTrue(_wire_path_exists(
-            main, _controls_port(main, "SET_ILL"), lower_input
+            main, _subcircuit_ports(root, main, "FETCH_DECODE_CONTROLS")["SET_ILL"], lower_input
         ))
         self.assertTrue(
             _wire_path_exists(
@@ -635,19 +635,18 @@ class LogisimLauncherTests(unittest.TestCase):
             autonomous_project(source, Path(directory) / "copy.circ", "TinyCPUMain")
         self.assertEqual(before, source.read_bytes())
 
-    def test_register_offset_sum_reaches_effective_address_selector(self):
-        for name in ("TinyCPU.circ",):
-            root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
-            main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
-            self.assertTrue(
-                _wire_path_exists(
-                    main, _controls_port(main, "ADDR_REG_OFFS_ARGUMENT"),
-                    _box_input(
-                        _component_by_label(main, "EFFECTIVE_ADDRESS_FBOX"), 2
-                    ),
-                ),
-                f"{name} leaves the register-plus-offset selector floating",
-            )
+    def test_register_read_reaches_named_effective_address_inputs(self):
+        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        main = root.find("circuit[@name='TinyCPUMain']")
+        effective = _subcircuit_ports(root, main, "EFFECTIVE_ADDRESS_FBOX")
+        address = _subcircuit_ports(root, main, "ADDRESS_PATH")
+        controls = _subcircuit_ports(root, main, "FETCH_DECODE_CONTROLS")
+        gate = _component_by_label(main, "REGISTER_ADDRESS_REQUEST")
+        self.assertTrue(_wire_path_exists(main, address["ADDRESS"], effective["REG_ADDR"]))
+        self.assertTrue(_wire_path_exists(main, gate.get("loc"), effective["ADDR_REG_ARGUMENT"]))
+        for source, y in (("ADDR_REG_ARGUMENT", -20), ("LOAD_ADR_REG", 20)):
+            self.assertTrue(_wire_path_exists(
+                main, controls[source], _point_offset(gate, x=-50, y=y)))
 
     def test_register_offset_load_selects_memory_data(self):
         for name in ("TinyCPU.circ",):
@@ -940,7 +939,8 @@ class LogisimLauncherTests(unittest.TestCase):
 
         # Follow the complete net between the named component terminals.
         self.assertTrue(
-            _wire_path_exists(main, _controls_port(main, "PRINT_ADR"), print_address_enable.get("loc")),
+            _wire_path_exists(main, _subcircuit_ports(
+                root, main, "FETCH_DECODE_CONTROLS")["PRINT_ADR"], print_address_enable.get("loc")),
             "FetchDecodeControls.PRINT_ADDRESS does not reach "
             "TinyCPUMain.PRINT_ADDRESS_ENABLE",
         )
@@ -999,9 +999,9 @@ class LogisimLauncherTests(unittest.TestCase):
             for component in main.findall("comp")
         ))
         self.assertFalse(any(
-            component.get("name") in {"AND Gate", "NOT Gate"}
-            or (component.get("name") == "OR Gate"
-                and _attributes(component).get("label", "").startswith("JUMP_"))
+            component.get("name") in {"AND Gate", "NOT Gate", "OR Gate"}
+            and (_attributes(component).get("label") in jump_labels
+                 or _attributes(component).get("label", "").startswith("JUMP_"))
             for component in main.findall("comp")
         ))
 

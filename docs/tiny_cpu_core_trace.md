@@ -1,17 +1,15 @@
 # Elektrischer Kernvergleich (AP 22.1)
 
 **Stand: 31. Oktober 2026.** Der Vergleich ist im verpflichtenden Gate aktiv.
-Die Schaltung besteht die vollständige Abnahme derzeit nicht. Nach den
-Operandenauswahl- und Speicherlade-Reparaturen bestehen beide identischen
-Minimalkernläufe, der vollständige Countdown und die Fixtures `load-const`
-und `load-address`. Die erste Abweichung liegt nun in `load-address-register`
-an Flanke 3, `post`, bei `AR` (Soll `20`, Ist `0`). Der unerlaubte
-Akkumulator-Schreibvorgang bei `LOAD_ADDRESS_REGISTER_CONST` ist inzwischen
-elektrisch belegt und minimal repariert; der Akkumulator hält jetzt `7 VALID`.
-Die Bestandsaufnahme mit 59 Abweichungen in 61 ISA-/Fehler-Fixtures stammt vom
-29. Oktober; die neue serielle Matrix stoppt bei der dritten Fixture.
-Reproduktion und nächste Diagnose stehen im
-[Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-akkumulatorhalten-bei-adressregister-konstante-am-31-oktober-2026).
+Beide identischen Minimalkernläufe, der vollständige Countdown und alle
+61 bestehenden ISA-/Fehlerfixtures bestehen jetzt mit vollständigem
+Pre-/Post-Zustandsvergleich. Der CI-Fehler bei `load-address-register` ist
+behoben; auch die danach einzeln geöffneten Pfade sind korrigiert und erneut
+abgenommen. Die Bestandsaufnahme mit 59 Abweichungen vom 29. Oktober ist
+historisch. Gültige externe Eingaben, weitere arithmetische Grenzen aus 22.2
+und die Neuabnahme aus frischem Checkout nach 22.5 bleiben offen. Reproduktion
+und Abdeckungsgrenzen stehen im
+[Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-registerpfade-und-vollständige-61-fall-abnahme-am-31-oktober-2026).
 
 ## Ausführung
 
@@ -146,7 +144,8 @@ ausschließlich in einer Kopie den über benannte Pins aufgelösten PRINT-Zweig
 und legt ihn auf Null. Der Vergleich muss an Flanke 2, `pre`, `PRINT_ENABLE`
 (Soll `1`, Ist `0`) ablehnen, während Normalhalt erhalten bleibt. Original-
 schaltung, Rohdaten und `proof.json` werden entsprechend geprüft beziehungsweise
-aufbewahrt. Ungültige Ausgabe und `PRINT_ADDRESS` sind damit nicht abgenommen.
+aufbewahrt. Zwei zusätzliche Positivkontrollen prüfen inzwischen auch einen
+ungültigen PRINT-Versuch mit INV-Übernahme und `PRINT_ADDRESS` aus gültigem RAM.
 
 Die verpflichtende Immediate-Regression läuft separat:
 
@@ -156,7 +155,10 @@ PYTHONPATH=src python scripts/test-logisim-immediate.py
 
 Sie vergleicht `LOAD_CONST(3); ADD_CONST(-1); HALT` sowie eine Addition mit
 gültigem Nullergebnis vollständig mit der VM. Eine Kopie unterdrückt nur den
-Konstantenselektor und muss an Flanke 2, `post`, `ERROR_INV` abgelehnt werden.
+Konstantenselektor und muss an Flanke 2, `post`, `ACC` (Soll `2`, Ist `0`)
+abgelehnt werden. Die Rohdaten müssen zusätzlich `ACC_VALID=0` und
+`ERROR_INV=1` belegen: Die reparierte Ergebnisgültigkeit macht den Fehler nun
+bereits am kanonischen ungültigen Nullergebnis sichtbar.
 Eine zweite Kopie ersetzt nur `Operations.IMMEDIATE_VALUE` durch Null und muss
 an derselben Flanke bei `ACC` (Soll `2`, Ist `3`) scheitern. Originalschaltung,
 Rohtraces und `proof.json` werden entsprechend geprüft beziehungsweise erhalten.
@@ -173,5 +175,11 @@ neutrale Konstante `ACC_LD_REG_CONST_DISABLED` und stellt den belegten
 `ACC_WRITE_REQUEST` (Soll `0`, Ist `1`) ablehnen. Unveränderte Quelle,
 Projektkopien, Befehle und beide Rohtraces werden unter `artifacts/decode/`
 beziehungsweise dem mit `--output` gewählten Pfad festgehalten. Dieser Nachweis
-betrifft das Akkumulatorhalten; Laden und Reset des Adressregisters sind damit
-weiterhin nicht abgenommen.
+betrifft das Akkumulatorhalten. Die zusätzliche verpflichtende Prüfung
+`scripts/test-logisim-address-register.py` vergleicht neun Programme für
+Konstanten, Halten, erneutes Laden, Registerlesen/-schreiben, positive und
+negative Offsets sowie das Laden aus RAM vollständig mit der VM. Fünf Kopien
+erzwingen einen aktiven Reset, unterdrücken Laden beziehungsweise
+Registerauswahl, verfälschen den Datenwert oder aktivieren den falschen Carry
+bei negativem Offset. Jede muss am festgelegten ersten Unterschied scheitern.
+Rohtraces, Projektkopien und `proof.json` bleiben unter dem `--output`-Pfad.

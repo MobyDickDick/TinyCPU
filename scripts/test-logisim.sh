@@ -45,6 +45,11 @@ if ! PYTHONPATH=src python3 scripts/test-logisim-decode.py --output "$OUTPUT/dec
   failed+=(decode)
 fi
 
+if ! PYTHONPATH=src python3 scripts/test-logisim-address-register.py \
+    --output "$OUTPUT/address-register"; then
+  failed+=(address-register)
+fi
+
 system_args=(--profile tinycpu-16-12
              --system tinycpu-peripherals-16-12-v1
              --system-only

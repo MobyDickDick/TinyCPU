@@ -441,7 +441,8 @@ class CircuitVerificationTests(unittest.TestCase):
                          ):
                         with self.assertRaisesRegex(
                             VERIFY.VerificationError,
-                            "external-memory selection paths differ",
+                            "external-memory selection paths differ|"
+                            "address-register reset/load/data paths differ",
                         ):
                             VERIFY.verify_system_circuit()
 
@@ -792,7 +793,8 @@ class CircuitVerificationTests(unittest.TestCase):
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
         for label in (
-            "ACC_MEMORY_VALID_SELECT", "ACC_NOT_VALID_SELECT", "ACC_INPUT_VALID_SELECT"
+            "ACC_MEMORY_VALID_SELECT", "ACC_NOT_VALID_SELECT", "ACC_INPUT_VALID_SELECT",
+            "ACC_ARITHMETIC_VALID_SELECT",
         ):
             with self.subTest(selector=label):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
@@ -812,10 +814,15 @@ class CircuitVerificationTests(unittest.TestCase):
                     if next((attribute.get("val") for attribute in component.findall("a")
                              if attribute.get("name") == "width"), "1") == "1"
                 ]
-                input_selector = next(
+                arithmetic_selector = next(
                     component for component in one_bit_muxes
                     if _wire_path_exists(main, component.get("loc"),
                                          datapath_ports["VALID_IN"])
+                )
+                input_selector = next(
+                    component for component in one_bit_muxes
+                    if _wire_path_exists(main, component.get("loc"),
+                                         _component_terminal(arithmetic_selector, -30, -10))
                 )
                 not_selector = next(
                     component for component in one_bit_muxes
@@ -836,6 +843,7 @@ class CircuitVerificationTests(unittest.TestCase):
                     "ACC_MEMORY_VALID_SELECT": memory_selector,
                     "ACC_NOT_VALID_SELECT": not_selector,
                     "ACC_INPUT_VALID_SELECT": input_selector,
+                    "ACC_ARITHMETIC_VALID_SELECT": arithmetic_selector,
                 }[label]
                 _remove_wire_at(main, selector.get("loc"))
                 project.write(core, encoding="utf-8", xml_declaration=True)
@@ -851,7 +859,8 @@ class CircuitVerificationTests(unittest.TestCase):
                      ):
                     with self.assertRaisesRegex(
                         VERIFY.VerificationError,
-                        "load-validity (?:selectors|selection paths)",
+                        ("arithmetic validity selection" if label == "ACC_ARITHMETIC_VALID_SELECT"
+                         else "load-validity (?:selectors|selection paths)"),
                     ):
                         VERIFY.verify_system_circuit()
 
@@ -950,8 +959,9 @@ class CircuitVerificationTests(unittest.TestCase):
 
     def test_core_print_enable_rejects_disconnected_or_wrong_decoder_source(self) -> None:
         root = MODULE_PATH.parents[1]
-        for replacement in (None, "SET_DIV0"):
-            with self.subTest(replacement=replacement):
+        for decode, replacement in (("PRINT", None), ("PRINT", "SET_DIV0"),
+                                    ("PRINT_ADR", None), ("PRINT_ADR", "SET_DIV0")):
+            with self.subTest(decode=decode, replacement=replacement):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
                 shutil.copytree(root / "hardware/logisim", temporary / "logisim")
                 circuit = temporary / "logisim/TinyCPU.circ"
@@ -959,18 +969,46 @@ class CircuitVerificationTests(unittest.TestCase):
                 main = project.getroot().find("circuit[@name='TinyCPUMain']")
                 ports = _subcircuit_ports(project.getroot(), main, "FETCH_DECODE_CONTROLS")
                 wire = next(item for item in main.findall("wire")
-                            if ports["PRINT"] in {item.get("from"), item.get("to")})
+                            if ports[decode] in {item.get("from"), item.get("to")})
                 if replacement is None:
                     main.remove(wire)
                 else:
-                    end = "from" if wire.get("from") == ports["PRINT"] else "to"
+                    end = "from" if wire.get("from") == ports[decode] else "to"
                     wire.set(end, ports[replacement])
                 project.write(circuit, encoding="utf-8", xml_declaration=True)
                 system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
                 with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
                      mock.patch.object(VERIFY, "load_system_profile", return_value=replace(
                          system, circuit_path=temporary / "logisim/TinyCPU_Peripherals.circ")):
-                    with self.assertRaisesRegex(VERIFY.VerificationError, "CPU PRINT forwarding"):
+                    with self.assertRaisesRegex(VERIFY.VerificationError, "CPU PRINT(?:_ADDRESS)? forwarding"):
+                        VERIFY.verify_system_circuit()
+
+    def test_core_address_register_rejects_disconnected_controls_and_data(self) -> None:
+        root = MODULE_PATH.parents[1]
+        for broken in ("reset", "load", "data", "arithmetic-select", "load-select"):
+            with self.subTest(broken=broken):
+                temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
+                shutil.copytree(root / "hardware/logisim", temporary / "logisim")
+                circuit = temporary / "logisim/TinyCPU.circ"
+                project = ET.parse(circuit)
+                main = project.getroot().find("circuit[@name='TinyCPUMain']")
+                ports = _subcircuit_ports(project.getroot(), main, "ADDRESS_PATH")
+                if broken in {"reset", "load", "data"}:
+                    terminal = ports[{"reset": "ADDRESS_PATH_STARTUP_RESET",
+                                      "load": "AR_LOAD", "data": "ADDRESS_IN"}[broken]]
+                    message = "CPU address-register reset/load/data"
+                else:
+                    gate = _component_by_label(main, "REGISTER_ADDRESS_REQUEST")
+                    terminal = _component_terminal(
+                        gate, -50, -20 if broken == "arithmetic-select" else 20)
+                    message = "CPU register-address selection"
+                _remove_wire_at(main, terminal)
+                project.write(circuit, encoding="utf-8", xml_declaration=True)
+                system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+                with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
+                     mock.patch.object(VERIFY, "load_system_profile", return_value=replace(
+                         system, circuit_path=temporary / "logisim/TinyCPU_Peripherals.circ")):
+                    with self.assertRaisesRegex(VERIFY.VerificationError, message):
                         VERIFY.verify_system_circuit()
 
     def test_core_constant_operand_rejects_wrong_selector_and_missing_data(self) -> None:

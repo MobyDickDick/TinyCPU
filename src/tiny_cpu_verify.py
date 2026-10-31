@@ -691,6 +691,8 @@ def verify_system_circuit() -> None:
     # than an unrelated error-set output of the same generated symbol.
     if not core_connected(controls_ports["PRINT"], core_pin_locations["PRINT_ENABLE"]):
         raise VerificationError("CPU PRINT forwarding from decoder to PRINT_ENABLE differs")
+    if not core_connected(controls_ports["PRINT_ADR"], core_pin_locations["PRINT_ADDRESS_ENABLE"]):
+        raise VerificationError("CPU PRINT_ADDRESS forwarding from decoder differs")
 
     # FetchDecode exports the complete 22-bit instruction word.  The authored
     # splitter must pass its six high opcode bits to FetchDecodeControls.  Find
@@ -947,10 +949,7 @@ def verify_system_circuit() -> None:
         for label, target in feedback_targets.items()
     ) or not all((
         core_connected(core_pin_locations["ILL_RET"], illegal_return_inputs[0]),
-        # The generated controls box retains two blank output rows before the
-        # sticky-error group; SET_ILL is therefore the terminal 660 pixels
-        # below the box anchor rather than a compacted pin-list coordinate.
-        core_connected(f"({controls_x},{controls_y + 660})", illegal_return_inputs[1]),
+        core_connected(controls_ports["SET_ILL"], illegal_return_inputs[1]),
         core_connected(illegal_return_or.get("loc"), error_ports["SET_ILL"]),
     )):
         raise VerificationError("AP-18 CPU interrupt-feedback paths differ from contract")
@@ -1021,6 +1020,50 @@ def verify_system_circuit() -> None:
         core_connected(immediate_source, operations_ports["IMMEDIATE_VALUE"]),
     )):
         raise VerificationError("CPU constant operand selection/data paths differ from contract")
+    # AP 22.1: protect the separately measured address-register paths. These
+    # checks follow named boundaries and wires, independent of symbol placement.
+    address_instance = next(component for component in core_definition.findall("comp")
+                            if _pin_label(component) == "ADDRESS_PATH")
+    address_definition = core_project.find("circuit[@name='AddressPath']")
+    address_ports = generated_symbol_ports(address_definition, address_instance)
+    address_load = next(component for component in core_definition.findall("comp")
+                        if _pin_label(component) == "AR_LOAD_REQUEST")
+    address_data_candidates = [component for component in core_definition.findall("comp[@name='Multiplexer']")
+                               if core_connected(component.get("loc"), address_ports["ADDRESS_IN"])]
+    if len(address_data_candidates) != 1:
+        raise VerificationError("CPU address-register reset/load/data paths differ from contract")
+    address_data = address_data_candidates[0]
+    load_x, load_y = map(int, address_load.get("loc").strip("()").split(","))
+    data_x, data_y = map(int, address_data.get("loc").strip("()").split(","))
+    if not all((
+        core_connected(core_pin_locations["RESET"], address_ports["ADDRESS_PATH_STARTUP_RESET"]),
+        core_connected(controls_ports["LD_REG_CONST"], f"({load_x - 50},{load_y - 20})"),
+        core_connected(controls_ports["LD_REG_ADR"], f"({load_x - 50},{load_y + 20})"),
+        core_connected(address_load.get("loc"), address_ports["AR_LOAD"]),
+        not core_connected(controls_ports["ACC_WRITE_REQUEST"], address_ports["AR_LOAD"]),
+        core_connected(immediate_source, f"({data_x - 30},{data_y - 10})"),
+        core_connected(memory_selectors["EXTERNAL_MEMORY_VALUE_SELECT"].get("loc"),
+                       f"({data_x - 30},{data_y + 10})"),
+        core_connected(controls_ports["LD_REG_ADR"], f"({data_x - 20},{data_y + 20})"),
+        core_connected(address_data.get("loc"), address_ports["ADDRESS_IN"]),
+    )):
+        raise VerificationError("CPU address-register reset/load/data paths differ from contract")
+    register_request = next((component for component in core_definition.findall("comp[@name='OR Gate']")
+                             if _pin_label(component) == "REGISTER_ADDRESS_REQUEST"), None)
+    effective_instance = next(component for component in core_definition.findall("comp")
+                              if _pin_label(component) == "EFFECTIVE_ADDRESS_FBOX")
+    effective_ports = generated_symbol_ports(
+        core_project.find("circuit[@name='EffectiveAddress']"), effective_instance)
+    if register_request is None:
+        raise VerificationError("CPU register-address selection gate is missing")
+    request_x, request_y = map(int, register_request.get("loc").strip("()").split(","))
+    if not all((
+        core_connected(controls_ports["ADDR_REG_ARGUMENT"], f"({request_x - 50},{request_y - 20})"),
+        core_connected(controls_ports["STORE_ADR_REG"], f"({request_x - 50},{request_y})"),
+        core_connected(controls_ports["LOAD_ADR_REG"], f"({request_x - 50},{request_y + 20})"),
+        core_connected(register_request.get("loc"), effective_ports["ADDR_REG_ARGUMENT"]),
+    )):
+        raise VerificationError("CPU register-address selection paths differ from contract")
     if not all((
         core_connected(memory_ports["MEMORY_DATA"],
                        core_pin_locations["RAW_MEMORY_VALUE"]),
@@ -1095,9 +1138,20 @@ def verify_system_circuit() -> None:
                  if item.get("name") == "width"), "1") == "1"
     ]
     terminals = {id(component): mux_terminals(component) for component in one_bit_muxes}
-    input_candidates = [
+    arithmetic_candidates = [
         component for component in one_bit_muxes
         if core_connected(terminals[id(component)][0], datapath_ports["VALID_IN"])
+        and core_connected(terminals[id(component)][3], operations_ports["OPERATION_ACTIVE"])
+    ]
+    if len(arithmetic_candidates) != 1:
+        raise VerificationError("CPU arithmetic validity selection differs from contract")
+    arithmetic_out, arithmetic_default, arithmetic_selected, arithmetic_control = \
+        terminals[id(arithmetic_candidates[0])]
+    if not core_connected(arithmetic_selected, operations_ports["RESULT_IS_VALID"]):
+        raise VerificationError("CPU arithmetic validity selection differs from contract")
+    input_candidates = [
+        component for component in one_bit_muxes
+        if core_connected(terminals[id(component)][0], arithmetic_default)
     ]
     if len(input_candidates) != 1:
         raise VerificationError("AP-18 CPU load-validity selectors differ from contract")
@@ -1166,7 +1220,7 @@ def verify_system_circuit() -> None:
         core_connected(not_out, input_default),
         any(core_connected(point, input_selected) for point in constants.get("0x0", ())),
         core_connected(controls_ports["INPUT"], input_control),
-        core_connected(input_out, datapath_ports["VALID_IN"]),
+        core_connected(input_out, arithmetic_default),
     )
     if not all(validity_paths):
         raise VerificationError("AP-18 CPU load-validity selection paths differ from contract")

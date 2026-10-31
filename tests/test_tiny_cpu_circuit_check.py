@@ -357,6 +357,24 @@ class CircuitCheckTests(unittest.TestCase):
             "COMPACT input at (170, 110) has an undriven wire ending at (700, 180)"
         ])
 
+    def test_public_input_drives_gate_and_distant_multiplexer_fanout(self):
+        circuit = ET.fromstring("""
+          <circuit name="Fanout">
+            <comp lib="0" loc="(100,100)" name="Pin"/>
+            <comp lib="1" loc="(200,120)" name="AND Gate"/>
+            <comp lib="2" loc="(800,180)" name="Multiplexer"/>
+            <wire from="(100,100)" to="(150,100)"/>
+            <wire from="(150,100)" to="(700,100)"/>
+            <wire from="(700,100)" to="(700,170)"/>
+            <wire from="(700,170)" to="(770,170)"/>
+            <wire from="(700,190)" to="(770,190)"/>
+          </circuit>
+        """)
+        self.assertEqual(inspect_circuit(circuit), [])
+        circuit.remove(circuit.find("comp[@name='Pin']"))
+        self.assertTrue(any("undriven wire" in issue.message
+                            for issue in inspect_circuit(circuit)))
+
     def test_even_input_gate_uses_grid_aligned_terminals(self):
         circuit = ET.fromstring("""
           <circuit name="Connected">
