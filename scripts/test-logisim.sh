@@ -26,6 +26,25 @@ if ! PYTHONPATH=src python3 scripts/test-logisim-core-mutation.py \
   failed+=(core-mutation)
 fi
 
+if ! PYTHONPATH=src python3 scripts/test-logisim-store.py \
+    --output "$OUTPUT/store-acc-hold"; then
+  failed+=(store-acc-hold)
+fi
+
+if ! PYTHONPATH=src python3 scripts/test-logisim-print.py \
+    --output "$OUTPUT/print-forwarding"; then
+  failed+=(print-forwarding)
+fi
+
+if ! PYTHONPATH=src python3 scripts/test-logisim-immediate.py \
+    --output "$OUTPUT/immediate-operand"; then
+  failed+=(immediate-operand)
+fi
+
+if ! PYTHONPATH=src python3 scripts/test-logisim-decode.py; then
+  failed+=(decode)
+fi
+
 system_args=(--profile tinycpu-16-12
              --system tinycpu-peripherals-16-12-v1
              --system-only

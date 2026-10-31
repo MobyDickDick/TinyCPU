@@ -687,6 +687,11 @@ def verify_system_circuit() -> None:
     )
     controls_ports = generated_symbol_ports(controls_definition, controls_instance)
 
+    # AP 22.1: the public PRINT event must follow the PRINT decode, rather
+    # than an unrelated error-set output of the same generated symbol.
+    if not core_connected(controls_ports["PRINT"], core_pin_locations["PRINT_ENABLE"]):
+        raise VerificationError("CPU PRINT forwarding from decoder to PRINT_ENABLE differs")
+
     # FetchDecode exports the complete 22-bit instruction word.  The authored
     # splitter must pass its six high opcode bits to FetchDecodeControls.  Find
     # that splitter by its electrical neighbours and bit mapping, rather than
@@ -710,10 +715,10 @@ def verify_system_circuit() -> None:
         splitter_x, splitter_y = map(
             int, splitter.get("loc", "").strip("()").split(",")
         )
-        # With two outputs and spacing=2, Logisim places the branch terminals
-        # one grid unit either side and two below the incoming terminal.
+        # The south-facing two-way splitter with spacing=2 places branch 0
+        # three grid units right and branch 1 one right, both two below.
         branches = (
-            f"({splitter_x - 10},{splitter_y + 20})",
+            f"({splitter_x + 30},{splitter_y + 20})",
             f"({splitter_x + 10},{splitter_y + 20})",
         )
         high_bits_on_branch_one = all(
@@ -1006,6 +1011,16 @@ def verify_system_circuit() -> None:
     if operations_definition is None:
         raise VerificationError("AP-18 CPU Operations boundary is missing")
     operations_ports = generated_symbol_ports(operations_definition, operations_instance)
+    instruction_splitter = opcode_splitters[0]
+    instruction_x, instruction_y = map(
+        int, instruction_splitter.get("loc").strip("()").split(",")
+    )
+    immediate_source = f"({instruction_x + 30},{instruction_y + 20})"
+    if not all((
+        core_connected(controls_ports["CONST_ARGUMENT"], operations_ports["CONST_OPERAND"]),
+        core_connected(immediate_source, operations_ports["IMMEDIATE_VALUE"]),
+    )):
+        raise VerificationError("CPU constant operand selection/data paths differ from contract")
     if not all((
         core_connected(memory_ports["MEMORY_DATA"],
                        core_pin_locations["RAW_MEMORY_VALUE"]),

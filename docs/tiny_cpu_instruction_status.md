@@ -1,17 +1,24 @@
 # Funktionsstand der TinyCPU-Befehle
 
-**Aktueller Stand: 29. Oktober 2026 — elektrische Kernabnahme fehlgeschlagen.**
+**Aktueller Stand: 30. Oktober 2026 — elektrische Kernabnahme weiterhin offen.**
 
-Der neue vollständige Kernvergleich aus AP 22.1 findet im aktuellen Stand
-`9d60c94` Abweichungen in 59 von 61 unveränderten Fixtures. Nur `halt` und
-`halt-error` bestehen den vollständigen Vergleich. Auch die Countdown-Fixture
-scheitert. Der Minimalkern `LOAD_CONST(3); HALT` besteht zweimal.
+Die Bestandsaufnahme des vollständigen Kernvergleichs aus AP 22.1 vom
+29. Oktober am Ausgangsstand `9d60c94` fand Abweichungen in 59 von 61
+unveränderten Fixtures; nur `halt` und `halt-error` bestanden. Nach der
+begrenzten Reparaturen an STORE, PRINT, Immediate-Operandenauswahl und
+Speicherladeanforderung bestehen die gezielten Regressionen samt elektrischen
+Negativkontrollen und alle 198 Windows-Unit-Tests. Der vollständige Countdown
+und die ersten beiden Matrixfixtures `load-const` und `load-address` bestehen.
+Die serielle Matrix stoppt nun bei `load-address-register`, Flanke 3, `post`,
+`ACC` (Soll `7`, Ist `20`). Der Minimalkern `LOAD_CONST(3); HALT` besteht
+weiterhin zweimal mit identischen Rohtraces. Alle sieben Systemfixtures und
+die automatische Operator-Panel-Abnahme wurden erneut erfolgreich ausgeführt.
 Die bisherigen grünen Haltprüfungen belegen keine vollständige Zustandsparität;
 die unten stehende Tabelle ist ein historischer Abschlussvermerk vom
 20. September 2026 und keine aktuelle Funktionsfreigabe.
 
 Details und der erste begrenzte Reparaturschritt stehen im
-[AP-22.1-Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-elektrischer-kernvergleich-am-29-oktober-2026).
+[AP-22.1-Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-countdown-operandenauswahl-und-speicherladeanforderung-am-30-oktober-2026).
 Der [Beobachtungsvertrag](tiny_cpu_core_trace.md) beschreibt die neue Prüfung
 und ihre noch offene Grenze für gültige Eingaben. Der manuelle GUI-Test bleibt
 ebenfalls offen.

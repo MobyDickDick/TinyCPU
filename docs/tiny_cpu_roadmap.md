@@ -92,10 +92,45 @@ Flankenvergleich inzwischen implementiert und reale Abweichungen nachgewiesen:
 scheitern. Zwei Minimalkernläufe und die elektrische Negativkontrolle bestehen.
 Damit ist die folgende historische Funktionsfreigabe für den aktuellen Stand
 nicht bestätigt. AP 22.1 bleibt zur Behebung und erneuten Abnahme offen.
-Der nächste begrenzte Reparaturschritt gilt `ACC_WRITE_REQUEST` bei
-`STORE_ADDRESS`; Nachweise und Eingabegrenzen stehen im
+Der damals nächste begrenzte Reparaturschritt galt `ACC_WRITE_REQUEST` bei
+`STORE_ADDRESS`; die ursprünglichen Nachweise und Eingabegrenzen stehen im
 [Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-elektrischer-kernvergleich-am-29-oktober-2026)
 und im [Flankenvertrag](tiny_cpu_core_trace.md).
+
+**Erster Nachtrag vom 30. Oktober 2026:** Der direkte STORE-Zweig zur
+Akkumulator-Ladeanforderung ist repariert und durch elektrische Positiv- und
+Negativkontrollen gesichert; alle 196 Offline-Unit-Tests bestehen. Der
+Countdown erreicht nun den ersten Unterschied erst an Flanke 5, `pre`,
+bei `PRINT_ENABLE` (Soll `1`, Ist `0`). Als nächster begrenzter Schritt wird
+ausschließlich der `PRINT`-Decode bis zum öffentlichen Ausgabe-Enable passiv
+verfolgt. Die vollständige Kernabnahme bleibt offen; die Matrix wurde nach
+diesem ersten Fehler nicht erneut geöffnet. Details stehen im
+[neuen Diagnoseabschnitt](tiny_cpu_circuit_debug_report.md#ap-221-store_address-ladeanforderung-am-30-oktober-2026).
+
+**Zweiter Nachtrag vom 30. Oktober 2026:** Die passive PRINT-Diagnose hat
+den falschen Top-Level-Anschluss an `SET_DIV0` belegt. Der Ausgabezweig ist
+nun mit dem tatsächlichen PRINT-Kontakt verbunden; die Decoderzeichnung blieb
+unverändert. Die neue elektrische PRINT-Regression einschließlich unterdrücktem
+Impuls trotz Normalhalt, die bisherigen STORE-/Rechenergebnis-Kontrollen und
+alle 197 Windows-Unit-Tests bestehen. Der Countdown stimmt jetzt bis
+einschließlich Flanke 5 vollständig überein; der erste Unterschied liegt an
+Flanke 6, `post`, bei `ERROR_INV` (Soll `0`, Ist `1`). Als nächstes wird
+ausschließlich `ErrorFlags.SET_INV` bis zur Flagübernahme passiv verfolgt.
+Die Matrix und die vollständige Kernabnahme bleiben offen; Nachweise stehen im
+[PRINT-Diagnoseabschnitt](tiny_cpu_circuit_debug_report.md#ap-221-print-weitergabe-am-30-oktober-2026).
+
+**Dritter Nachtrag vom 30. Oktober 2026:** Der CI-Befund an Countdown-Flanke 6
+ist durch die elektrisch belegte Korrektur von Konstantenselektor und
+Immediate-Datenquelle behoben; der vollständige Countdown besteht. Die danach
+geöffnete Matrix belegte zusätzlich die fehlende Speicherladeanforderung, deren
+drei Decoderzweige einzeln korrigiert und im 64-Zeilen-Test abgesichert sind.
+`load-const` und `load-address` bestehen. Die nächste Abweichung ist
+`load-address-register`, Flanke 3, `post`, `ACC`: Soll `7`, Ist `20`.
+198 Windows-Unit-Tests, alle sieben Systemfixtures, Operator-Panel und die
+gezielten elektrischen Regressionen bestehen. Der neue Registerbefund bleibt
+ein getrennter Diagnoseschritt; AP 22.1 und die vollständige Kernfreigabe bleiben
+offen. Die [Nachweise](tiny_cpu_circuit_debug_report.md#ap-221-countdown-operandenauswahl-und-speicherladeanforderung-am-30-oktober-2026)
+benennen Zwischenstände und den nächsten passiven Vergleich.
 
 TinyCPU ist im eingefrorenen 1.0-Zielprofil **voll funktionsfähig**: Die
 16-Bit-Daten-/12-Bit-Adress-Schaltung implementiert alle 50 Opcodes, wird im
