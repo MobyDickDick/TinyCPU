@@ -18,6 +18,7 @@ from tiny_cpu_assembler import assemble, encode_program
 from tiny_cpu_core_trace import CoreMismatch
 from tiny_cpu_logisim import LogisimError, resolve_jar, run_core_comparison
 from tiny_cpu_profiles import load_profile
+from tiny_cpu_hierarchy import find_core_instance
 from tiny_cpu_verify import generated_symbol_ports
 
 
@@ -25,11 +26,8 @@ def suppress_selector(source: Path, destination: Path) -> None:
     """Drive the existing selection branch low only in a temporary copy."""
     tree = ET.parse(source)
     root = tree.getroot()
-    main = root.find("circuit[@name='TinyCPUMain']")
+    main, instance = find_core_instance(root, "FETCH_DECODE_CONTROLS")
     definition = root.find("circuit[@name='FetchDecodeControls']")
-    instance = next(component for component in main.findall("comp")
-                    if component.find("a[@name='label'][@val='FETCH_DECODE_CONTROLS']")
-                    is not None)
     terminal = generated_symbol_ports(definition, instance)["CONST_ARGUMENT"]
     wires = [wire for wire in main.findall("wire")
              if terminal in {wire.get("from"), wire.get("to")}]
@@ -47,11 +45,8 @@ def suppress_immediate(source: Path, destination: Path) -> None:
     """Replace only the Operations immediate data input with a 16-bit zero."""
     tree = ET.parse(source)
     root = tree.getroot()
-    main = root.find("circuit[@name='TinyCPUMain']")
+    main, instance = find_core_instance(root, "OPERATIONS_INSTANCE")
     definition = root.find("circuit[@name='Operations']")
-    instance = next(component for component in main.findall("comp")
-                    if component.find("a[@name='label'][@val='OPERATIONS_INSTANCE']")
-                    is not None)
     terminal = generated_symbol_ports(definition, instance)["IMMEDIATE_VALUE"]
     wires = [wire for wire in main.findall("wire")
              if terminal in {wire.get("from"), wire.get("to")}]

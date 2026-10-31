@@ -36,6 +36,15 @@ from tiny_cpu_systems import load_system_profile
 from tiny_cpu_verify import generated_symbol_ports
 
 
+from tiny_cpu_hierarchy import flatten_core, wire_path_exists as _hierarchy_wire_path_exists
+
+
+def _parse_project(path):
+    # Component-level mutations use the real, bit-resolved hierarchy analysis
+    # view. Production files and electrical tests retain the functional units.
+    return ET.ElementTree(flatten_core(ET.parse(path).getroot()))
+
+
 def _attributes(component):
     return {
         attribute.get("name"): attribute.get("val")
@@ -54,36 +63,7 @@ def _component_by_label(circuit, label):
 
 
 def _wire_path_exists(circuit, start, end):
-    graph = {}
-    wires = [(wire.get("from"), wire.get("to"))
-             for wire in circuit.findall("wire")]
-    points = {point for wire in wires for point in wire} | {start, end}
-
-    def coordinates(point):
-        return tuple(map(int, point.strip("()").split(",")))
-
-    for left, right in wires:
-        x1, y1 = coordinates(left)
-        x2, y2 = coordinates(right)
-        contacts = []
-        for point in points:
-            x, y = coordinates(point)
-            if ((x1 == x2 == x and min(y1, y2) <= y <= max(y1, y2)) or
-                    (y1 == y2 == y and min(x1, x2) <= x <= max(x1, x2))):
-                contacts.append(point)
-        contacts.sort(key=coordinates)
-        for first, second in zip(contacts, contacts[1:]):
-            graph.setdefault(first, set()).add(second)
-            graph.setdefault(second, set()).add(first)
-    pending, visited = [start], set()
-    while pending:
-        point = pending.pop()
-        if point == end:
-            return True
-        if point not in visited:
-            visited.add(point)
-            pending.extend(graph.get(point, ()))
-    return False
+    return _hierarchy_wire_path_exists(circuit, start, end)
 
 
 def _point_offset(component, x=0, y=0):
@@ -215,7 +195,7 @@ class LogisimLauncherTests(unittest.TestCase):
 
     def test_interrupt_feedback_inputs_remain_connected_after_layout_edits(self):
         """Guard electrical paths without freezing their drawing coordinates."""
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = root.find("circuit[@name='TinyCPUMain']")
         self.assertIsNotNone(main)
         self.assertTrue(
@@ -251,7 +231,7 @@ class LogisimLauncherTests(unittest.TestCase):
 
     def test_interrupt_pc_override_preserves_sequential_pc_when_inactive(self):
         """The IRQ mux must select its target only when acceptance is active."""
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         fetch = root.find("circuit[@name='FetchDecode']")
         self.assertIsNotNone(fetch)
         override_candidates = []
@@ -401,7 +381,7 @@ class LogisimLauncherTests(unittest.TestCase):
                 temporary_root = Path(directory)
                 target = temporary_root / "hardware/logisim/TinyCPU.circ"
                 target.parent.mkdir(parents=True)
-                tree = ET.parse(source)
+                tree = _parse_project(source)
                 disconnect(tree, circuit_name, point_for(tree))
                 tree.write(target, encoding="utf-8", xml_declaration=True)
 
@@ -587,7 +567,7 @@ class LogisimLauncherTests(unittest.TestCase):
             "INTERRUPT_TARGET_PC": "0x0",
             "ILL_RET": "0x0",
         }
-        source_main = ET.parse(source).getroot().find("circuit[@name='TinyCPUMain']")
+        source_main = _parse_project(source).getroot().find("circuit[@name='TinyCPUMain']")
         self.assertIsNotNone(source_main)
         locations = {
             component.get("loc"): _attributes(component).get("label")
@@ -636,7 +616,7 @@ class LogisimLauncherTests(unittest.TestCase):
         self.assertEqual(before, source.read_bytes())
 
     def test_register_read_reaches_named_effective_address_inputs(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = root.find("circuit[@name='TinyCPUMain']")
         effective = _subcircuit_ports(root, main, "EFFECTIVE_ADDRESS_FBOX")
         address = _subcircuit_ports(root, main, "ADDRESS_PATH")
@@ -650,7 +630,7 @@ class LogisimLauncherTests(unittest.TestCase):
 
     def test_register_offset_load_selects_memory_data(self):
         for name in ("TinyCPU.circ",):
-            root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
+            root = _parse_project(ROOT / "hardware/logisim" / name).getroot()
             circuit_name = (
                 "FetchDecodeControls" if name == "TinyCPU.circ" else "DecodeSignals"
             )
@@ -676,7 +656,7 @@ class LogisimLauncherTests(unittest.TestCase):
 
     def test_grouped_public_decoder_replaces_legacy_adapter(self):
         for name in ("TinyCPU.circ",):
-            root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
+            root = _parse_project(ROOT / "hardware/logisim" / name).getroot()
             main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
             decoders = [
                 component
@@ -707,7 +687,7 @@ class LogisimLauncherTests(unittest.TestCase):
                 )
 
     def test_fetch_path_uses_profile_address_width(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         fetch = next(c for c in root.findall("circuit") if c.get("name") == "FetchDecode")
         source = _component_by_label(fetch, "PROGRAM_LIMIT")
         attributes = _attributes(source)
@@ -740,7 +720,7 @@ class LogisimLauncherTests(unittest.TestCase):
         self.assertEqual(len(pc_splitters), 1)
 
     def test_authored_fetch_controls_keep_decoder_rows(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         controls = next(
             circuit for circuit in root.findall("circuit")
             if circuit.get("name") == "FetchDecodeControls"
@@ -783,7 +763,7 @@ class LogisimLauncherTests(unittest.TestCase):
         )
 
     def test_reserved_opcode_3f_sets_illegal_and_halts_with_error(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         controls = next(
             circuit for circuit in root.findall("circuit")
             if circuit.get("name") == "FetchDecodeControls"
@@ -833,7 +813,7 @@ class LogisimLauncherTests(unittest.TestCase):
             )
 
     def test_visible_top_level_memory_or_gate_has_every_input_connected(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
 
         # These are the input terminals rendered by Logisim for the OR gates
@@ -875,7 +855,7 @@ class LogisimLauncherTests(unittest.TestCase):
 
     def test_add_operand_reaches_operations_input(self):
         for name in ("TinyCPU.circ",):
-            root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
+            root = _parse_project(ROOT / "hardware/logisim" / name).getroot()
             operations = next(c for c in root.findall("circuit") if c.get("name") == "Operations")
             add_operand = _component_by_label(operations, "ADD_OPERAND")
             add_operation = _component_by_label(operations, "ADD_OPERATION")
@@ -901,7 +881,7 @@ class LogisimLauncherTests(unittest.TestCase):
             )
 
     def test_effective_address_monitors_do_not_cross_address_range_box(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
 
         effective = _subcircuit_ports(root, main, "EFFECTIVE_ADDRESS_FBOX")
@@ -921,7 +901,7 @@ class LogisimLauncherTests(unittest.TestCase):
         )
 
     def test_print_control_reaches_public_enable_pin(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
         print_enable = _component_by_label(main, "PRINT_ENABLE")
 
@@ -933,7 +913,7 @@ class LogisimLauncherTests(unittest.TestCase):
         )
 
     def test_print_address_control_reaches_public_enable_pin(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
         print_address_enable = _component_by_label(main, "PRINT_ADDRESS_ENABLE")
 
@@ -946,7 +926,7 @@ class LogisimLauncherTests(unittest.TestCase):
         )
 
     def test_halt_control_reaches_public_halted_pin(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
         halted = _component_by_label(main, "HALTED")
 
@@ -957,7 +937,7 @@ class LogisimLauncherTests(unittest.TestCase):
         )
 
     def test_halt_error_control_reaches_public_halted_with_error_pin(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
         halted_with_error = _component_by_label(main, "HALTED_WITH_ERROR")
 
@@ -969,7 +949,7 @@ class LogisimLauncherTests(unittest.TestCase):
         )
 
     def test_input_error_control_reaches_input_error_flag(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
 
         # INPUT with no value asserts SET_INPUT at the controls instance. The
@@ -980,7 +960,7 @@ class LogisimLauncherTests(unittest.TestCase):
         )
 
     def test_jump_wiring_is_encapsulated_without_tunnels(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = next(c for c in root.findall("circuit") if c.get("name") == "TinyCPUMain")
         boxes = [component for component in main.findall("comp")
                  if component.get("name") == "JumpBox"]
@@ -1031,7 +1011,7 @@ class LogisimLauncherTests(unittest.TestCase):
         self.assertIn(jump_ports["DEC_JUMP_NOT_ZERO"], wire_endpoints)
 
     def test_jump_box_gates_zero_conditions_with_the_matching_controls(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         jump_box = next(
             circuit for circuit in root.findall("circuit")
             if circuit.get("name") == "JumpBox"
@@ -1065,7 +1045,7 @@ class LogisimLauncherTests(unittest.TestCase):
         ))
 
     def test_jump_box_gates_error_conditions_with_the_matching_controls(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         jump_box = next(
             circuit for circuit in root.findall("circuit")
             if circuit.get("name") == "JumpBox"
@@ -1103,7 +1083,7 @@ class LogisimLauncherTests(unittest.TestCase):
 
     def test_sub_operand_reaches_operations_input(self):
         for name in ("TinyCPU.circ",):
-            root = ET.parse(ROOT / "hardware/logisim" / name).getroot()
+            root = _parse_project(ROOT / "hardware/logisim" / name).getroot()
             operations = next(c for c in root.findall("circuit") if c.get("name") == "Operations")
             sub_operand = _component_by_label(operations, "SUB_OPERAND")
             sub_operation = _component_by_label(operations, "SUB_OPERATION")
@@ -1146,7 +1126,7 @@ class LogisimLauncherTests(unittest.TestCase):
             )
 
     def test_public_decoder_preserves_authored_control_boundary(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         controls = next(
             circuit for circuit in root.findall("circuit")
             if circuit.get("name") == "FetchDecodeControls"
@@ -1170,7 +1150,7 @@ class LogisimLauncherTests(unittest.TestCase):
         self.assertTrue({"LOAD_OPERAND", "STORE_OPERAND"}.isdisjoint(labels))
 
     def test_argument_kind_drives_effective_address_without_operation_fan_in(self):
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         effective = next(
             circuit for circuit in root.findall("circuit")
             if circuit.get("name") == "EffectiveAddress"
@@ -1190,7 +1170,7 @@ class LogisimLauncherTests(unittest.TestCase):
 
     def test_effective_address_cascades_selected_base_into_offset_mux(self):
         """Keep distinct direct and offset values from masking the mux handoff."""
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         effective = root.find("circuit[@name='EffectiveAddress']")
         self.assertIsNotNone(effective)
         muxes = sorted(
@@ -1219,7 +1199,7 @@ class LogisimLauncherTests(unittest.TestCase):
 
     def test_instruction_operand_bus_drives_direct_effective_address(self):
         """Follow the operand branch; do not freeze the authored canvas position."""
-        root = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        root = _parse_project(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         main = root.find("circuit[@name='TinyCPUMain']")
         self.assertIsNotNone(main)
         fetch_ports = _subcircuit_ports(root, main, "FETCH_DECODE")

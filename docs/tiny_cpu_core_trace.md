@@ -36,6 +36,14 @@ zweimal auf Parität und Determinismus sowie die ursprüngliche Countdown-Fixtur
 
 ## Beobachtungsvertrag
 
+Seit AP 23 stehen die bestehenden Zustandsbausteine in benannten
+Funktionsboxen. Die Messpfade beginnen deshalb beispielsweise mit
+`FETCH_UNIT/FETCH_DECODE`, `ACCUMULATOR_UNIT/DATAPATH_INSTANCE` oder
+`MEMORY_UNIT/MEMORY_INSTANCE`. Spalten, Breiten, Flankenbezug und VM-Sollwerte
+bleiben unverändert. Die Abnahme führt die modularisierte Schaltung aus;
+eine für Offline-Verdrahtungsprüfungen erzeugte Analyseansicht wird niemals
+als elektrische Ersatzschaltung verwendet.
+
 `scripts/LogisimCoreTrace.java` öffnet mit den öffentlichen APIs der gepinnten
 JAR eine ROM-Kopie und steuert den Eingang `CLK` selbst. Der Export erhält
 keine VM-Sollwerte. Er löst bestehende Instanzen und Pins über ihre Labels auf;

@@ -17,6 +17,7 @@ from tiny_cpu_assembler import assemble, encode_program
 from tiny_cpu_core_trace import CoreMismatch
 from tiny_cpu_logisim import LogisimError, resolve_jar, run_core_comparison
 from tiny_cpu_profiles import load_profile
+from tiny_cpu_hierarchy import find_core_instance
 from tiny_cpu_verify import generated_symbol_ports
 
 
@@ -25,10 +26,7 @@ def force_input(source: Path, destination: Path, instance_label: str,
     """Replace one named boundary input only in a test copy."""
     tree = ET.parse(source)
     root = tree.getroot()
-    main = root.find("circuit[@name='TinyCPUMain']")
-    instance = next(component for component in main.findall("comp")
-                    if component.find(f"a[@name='label'][@val='{instance_label}']")
-                    is not None)
+    main, instance = find_core_instance(root, instance_label)
     definition = root.find(f"circuit[@name='{instance.get('name')}']")
     terminal = generated_symbol_ports(definition, instance)[port]
     branches = [wire for wire in main.findall("wire")

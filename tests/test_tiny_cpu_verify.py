@@ -13,6 +13,7 @@ from unittest import mock
 
 
 MODULE_PATH = Path(__file__).parents[1] / "src" / "tiny_cpu_verify.py"
+sys.path.insert(0, str(MODULE_PATH.parent))
 SPEC = importlib.util.spec_from_file_location("tiny_cpu_verify", MODULE_PATH)
 assert SPEC and SPEC.loader
 VERIFY = importlib.util.module_from_spec(SPEC)
@@ -26,6 +27,15 @@ assert WIRE_SPEC and WIRE_SPEC.loader
 WIRE_CONTACTS = importlib.util.module_from_spec(WIRE_SPEC)
 sys.modules[WIRE_SPEC.name] = WIRE_CONTACTS
 WIRE_SPEC.loader.exec_module(WIRE_CONTACTS)
+
+
+from tiny_cpu_hierarchy import flatten_core, wire_path_exists as _hierarchy_wire_path_exists
+
+
+def _parse_project(path):
+    # Component-level mutations use the real, bit-resolved hierarchy analysis
+    # view. Production files and electrical tests retain the functional units.
+    return ET.ElementTree(flatten_core(ET.parse(path).getroot()))
 
 
 def _component_by_label(circuit: ET.Element, label: str) -> ET.Element:
@@ -69,40 +79,8 @@ def _remove_wire_at(circuit: ET.Element, endpoint: str) -> None:
     circuit.remove(wire)
 
 
-def _wire_path_exists(circuit: ET.Element, start: str, end: str) -> bool:
-    """Follow a Logisim net, including explicit T-junction endpoints."""
-    wires = [(wire.get("from"), wire.get("to"))
-             for wire in circuit.findall("wire")]
-    points = {point for wire in wires for point in wire} | {start, end}
-
-    def coordinates(value: str) -> tuple[int, int]:
-        return tuple(map(int, value.strip("()").split(",")))
-
-    graph: dict[str, set[str]] = {}
-    for left, right in wires:
-        x1, y1 = coordinates(left)
-        x2, y2 = coordinates(right)
-        contacts = [
-            point for point in points
-            if ((x1 == x2 == coordinates(point)[0]
-                 and min(y1, y2) <= coordinates(point)[1] <= max(y1, y2))
-                or (y1 == y2 == coordinates(point)[1]
-                    and min(x1, x2) <= coordinates(point)[0] <= max(x1, x2)))
-        ]
-        contacts.sort(key=coordinates)
-        for first, second in zip(contacts, contacts[1:]):
-            graph.setdefault(first, set()).add(second)
-            graph.setdefault(second, set()).add(first)
-
-    pending, visited = [start], set()
-    while pending:
-        point = pending.pop()
-        if point == end:
-            return True
-        if point not in visited:
-            visited.add(point)
-            pending.extend(graph.get(point, ()))
-    return False
+def _wire_path_exists(circuit, start, end):
+    return _hierarchy_wire_path_exists(circuit, start, end)
 
 
 def _multiplexer_driven_by(circuit: ET.Element, pin_label: str,
@@ -259,7 +237,7 @@ class CircuitVerificationTests(unittest.TestCase):
         self.assertFalse(stale_reconstruction <= wires)
 
     def test_ap18_illegal_return_gate_output_reaches_error_flags(self) -> None:
-        project = VERIFY.ET.parse(
+        project = _parse_project(
             MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU.circ"
         ).getroot()
         main = project.find("circuit[@name='TinyCPUMain']")
@@ -363,7 +341,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        project = ET.parse(circuit)
+        project = _parse_project(circuit)
         boundary = project.getroot().find("circuit[@name='CPUIntegrationBoundary']")
         self.assertIsNotNone(boundary)
         core = boundary.find("comp[@name='TinyCPUMain']")
@@ -421,7 +399,7 @@ class CircuitVerificationTests(unittest.TestCase):
                     temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
                     shutil.copytree(source, temporary / "logisim")
                     core = temporary / "logisim" / "TinyCPU.circ"
-                    project = ET.parse(core)
+                    project = _parse_project(core)
                     main = project.getroot().find("circuit[@name='TinyCPUMain']")
                     self.assertIsNotNone(main)
                     selector = _multiplexer_driven_by(main, pin_label, width)
@@ -458,7 +436,7 @@ class CircuitVerificationTests(unittest.TestCase):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
                 shutil.copytree(source, temporary / "logisim")
                 core = temporary / "logisim" / "TinyCPU.circ"
-                project = ET.parse(core)
+                project = _parse_project(core)
                 main = project.getroot().find("circuit[@name='TinyCPUMain']")
                 self.assertIsNotNone(main)
                 pin = next(
@@ -499,7 +477,7 @@ class CircuitVerificationTests(unittest.TestCase):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
                 shutil.copytree(source, temporary / "logisim")
                 core = temporary / "logisim" / "TinyCPU.circ"
-                project = ET.parse(core)
+                project = _parse_project(core)
                 main = project.getroot().find("circuit[@name='TinyCPUMain']")
                 pin = next(
                     component for component in main.findall("comp[@name='Pin']")
@@ -539,7 +517,7 @@ class CircuitVerificationTests(unittest.TestCase):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
                 shutil.copytree(source, temporary / "logisim")
                 core = temporary / "logisim" / "TinyCPU.circ"
-                project = ET.parse(core)
+                project = _parse_project(core)
                 main = project.getroot().find("circuit[@name='TinyCPUMain']")
                 self.assertIsNotNone(main)
                 pin = next(
@@ -610,7 +588,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         core = temporary / "logisim" / "TinyCPU.circ"
-        project = ET.parse(core)
+        project = _parse_project(core)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
         self.assertIsNotNone(main)
         controls = next(
@@ -644,7 +622,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         core = temporary / "logisim" / "TinyCPU.circ"
-        project = ET.parse(core)
+        project = _parse_project(core)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
         self.assertIsNotNone(main)
         boundary = _component_by_label(main, "INSTRUCTION_BOUNDARY")
@@ -682,7 +660,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         core = temporary / "logisim" / "TinyCPU.circ"
-        project = ET.parse(core)
+        project = _parse_project(core)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
         next_pc = _component_by_label(main, "NEXT_PC")
         _remove_wire_at(main, next_pc.get("loc", ""))
@@ -706,7 +684,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         core = temporary / "logisim" / "TinyCPU.circ"
-        project = ET.parse(core)
+        project = _parse_project(core)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
         controls = _subcircuit_ports(
             project.getroot(), main, "FETCH_DECODE_CONTROLS"
@@ -757,7 +735,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         core = temporary / "logisim" / "TinyCPU.circ"
-        project = ET.parse(core)
+        project = _parse_project(core)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
         operations = _subcircuit_ports(project.getroot(), main, "OPERATIONS_INSTANCE")
         memory = _subcircuit_ports(project.getroot(), main, "MEMORY_INSTANCE")
@@ -800,7 +778,7 @@ class CircuitVerificationTests(unittest.TestCase):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
                 shutil.copytree(source, temporary / "logisim")
                 core = temporary / "logisim" / "TinyCPU.circ"
-                project = ET.parse(core)
+                project = _parse_project(core)
                 main = project.getroot().find("circuit[@name='TinyCPUMain']")
                 datapath = next(
                     component for component in main.findall("comp")
@@ -878,7 +856,7 @@ class CircuitVerificationTests(unittest.TestCase):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
                 shutil.copytree(source, temporary / "logisim")
                 circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-                project = ET.parse(circuit)
+                project = _parse_project(circuit)
                 boundary = project.getroot().find("circuit[@name='CPUIntegrationBoundary']")
                 self.assertIsNotNone(boundary)
                 pin = next(
@@ -910,7 +888,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        project = ET.parse(circuit)
+        project = _parse_project(circuit)
         boundary = project.getroot().find("circuit[@name='CPUIntegrationBoundary']")
         self.assertIsNotNone(boundary)
         wire = next(item for item in boundary.findall("wire")
@@ -932,7 +910,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU.circ"
-        project = ET.parse(circuit)
+        project = _parse_project(circuit)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
         self.assertIsNotNone(main)
         selector = _multiplexer_driven_by(main, "RAM_WRITE_ENABLE")
@@ -965,7 +943,7 @@ class CircuitVerificationTests(unittest.TestCase):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
                 shutil.copytree(root / "hardware/logisim", temporary / "logisim")
                 circuit = temporary / "logisim/TinyCPU.circ"
-                project = ET.parse(circuit)
+                project = _parse_project(circuit)
                 main = project.getroot().find("circuit[@name='TinyCPUMain']")
                 ports = _subcircuit_ports(project.getroot(), main, "FETCH_DECODE_CONTROLS")
                 wire = next(item for item in main.findall("wire")
@@ -990,7 +968,7 @@ class CircuitVerificationTests(unittest.TestCase):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
                 shutil.copytree(root / "hardware/logisim", temporary / "logisim")
                 circuit = temporary / "logisim/TinyCPU.circ"
-                project = ET.parse(circuit)
+                project = _parse_project(circuit)
                 main = project.getroot().find("circuit[@name='TinyCPUMain']")
                 ports = _subcircuit_ports(project.getroot(), main, "ADDRESS_PATH")
                 if broken in {"reset", "load", "data"}:
@@ -1018,7 +996,7 @@ class CircuitVerificationTests(unittest.TestCase):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
                 shutil.copytree(root / "hardware/logisim", temporary / "logisim")
                 circuit = temporary / "logisim/TinyCPU.circ"
-                project = ET.parse(circuit)
+                project = _parse_project(circuit)
                 main = project.getroot().find("circuit[@name='TinyCPUMain']")
                 controls = _subcircuit_ports(project.getroot(), main, "FETCH_DECODE_CONTROLS")
                 operations = _subcircuit_ports(project.getroot(), main, "OPERATIONS_INSTANCE")
@@ -1044,7 +1022,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU.circ"
-        project = ET.parse(circuit)
+        project = _parse_project(circuit)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
         self.assertIsNotNone(main)
         gate = _component_by_label(main, "MEMORY_WRITE_REQUEST")
@@ -1071,7 +1049,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU.circ"
-        project = ET.parse(circuit)
+        project = _parse_project(circuit)
         main = project.getroot().find("circuit[@name='TinyCPUMain']")
         self.assertIsNotNone(main)
         gate = _component_by_label(main, "ACC_MEMORY_REQUEST_SELECT")
@@ -1098,7 +1076,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        project = ET.parse(circuit)
+        project = _parse_project(circuit)
         boundary = project.getroot().find("circuit[@name='CPUIntegrationBoundary']")
         self.assertIsNotNone(boundary)
         splitter = next(
@@ -1126,7 +1104,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        project = ET.parse(circuit)
+        project = _parse_project(circuit)
         boundary = project.getroot().find("circuit[@name='CPUIntegrationBoundary']")
         self.assertIsNotNone(boundary)
         splitter = next(
@@ -1148,11 +1126,11 @@ class CircuitVerificationTests(unittest.TestCase):
 
     def test_ap18_cpu_address_is_exported_from_the_effective_address_net(self) -> None:
         root = MODULE_PATH.parents[1]
-        core_project = ET.parse(
+        core_project = _parse_project(
             root / "hardware/logisim/TinyCPU.circ"
         ).getroot()
         core = core_project.find("circuit[@name='TinyCPUMain']")
-        boundary = ET.parse(
+        boundary = _parse_project(
             root / "hardware/logisim/TinyCPU_Peripherals.circ"
         ).getroot().find("circuit[@name='CPUIntegrationBoundary']")
         self.assertIsNotNone(core)
@@ -1188,7 +1166,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        project = ET.parse(circuit)
+        project = _parse_project(circuit)
         top = project.getroot().find("circuit[@name='TinyCPUSystemMain']")
         self.assertIsNotNone(top)
         instance = top.find("comp[@name='CPUIntegrationBoundary']")
@@ -1224,7 +1202,7 @@ class CircuitVerificationTests(unittest.TestCase):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
                 shutil.copytree(source, temporary / "logisim")
                 circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-                project = ET.parse(circuit)
+                project = _parse_project(circuit)
                 top = project.getroot().find("circuit[@name='TinyCPUSystemMain']")
                 wire = next(item for item in top.findall("wire")
                             if terminal in {item.get("from"), item.get("to")})
@@ -1245,7 +1223,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        project = ET.parse(circuit)
+        project = _parse_project(circuit)
         top = project.getroot().find("circuit[@name='TinyCPUSystemMain']")
         self.assertIsNotNone(top)
 
@@ -1272,7 +1250,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        project = ET.parse(circuit)
+        project = _parse_project(circuit)
         top = project.getroot().find("circuit[@name='TinyCPUSystemMain']")
         self.assertIsNotNone(top)
 
@@ -1547,7 +1525,7 @@ class CircuitVerificationTests(unittest.TestCase):
 
     def test_ap18_pending_next_state_includes_current_request_edge(self) -> None:
         """A masked request edge must be stored instead of being tied low."""
-        root = ET.parse(
+        root = _parse_project(
             MODULE_PATH.parents[1] / "hardware" / "logisim" / "TinyCPU_Peripherals.circ"
         ).getroot()
         interrupt = root.find("circuit[@name='InterruptController']")
@@ -1657,7 +1635,7 @@ class CircuitVerificationTests(unittest.TestCase):
                 VERIFY.verify_system_circuit()
 
     def test_ap18_interrupt_target_reaches_public_pin(self) -> None:
-        root = ET.parse(
+        root = _parse_project(
             MODULE_PATH.parents[1] / "hardware" / "logisim" / "TinyCPU_Peripherals.circ"
         ).getroot()
         interrupt = root.find("circuit[@name='InterruptController']")
@@ -1672,7 +1650,7 @@ class CircuitVerificationTests(unittest.TestCase):
 
     def test_ap18_interrupt_controller_routing_corridors_are_bounded(self) -> None:
         """Visual routing rails stop at their first and last electrical branch."""
-        root = ET.parse(
+        root = _parse_project(
             MODULE_PATH.parents[1] / "hardware" / "logisim" / "TinyCPU_Peripherals.circ"
         ).getroot()
         interrupt = root.find("circuit[@name='InterruptController']")
@@ -1696,7 +1674,7 @@ class CircuitVerificationTests(unittest.TestCase):
 
     def test_ap18_interrupt_handler_and_return_valid_feedback_are_separate(self) -> None:
         """The two one-bit states must not share the former x=1040 branch."""
-        root = ET.parse(
+        root = _parse_project(
             MODULE_PATH.parents[1] / "hardware" / "logisim" / "TinyCPU_Peripherals.circ"
         ).getroot()
         interrupt = root.find("circuit[@name='InterruptController']")

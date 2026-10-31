@@ -1,5 +1,12 @@
 # TinyCPU in Logisim-evolution
 
+`TinyCPUMain` ist die Übersicht aus acht Funktionsboxen. Die Detailverdrahtung
+liegt in den jeweiligen Teilkreisen; auf der obersten Ebene stehen nur diese
+Boxen, öffentliche Anschlusspins und Leitungen. Architektur, Abbildung und
+Abnahmen sind in [AP 23](../../docs/tiny_cpu_modularity_plan.md) dokumentiert.
+Die Strukturregel in [AGENTS.md](AGENTS.md) und der Offline-Verifier schützen
+diese Aufteilung bei späteren Änderungen.
+
 ## Manueller GUI-Kurztest
 
 Dieser Kurztest ergänzt die automatischen Gates; er ersetzt weder

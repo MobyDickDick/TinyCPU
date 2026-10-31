@@ -10,6 +10,7 @@ Reference and project records:
 - [`tiny_cpu.md`](tiny_cpu.md): Architektur, Befehlssatz und Simulator
 - [`tiny_cpu_alu_sketch.md`](tiny_cpu_alu_sketch.md): Entwurf der ALU
 - [`tiny_cpu_top_level_template.md`](tiny_cpu_top_level_template.md): Referenz für die Top-Level-Integration
+- [`tiny_cpu_modularity_plan.md`](tiny_cpu_modularity_plan.md): aktuelle Vorgabe und Abnahme der CPU-Übersicht aus acht Funktionsboxen (AP 23)
 - [`tiny_cpu_test_guide.md`](tiny_cpu_test_guide.md): Testanleitung für die Logisim-Schaltung
 - [`tiny_cpu_core_trace.md`](tiny_cpu_core_trace.md): elektrischer Kernvergleich, Flankenvertrag, Rohdaten und offene Abnahmebefunde aus AP 22.1
 - [`tiny_cpu_instruction_status.md`](tiny_cpu_instruction_status.md): aktuell nachgewiesener Funktionsstand aller Befehle

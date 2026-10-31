@@ -108,7 +108,7 @@ final class LogisimCoreTrace {
     }
     header.add("MEMORY");
     System.out.println(String.join("\t", header));
-    var ram = child(state, "MEMORY_INSTANCE");
+    var ram = child(child(state, "MEMORY_UNIT"), "MEMORY_INSTANCE");
     for (int edge = 1; edge <= Integer.parseInt(args[3]); edge++) {
       drive(state, "CLK", 0);
       settle(state);

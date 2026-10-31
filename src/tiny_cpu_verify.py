@@ -130,7 +130,8 @@ def generated_symbol_ports(
     pins = list(definition.findall("comp[@name='Pin']"))
     # Logisim-evolution's ``logisim_evolution`` default appearance uses the
     # standard 220-pixel subcircuit body in the project format used here.
-    width = 220
+    # With no output pins, Logisim anchors the instance at its first input.
+    width = 220 if any(_is_output_pin(pin) for pin in pins) else 0
     instance_x, instance_y = map(int, instance.get("loc", "").strip("()").split(","))
     result: dict[str, str] = {}
     for output in (False, True):
@@ -584,7 +585,11 @@ def verify_system_circuit() -> None:
             f"{display_path(system.circuit_path)}: full CPU core placement differs from contract"
         )
     core_instance = core_instances[0]
-    core_project = ET.parse(LOGISIM / str(core_library)).getroot()
+    from tiny_cpu_hierarchy import flatten_core
+    try:
+        core_project = flatten_core(ET.parse(LOGISIM / str(core_library)).getroot())
+    except ValueError as exc:
+        raise VerificationError(f"CPU hierarchy: {exc}") from exc
     core_definition = core_project.find(f"circuit[@name='{core_circuit}']")
     if core_definition is None:
         raise VerificationError("AP-18 CPU core definition is missing")
@@ -1884,6 +1889,15 @@ def verify(root: Path = ROOT) -> list[str]:
             circuits, wires = verify_circuit(path)
             circuit_count += circuits
             wire_count += wires
+        from tiny_cpu_hierarchy import verify_core_modularity, core_topology_fingerprint
+        try:
+            core = ET.parse(LOGISIM / "TinyCPU.circ").getroot()
+            control = load_json(LOGISIM / "tinycpu-core-control-v1.json")
+            verify_core_modularity(core, control)
+            if core_topology_fingerprint(core) != control.get("topology_sha256"):
+                raise ValueError("CPU extracted topology differs from the accepted baseline")
+        except ValueError as exc:
+            raise VerificationError(str(exc)) from exc
         verify_operator_panel()
         release_version = verify_release_version()
         opcode_count, fixture_count = verify_contracts()

@@ -1,5 +1,13 @@
 # Referenz: TinyCPU-Top-Level-Integration
 
+**Aktuelle Strukturvorgabe vom 31. Oktober 2026:** Die oberste CPU-Ebene
+enthält ausschließlich Funktionsboxen, Anschlusspins und Leitungen. Die
+ausdrücklich beauftragte Modularisierung aus
+[AP 23](tiny_cpu_modularity_plan.md) ersetzt dafür die historischen
+Anordnungs- und Wartungsregeln dieses Dokuments. Die folgenden Abschnitte
+bleiben als Integrationshistorie erhalten und sind kein Verbot dieser
+Umstrukturierung. Der Schutz von `FetchDecodeControls` bleibt unverändert.
+
 Diese Referenz dokumentiert die abgeschlossene manuelle Integration in
 Logisim-evolution. Die folgende Reihenfolge ist die Abnahmehistorie der bereits
 verdrahteten Netze und kein offener Bauplan. Die bestehende Übersichtsseite
