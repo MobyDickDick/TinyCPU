@@ -1,0 +1,81 @@
+# Topologische Nachprüfung von TinyCPUMain
+
+Am 31. Oktober 2026 wurde der manuell neu gezeichnete Stand `171d99f`
+(im Ausgangscheckout `d760452`) anhand benannter Bauteilanschlüsse geprüft.
+Die aktuelle Anordnung bleibt erhalten; es wurde kein älteres Layout
+zurückgeschrieben.
+
+## Befund und Korrektur
+
+| Anschluss | Vorher tatsächlich verbunden | Korrigierte Verbindung |
+|---|---|---|
+| `BranchUnit.DIV0` | `FaultUnit.ILL` | `FaultUnit.DIV0` |
+| `BranchUnit.ILL` | `FaultUnit.DIV0` | `FaultUnit.ILL` |
+| `BranchUnit.OVF` | Adressfehlernetz, gemeinsam mit `BranchUnit.ADDR` | `FaultUnit.OVF` |
+| `BranchUnit.INV` | `FetchUnit.ERROR_HALT` | `FaultUnit.INV` |
+| Öffentlicher Pin `HALTED_WITH_ERROR` | offen; die Leitung endete daneben | `FetchUnit.ERROR_HALT` |
+
+Die bestehenden Leitungskorridore wurden gezielt angepasst. Die Abzweige
+für OVF und INV enden jetzt an ihren eigenen Fehlernetzen; die vorherigen
+Verbindungspunkte auf den fremden Netzen sind entfernt. DIV0 und ILL erreichen
+die richtigen benannten Eingänge. Der Fehlerhalt erreicht seinen öffentlichen
+Ausgang. Der INV-Verlauf verwendet eine freie Nachbarspur, damit er nicht mit
+dem Adressbus zusammenfällt.
+
+Alle 41 Komponenten einschließlich ihrer Positionen und Attribute bleiben
+unverändert. Die Übersicht enthält nun 299 statt 301 Leitungssegmente.
+Sämtliche Teilkreisdefinitionen hinter `TinyCPUMain`, insbesondere der
+geschützte Decoder, sind gegenüber dem Ausgangscheckout bytegenau unverändert.
+
+## Prüfung nach einem Speichern mit Logisim
+
+Der bisherige Offline-Prüfer interpretierte ausgelassene Splitter-Bitwerte
+als Null und verlangte ein `label`, das Logisim für Splitter nicht speichert.
+Er berücksichtigte außerdem XML-Komponentenreihenfolge und nicht gespeicherte
+Standardattribute im Topologie-Fingerabdruck. Diese Darstellungsdetails
+führten nach dem Speichern zu falschen Befunden.
+
+Die Analyse verwendet jetzt Logisims tatsächliche Standard-Bitverteilung,
+findet den Steuerbus-Splitter anhand seiner Schnittstelle und ordnet
+Teilkreisports stabil nach ihren Namen. Der Fingerabdruck normalisiert
+Darstellungsattribute und elektrische Standardwerte. Die Änderung des
+Referenz-Digests wurde unabhängig am abgenommenen Referenzcommit `d2fd035`
+ermittelt, nicht aus der zu reparierenden Schaltung übernommen:
+
+```text
+Referenz d2fd035: 0d7893c6fbc0869006a4bd8ffa96313c405fac87719787ca1e71a3348159f980
+Vor Korrektur:   2c5f7a1ab7ee9623f21c5b78661d718c024e3c388671a94b7e73f2355889241d
+Nach Korrektur:  0d7893c6fbc0869006a4bd8ffa96313c405fac87719787ca1e71a3348159f980
+```
+
+Der vollständige Komponenten-/Port-/Netzvergleich stimmt somit wieder mit
+der akzeptierten elektrischen Struktur überein, bei der aktuellen Zeichnung.
+Zusätzliche Regressionen prüfen die sechs getrennten Fehler-Rückführungen,
+den Fehlerhalt, gespeicherte Standardwerte und XML-Reihenfolge. Die beiden
+Decoder-Negativkontrollen finden ihre Neutral-Konstanten über die Eingänge
+12 beziehungsweise 14 von `ACC_LOAD_REQUEST`, weil auch Konstantenlabels
+beim GUI-Speichern entfallen. Sie verändern ausschließlich Testkopien.
+
+## Nachweise
+
+Rohdaten und Bildexporte liegen lokal unter `artifacts/ap23-wiring-review/`.
+Umgebung: Python 3.14.5, OpenJDK 27, vorhandene Logisim-evolution-4.1.0-JAR.
+Für die Windows-Testläufe wurden `TEMP` und `TMP` auf
+`artifacts/review-tmp` gesetzt; Java benötigt seine lokalen Benutzereinstellungen.
+
+| Prüfung | Ergebnis / Nachweis |
+|---|---|
+| `python src/tiny_cpu_verify.py` | Bestanden; `verify-final.txt` |
+| `python scripts/check-logisim-circuit.py` | Bestanden; `structure-final.txt` |
+| `python -m unittest discover -s tests -v` | Alle 212 Tests bestanden; `unit-complete.txt` |
+| `python src/tiny_cpu_logisim.py --java $env:JAVA --jar $env:LOGISIM_JAR --trace-output artifacts/ap23-wiring-review/final/core.tsv --matrix-output artifacts/ap23-wiring-review/final/matrix --jobs 4` | Zwei Minimalkernläufe, Countdown und alle 61 Kernfixtures bestanden; `core-final.txt` |
+| `scripts/test-logisim-core-mutation.py` | Falscher ACC trotz normalen Halts abgewiesen; `checks-b.txt` |
+| `scripts/test-logisim-store.py`, `test-logisim-print.py`, `test-logisim-immediate.py` | Positive Fälle und Negativkontrollen bestanden; `checks-a-final.txt` |
+| `scripts/test-logisim-decode.py`, `test-logisim-address-register.py` | Decoder und Registerpfade einschließlich Mutationen bestanden; `checks-b-final.txt` |
+| Systemmatrix mit `--system tinycpu-peripherals-16-12-v1 --system-only` | Alle sieben Fälle bestanden; `system.txt` |
+| `scripts/test-logisim-operator.py` | Ein STEP-Takt ohne Wiederholung bei gehaltenem Eingang; `system.txt` |
+| Logisim-Zeichen-API / Anschlussprüfung | Export gesichtet; `before.png`, `after.png`, `ports-before.tsv` |
+| Layout- und Referenzvergleich | `topology-proof.json`; Komponenten unverändert, Teilkreise bytegleich |
+
+Die Simulatorprüfungen verwenden das echte hierarchische Projekt. Die
+abgeflachte Analyseansicht wird ausschließlich für Offline-Prüfungen erzeugt.

@@ -1200,7 +1200,7 @@ def verify_system_circuit() -> None:
         attributes = {
             item.get("name"): item.get("val") for item in component.findall("a")
         }
-        constants.setdefault(attributes.get("value", "0x0"), []).append(
+        constants.setdefault(attributes.get("value", "0x1"), []).append(
             component.get("loc")
         )
     memory_request_paths = tuple(

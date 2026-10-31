@@ -1,3 +1,4 @@
+import copy
 import json
 from pathlib import Path
 import sys
@@ -6,8 +7,8 @@ import xml.etree.ElementTree as ET
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from tiny_cpu_hierarchy import (
-    attributes, core_topology_fingerprint, flatten_core, verify_core_modularity,
-    wire_path_exists,
+    attributes, control_bus_splitter, core_topology_fingerprint, flatten_core, gate_input_constant,
+    splitter_groups, verify_core_modularity, wire_path_exists,
 )
 from tiny_cpu_verify import generated_symbol_ports
 
@@ -55,11 +56,75 @@ class HierarchyTests(unittest.TestCase):
 
     def test_swapped_control_bit_is_rejected(self):
         unit = self.project.find("circuit[@name='AddressUnit']")
-        splitter = next(c for c in unit.findall("comp[@name='Splitter']")
-                        if attributes(c).get("label") == "CONTROL_BUS_SPLITTER")
-        splitter.find("a[@name='bit0']").set("val", "1")
+        splitter = control_bus_splitter(unit)
+        ET.SubElement(splitter, "a", {"name": "bit0", "val": "1"})
         with self.assertRaisesRegex(ValueError, "bit mapping"):
             verify_core_modularity(self.project, self.contract)
+
+    def test_splitter_uses_logisim_defaults_for_omitted_bits(self):
+        splitter = ET.fromstring('<comp name="Splitter"><a name="incoming" val="7"/>'
+                                '<a name="fanout" val="3"/></comp>')
+        self.assertEqual(splitter_groups(splitter), [0, 0, 0, 1, 1, 2, 2])
+        ET.SubElement(splitter, "a", {"name": "bit6", "val": "0"})
+        self.assertEqual(splitter_groups(splitter), [0, 0, 0, 1, 1, 2, 0])
+
+    def test_decoder_mutations_find_neutral_inputs_without_constant_labels(self):
+        decoder = self.project.find("circuit[@name='FetchDecodeControls']")
+        for c in decoder.findall("comp[@name='Constant']"):
+            for label in c.findall("a[@name='label']"):
+                c.remove(label)
+        register = gate_input_constant(decoder, "ACC_LOAD_REQUEST", 12)
+        store = gate_input_constant(decoder, "ACC_LOAD_REQUEST", 14)
+        self.assertIsNot(register, store)
+        self.assertEqual(attributes(register)["value"], "0x0")
+        self.assertEqual(attributes(store)["value"], "0x0")
+
+    def test_gui_save_defaults_and_xml_order_preserve_topology(self):
+        explicit = copy.deepcopy(self.project)
+        for circuit in explicit.findall("circuit"):
+            components = circuit.findall("comp")
+            for comp in components:
+                kind, a = comp.get("name"), attributes(comp)
+                defaults = {}
+                if kind == "Splitter":
+                    defaults.update({f"bit{i}": str(g) for i, g in enumerate(splitter_groups(comp))})
+                    defaults["label"] = "UNSAVED_SPLITTER_LABEL"
+                if kind in {"Constant", "Multiplexer"}:
+                    defaults["label"] = "UNSAVED_COMPONENT_LABEL"
+                if kind == "Constant":
+                    defaults["value"] = "0x1"
+                if kind in {"Pin", "Tunnel"}:
+                    defaults["width"] = "1"
+                if kind.endswith(" Gate") and kind != "NOT Gate":
+                    defaults["inputs"] = "2"
+                for name, value in defaults.items():
+                    if name not in a:
+                        ET.SubElement(comp, "a", {"name": name, "val": value})
+            for comp in components:
+                circuit.remove(comp)
+            circuit.extend(reversed(components))
+        verify_core_modularity(explicit, self.contract)
+        self.assertEqual(core_topology_fingerprint(explicit), self.contract["topology_sha256"])
+
+    def test_named_fault_feedback_and_error_halt_are_separate_nets(self):
+        main = self.project.find("circuit[@name='TinyCPUMain']")
+
+        def ports(name):
+            return generated_symbol_ports(self.project.find(f"circuit[@name='{name}']"),
+                                          main.find(f"comp[@name='{name}']"))
+
+        faults, branch, fetch = ports("FaultUnit"), ports("BranchUnit"), ports("FetchUnit")
+        public = {attributes(p)["label"]: p.get("loc") for p in main.findall("comp[@name='Pin']")}
+        sources = [faults[n] for n in ("ADDR", "DIV0", "ILL", "INPUT", "INV", "OVF")]
+        sources.append(fetch["ERROR_HALT"])
+        for name in ("ADDR", "DIV0", "ILL", "INPUT", "INV", "OVF"):
+            with self.subTest(signal=name):
+                self.assertTrue(wire_path_exists(main, faults[name], branch[name]))
+                self.assertTrue(wire_path_exists(main, faults[name], public[f"ERROR_{name}"]))
+        self.assertTrue(wire_path_exists(main, fetch["ERROR_HALT"], public["HALTED_WITH_ERROR"]))
+        for index, source in enumerate(sources):
+            for other in sources[index + 1:]:
+                self.assertFalse(wire_path_exists(main, source, other))
 
     def test_public_pin_reordering_is_rejected(self):
         main = self.project.find("circuit[@name='TinyCPUMain']")

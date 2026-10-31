@@ -195,7 +195,7 @@
     "CoreDiagnostics": "CORE_DIAGNOSTICS"
   },
   "extraction_baseline_commit": "df3de2bb1afaceabb6f47a67ef10cb474ed25f19",
-  "topology_sha256": "13e0500f9f7cc7a9454dee69930fac267b685f60f5a4a3c1946618bac21905d2",
+  "topology_sha256": "0d7893c6fbc0869006a4bd8ffa96313c405fac87719787ca1e71a3348159f980",
   "public_inputs": [
     {
       "name": "CLK",

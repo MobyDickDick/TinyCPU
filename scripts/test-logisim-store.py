@@ -15,6 +15,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from tiny_cpu_assembler import assemble, encode_program
 from tiny_cpu_core_trace import CoreMismatch
+from tiny_cpu_hierarchy import gate_input_constant
 from tiny_cpu_logisim import LogisimError, resolve_jar, run_core_comparison
 from tiny_cpu_profiles import load_profile
 
@@ -42,13 +43,11 @@ def main() -> int:
                             f"store-acc-hold-{name}")
 
     # Re-enable the removed request in a copy by driving its neutral input
-    # high. Resolve by label, so moving the authored gate cannot evade this
-    # control. The original drawing is never written.
+    # high. Follow ACC_LOAD_REQUEST input 14: Constant labels are not saved
+    # by Logisim. The original drawing is never written.
     tree = ET.parse(source)
     decoder = tree.getroot().find("circuit[@name='FetchDecodeControls']")
-    neutral = next(component for component in decoder.findall("comp[@name='Constant']")
-                   if component.find("a[@name='label']") is not None
-                   and component.find("a[@name='label']").get("val") == "ACC_STORE_DISABLED")
+    neutral = gate_input_constant(decoder, "ACC_LOAD_REQUEST", 14)
     neutral.find("a[@name='value']").set("val", "0x1")
     mutated = args.output / "store-request-enabled.circ"
     tree.write(mutated, encoding="utf-8", xml_declaration=True)

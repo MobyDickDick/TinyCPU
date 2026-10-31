@@ -1,5 +1,10 @@
 # AP 23: Funktionsboxen auf der obersten CPU-Ebene
 
+Die anschließende topologische Reparatur des manuell neu gezeichneten Stands
+ist in der [Verdrahtungsnachprüfung](tiny_cpu_wiring_review.md) dokumentiert.
+Sie erhält die aktuelle Anordnung und berücksichtigt Logisims gespeicherte
+Standardattribute im positionsunabhängigen Vergleich.
+
 **Auftrag vom 31. Oktober 2026:** `TinyCPUMain` soll ausschließlich
 Funktionsboxen wie Aufrufe fachlicher Teilprogramme zeigen. Anschlusspins und
 Verbindungsleitungen bilden deren Schnittstelle. Einzelgatter, Auswahl- und

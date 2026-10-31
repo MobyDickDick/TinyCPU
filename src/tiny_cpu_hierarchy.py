@@ -30,6 +30,26 @@ def attributes(component):
     return {a.get("name"): a.get("val") for a in component.findall("a")}
 
 
+def splitter_groups(component):
+    """Logisim omits bit mappings equal to its balanced ascending default."""
+    a = attributes(component)
+    incoming, fanout = int(a.get("incoming", "2")), int(a.get("fanout", "2"))
+    size, extra = divmod(incoming, fanout)
+    defaults = [group for group in range(fanout)
+                for _ in range(size + (group < extra))]
+    return [int(a.get(f"bit{i}", str(defaults[i]))) for i in range(incoming)]
+
+
+def control_bus_splitter(circuit, width=45):
+    """Find the bus by its electrical shape; Splitter has no saved label."""
+    candidates = [c for c in circuit.findall("comp[@name='Splitter']")
+                  if int(attributes(c).get("incoming", "2")) == width
+                  and int(attributes(c).get("fanout", "2")) == width]
+    if len(candidates) != 1:
+        raise ValueError(f"{circuit.get('name')}: control-bus boundary is missing or ambiguous")
+    return candidates[0]
+
+
 def point(text):
     return tuple(map(int, text.strip("()").split(",")))
 
@@ -79,6 +99,23 @@ def wire_path_exists(circuit, start, end):
     return network.find(a) == network.find(b)
 
 
+def gate_input_constant(circuit, gate_label, input_name):
+    """Locate a constant by the gate contact it drives, even after GUI save."""
+    gates = [c for c in circuit.findall("comp") if attributes(c).get("label") == gate_label]
+    if len(gates) != 1:
+        raise ValueError(f"missing or ambiguous gate: {gate_label}")
+    contacts = [p for p, _, incoming, _, name in component_ports({}, gates[0])
+                if incoming and name == str(input_name)]
+    if len(contacts) != 1:
+        raise ValueError(f"missing gate input: {gate_label}.{input_name}")
+    network = wire_network(circuit, contacts)
+    constants = [c for c in circuit.findall("comp[@name='Constant']")
+                 if network.find(point(c.get("loc"))) == network.find(contacts[0])]
+    if len(constants) != 1:
+        raise ValueError(f"missing or ambiguous constant at {gate_label}.{input_name}")
+    return constants[0]
+
+
 def _rotate(dx, dy, facing):
     return {"east": (dx, dy), "south": (-dy, dx),
             "west": (-dx, -dy), "north": (dy, -dx)}[facing]
@@ -103,7 +140,8 @@ def component_ports(definitions, component):
         ports = generated_symbol_ports(definition, component)
         return [(point(ports[p["label"]]), int(p.get("width", "1")),
                  p.get("type", "input") != "output", p.get("type") == "output", p["label"])
-                for p in (attributes(pin) for pin in definition.findall("comp[@name='Pin']"))]
+                for p in sorted((attributes(pin) for pin in definition.findall("comp[@name='Pin']")),
+                                key=lambda p: p["label"])]
     if kind == "Pin":
         output = a.get("type") == "output"
         return [((x, y), width, output, not output, a.get("label", ""))]
@@ -114,7 +152,7 @@ def component_ports(definitions, component):
     if kind == "Splitter":
         count = int(a.get("fanout", "2"))
         incoming = int(a.get("incoming", "2"))
-        groups = [int(a.get(f"bit{i}", "0")) for i in range(incoming)]
+        groups = splitter_groups(component)
         spacing = int(a.get("spacing", "1"))
         result = [terminal(0, 0, incoming, True, False, "incoming")]
         for index in range(count):
@@ -190,6 +228,7 @@ def flatten_core(project):
 
     def visit(circuit, path, shift, top=False):
         state = CircuitBits(definitions, circuit, path)
+        bus_splitter = None if top else control_bus_splitter(circuit)
         for c in circuit.findall("comp"):
             kind = c.get("name")
             a = attributes(c)
@@ -205,7 +244,7 @@ def flatten_core(project):
                             state.vector(point(parent_ports[pa["label"]]), int(pa.get("width", "1"))),
                             child.vector(point(pin.get("loc")), int(pa.get("width", "1")))):
                         bits.union(outer, inner)
-            elif kind != "Tunnel" and (top or kind != "Pin") and a.get("label") != "CONTROL_BUS_SPLITTER":
+            elif kind != "Tunnel" and (top or kind != "Pin") and c is not bus_splitter:
                 clone = copy.deepcopy(c)
                 x, y = point(c.get("loc"))
                 clone.set("loc", location((x + shift, y + shift)))
@@ -216,8 +255,11 @@ def flatten_core(project):
                 ports = state.ports[id(c)]
                 incoming = state.vector(ports[0][0], ports[0][1])
                 offsets = defaultdict(int)
+                groups = splitter_groups(c)
                 for bit in range(len(incoming)):
-                    group = int(a.get(f"bit{bit}", "0"))
+                    group = groups[bit]
+                    if group < 0:  # Explicitly unconnected splitter bit.
+                        continue
                     branch = ports[group + 1]
                     outgoing = state.vector(branch[0], branch[1])
                     bits.union(incoming[bit], outgoing[offsets[group]])
@@ -283,16 +325,15 @@ def verify_core_modularity(project, control_contract=None):
         circuit = definitions[name]
         pins = [p for p in circuit.findall("comp[@name='Pin']")
                 if attributes(p).get("label") == "CONTROL"]
-        splitters = [p for p in circuit.findall("comp[@name='Splitter']")
-                     if attributes(p).get("label") == "CONTROL_BUS_SPLITTER"]
-        if len(pins) != 1 or len(splitters) != 1:
+        splitter = control_bus_splitter(circuit, width)
+        if len(pins) != 1:
             raise ValueError(f"{name}: control-bus boundary is missing")
-        pa, sa = attributes(pins[0]), attributes(splitters[0])
+        pa, sa = attributes(pins[0]), attributes(splitter)
         if (int(pa.get("width", "1")) != width
                 or (pa.get("type") == "output") != (name == "FetchUnit")
                 or int(sa.get("incoming", "2")) != width
                 or int(sa.get("fanout", "2")) != width
-                or any(int(sa.get(f"bit{i}", "0")) != i for i in range(width))):
+                or splitter_groups(splitter) != list(range(width))):
             raise ValueError(f"{name}: control-bus bit mapping differs from contract")
 
 
@@ -338,7 +379,23 @@ def core_topology_fingerprint(project):
 
     for index, c in enumerate(main.findall("comp")):
         component = ("component", index)
-        node(component, [c.get("name"), c.get("lib"), attributes(c)])
+        a = attributes(c)
+        kind = c.get("name")
+        # Canvas presentation and unsupported labels disappear on a GUI save.
+        # Keep electrical parameters, including Logisim's omitted defaults.
+        a = {k: v for k, v in a.items()
+             if k not in {"appearance", "facing", "spacing", "label"}}
+        if kind == "Pin":
+            a["label"] = attributes(c)["label"]
+        if kind in {"Pin", "Constant", "Multiplexer", "Probe"} or kind.endswith(" Gate"):
+            a.setdefault("width", "1")
+        if kind == "Constant":
+            a.setdefault("value", "0x1")
+        if kind.endswith(" Gate") and kind != "NOT Gate":
+            a.setdefault("inputs", "2")
+        if kind == "Splitter":
+            a.update({f"bit{i}": str(group) for i, group in enumerate(splitter_groups(c))})
+        node(component, [kind, c.get("lib"), a])
         for port_index, (p, width, incoming, outgoing, label) in enumerate(state.ports[id(c)]):
             width = width or state.widths.get(state.network.find(p), 1)
             terminal = ("port", index, port_index)

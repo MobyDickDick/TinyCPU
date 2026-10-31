@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from tiny_cpu_assembler import opcode_table
+from tiny_cpu_hierarchy import gate_input_constant
 from tiny_cpu_logisim import LogisimError, resolve_jar
 from tiny_cpu_profiles import load_profile
 
@@ -160,9 +161,7 @@ def main() -> int:
         tree = ET.parse(source)
         check_table(run_table(tree, jar, args.output / "control"), source, opcodes)
         decoder = tree.getroot().find("circuit[@name='FetchDecodeControls']")
-        neutral = next(component for component in decoder.findall("comp[@name='Constant']")
-                       if component.find("a[@name='label'][@val='ACC_LD_REG_CONST_DISABLED']")
-                       is not None)
+        neutral = gate_input_constant(decoder, "ACC_LOAD_REQUEST", 12)
         pin = next(component for component in decoder.findall("comp[@name='Pin']")
                    if component.find("a[@name='label'][@val='LD_REG_CONST']") is not None)
         branches = [wire for wire in decoder.findall("wire")
