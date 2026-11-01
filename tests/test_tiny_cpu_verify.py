@@ -107,6 +107,24 @@ def _multiplexer_driven_by(circuit: ET.Element, pin_label: str,
 
 
 class CircuitVerificationTests(unittest.TestCase):
+    def test_rejects_a_dense_long_run_inside_a_functional_unit(self) -> None:
+        path = self.write_project("")
+        tree = ET.parse(path)
+        unit = ET.SubElement(tree.getroot(), "circuit", {"name": "AddressUnit"})
+        ET.SubElement(unit, "wire", {"from": "(20,30)", "to": "(500,30)"})
+        tree.write(path, encoding="utf-8", xml_declaration=True)
+        with self.assertRaisesRegex(VERIFY.VerificationError, "grouped routing grid"):
+            VERIFY.verify_circuit(path)
+
+    def test_rejects_tunnels_even_in_an_unused_subcircuit(self) -> None:
+        path = self.write_project("")
+        tree = ET.parse(path)
+        hidden = ET.SubElement(tree.getroot(), "circuit", {"name": "Hidden"})
+        ET.SubElement(hidden, "comp", {"lib": "0", "loc": "(100,100)", "name": "Tunnel"})
+        tree.write(path, encoding="utf-8", xml_declaration=True)
+        with self.assertRaisesRegex(VERIFY.VerificationError, "Hidden: Tunnel components are forbidden"):
+            VERIFY.verify_circuit(path)
+
     def test_release_version_matches_machine_readable_contract(self) -> None:
         self.assertEqual(VERIFY.verify_release_version(), "1.1.0")
 

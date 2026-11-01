@@ -106,6 +106,14 @@ class HierarchyTests(unittest.TestCase):
         verify_core_modularity(explicit, self.contract)
         self.assertEqual(core_topology_fingerprint(explicit), self.contract["topology_sha256"])
 
+    def test_gate_caption_font_does_not_change_electrical_topology(self):
+        gate = self.project.find("circuit[@name='AddressUnit']/comp[@name='OR Gate']")
+        font = gate.find("a[@name='labelfont']")
+        if font is None:
+            font = ET.SubElement(gate, "a", {"name": "labelfont"})
+        font.set("val", "SansSerif plain 24")
+        self.assertEqual(core_topology_fingerprint(self.project), self.contract["topology_sha256"])
+
     def test_named_fault_feedback_and_error_halt_are_separate_nets(self):
         main = self.project.find("circuit[@name='TinyCPUMain']")
 
@@ -143,6 +151,86 @@ class HierarchyTests(unittest.TestCase):
                                    '<a name="label" val="VALUE"/></comp></circuit>')
         instance = ET.fromstring('<comp name="Monitor" loc="(100,200)"/>')
         self.assertEqual(generated_symbol_ports(definition, instance), {"VALUE": "(100,200)"})
+
+    def test_explicit_symbol_ports_are_independent_of_sheet_pin_order(self):
+        definition = ET.fromstring('''<circuit name="Stable">
+          <a name="appearance" val="custom"/>
+          <appear>
+            <circ-port dir="out" pin="100,300" x="270" y="60"/>
+            <circ-port dir="out" pin="100,100" x="270" y="80"/>
+            <circ-anchor facing="east" x="270" y="60"/>
+          </appear>
+          <comp lib="0" name="Pin" loc="(100,300)">
+            <a name="label" val="A"/><a name="type" val="output"/>
+          </comp>
+          <comp lib="0" name="Pin" loc="(100,100)">
+            <a name="label" val="B"/><a name="type" val="output"/>
+          </comp>
+        </circuit>''')
+        instance = ET.fromstring('<comp name="Stable" loc="(500,200)"/>')
+        self.assertEqual(generated_symbol_ports(definition, instance),
+                         {"A": "(500,200)", "B": "(500,220)"})
+        ET.SubElement(instance, "a", {"name": "facing", "val": "west"})
+        self.assertEqual(generated_symbol_ports(definition, instance),
+                         {"A": "(500,200)", "B": "(500,180)"})
+        definition.find("appear/circ-port").set("pin", "999,999")
+        with self.assertRaisesRegex(ValueError, "unknown or duplicate pin"):
+            generated_symbol_ports(definition, instance)
+
+    def test_splitter_handedness_matches_native_logisim_endpoints(self):
+        from tiny_cpu_hierarchy import component_ports
+        for facing, appear, first, last in (
+            ("east", "left", (120,50), (120,90)),
+            ("east", "right", (120,110), (120,150)),
+            ("west", "left", (80,110), (80,150)),
+            ("west", "right", (80,50), (80,90)),
+        ):
+            with self.subTest(facing=facing, appear=appear):
+                splitter = ET.fromstring(f'''<comp name="Splitter" loc="(100,100)">
+                  <a name="fanout" val="3"/><a name="incoming" val="3"/>
+                  <a name="spacing" val="2"/><a name="facing" val="{facing}"/>
+                  <a name="appear" val="{appear}"/>
+                </comp>''')
+                ports = component_ports({}, splitter)
+                self.assertEqual((ports[1][0], ports[-1][0]), (first, last))
+
+    def test_fetch_control_merger_faces_its_decoder(self):
+        from tiny_cpu_hierarchy import component_ports
+        unit = self.project.find("circuit[@name='FetchUnit']")
+        splitter = control_bus_splitter(unit)
+        self.assertEqual(attributes(splitter)["facing"], "west")
+        self.assertEqual(attributes(splitter)["appear"], "right")
+        ports = component_ports({}, splitter)
+        self.assertTrue(all(p[0] < ports[0][0][0] for p, *_ in ports[1:]))
+
+    def test_functional_unit_pins_have_horizontal_wire_entries(self):
+        from tiny_cpu_hierarchy import CORE_UNITS, point
+        checked = 0
+        for circuit in self.project.findall("circuit"):
+            if circuit.get("name") not in CORE_UNITS:
+                continue
+            for pin in circuit.findall("comp[@name='Pin']"):
+                attached = [w for w in circuit.findall("wire")
+                            if pin.get("loc") in w.attrib.values()]
+                for wire in attached:
+                    with self.subTest(circuit=circuit.get("name"), pin=attributes(pin)["label"]):
+                        self.assertEqual(point(wire.get("from"))[1], point(wire.get("to"))[1])
+                        checked += 1
+        self.assertGreater(checked, 0)
+
+    def test_functional_units_have_no_free_wire_tips(self):
+        from collections import Counter
+        from tiny_cpu_hierarchy import CORE_UNITS, component_ports, location
+        definitions = {c.get("name"): c for c in self.project.findall("circuit")}
+        for name in CORE_UNITS:
+            circuit = definitions[name]
+            ports = {location(p) for c in circuit.findall("comp")
+                     for p, *_ in component_ports(definitions, c)}
+            ends = Counter(p for w in circuit.findall("wire")
+                           for p in (w.get("from"), w.get("to")))
+            with self.subTest(circuit=name):
+                self.assertEqual([p for p, degree in ends.items()
+                                  if degree == 1 and p not in ports], [])
 
 
 if __name__ == "__main__":

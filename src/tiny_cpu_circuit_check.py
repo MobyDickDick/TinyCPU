@@ -49,14 +49,9 @@ class _WidthConstraint:
 
 
 def _subcircuit_outputs(definition: ET.Element, instance: ET.Element) -> list[_Driver]:
-    """Return generated-box output terminals for a subcircuit instance.
-
-    Logisim's fixed generated box puts output pins, in sheet-position order, at
-    the instance anchor and then at 20-pixel intervals below it.  This is the
-    important detail the old checker missed: an instance output is just as
-    much a driver as the output of a primitive gate.
-    """
-    anchor_x, anchor_y = _point(instance.get("loc", ""))
+    """Resolve real output terminals of generated and explicit symbols."""
+    from tiny_cpu_verify import generated_symbol_ports
+    ports = generated_symbol_ports(definition, instance)
     outputs = []
     pins = [pin for pin in definition.findall("comp")
             if pin.get("name") == "Pin" and _attributes(pin).get("type") == "output"]
@@ -67,11 +62,22 @@ def _subcircuit_outputs(definition: ET.Element, instance: ET.Element) -> list[_D
     for pin in pins:
         attributes = _attributes(pin)
         outputs.append(_Driver(
-            (anchor_x, anchor_y + 20 * len(outputs)),
+            _point(ports[attributes["label"]]),
             f"{attributes.get('label', 'output')} of "
             f"{_attributes(instance).get('label', instance.get('name', 'subcircuit'))}",
         ))
     return outputs
+
+
+def _component_contact_locations(circuit, definitions=None):
+    """Include offset FBox inputs, which are not the component's anchor."""
+    from tiny_cpu_verify import generated_symbol_ports
+    points = {_point(c.get("loc")) for c in circuit.findall("comp")}
+    for component in circuit.findall("comp"):
+        if definitions and component.get("name") in definitions:
+            points.update(_point(p) for p in generated_symbol_ports(
+                definitions[component.get("name")], component).values())
+    return points
 
 
 def _width_constraints(
@@ -96,17 +102,18 @@ def _width_constraints(
                 attributes.get("label") or f"Pin@{component.get('loc')}",
             ))
         elif definitions and kind in definitions:
+            from tiny_cpu_verify import generated_symbol_ports
+            ports = generated_symbol_ports(definitions[kind], component)
             outputs = [pin for pin in definitions[kind].findall("comp")
                        if pin.get("name") == "Pin"
                        and _attributes(pin).get("type") == "output"]
             outputs.sort(key=lambda pin: (_point(pin.get("loc", ""))[1],
                                           _point(pin.get("loc", ""))[0]))
-            anchor_x, anchor_y = _point(component.get("loc", ""))
             instance_label = attributes.get("label", kind)
-            for index, pin in enumerate(outputs):
+            for pin in outputs:
                 pin_attributes = _attributes(pin)
                 constraints.append(_WidthConstraint(
-                    (anchor_x, anchor_y + 20 * index),
+                    _point(ports[pin_attributes["label"]]),
                     int(pin_attributes.get("width", "1")),
                     f"{pin_attributes.get('label', 'output')} of {instance_label}",
                 ))
@@ -240,6 +247,7 @@ def _undriven_gate_input_issues(
                 if component.get("name") == "Constant"
                 or (component.get("name") == "Pin"
                     and _attributes(component).get("type", "input") == "input")]
+    drivers += _driven_splitter_contacts(circuit, drivers)
     gate_kinds = {
         "AND Gate", "OR Gate", "XOR Gate", "NAND Gate", "NOR Gate", "NOT Gate",
     }
@@ -292,6 +300,44 @@ def _undriven_gate_input_issues(
     return issues
 
 
+def _driven_splitter_contacts(circuit: ET.Element, drivers: list[_Driver]) -> list[_Driver]:
+    """Follow real sources through splitter bit mappings, including cascades.
+
+    Splitter branches are offset from their component anchor. Treating those
+    contacts as loose wire ends misidentifies visibly wired control signals.
+    Only bits connected to an actual source count as driven.
+    """
+    from tiny_cpu_hierarchy import UnionFind, component_ports, splitter_groups, wire_network
+
+    splitters = circuit.findall("comp[@name='Splitter']")
+    if not splitters:
+        return []
+    ports = {id(c): component_ports({}, c) for c in splitters}
+    contacts = [p for values in ports.values() for p, *_ in values]
+    network = wire_network(circuit, contacts + [d.point for d in drivers])
+    bits = UnionFind()
+    widths = {}
+    for values in ports.values():
+        for p, width, *_ in values:
+            widths[network.find(p)] = width
+    for splitter in splitters:
+        values = ports[id(splitter)]
+        incoming = network.find(values[0][0])
+        offsets: dict[int, int] = {}
+        for index, group in enumerate(splitter_groups(splitter)):
+            if group < 0:
+                continue
+            branch = network.find(values[group + 1][0])
+            offset = offsets.get(group, 0)
+            bits.union((incoming, index), (branch, offset))
+            offsets[group] = offset + 1
+    sources = {bits.find((network.find(d.point), bit)) for d in drivers
+               for bit in range(widths.get(network.find(d.point), 1))}
+    return [_Driver(p, "driven splitter contact") for values in ports.values()
+            for p, width, *_ in values if width and all(
+                bits.find((network.find(p), bit)) in sources for bit in range(width))]
+
+
 def _unwired_multiplexer_input_issues(circuit: ET.Element) -> list[CircuitIssue]:
     """Report multiplexer data contacts that no wire reaches."""
     segments = [(_point(w.get("from", "")), _point(w.get("to", "")))
@@ -327,9 +373,7 @@ def _dangling_subcircuit_output_issues(
         return []
     wires = [(_point(wire.get("from", "")), _point(wire.get("to", "")))
              for wire in circuit.findall("wire")]
-    component_locations = {
-        _point(component.get("loc", "")) for component in circuit.findall("comp")
-    }
+    component_locations = _component_contact_locations(circuit, definitions)
     output_labels = {}
     for component in circuit.findall("comp"):
         definition = definitions.get(component.get("name", ""))
@@ -362,7 +406,7 @@ def _dangling_subcircuit_output_issues(
     return issues
 
 
-def _dangling_bus_input_issues(circuit: ET.Element) -> list[CircuitIssue]:
+def _dangling_bus_input_issues(circuit: ET.Element, definitions=None) -> list[CircuitIssue]:
     """Report unused multibit inputs and their abandoned wire stubs.
 
     A sheet input is allowed to be unused, but a wire drawn from it promises a
@@ -375,9 +419,7 @@ def _dangling_bus_input_issues(circuit: ET.Element) -> list[CircuitIssue]:
     wires = [(_point(wire.get("from", "")), _point(wire.get("to", "")))
              for wire in circuit.findall("wire")]
     components = circuit.findall("comp")
-    component_locations = {
-        _point(component.get("loc", "")) for component in components
-    }
+    component_locations = _component_contact_locations(circuit, definitions)
     issues = []
     for component in components:
         attributes = _attributes(component)
@@ -455,7 +497,8 @@ def inspect_circuit(circuit: ET.Element,
                     definitions: dict[str, ET.Element] | None = None) -> list[CircuitIssue]:
     """Find driver collisions, width mismatches, and incomplete wiring."""
     name = circuit.get("name", "<unnamed>")
-    issues = []
+    issues = [CircuitIssue(name, "Tunnel components are forbidden; use visible orthogonal wires")
+              for component in circuit.findall("comp[@name='Tunnel']")]
     for drivers in _net_drivers(circuit, definitions).values():
         if len(drivers) > 1:
             labels = sorted(driver.label for driver in drivers)
@@ -464,7 +507,7 @@ def inspect_circuit(circuit: ET.Element,
     issues.extend(_undriven_gate_input_issues(circuit, definitions))
     issues.extend(_unwired_multiplexer_input_issues(circuit))
     issues.extend(_dangling_subcircuit_output_issues(circuit, definitions))
-    issues.extend(_dangling_bus_input_issues(circuit))
+    issues.extend(_dangling_bus_input_issues(circuit, definitions))
     return issues
 
 

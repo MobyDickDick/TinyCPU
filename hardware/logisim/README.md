@@ -592,20 +592,29 @@ jeweiligen `HOLD_*`-Gatter ist jetzt als kurze, U-förmige Leitung vollständig
 sichtbar. Sie verläuft im freien Korridor oberhalb der jeweiligen Flag-Zeile
 und kreuzt weder Reset-Anschlüsse noch Takt- oder WE-Bus.
 
-## Gestaltungsregel: sichtbare Leitungen vor Tunneln
+## Gestaltungsregel: keine Tunnel im gesamten Projekt
 
 Die TinyCPU soll eine **graphische und direkt verfolgbare** Schaltung bleiben.
 Darum werden zusammengehörige Anschlüsse grundsätzlich mit sichtbaren,
 rechtwinkligen Leitungen verbunden. Auf der neu gezeichneten Übersichtsseite
 `TinyCPUMain` sind die verbliebenen Tunnel jetzt durch sichtbare Leitungen in
 getrennten rechten Routingkorridoren ersetzt; unbeschriftete Logikbausteine
-halten dabei den Signalfluss statt interner Netznamen im Vordergrund. Tunnel sind kein Mittel, um eine schwierige
-Leitungsführung abzukürzen. Sie sind nur ausnahmsweise zulässig, wenn eine
-direkte Route trotz Verschieben der Bauteile und Nutzung freier Korridore die
-Lesbarkeit verschlechtern oder fremde Netze elektrisch verbinden würde. Jede
-solche Ausnahme muss im Designdokument begründet und bei der nächsten
-Überarbeitung erneut auflösbar geprüft werden. Neue oder lokal begrenzte Netze
-dürfen nicht als Tunnel angelegt werden. Die sechs bisher getunnelten
+halten dabei den Signalfluss statt interner Netznamen im Vordergrund.
+Seit dem 1. November 2026 sind Tunnel **ausnahmslos im gesamten Projekt
+verboten**, auch innerhalb der acht Funktionsboxen und in separaten
+Diagnoseschaltungen. Sämtliche 738 Tunnel des vorherigen Arbeitsstands sind
+durch sichtbare rechtwinklige Leitungen ersetzt. Die Funktionsboxen verwenden
+weiterhin physisch angeschlossene Steuerbusse und Splitter; alle Abzweige
+haben explizite Leitungsenden. Die Anschlusstopologie des Kerns ist unverändert.
+`tiny_cpu_verify.py` und `check-logisim-circuit.py` lehnen jeden neuen Tunnel
+ab. Ältere hier dokumentierte Tunnel-Ausnahmen sind damit aufgehoben.
+Die [Abnahme der Tunnelentfernung](../../docs/tiny_cpu_tunnel_removal.md)
+dokumentiert die Prüfungen und die bereits vorhandenen Decoder-Testprobleme.
+Die anschließende [Lesbarkeitsüberarbeitung](../../docs/tiny_cpu_readable_wiring.md)
+ordnet die acht Funktionsboxen kompakter an. Lange Leitungen halten eine freie
+Rasterzeile Abstand; nach höchstens vier Spuren folgen drei freie Rasterzeilen.
+Kurze Auffächerungen unmittelbar an festen Bauteilanschlüssen bleiben lokal.
+Die sechs bisher getunnelten
 Sticky-Flag-Rückkopplungen sind deshalb vollständig durch sichtbare Leitungen
 ersetzt.
 
@@ -1421,8 +1430,7 @@ the OR box to all four `XOR_*` addressing modes. `XorArithmeticCircuit` uses a
 leaf diagnostic is generated from the maintained project. `Operations` now
 instantiates the box once and extends its maintained seven-way result,
 validity, and activity trees through explicit two-input OR stages. Four paired
-local tunnel lanes cross the occupied compact merge area; this documented
-exception avoids moving the manually maintained boxes. The four XOR controls
+visible wire lanes cross the occupied compact merge area. The four XOR controls
 append their version-1 opcodes and deliberately add no overflow source.
 
 The manual redraw reviewed with this package is not treated as layout-only:
@@ -1534,8 +1542,8 @@ zwischenzeitliche direkte Verdrahtung verband durch überlappende Schienen
 mehrere logisch getrennte Zustandsnetze; der Treiber-Test allein meldete das
 nicht, weil diese Netze überwiegend Registereingänge und Rückführungen statt
 mehrerer erkannter Ausgänge zusammenführten. Die bereinigte Schaltung verwendet
-deshalb wieder ausschließlich explizit benannte lokale Tunnel für die langen
-Rückführungen. Kurze Leitungen bleiben sichtbar, besitzen keine impliziten
+deshalb ausschließlich sichtbare Leitungen für die langen
+Rückführungen. Die Leitungen besitzen keine impliziten
 T-Kontakte oder kollinearen Überlappungen, und sowohl ein positiver Audit als
 auch ein absichtlich eingebrachter Kontakt werden im Python-Test geprüft.
 

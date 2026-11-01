@@ -6,6 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from tiny_cpu_circuit_check import inspect_circuit, inspect_project, repair_project
 from tiny_cpu_wire_contacts import inspect_circuit as inspect_wire_contacts
+from tiny_cpu_wire_contacts import inspect_routing_grid
 from tiny_cpu_hierarchy import CORE_UNITS
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -21,6 +22,84 @@ def _labelled(circuit, label):
 
 
 class CircuitCheckTests(unittest.TestCase):
+    def test_long_horizontal_input_to_an_offset_fbox_terminal_is_connected(self):
+        definition = ET.fromstring('''<circuit name="Box">
+          <comp lib="0" name="Pin" loc="(100,100)">
+            <a name="label" val="DATA"/><a name="width" val="16"/>
+          </comp>
+          <comp lib="0" name="Pin" loc="(500,100)">
+            <a name="label" val="RESULT"/><a name="width" val="16"/>
+            <a name="type" val="output"/>
+          </comp>
+        </circuit>''')
+        circuit = ET.fromstring('''<circuit name="DirectInput">
+          <comp lib="0" name="Pin" loc="(100,100)">
+            <a name="label" val="VALUE"/><a name="width" val="16"/>
+          </comp>
+          <comp name="Box" loc="(800,100)"/>
+          <wire from="(100,100)" to="(580,100)"/>
+        </circuit>''')
+        self.assertEqual(inspect_circuit(circuit, {"Box": definition}), [])
+
+    def test_grouped_routing_grid_accepts_four_tracks_and_a_three_row_gap(self):
+        circuit = ET.Element("circuit", {"name": "Grouped"})
+        for x in (20, 40, 60, 80, 120, 140, 160, 180):
+            ET.SubElement(circuit, "wire", {"from": f"({x},0)", "to": f"({x},400)"})
+        self.assertEqual(inspect_routing_grid(circuit), [])
+        ET.SubElement(circuit, "wire", {"from": "(100,0)", "to": "(100,400)"})
+        self.assertEqual(len(inspect_routing_grid(circuit)), 1)
+
+    def test_grouped_routing_grid_merges_segments_and_allows_short_port_escapes(self):
+        circuit = ET.fromstring('''<circuit name="SplitRun">
+          <wire from="(0,30)" to="(100,30)"/>
+          <wire from="(100,30)" to="(200,30)"/>
+          <wire from="(0,50)" to="(120,50)"/>
+        </circuit>''')
+        issues = inspect_routing_grid(circuit)
+        self.assertEqual(len(issues), 1)
+        self.assertIn("horizontal run at 30", issues[0])
+
+    def test_all_functional_units_use_the_grouped_routing_grid(self):
+        project = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
+        for circuit in project.findall("circuit"):
+            if circuit.get("name") in CORE_UNITS:
+                with self.subTest(circuit=circuit.get("name")):
+                    self.assertEqual(inspect_routing_grid(circuit), [])
+
+    def test_splitter_branch_requires_a_physically_connected_bus_source(self):
+        circuit = ET.fromstring('''<circuit name="Control">
+          <comp lib="0" loc="(1300,200)" name="Pin">
+            <a name="label" val="CONTROL"/><a name="width" val="2"/>
+          </comp>
+          <comp lib="0" loc="(1400,200)" name="Splitter"/>
+          <comp lib="1" loc="(700,400)" name="OR Gate"/>
+          <wire from="(1300,200)" to="(1400,200)"/>
+          <wire from="(1420,180)" to="(1500,180)"/>
+          <wire from="(1500,180)" to="(1500,380)"/>
+          <wire from="(650,380)" to="(1500,380)"/>
+        </circuit>''')
+        self.assertEqual(inspect_circuit(circuit), [])
+        bus_wire = circuit.find("wire[@from='(1300,200)']")
+        circuit.remove(bus_wire)
+        self.assertTrue(any("undriven wire" in issue.message
+                            for issue in inspect_circuit(circuit)))
+
+    def test_tunnels_are_rejected_by_the_static_checker(self):
+        circuit = ET.fromstring('''<circuit name="Hidden">
+          <comp lib="0" loc="(100,100)" name="Tunnel"/>
+        </circuit>''')
+        self.assertEqual([issue.message for issue in inspect_circuit(circuit)], [
+            "Tunnel components are forbidden; use visible orthogonal wires",
+        ])
+
+    def test_all_project_sheets_are_tunnel_free_with_explicit_unit_junctions(self):
+        for project in sorted((ROOT / "hardware/logisim").rglob("*.circ")):
+            for circuit in ET.parse(project).getroot().findall("circuit"):
+                with self.subTest(project=project.name, circuit=circuit.get("name")):
+                    self.assertEqual(circuit.findall("comp[@name='Tunnel']"), [])
+                    if circuit.get("name") in CORE_UNITS:
+                        self.assertEqual(inspect_wire_contacts(circuit), [])
+
     def test_wire_contact_audit_finds_t_junction_and_overlap(self):
         circuit = ET.fromstring("""
           <circuit name="Crowded">

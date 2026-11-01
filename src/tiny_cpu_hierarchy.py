@@ -154,10 +154,22 @@ def component_ports(definitions, component):
         incoming = int(a.get("incoming", "2"))
         groups = splitter_groups(component)
         spacing = int(a.get("spacing", "1"))
-        result = [terminal(0, 0, incoming, True, False, "incoming")]
+        appearance = a.get("appear", "left")
+        side = {"left": -1, "right": 1, "center": 0, "legacy": 0}[appearance]
+        pitch = 10 * spacing
+        result = [((x, y), incoming, True, False, "incoming")]
         for index in range(count):
-            result.append(terminal(20, -10 * spacing * (count - index) + 10 * (spacing - 1),
-                                   groups.count(index), False, True, str(index)))
+            if facing in {"east", "west"}:
+                sign = 1 if facing == "east" else -1
+                first = (-pitch * (count // 2) if not side else
+                         10 if sign * side > 0 else -10 - pitch * (count - 1))
+                p = (x + sign * 20, y + first + pitch * index)
+            else:
+                sign = 1 if facing == "north" else -1
+                first = (pitch * ((count + 1) // 2 - 1) if not side else
+                         -10 if sign * side < 0 else 10 + pitch * (count - 1))
+                p = (x + first - pitch * index, y - sign * 20)
+            result.append((p, groups.count(index), False, True, str(index)))
         return result
     if kind == "Multiplexer":
         count = 1 << int(a.get("select", "1"))
@@ -385,6 +397,9 @@ def core_topology_fingerprint(project):
         # Keep electrical parameters, including Logisim's omitted defaults.
         a = {k: v for k, v in a.items()
              if k not in {"appearance", "facing", "spacing", "label"}}
+        if kind.endswith(" Gate"):
+            # A gate's caption font changes no electrical port.
+            a.pop("labelfont", None)
         if kind == "Pin":
             a["label"] = attributes(c)["label"]
         if kind in {"Pin", "Constant", "Multiplexer", "Probe"} or kind.endswith(" Gate"):

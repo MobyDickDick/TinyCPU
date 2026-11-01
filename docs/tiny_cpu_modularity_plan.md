@@ -40,7 +40,7 @@ bleiben nach Namen, Richtung, Breite und Symbolreihenfolge kompatibel.
 - Die bisherigen Teilkreisdefinitionen, insbesondere Decoder, ALU, Register
   und RAM, bleiben unverändert. Neue Wrapper tragen die bisher verteilte Logik.
 - Eine Offline-Regel lehnt primitive Bauteile auf `TinyCPUMain` ab.
-- Hierarchische Verbindungen werden einschließlich Steuerbus und Tunnel
+- Hierarchische Verbindungen werden einschließlich Steuerbus und Leitungen
   innerhalb der neuen Funktionsboxen geprüft. Die bestehenden semantischen
   Verdrahtungsprüfungen bleiben wirksam.
 - Alle 61 Kernfixtures, sieben Systemfixtures, Operator-Prüfung und
@@ -69,14 +69,19 @@ Die Übersicht verwendet einen 45-Bit-Steuerbus. Seine Bitzuordnung,
 Funktionsboxen und öffentlichen Pins stehen in
 [`tinycpu-core-control-v1.json`](../hardware/logisim/tinycpu-core-control-v1.json).
 Der Bus ist eine interne Verbindung und kein neues Maschinenwortformat.
-Innerhalb der neuen Boxen verbinden lokal benannte Tunnel die extrahierten
-Netze; solche Tunnel verbinden niemals verschiedene Boxen allein anhand
-ihres Namens. Die Übersicht selbst enthält ausschließlich sichtbare Leitungen.
+Innerhalb der neuen Boxen verbinden ausschließlich sichtbare rechtwinklige
+Leitungen die extrahierten Netze. Seit dem 1. November 2026 gilt das
+Tunnelverbot für sämtliche Schaltblätter und Diagnosedateien. Beide
+Offline-Prüfer lehnen Tunnel-Komponenten ab. Öffentliche Schnittstellen
+und die elektrische Anschlusstopologie bleiben erhalten. Die anschließende
+[Lesbarkeitsüberarbeitung](tiny_cpu_readable_wiring.md) rückt die internen
+Funktionsboxen zusammen und verwendet Leitungen in Vierergruppen mit
+freien Rasterzeilen.
 
 ## Schutz vor Rückfällen
 
 `src/tiny_cpu_hierarchy.py` prüft die echte hierarchische Bitverbindung über
-Pins, scoped Tunnel und Splitter. Für die bisherigen semantischen
+Pins, sichtbare Leitungen und Splitter. Für die bisherigen semantischen
 Bauteilprüfungen entsteht daraus eine reine Analyseansicht. Diese wird weder
 in die produktive `.circ`-Datei zurückgeschrieben noch elektrisch ausgeführt.
 Die bisherigen Mutationstests bleiben wirksam. Die elektrische Abnahme und

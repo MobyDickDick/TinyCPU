@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import xml.etree.ElementTree as ET
+from collections import defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -98,6 +99,39 @@ def inspect_project(path: Path, circuits: set[str] | None = None) -> list[Contac
     return [issue for circuit in root.findall("circuit")
             if circuits is None or circuit.get("name") in circuits
             for issue in inspect_circuit(circuit)]
+
+
+def inspect_routing_grid(circuit: ET.Element) -> list[str]:
+    """Check long runs on four 20-pixel tracks followed by a 40-pixel gap.
+
+    Logisim's grid pitch is 10 pixels. Coordinates 20/40/60/80 modulo 100
+    therefore leave one empty row between wires and three between groups.
+    Native component ports require short escapes; runs up to 160 pixels are
+    exempt. Merge collinear segments first so junctions cannot hide a long run.
+    This convention applies to the newly arranged functional unit sheets.
+    """
+    lines = defaultdict(list)
+    for wire in circuit.findall("wire"):
+        a, b = _point(wire.get("from", "")), _point(wire.get("to", ""))
+        if a[0] == b[0]:
+            lines[("vertical", a[0])].append(sorted((a[1], b[1])))
+        elif a[1] == b[1]:
+            lines[("horizontal", a[1])].append(sorted((a[0], b[0])))
+    issues = []
+    for (orientation, coordinate), spans in sorted(lines.items()):
+        merged = []
+        for start, stop in sorted(spans):
+            if merged and start <= merged[-1][1]:
+                merged[-1][1] = max(merged[-1][1], stop)
+            else:
+                merged.append([start, stop])
+        for start, stop in merged:
+            if stop - start > 160 and coordinate % 100 not in (20, 40, 60, 80):
+                issues.append(
+                    f"{circuit.get('name')}: {orientation} run at {coordinate} "
+                    f"from {start} to {stop} violates the grouped routing grid"
+                )
+    return issues
 
 
 def main(argv: list[str] | None = None) -> int:

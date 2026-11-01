@@ -88,28 +88,7 @@
       <a name="appearance" val="classic"/>
       <a name="label" val="CLEAR_ERROR"/>
     </comp>
-    <comp lib="0" loc="(180,970)" name="Tunnel">
-      <a name="label" val="ERROR_FLAGS_STARTUP_RESET"/>
-    </comp>
     <comp lib="0" loc="(720,200)" name="Constant"/>
-    <comp lib="0" loc="(780,290)" name="Tunnel">
-      <a name="label" val="ERROR_FLAGS_STARTUP_RESET"/>
-    </comp>
-    <comp lib="0" loc="(780,420)" name="Tunnel">
-      <a name="label" val="ERROR_FLAGS_STARTUP_RESET"/>
-    </comp>
-    <comp lib="0" loc="(780,560)" name="Tunnel">
-      <a name="label" val="ERROR_FLAGS_STARTUP_RESET"/>
-    </comp>
-    <comp lib="0" loc="(780,690)" name="Tunnel">
-      <a name="label" val="ERROR_FLAGS_STARTUP_RESET"/>
-    </comp>
-    <comp lib="0" loc="(780,830)" name="Tunnel">
-      <a name="label" val="ERROR_FLAGS_STARTUP_RESET"/>
-    </comp>
-    <comp lib="0" loc="(780,970)" name="Tunnel">
-      <a name="label" val="ERROR_FLAGS_STARTUP_RESET"/>
-    </comp>
     <comp lib="1" loc="(260,110)" name="NOT Gate">
       <a name="label" val="NOT_CLEAR_ERROR"/>
     </comp>
@@ -278,5 +257,19 @@
     <wire from="(820,770)" to="(1000,770)"/>
     <wire from="(830,850)" to="(830,910)"/>
     <wire from="(830,910)" to="(1000,910)"/>
+    <wire from="(180,970)" to="(180,1010)"/>
+    <wire from="(180,1010)" to="(850,1010)"/>
+    <wire from="(850,290)" to="(850,420)"/>
+    <wire from="(850,420)" to="(850,560)"/>
+    <wire from="(850,560)" to="(850,690)"/>
+    <wire from="(850,690)" to="(850,830)"/>
+    <wire from="(850,830)" to="(850,970)"/>
+    <wire from="(850,970)" to="(850,1010)"/>
+    <wire from="(780,290)" to="(850,290)"/>
+    <wire from="(780,420)" to="(850,420)"/>
+    <wire from="(780,560)" to="(850,560)"/>
+    <wire from="(780,690)" to="(850,690)"/>
+    <wire from="(780,830)" to="(850,830)"/>
+    <wire from="(780,970)" to="(850,970)"/>
   </circuit>
 </project>

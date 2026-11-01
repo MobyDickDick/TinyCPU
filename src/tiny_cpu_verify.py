@@ -120,14 +120,43 @@ def _is_output_pin(component: ET.Element) -> bool:
 def generated_symbol_ports(
     definition: ET.Element, instance: ET.Element,
 ) -> dict[str, str]:
-    """Return named terminals of a default Logisim-evolution subcircuit box.
+    """Return named terminals of generated or explicit Logisim symbols.
 
     Logisim orders each side by the authored pin position.  The instance
     location is the top-right corner of the project's fixed-size default box.
-    Deriving terminals from pin names and the instance transform keeps
-    integration checks independent of absolute canvas coordinates.
+    Explicit appearances bind symbol ports to physical pin coordinates and
+    keep the symbol stable when the sheet's pins are rearranged.
     """
     pins = list(definition.findall("comp[@name='Pin']"))
+    appearance = definition.find("appear")
+    if appearance is not None and definition.find("a[@name='appearance'][@val='custom']") is not None:
+        anchor = appearance.find("circ-anchor")
+        if anchor is None:
+            raise ValueError("custom symbol has no anchor")
+        ax, ay = int(anchor.get("x")), int(anchor.get("y"))
+        # Current native exports use point coordinates; legacy SVG symbols
+        # use the upper-left corner of a small port/anchor rectangle.
+        ax += int(anchor.get("width", "0")) // 2
+        ay += int(anchor.get("height", "0")) // 2
+        ix, iy = map(int, instance.get("loc").strip("()").split(","))
+        directions = {"east": 0, "south": 1, "west": 2, "north": 3}
+        facing = next((a.get("val") for a in instance.findall("a")
+                       if a.get("name") == "facing"), "east")
+        turns = (directions[facing] - directions[anchor.get("facing", "east")]) % 4
+        labels = {p.get("loc").strip("()"): _pin_label(p) for p in pins}
+        result = {}
+        for port in appearance.findall("circ-port"):
+            label = labels.get(port.get("pin"))
+            if label is None or label in result:
+                raise ValueError("custom symbol has an unknown or duplicate pin")
+            dx = int(port.get("x")) + int(port.get("width", "0")) // 2 - ax
+            dy = int(port.get("y")) + int(port.get("height", "0")) // 2 - ay
+            for _ in range(turns):
+                dx, dy = -dy, dx
+            result[label] = f"({ix + dx},{iy + dy})"
+        if len(result) != len(pins):
+            raise ValueError("custom symbol does not expose every pin")
+        return result
     # Logisim-evolution's ``logisim_evolution`` default appearance uses the
     # standard 220-pixel subcircuit body in the project format used here.
     # With no output pins, Logisim anchors the instance at its first input.
@@ -303,6 +332,11 @@ def verify_circuit(path: Path) -> tuple[int, int]:
         circuit_name = circuit.get("name", "")
         pin_labels: list[str] = []
         for component in circuit.findall("comp"):
+            if component.get("name") == "Tunnel":
+                raise VerificationError(
+                    f"{display_path(path)}:{circuit_name}: Tunnel components are forbidden; "
+                    "use visible orthogonal wires"
+                )
             location = component.get("loc")
             if location is None:
                 raise VerificationError(f"{display_path(path)}:{circuit_name}: component without loc")
@@ -338,6 +372,13 @@ def verify_circuit(path: Path) -> tuple[int, int]:
                     f"{display_path(path)}:{circuit_name}: diagonal wire {start} -> {end}"
                 )
             wires += 1
+
+        from tiny_cpu_hierarchy import CORE_UNITS
+        from tiny_cpu_wire_contacts import inspect_routing_grid
+        if circuit_name in CORE_UNITS:
+            layout_issues = inspect_routing_grid(circuit)
+            if layout_issues:
+                raise VerificationError(f"{display_path(path)}: {layout_issues[0]}")
 
     visiting: set[str] = set()
     visited: set[str] = set()
