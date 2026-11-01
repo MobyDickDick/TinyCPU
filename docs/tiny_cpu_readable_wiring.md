@@ -1,5 +1,11 @@
 # Kompaktere Verdrahtung mit freien Rasterzeilen
 
+**Einordnung:** Dieser Bericht beschreibt einen früheren Teilstand von acht
+Funktionsboxen. Der vollständige, projektweite
+[Benutzerstil](tiny_cpu_schematic_style.md) ergänzt ihn um oben beginnende
+Pinspalten, Vierergruppen bei Pins und möglichst wenige Konstanten. Die hier
+beschriebenen Prüfungen belegen noch keine Abnahme nach allen diesen Regeln.
+
 Die acht internen Funktionsboxen wurden am 1. November 2026 nach dem
 Tunnelabbau erneut angeordnet. Eingänge, Vorlogik, Funktionsboxen und
 Ausgänge stehen jetzt näher zusammen; lange Leerflächen zwischen

@@ -7,6 +7,7 @@ Start here:
 
 Reference and project records:
 
+- [`tiny_cpu_schematic_style.md`](tiny_cpu_schematic_style.md): verbindlicher gemeinsamer Zeichenstil für alle Elektroschemas, einschließlich Pin- und Leitungsgruppen sowie möglichst weniger Konstanten
 - [`tiny_cpu.md`](tiny_cpu.md): Architektur, Befehlssatz und Simulator
 - [`tiny_cpu_alu_sketch.md`](tiny_cpu_alu_sketch.md): Entwurf der ALU
 - [`tiny_cpu_top_level_template.md`](tiny_cpu_top_level_template.md): Referenz für die Top-Level-Integration

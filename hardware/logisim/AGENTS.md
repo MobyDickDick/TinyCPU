@@ -20,6 +20,21 @@ Tunnel-Komponenten in jeder `.circ`-Datei ablehnen.
 
 # Verbindliche Lesbarkeitsregeln
 
+Der vollständige Benutzerstil für alle Schaltpläne steht in
+[`docs/tiny_cpu_schematic_style.md`](../../docs/tiny_cpu_schematic_style.md).
+Seit dem 1. November 2026 gilt ergänzend:
+
+- Eingänge beginnen links oben, Ausgänge rechts oben. Je höchstens vier
+  Pinobjekte oder fachliche Pingruppen bilden eine Gruppe; zwischen den
+  Gruppen bleibt zusätzlich der Platz eines Einzelpins frei.
+- Die obere Anordnung und erkennbare Gruppierung haben Vorrang vor einer
+  bloßen Ausrichtung aller Blattpins auf weit entfernte Signalquellen.
+- Möglichst wenige Konstanten verwenden. Jede braucht einen elektrischen
+  Zweck. Gleiche feste Werte dürfen übersichtlich gemeinsam versorgt werden;
+  offene Eingänge und lange Verteilungsschleifen sind keine Verbesserung.
+- Diese Regeln gelten auch außerhalb der acht Funktionsboxen. Bestehende
+  Nachweise für diese Boxen sind keine projektweite visuelle Abnahme.
+
 So weit wie möglich gilt für sichtbare Leitungen:
 
 - Zwischen zwei parallelen Leitungen bleibt eine Rasterzeile frei: bei
@@ -28,8 +43,9 @@ So weit wie möglich gilt für sichtbare Leitungen:
   der letzten und der nächsten Spur liegen mindestens 40 Pixel.
 - Funktionsboxen stehen so nah beieinander, wie ihre Anschlussauffächerung
   und die obigen Leitungsabstände erlauben. Große leere Umwege sind zu vermeiden.
-- Blattpins werden möglichst auf die Höhe ihrer Signalquellen beziehungsweise
-  Zieleingänge gesetzt. Leitungen beginnen und enden am Pin waagrecht;
+- Innerhalb der oberen Pingruppen werden Blattpins möglichst auf die Höhe
+  nahe gelegener Signalquellen beziehungsweise Zieleingänge gesetzt.
+  Leitungen beginnen und enden am Pin waagrecht;
   erforderliche kurze Höhenversätze liegen möglichst nahe an der Logik.
 - Splitter/Bus-Zusammenführungen müssen zu den angeschlossenen Signalen zeigen.
   Eine Spiegelung darf weder die Bitreihenfolge noch die Busbelegung verändern.
