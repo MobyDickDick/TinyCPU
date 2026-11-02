@@ -92,6 +92,18 @@
       "program": "LOAD_CONST(7)\nSTORE_ADDRESS(21)\nLOAD_ADDRESS_REGISTER_CONST(20)\nLOAD_CONST(0)\nLOAD_ADDRESS_REGISTER_PLUS_OFFSET(1)\nPRINT()\nHALT()\n"
     },
     {
+      "id": "load-address-register-invalid-memory",
+      "opcode": "LOAD_ADDRESS_REGISTER",
+      "variant": "invalid-memory",
+      "program": "LOAD_ADDRESS_REGISTER_CONST(101)\nLOAD_ADDRESS_REGISTER()\nHALT()\n"
+    },
+    {
+      "id": "load-address-register-offset-invalid-memory",
+      "opcode": "LOAD_ADDRESS_REGISTER_PLUS_OFFSET",
+      "variant": "invalid-memory",
+      "program": "LOAD_ADDRESS_REGISTER_CONST(100)\nLOAD_ADDRESS_REGISTER_PLUS_OFFSET(1)\nHALT()\n"
+    },
+    {
       "id": "store-address",
       "opcode": "STORE_ADDRESS",
       "variant": "default",

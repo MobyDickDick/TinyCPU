@@ -37,7 +37,17 @@ def splitter_groups(component):
     size, extra = divmod(incoming, fanout)
     defaults = [group for group in range(fanout)
                 for _ in range(size + (group < extra))]
-    return [int(a.get(f"bit{i}", str(defaults[i]))) for i in range(incoming)]
+    return [-1 if a.get(f"bit{i}") == "none" else int(a.get(f"bit{i}", str(defaults[i])))
+            for i in range(incoming)]
+
+
+def control_bus_splitters(circuit, width=45):
+    """Return the physical control-bus breakout or its local single-bit taps."""
+    candidates = [c for c in circuit.findall("comp[@name='Splitter']")
+                  if int(attributes(c).get("incoming", "2")) == width]
+    if not candidates:
+        raise ValueError(f"{circuit.get('name')}: control-bus boundary is missing")
+    return candidates
 
 
 def control_bus_splitter(circuit, width=45):
@@ -128,6 +138,9 @@ def component_ports(definitions, component):
     x, y = point(component.get("loc"))
     width = int(a.get("width", "1"))
     facing = a.get("facing", "east")
+
+    if kind == "Text":
+        return []  # Sheet annotations have no electrical terminals.
 
     def terminal(dx, dy, bits, incoming, outgoing, name=""):
         dx, dy = _rotate(dx, dy, facing)
@@ -240,7 +253,7 @@ def flatten_core(project):
 
     def visit(circuit, path, shift, top=False):
         state = CircuitBits(definitions, circuit, path)
-        bus_splitter = None if top else control_bus_splitter(circuit)
+        bus_splitters = set() if top else set(control_bus_splitters(circuit))
         for c in circuit.findall("comp"):
             kind = c.get("name")
             a = attributes(c)
@@ -256,7 +269,7 @@ def flatten_core(project):
                             state.vector(point(parent_ports[pa["label"]]), int(pa.get("width", "1"))),
                             child.vector(point(pin.get("loc")), int(pa.get("width", "1")))):
                         bits.union(outer, inner)
-            elif kind != "Tunnel" and (top or kind != "Pin") and c is not bus_splitter:
+            elif kind not in {"Tunnel", "Text"} and (top or kind != "Pin") and c not in bus_splitters:
                 clone = copy.deepcopy(c)
                 x, y = point(c.get("loc"))
                 clone.set("loc", location((x + shift, y + shift)))
@@ -337,16 +350,48 @@ def verify_core_modularity(project, control_contract=None):
         circuit = definitions[name]
         pins = [p for p in circuit.findall("comp[@name='Pin']")
                 if attributes(p).get("label") == "CONTROL"]
-        splitter = control_bus_splitter(circuit, width)
+        splitters = control_bus_splitters(circuit, width)
         if len(pins) != 1:
             raise ValueError(f"{name}: control-bus boundary is missing")
-        pa, sa = attributes(pins[0]), attributes(splitter)
+        pa = attributes(pins[0])
         if (int(pa.get("width", "1")) != width
-                or (pa.get("type") == "output") != (name == "FetchUnit")
-                or int(sa.get("incoming", "2")) != width
-                or int(sa.get("fanout", "2")) != width
-                or splitter_groups(splitter) != list(range(width))):
+                or (pa.get("type") == "output") != (name == "FetchUnit")):
             raise ValueError(f"{name}: control-bus bit mapping differs from contract")
+        full_breakout = (len(splitters) == 1
+                         and int(attributes(splitters[0]).get("fanout", "2")) == width
+                         and splitter_groups(splitters[0]) == list(range(width)))
+        tapped = []
+        for splitter in splitters:
+            groups = splitter_groups(splitter)
+            if (int(attributes(splitter).get("fanout", "2")) != 1
+                    or groups.count(0) != 1 or any(g not in (-1, 0) for g in groups)):
+                break
+            tapped.append(groups.index(0))
+        tap_signals = {
+            "AccumulatorUnit": {"LOAD_ADR", "LOAD_ADR_REG", "LOAD_REG_OFF", "INVERT", "INPUT", "ACC_WRITE_REQUEST"},
+            "AddressUnit": {"LD_REG_CONST", "LD_REG_ADR", "INVERT", "ADDR_REG_ARGUMENT", "STORE_ADR_REG",
+                            "LOAD_ADR_REG", "ADDR_REG_OFFS_ARGUMENT", "STORE_REG_OFF", "LOAD_REG_OFF"},
+            "MemoryUnit": {"ADDR_ARGUMENT", "ADDR_REG_ARGUMENT", "ADDR_REG_OFFS_ARGUMENT",
+                           "STORE_ADR", "STORE_ADR_REG", "STORE_REG_OFF", "ACC_MEMORY_REQUEST"},
+            "ExecutionUnit": {"ADD_OPERAND", "SUB_OPERAND", "MUL_OPERAND", "DIV_OPERAND",
+                              "AND_OPERAND", "OR_OPERAND", "XOR_OPERAND", "CONST_ARGUMENT", "INVERT"},
+            "FaultUnit": {"SET_ILL", "CLEAR_ERROR", "INPUT", "PRINT", "ACC_MEMORY_REQUEST"},
+            "BranchUnit": {"JUMP_ADR", "JUMP_ZERO", "JUMP_NOT_ZERO", "JUMP_NEGATIVE",
+                           "JUMP_ERROR", "JUMP_NOT_ERROR"},
+            # Preserve the existing probe wiring, including its historical
+            # captions. Their names are not a new decoder signal contract.
+            "CoreDiagnostics": {"JUMP_ADR", "JUMP_ZERO", "JUMP_NOT_ZERO", "JUMP_NEGATIVE",
+                                "JUMP_ERROR", "JUMP_NOT_ERROR", "LOAD_CONST", "ACC_MEMORY_REQUEST",
+                                "LOAD_REG_OFF", "LD_REG_CONST", "LD_REG_ADR", "SET_OVF"},
+        }.get(name, set())
+        required_taps = {signal["bit"] for signal in signals if signal["name"] in tap_signals}
+        local_taps = (bool(tap_signals) and len(tapped) == len(splitters) == len(required_taps)
+                      and len(set(tapped)) == len(required_taps) and set(tapped) == required_taps)
+        if not (full_breakout or local_taps):
+            raise ValueError(f"{name}: control-bus bit mapping differs from contract")
+        if any(not wire_path_exists(circuit, pins[0].get("loc"), splitter.get("loc"))
+               for splitter in splitters):
+            raise ValueError(f"{name}: control-bus breakout is disconnected")
 
 
 def find_core_instance(project, label):

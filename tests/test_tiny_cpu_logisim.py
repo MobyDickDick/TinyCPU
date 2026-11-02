@@ -211,11 +211,13 @@ class LogisimLauncherTests(unittest.TestCase):
             )
         )
         illegal_return_or = _component_by_label(main, "ILLEGAL_RETURN_OR")
-        # The default Logisim-evolution gate size is 50 pixels.  Its contacts
-        # are therefore 50 pixels left of the output location; wires ending at
-        # x - 30 only appear to touch the body of the symbol.
-        upper_input = _point_offset(illegal_return_or, x=-50, y=-10)
-        lower_input = _point_offset(illegal_return_or, x=-50, y=10)
+        from tiny_cpu_hierarchy import component_ports, location
+        inputs = [location(p) for p, _, incoming, _, _
+                  in component_ports({}, illegal_return_or) if incoming]
+        if len(inputs) == 4:
+            inputs = inputs[1:3]
+        self.assertEqual(len(inputs), 2)
+        upper_input, lower_input = inputs
         self.assertTrue(
             _wire_path_exists(main, _pin_location(main, "ILL_RET"), upper_input)
         )

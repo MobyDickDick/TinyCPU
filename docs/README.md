@@ -8,6 +8,12 @@ Start here:
 Reference and project records:
 
 - [`tiny_cpu_schematic_style.md`](tiny_cpu_schematic_style.md): verbindlicher gemeinsamer Zeichenstil für alle Elektroschemas, einschließlich Pin- und Leitungsgruppen sowie möglichst weniger Konstanten
+- [`tiny_cpu_schematic_reference.md`](tiny_cpu_schematic_reference.md): erste drei überarbeitete Schaltpläne mit sichtbaren Signalbussen, Vorher-/Nachher-Ansichten und Prüfstand
+- [`tiny_cpu_schematic_followup.md`](tiny_cpu_schematic_followup.md): Benutzeranordnung des Akkumulators, ergänzte Flussrichtung, korrigierte Ladegültigkeit und Reset-Erklärung
+- [`tiny_cpu_operations_repair.md`](tiny_cpu_operations_repair.md): gezielte Reparatur der Operations-Einbettung und Gültigkeitsauswahl bei erhaltener Benutzerzeichnung
+- [`tiny_cpu_schematic_review.md`](tiny_cpu_schematic_review.md): Prüfung weiterer Umzeichnungen und lokale Korrektur der Steuerbit-Auswahl im Akkumulator
+- [`tiny_cpu_address_review.md`](tiny_cpu_address_review.md): korrigierte Steuerbit-Abgriffe und Datenwahl der AddressUnit; offene Funktionslücke beim unbenutzten ADDRESS_VALID mit elektrischem Gegenbeispiel
+- [`hardware/logisim/TinyCPU.md`](../hardware/logisim/TinyCPU.md): kurze Grundfunktion jedes Kern-Teilkreises; Begleitbeschreibungen stehen ebenso neben allen übrigen `.circ`-Dateien
 - [`tiny_cpu.md`](tiny_cpu.md): Architektur, Befehlssatz und Simulator
 - [`tiny_cpu_alu_sketch.md`](tiny_cpu_alu_sketch.md): Entwurf der ALU
 - [`tiny_cpu_top_level_template.md`](tiny_cpu_top_level_template.md): Referenz für die Top-Level-Integration
@@ -254,3 +260,11 @@ Abnahme als offene Aufgaben. Frühere Abschlussvermerke belegen nur den damals
 tatsächlich ausgeführten Prüfumfang. AP 22 hat Vorrang vor weiteren
 Funktionserweiterungen. Zusätzlich bleibt der in AP 21 ausdrücklich
 verschobene manuelle GUI-Kurztest in einer interaktiven Umgebung offen.
+
+Die [Layoutüberarbeitung von MemoryUnit bis CoreDiagnostics](tiny_cpu_units_layout.md)
+vom 2. November 2026 zeigt die fünf neu angeordneten Funktionsboxen samt
+Netzvergleich, nativen Ansichten und elektrischen Nachweisen.
+
+Die [erneute Schaltplanprüfung](tiny_cpu_schematic_recheck.md) erhält die danach
+angepasste Benutzeranordnung, korrigiert einen Anschluss der RAM-Schreibfreigabe
+und bestätigt die vereinfachte FaultUnit mit aktualisierten Strukturprüfungen.

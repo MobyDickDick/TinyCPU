@@ -8,8 +8,8 @@ Projekt; ein separates CPU-Projekt ist dafür nicht erforderlich.
 ## Ziel und Geltungsbereich
 
 Eine Zeichnung ist gut lesbar, wenn man Eingänge findet, ihre Verarbeitung von
-links nach rechts verfolgen und die Ausgänge erkennen kann, ohne ständig lange
-Leitungen mit dem Finger nachfahren zu müssen. Regelmäßige Abstände allein
+oben nach unten und von links nach rechts verfolgen und die Ausgänge erkennen
+kann, ohne ständig lange Leitungen mit dem Finger nachfahren zu müssen. Regelmäßige Abstände allein
 reichen dafür nicht aus. Die Regeln gelten für Übersicht, Funktionsboxen,
 Teilkreise, Peripherie, Operator-Panel, Diagnose- und Smoke-Schaltungen sowie
 für künftig hinzukommende Schemas.
@@ -47,12 +47,26 @@ ist kein Auftrag, die geschützte Zeichnung neu anzuordnen.
 - Nach höchstens vier parallelen Leitungen bleiben drei Rasterzeilen frei:
   mindestens 40 Pixel Abstand von der letzten Spur zur nächsten Gruppe.
   Das gilt horizontal und vertikal.
+- Nicht jede fachliche Verbindung ergibt ein vollständiges Viererbündel.
+  In solchen Bereichen werden die tatsächlich vorhandenen horizontalen
+  Leitungen von oben und die vertikalen von links gezählt; nach jeweils
+  vier Leitungen folgt die größere Lücke. Fehlende Leitungen werden nicht
+  durch zusätzliche Signale oder künstliche Umwege ergänzt.
 - Die bisher verwendeten langen Spuren bei 20/40/60/80 modulo 100 erfüllen
   diese Abstände. Das Raster ist ein Hilfsmittel, keine ausreichende
   Bewertung der gesamten Zeichnung.
-- Die Verarbeitung läuft möglichst von links nach rechts. Bauteile werden
+- Der Daten- und Signalfluss läuft möglichst von oben nach unten und von
+  links nach rechts. Bauteile werden
   nach ihrem Zusammenhang platziert, bevor die Leitungen geführt werden.
   Zusammengehörige Auswahl- oder Verarbeitungsstufen stehen nahe beieinander.
+- Auf der rechten Seite dürfen Ausgangsleitungen wieder nach oben zu den
+  oben angeordneten Daten- und Ausgangspins geführt werden. Diese Rückführung
+  erhält einen eigenen, gut verfolgbaren Korridor.
+- Für `TinyCPUMain` ist diese Flussrichtung wegen der vielen Verbindungen
+  zwischen Funktionsboxen derzeit nicht durchgehend erreichbar; die Übersicht
+  ist eine ausdrückliche Ausnahme. Auch feste Anschlüsse einzelner Bauteile,
+  insbesondere Multiplexer, dürfen kurze lokale Gegenrichtungen erfordern.
+  Diese Ausnahmen rechtfertigen keine unnötigen Umwege in der übrigen Logik.
 - Leitungen sind sichtbar und rechtwinklig. Sie sollen kurz sein, wenige
   Knicke und möglichst wenige Kreuzungen haben. Eine geringfügig längere,
   klar verfolgbare Leitung ist besser als eine schwer erkennbare Abkürzung.
@@ -60,9 +74,11 @@ ist kein Auftrag, die geschützte Zeichnung neu anzuordnen.
   durchqueren. Abzweige und bloße Kreuzungen müssen unterscheidbar bleiben.
 - Rückführungen erhalten einen erkennbaren freien Korridor am Rand der
   zugehörigen Logik. Große leere Schleifen quer über das Blatt vermeiden.
-- Physisch verdrahtete Busse dürfen zusammengehörige Signale bündeln. Splitter
-  zeigen zu ihren angeschlossenen Signalen; die Bitzuordnung bleibt erhalten.
-  Tunnel sind im gesamten Projekt verboten.
+- Wo immer es die Darstellung vereinfacht, werden zusammengehörige Signale
+  in physisch verdrahteten Bussen zusammengefasst. Die Aufteilung erfolgt
+  nahe an den Quellen und Zielen; Busbreite und Bitbelegung werden eindeutig
+  dokumentiert. Splitter zeigen zu ihren angeschlossenen Signalen; die
+  Bitzuordnung bleibt erhalten. Tunnel sind im gesamten Projekt verboten.
 - Feste enge Anschlussreihen dürfen lokal aufgefächert werden. Diese Ausnahme
   gilt nur unmittelbar am Bauteil und rechtfertigt keine engen langen Bündel.
 
@@ -112,6 +128,8 @@ Pro bearbeitetem Teilkreis prüfen:
   und ihre freien Zwischenräume sichtbar?
 - Lassen sich die wesentlichen Signalwege ohne langes Suchen verfolgen?
   Gibt es vermeidbare Kreuzungen, Umwege oder Leitungen durch Beschriftungen?
+- Folgt die Verarbeitung möglichst der Richtung oben nach unten und links
+  nach rechts? Bleibt das Hochführen der Ausgänge am rechten Rand erkennbar?
 - Sind die Leitungslücken auch an Abzweigen noch erkennbar?
 - Hat jede verbliebene Konstante einen nachvollziehbaren Zweck? Würde eine
   Zusammenlegung die Zeichnung tatsächlich verbessern?
@@ -138,7 +156,16 @@ Peripherieprojekt und 23 in den Diagnoseprojekten. Diese Zahlen sind eine
 Ausgangsbasis, kein Urteil darüber, welche Konstanten entfallen können.
 Die geschützte Decoder-Diagnose enthält davon sechs Konstanten.
 
-Die projektweite Umzeichnung und die elektrische Bewertung entfernbarer
-Konstanten sind noch offen. Beim Festhalten dieser Regeln wurden keine
-Schaltungsdateien geändert; insbesondere sind noch keine neue Referenzzeichnung
-und keine vollständige visuelle Abnahme entstanden.
+Ein erster praktischer Durchgang überarbeitet `AccumulatorUnit`, `BranchUnit`
+und `ExecutionUnit` mit oben beginnenden Pingruppen und zusätzlichen sichtbar
+verdrahteten Signalbussen. Vorher-/Nachher-Ansichten, Busbelegungen und die
+elektrischen Nachweise stehen in
+[`tiny_cpu_schematic_reference.md`](tiny_cpu_schematic_reference.md).
+Die übrigen 53 Teilkreisdefinitionen und die projektweite Bewertung
+entfernbarer Konstanten sind noch offen. Eine vollständige visuelle Abnahme
+sämtlicher Schemas ist damit weiterhin nicht erfolgt.
+
+Der anschließende [Nachtrag](tiny_cpu_schematic_followup.md) erhält die vom
+Benutzer erneut angepasste Akkumulator-Anordnung, ergänzt die Notizen und
+prüft die Funktion. Kurze Grundbeschreibungen stehen nun neben allen
+24 `.circ`-Dateien für sämtliche 56 Teilkreisdefinitionen.

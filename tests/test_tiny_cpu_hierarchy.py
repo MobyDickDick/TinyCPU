@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from tiny_cpu_hierarchy import (
-    attributes, control_bus_splitter, core_topology_fingerprint, flatten_core, gate_input_constant,
+    attributes, control_bus_splitter, control_bus_splitters, core_topology_fingerprint, flatten_core, gate_input_constant,
     splitter_groups, verify_core_modularity, wire_path_exists,
 )
 from tiny_cpu_verify import generated_symbol_ports
@@ -22,6 +22,51 @@ class HierarchyTests(unittest.TestCase):
 
     def test_overview_contains_exactly_the_eight_functional_units(self):
         verify_core_modularity(self.project, self.contract)
+
+    def test_execution_unit_contains_its_operations_instance(self):
+        unit = self.project.find("circuit[@name='ExecutionUnit']")
+        instances = unit.findall("comp[@name='Operations']")
+        self.assertEqual(len(instances), 1)
+        self.assertEqual(attributes(instances[0]).get("label"), "OPERATIONS_INSTANCE")
+
+    def test_memory_write_mux_uses_combined_write_request(self):
+        from tiny_cpu_hierarchy import CircuitBits
+        definitions = {c.get("name"): c for c in self.project.findall("circuit")}
+        unit = definitions["MemoryUnit"]
+        state = CircuitBits(definitions, unit, "memory")
+        memory, = unit.findall("comp[@name='Memory']")
+        write_enable = next(p for p, *_, name in state.ports[id(memory)]
+                            if name == "WRITE_ENABLE")
+        muxes = [c for c in unit.findall("comp[@name='Multiplexer']")
+                 if any(name == "output" and state.network.find(p) == state.network.find(write_enable)
+                        for p, *_, name in state.ports[id(c)])]
+        self.assertEqual(len(muxes), 1)
+        ports = {name: p for p, *_, name in state.ports[id(muxes[0])]}
+        request = next(c for c in unit.findall("comp[@name='OR Gate']")
+                       if attributes(c).get("label") == "MEMORY_WRITE_REQUEST")
+        combined = next(p for p, *_, name in state.ports[id(request)] if name == "output")
+        pins = {attributes(c)["label"]: c for c in unit.findall("comp[@name='Pin']")}
+        for port, source in (("0", combined), ("1", state.ports[id(pins["RAM_WRITE"])][0][0]),
+                             ("select", state.ports[id(pins["EXT_SELECT"])][0][0])):
+            with self.subTest(port=port):
+                self.assertEqual(state.network.find(ports[port]), state.network.find(source))
+
+    def test_operand_validity_selector_uses_not_instead_of_xor(self):
+        from tiny_cpu_hierarchy import CircuitBits, location
+        definitions = {c.get("name"): c for c in self.project.findall("circuit")}
+        circuit = definitions["Operations"]
+        state = CircuitBits(definitions, circuit, "operations")
+        invert = next(c for c in circuit.findall("comp[@name='NOT Gate']")
+                      if attributes(c).get("label") == "OPERAND_INVALID")
+        input_terminal = next(p for p, _, incoming, _, _ in state.ports[id(invert)] if incoming)
+        selectors = [c for c in circuit.findall("comp[@name='Multiplexer']")
+                     if state.network.find(state.ports[id(c)][0][0])
+                     == state.network.find(input_terminal)]
+        self.assertEqual(len(selectors), 1)
+        select = next(p for p, _, _, _, name in state.ports[id(selectors[0])] if name == "select")
+        pins = {attributes(c).get("label"): c for c in circuit.findall("comp[@name='Pin']")}
+        self.assertTrue(wire_path_exists(circuit, location(select), pins["NOT_OPERAND"].get("loc")))
+        self.assertFalse(wire_path_exists(circuit, location(select), pins["XOR_OPERAND"].get("loc")))
 
     def test_primitive_cannot_be_added_to_the_overview(self):
         main = self.project.find("circuit[@name='TinyCPUMain']")
@@ -56,10 +101,81 @@ class HierarchyTests(unittest.TestCase):
 
     def test_swapped_control_bit_is_rejected(self):
         unit = self.project.find("circuit[@name='AddressUnit']")
-        splitter = control_bus_splitter(unit)
-        ET.SubElement(splitter, "a", {"name": "bit0", "val": "1"})
+        splitter = control_bus_splitters(unit)[0]
+        groups = splitter_groups(splitter)
+        selected = next(i for i, group in enumerate(groups) if group >= 0)
+        for bit, value in ((selected, "none"), ((selected + 1) % len(groups), str(groups[selected]))):
+            attribute = splitter.find(f"a[@name='bit{bit}']")
+            if attribute is None:
+                attribute = ET.SubElement(splitter, 'a', {'name': f'bit{bit}'})
+            attribute.set('val', value)
         with self.assertRaisesRegex(ValueError, "bit mapping"):
             verify_core_modularity(self.project, self.contract)
+
+    def test_accumulator_memory_request_uses_all_three_memory_load_modes(self):
+        from tiny_cpu_hierarchy import CircuitBits
+        definitions = {c.get("name"): c for c in self.project.findall("circuit")}
+        unit = definitions["AccumulatorUnit"]
+        state = CircuitBits(definitions, unit, "accumulator")
+        splitters = control_bus_splitters(unit)
+        gate = next(c for c in unit.findall("comp[@name='OR Gate']")
+                    if attributes(c).get("label") == "ACC_MEMORY_REQUEST_SELECT")
+        controls = {signal["bit"]: signal["name"] for signal in self.contract["signals"]}
+        connected = []
+        for terminal, _, incoming, _, _ in state.ports[id(gate)]:
+            if incoming:
+                connected.append([
+                    controls[bit] for splitter in splitters
+                    for group, (source, *_) in enumerate(state.ports[id(splitter)][1:])
+                    for bit, mapped in enumerate(splitter_groups(splitter)) if mapped == group
+                    and state.network.find(source) == state.network.find(terminal)
+                ])
+        self.assertCountEqual(connected, [["LOAD_ADR"], ["LOAD_ADR_REG"], ["LOAD_REG_OFF"]])
+
+    def test_address_requests_use_their_named_control_bits(self):
+        from tiny_cpu_hierarchy import CircuitBits
+        definitions = {c.get("name"): c for c in self.project.findall("circuit")}
+        unit = definitions["AddressUnit"]
+        state = CircuitBits(definitions, unit, "address")
+        controls = {signal["bit"]: signal["name"] for signal in self.contract["signals"]}
+        expected = {
+            "AR_LOAD_REQUEST": {"LD_REG_CONST", "LD_REG_ADR"},
+            "REGISTER_ADDRESS_REQUEST": {"ADDR_REG_ARGUMENT", "STORE_ADR_REG", "LOAD_ADR_REG"},
+            "OFFSET_ADDRESS_REQUEST": {"ADDR_REG_OFFS_ARGUMENT", "STORE_REG_OFF", "LOAD_REG_OFF"},
+        }
+        for label, signals in expected.items():
+            gate = next(c for c in unit.findall("comp[@name='OR Gate']")
+                        if attributes(c).get("label") == label)
+            connected = []
+            for terminal, _, incoming, _, _ in state.ports[id(gate)]:
+                if incoming:
+                    connected.append([
+                        controls[bit] for splitter in control_bus_splitters(unit)
+                        for group, (source, *_) in enumerate(state.ports[id(splitter)][1:])
+                        for bit, mapped in enumerate(splitter_groups(splitter)) if mapped == group
+                        and state.network.find(source) == state.network.find(terminal)
+                    ])
+            with self.subTest(request=label):
+                self.assertCountEqual(connected, [[signal] for signal in signals])
+
+    def test_address_register_mux_selects_immediate_or_memory_data(self):
+        from tiny_cpu_hierarchy import CircuitBits
+        definitions = {c.get("name"): c for c in self.project.findall("circuit")}
+        unit = definitions["AddressUnit"]
+        state = CircuitBits(definitions, unit, "address")
+        mux, = unit.findall("comp[@name='Multiplexer']")
+        ports = {name: terminal for terminal, _, _, _, name in state.ports[id(mux)]}
+        pins = {attributes(c).get("label"): state.ports[id(c)][0][0]
+                for c in unit.findall("comp[@name='Pin']")}
+        for port, source in (("0", "IMMEDIATE_VALUE"), ("1", "READ_VALUE")):
+            with self.subTest(input=port):
+                self.assertEqual(state.network.find(ports[port]), state.network.find(pins[source]))
+        bit = next(signal["bit"] for signal in self.contract["signals"]
+                   if signal["name"] == "LD_REG_ADR")
+        sources = [state.ports[id(splitter)][splitter_groups(splitter)[bit] + 1][0]
+                   for splitter in control_bus_splitters(unit) if splitter_groups(splitter)[bit] >= 0]
+        self.assertEqual(len(sources), 1)
+        self.assertEqual(state.network.find(ports["select"]), state.network.find(sources[0]))
 
     def test_splitter_uses_logisim_defaults_for_omitted_bits(self):
         splitter = ET.fromstring('<comp name="Splitter"><a name="incoming" val="7"/>'
@@ -67,6 +183,52 @@ class HierarchyTests(unittest.TestCase):
         self.assertEqual(splitter_groups(splitter), [0, 0, 0, 1, 1, 2, 2])
         ET.SubElement(splitter, "a", {"name": "bit6", "val": "0"})
         self.assertEqual(splitter_groups(splitter), [0, 0, 0, 1, 1, 2, 0])
+
+    def test_splitter_none_leaves_other_control_bits_unmapped(self):
+        splitter = ET.fromstring('''<comp name="Splitter">
+          <a name="incoming" val="3"/><a name="fanout" val="1"/>
+          <a name="bit0" val="none"/><a name="bit2" val="none"/>
+        </comp>''')
+        self.assertEqual(splitter_groups(splitter), [-1, 0, -1])
+
+    def test_accumulator_tap_cannot_select_the_neighboring_control_bit(self):
+        unit = self.project.find("circuit[@name='AccumulatorUnit']")
+        tap = next(c for c in control_bus_splitters(unit) if splitter_groups(c)[41] >= 0)
+        group = splitter_groups(tap)[41]
+        for bit, value in ((41, "none"), (40, str(group))):
+            attribute = tap.find(f"a[@name='bit{bit}']")
+            if attribute is None:
+                attribute = ET.SubElement(tap, 'a', {'name': f'bit{bit}'})
+            attribute.set('val', value)
+        with self.assertRaisesRegex(ValueError, "bit mapping"):
+            verify_core_modularity(self.project, self.contract)
+
+    def test_accumulator_tap_must_reach_the_control_bus(self):
+        unit = self.project.find("circuit[@name='AccumulatorUnit']")
+        tap = control_bus_splitters(unit)[0]
+        for wire in list(unit.findall('wire')):
+            if tap.get('loc') in wire.attrib.values():
+                unit.remove(wire)
+        with self.assertRaisesRegex(ValueError, "disconnected"):
+            verify_core_modularity(self.project, self.contract)
+
+    def test_remaining_unit_taps_reject_changed_bit_and_disconnected_bus(self):
+        for name in ("MemoryUnit", "ExecutionUnit", "FaultUnit", "BranchUnit", "CoreDiagnostics"):
+            for mutation in ("bit mapping", "disconnected"):
+                with self.subTest(unit=name, mutation=mutation):
+                    project = copy.deepcopy(self.project)
+                    unit = project.find(f"circuit[@name='{name}']")
+                    tap = control_bus_splitters(unit)[0]
+                    if mutation == "bit mapping":
+                        selected = splitter_groups(tap).index(0)
+                        tap.find(f"a[@name='bit{selected}']").set("val", "none")
+                        tap.find(f"a[@name='bit{(selected + 1) % 45}']").set("val", "0")
+                    else:
+                        for wire in list(unit.findall("wire")):
+                            if tap.get("loc") in wire.attrib.values():
+                                unit.remove(wire)
+                    with self.assertRaisesRegex(ValueError, mutation):
+                        verify_core_modularity(project, self.contract)
 
     def test_decoder_mutations_find_neutral_inputs_without_constant_labels(self):
         decoder = self.project.find("circuit[@name='FetchDecodeControls']")
@@ -114,6 +276,14 @@ class HierarchyTests(unittest.TestCase):
         font.set("val", "SansSerif plain 24")
         self.assertEqual(core_topology_fingerprint(self.project), self.contract["topology_sha256"])
 
+    def test_sheet_annotations_do_not_change_electrical_topology(self):
+        from tiny_cpu_hierarchy import component_ports
+        unit = self.project.find("circuit[@name='AccumulatorUnit']")
+        note = ET.SubElement(unit, "comp", {"lib": "9", "name": "Text", "loc": "(320,80)"})
+        ET.SubElement(note, "a", {"name": "text", "val": "Qualifiers [3:0]"})
+        self.assertEqual(component_ports({}, note), [])
+        self.assertEqual(core_topology_fingerprint(self.project), self.contract["topology_sha256"])
+
     def test_named_fault_feedback_and_error_halt_are_separate_nets(self):
         main = self.project.find("circuit[@name='TinyCPUMain']")
 
@@ -151,6 +321,15 @@ class HierarchyTests(unittest.TestCase):
                                    '<a name="label" val="VALUE"/></comp></circuit>')
         instance = ET.fromstring('<comp name="Monitor" loc="(100,200)"/>')
         self.assertEqual(generated_symbol_ports(definition, instance), {"VALUE": "(100,200)"})
+
+    def test_custom_symbol_without_a_drawing_is_not_treated_as_an_evolution_box(self):
+        definition = ET.fromstring('''<circuit name="Incomplete">
+          <a name="appearance" val="custom"/>
+          <comp lib="0" name="Pin" loc="(100,100)"><a name="label" val="VALUE"/></comp>
+        </circuit>''')
+        instance = ET.fromstring('<comp name="Incomplete" loc="(500,200)"/>')
+        with self.assertRaisesRegex(ValueError, "no explicit appearance"):
+            generated_symbol_ports(definition, instance)
 
     def test_explicit_symbol_ports_are_independent_of_sheet_pin_order(self):
         definition = ET.fromstring('''<circuit name="Stable">

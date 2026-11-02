@@ -29,6 +29,12 @@ Seit dem 1. November 2026 gilt ergänzend:
   Gruppen bleibt zusätzlich der Platz eines Einzelpins frei.
 - Die obere Anordnung und erkennbare Gruppierung haben Vorrang vor einer
   bloßen Ausrichtung aller Blattpins auf weit entfernte Signalquellen.
+- Daten und Signale fließen nach Möglichkeit von oben nach unten und von
+  links nach rechts. Rechts dürfen Ausgabeleitungen wieder zu den oberen
+  Datenpins hochgeführt werden. `TinyCPUMain` ist wegen seiner Vernetzung
+  derzeit eine Ausnahme; feste Bauteilanschlüsse, etwa an Multiplexern,
+  erlauben kurze lokale Gegenrichtungen. Die Benutzeranordnung wird für
+  diese Ausnahmen nicht automatisch neu gezeichnet.
 - Möglichst wenige Konstanten verwenden. Jede braucht einen elektrischen
   Zweck. Gleiche feste Werte dürfen übersichtlich gemeinsam versorgt werden;
   offene Eingänge und lange Verteilungsschleifen sind keine Verbesserung.
@@ -41,6 +47,15 @@ So weit wie möglich gilt für sichtbare Leitungen:
   Logisims 10-Pixel-Raster beträgt der Leitungsabstand mindestens 20 Pixel.
 - Nach höchstens vier Leitungen bleiben drei Rasterzeilen frei: zwischen
   der letzten und der nächsten Spur liegen mindestens 40 Pixel.
+- Bei unvollständigen Bündeln werden die tatsächlich vorhandenen Leitungen
+  von oben beziehungsweise von links gezählt. Wo es übersichtlicher wird,
+  sind zusammengehörige Signale als sichtbar verdrahtete Busse zu führen;
+  ihre Bitbelegung muss dokumentiert bleiben.
+- Benötigte Steuerbits dürfen über einen vollständigen Aufteiler oder nahe
+  lokale Einzelbit-Abgriffe entnommen werden. Breite und Bitnummern des
+  Steuerbusses bleiben unverändert und müssen bitgenau geprüft werden.
+  Ein Vergleich des gesamten Steuerbusses mit einer Bitnummer ist keine
+  Auswahl des betreffenden Signals.
 - Funktionsboxen stehen so nah beieinander, wie ihre Anschlussauffächerung
   und die obigen Leitungsabstände erlauben. Große leere Umwege sind zu vermeiden.
 - Innerhalb der oberen Pingruppen werden Blattpins möglichst auf die Höhe

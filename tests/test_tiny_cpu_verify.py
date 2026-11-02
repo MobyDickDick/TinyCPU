@@ -273,6 +273,50 @@ class CircuitVerificationTests(unittest.TestCase):
             main, illegal_return_or.get("loc"), error_flags["SET_ILL"]
         ))
 
+    def test_ap18_illegal_return_supports_two_and_four_native_inputs(self) -> None:
+        source = MODULE_PATH.parents[1] / "hardware/logisim"
+        system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
+        for count in (2, 4):
+            with self.subTest(inputs=count):
+                temporary = Path(self.enterContext(tempfile.TemporaryDirectory())) / "logisim"
+                shutil.copytree(source, temporary)
+                core = temporary / "TinyCPU.circ"
+                project = ET.parse(core)
+                fault = project.getroot().find("circuit[@name='FaultUnit']")
+                gate = _component_by_label(fault, "ILLEGAL_RETURN_OR")
+                old_count = gate.find("a[@name='inputs']")
+                self.assertTrue(old_count is None or old_count.get("val") == "2")
+                x, y = map(int, gate.get("loc").strip("()").split(","))
+                # Native 50px OR contacts: two inputs at +/-20; the middle
+                # contacts of a four-input gate at +/-10, with neutral outer ones.
+                if count == 4:
+                    if old_count is None:
+                        old_count = ET.SubElement(gate, "a", {"name": "inputs"})
+                    old_count.set("val", "4")
+                    mapping = {f"({x-50},{y-20})": f"({x-50},{y-10})",
+                               f"({x-50},{y+20})": f"({x-50},{y+10})"}
+                    for wire in fault.findall("wire"):
+                        for end in ("from", "to"):
+                            if wire.get(end) in mapping:
+                                wire.set(end, mapping[wire.get(end)])
+                    for offset in (-20, 20):
+                        zero = ET.SubElement(fault, "comp", {
+                            "lib": "0", "name": "Constant", "loc": f"({x-50},{y+offset})"})
+                        ET.SubElement(zero, "a", {"name": "value", "val": "0x0"})
+                project.write(core, encoding="utf-8", xml_declaration=True)
+                accepted = core.read_bytes()
+                with mock.patch.object(VERIFY, "LOGISIM", temporary), \
+                     mock.patch.object(VERIFY, "load_system_profile", return_value=replace(
+                         system, circuit_path=temporary / "TinyCPU_Peripherals.circ")):
+                    VERIFY.verify_system_circuit()
+                    for offset in ((-20, 20) if count == 2 else (-10, 10)):
+                        broken = ET.ElementTree(ET.fromstring(accepted))
+                        _remove_wire_at(broken.getroot().find("circuit[@name='FaultUnit']"),
+                                        f"({x-50},{y+offset})")
+                        broken.write(core, encoding="utf-8", xml_declaration=True)
+                        with self.assertRaisesRegex(VERIFY.VerificationError, "interrupt-feedback paths"):
+                            VERIFY.verify_system_circuit()
+
     def test_ap18_system_top_requires_public_state_wiring(self) -> None:
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"

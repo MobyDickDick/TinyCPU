@@ -1,7 +1,26 @@
 # AP 22: Qualitätsbefunde und belastbare Abnahme
 
-**Stand:** 31. Oktober 2026. **Status:** 61 elektrische Kernfixtures abgenommen;
-gültige externe Eingaben und weitere Qualitätsaufgaben offen.
+**Stand:** 1. November 2026. **Status:** Bestehende 63 elektrische Kernfälle
+und sieben Systemfälle bestanden; eine zusätzliche Funktionslücke bei der
+Adressregister-Gültigkeit ist nachgewiesen und offen. Weitere Qualitätsaufgaben
+bleiben offen.
+
+## Neuer Befund am 1. November 2026: Adressregister-Gültigkeit
+
+`AddressPath.ADDRESS_VALID` bleibt in `AddressUnit` unbenutzt;
+`AddressPath.VALID_IN` liegt fest auf 1. Ein elektrisches Gegenbeispiel mit
+`LOAD_CONST(7)` und anschließendem `STORE_ADDRESS_REGISTER()` ohne vorheriges
+Laden des Adressregisters meldet an Flanke 2 (`pre`) `MEM_WRITE=1` statt 0.
+Das Referenzmodell sperrt den Zugriff und setzt `INV`.
+
+Die Korrektur und ihre Abnahme sind offen: Registergültigkeit in indirekte
+Zugriffe und Fehlerbehandlung einbeziehen, Schreibzugriffe bei ungültigem
+Register sperren und die Ladegültigkeit aus Datenquelle und Adressbereich
+bilden. Direkte Zugriffe müssen vom unbenutzten Register unabhängig bleiben.
+Die bisher bestandenen Matrizen erfassen diesen Gegenfall nicht und belegen
+hier keine vollständige Kernfreigabe. Nachweis, Abgrenzung und erforderliche
+Regressionen stehen im
+[AddressUnit-Prüfbericht](tiny_cpu_address_review.md#offene-funktionslücke-adressregister-gültigkeit).
 
 ## Fortschritt am 31. Oktober 2026: Registerpfade und vollständige Kernmatrix
 

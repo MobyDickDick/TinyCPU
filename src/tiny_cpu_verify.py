@@ -129,7 +129,12 @@ def generated_symbol_ports(
     """
     pins = list(definition.findall("comp[@name='Pin']"))
     appearance = definition.find("appear")
-    if appearance is not None and definition.find("a[@name='appearance'][@val='custom']") is not None:
+    custom = definition.find("a[@name='appearance'][@val='custom']") is not None
+    if custom and appearance is None:
+        # Logisim falls back to a different symbol pitch here. Guessing the
+        # evolution box would silently validate contacts that do not exist.
+        raise ValueError("custom symbol has no explicit appearance")
+    if custom:
         anchor = appearance.find("circ-anchor")
         if anchor is None:
             raise ValueError("custom symbol has no anchor")
@@ -978,18 +983,14 @@ def verify_system_circuit() -> None:
     )
     if illegal_return_or is None:
         raise VerificationError("AP-18 CPU interrupt-feedback paths differ from contract")
-    gate_x, gate_y = map(
-        int, illegal_return_or.get("loc").strip("()").split(",")
-    )
-    gate_attributes = {
-        attribute.get("name"): attribute.get("val")
-        for attribute in illegal_return_or.findall("a")
-    }
-    gate_size = int(gate_attributes.get("size", "50"))
-    illegal_return_inputs = (
-        f"({gate_x - gate_size},{gate_y - 10})",
-        f"({gate_x - gate_size},{gate_y + 10})",
-    )
+    from tiny_cpu_hierarchy import component_ports, location
+    gate_inputs = [location(p) for p, _, incoming, _, _
+                   in component_ports({}, illegal_return_or) if incoming]
+    # The former four-input OR used its middle two contacts; the reduced
+    # two-input OR has a different native pitch. Preserve both real layouts.
+    illegal_return_inputs = gate_inputs[1:3] if len(gate_inputs) == 4 else gate_inputs
+    if len(illegal_return_inputs) != 2:
+        raise VerificationError("AP-18 CPU interrupt-feedback paths differ from contract")
     if any(
         not core_connected(core_pin_locations[label], target)
         for label, target in feedback_targets.items()
