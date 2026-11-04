@@ -1,5 +1,12 @@
 # AddressUnit: erneute Prüfung
 
+**Nachtrag vom 4. November 2026:** Die unten dokumentierte Gültigkeitslücke
+ist inzwischen korrigiert. Die AddressUnit ist auf Benutzerwunsch nach
+Registerladen, Adressbildung und Zugriffsprüfung neu angeordnet. Aktuelle
+Schaltung, Regressionen und Abnahme stehen in
+[`tiny_cpu_address_validity.md`](tiny_cpu_address_validity.md).
+Die folgenden Befunde beschreiben den historischen Stand vom 1. November.
+
 Die Benutzerzeichnung vom 1. November 2026 bleibt erhalten. Alle 28 Bauteile
 und Pins stehen unverändert; nur neun Steuerbit-Zuordnungen und die kurzen
 Datenleitungen vor dem Adressregister-Multiplexer wurden korrigiert.

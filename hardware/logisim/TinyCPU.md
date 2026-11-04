@@ -33,10 +33,10 @@ Speichert die Basisadresse und ihre Gültigkeit im Adressregister. Ein Addierer 
 zusätzlich Basis plus Offset und liefert den Übertrag für die nachfolgende
 Bereichsprüfung.
 
-Offener Integrationsfehler: `ADDRESS_VALID` wird in `AddressUnit` noch nicht
-ausgewertet, während `VALID_IN` fest auf 1 liegt. Die
-[fehlende Gültigkeitsprüfung](../../docs/tiny_cpu_address_review.md#offene-funktionslücke-adressregister-gültigkeit)
-kann Schreibzugriffe über ein ungültiges Adressregister zulassen.
+`AddressUnit` wertet `ADDRESS_VALID` jetzt bei indirekten Zugriffen aus.
+`VALID_IN` folgt Quellgültigkeit und Adressbereich. Die
+[Gültigkeitsabnahme](../../docs/tiny_cpu_address_validity.md) dokumentiert die
+frühere Lücke und ihre Regressionen.
 
 ## Memory
 
@@ -157,13 +157,23 @@ Bildet die tatsächlich verwendete Speicheradresse aus unmittelbarem Operanden,
 Adressregister oder Adressregister plus Offset. Lädt das Adressregister bei Bedarf und
 meldet Adressfehler nur für Befehle, die diese Adresse benutzen.
 
-Der Adressregister-Multiplexer übernimmt normalerweise `IMMEDIATE_VALUE`; bei
-`CONTROL[23]` (`LD_REG_ADR`) übernimmt er `READ_VALUE`. Die lokalen
-Steuerbus-Abgriffe und der [Prüfbericht](../../docs/tiny_cpu_address_review.md)
-dokumentieren die Auswahl der Adressierungsarten.
+`AddressRegisterLoad` übernimmt normalerweise `IMMEDIATE_VALUE`; bei
+`CONTROL[23]` (`LD_REG_ADR`) übernimmt er `READ_VALUE` samt `READ_VALID`.
+`AddressAccess` sperrt ungültige indirekte Zugriffe und trennt INV von ADDR.
+Die Verarbeitungskette und lokalen Steuerbus-Abgriffe sind im
+[aktuellen Prüfbericht](../../docs/tiny_cpu_address_validity.md) erläutert.
 
-Die Prüfung der Adressregister-Gültigkeit ist noch unvollständig; siehe den
-oben bei `AddressPath` verlinkten offenen Befund.
+## AddressRegisterLoad
+
+Wählt Registerladewert und Ladefreigabe, prüft den Bereich 0..4095 und bei
+Speicherladen die Quellgültigkeit. Ungültige Ladeversuche liefern 0 INVALID
+und getrennte Fehleranforderungen für Konstanten und gelesene Werte.
+
+## AddressAccess
+
+Verknüpft Bereichsprüfung, verwendete Adressierungsart und Registergültigkeit
+zur Zugriffsfreigabe. Direkte Zugriffe hängen nicht vom unbenutzten Register
+ab. Ungültige Register setzen INV; Bereichsfehler gültiger Adressen setzen ADDR.
 
 ## MemoryUnit
 

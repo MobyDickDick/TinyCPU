@@ -7,7 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from tiny_cpu_circuit_check import inspect_circuit, inspect_project, repair_project
 from tiny_cpu_wire_contacts import inspect_circuit as inspect_wire_contacts
 from tiny_cpu_wire_contacts import inspect_routing_grid
-from tiny_cpu_hierarchy import CORE_UNITS
+from tiny_cpu_hierarchy import ADDRESS_HELPERS, CORE_UNITS
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -62,7 +62,7 @@ class CircuitCheckTests(unittest.TestCase):
     def test_all_functional_units_use_the_grouped_routing_grid(self):
         project = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         for circuit in project.findall("circuit"):
-            if circuit.get("name") in CORE_UNITS:
+            if circuit.get("name") in CORE_UNITS.keys() | ADDRESS_HELPERS:
                 with self.subTest(circuit=circuit.get("name")):
                     self.assertEqual(inspect_routing_grid(circuit), [])
 

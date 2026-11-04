@@ -75,7 +75,7 @@ def main() -> int:
         # mux must consume the selected direct address, not REG_SELECTED.
         "store-direct-regression": (
             {"DIRECT_ADDR": 0xFFFF, "REG_SELECTED": 1},
-            "0xffff", "0xffff", "0",
+            "0xffff", "0xffff", "1",
         ),
     }
     for name, (specific, expected_selected, expected_address, expected_range) in fixtures.items():

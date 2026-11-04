@@ -25,6 +25,9 @@ CORE_UNITS = {
     "CoreDiagnostics": "CORE_DIAGNOSTICS",
 }
 
+# These local boxes have no control-bus boundary of their own.
+ADDRESS_HELPERS = {"AddressRegisterLoad", "AddressAccess"}
+
 
 def attributes(component):
     return {a.get("name"): a.get("val") for a in component.findall("a")}
@@ -253,11 +256,12 @@ def flatten_core(project):
 
     def visit(circuit, path, shift, top=False):
         state = CircuitBits(definitions, circuit, path)
-        bus_splitters = set() if top else set(control_bus_splitters(circuit))
+        bus_splitters = (set(control_bus_splitters(circuit))
+                         if not top and circuit.get("name") in CORE_UNITS else set())
         for c in circuit.findall("comp"):
             kind = c.get("name")
             a = attributes(c)
-            if kind in CORE_UNITS and c.get("lib") is None:
+            if kind in CORE_UNITS.keys() | ADDRESS_HELPERS and c.get("lib") is None:
                 child_shift = 10000 * (len(instances) + 1)
                 instances.append(path + "/" + a.get("label", kind))
                 child = visit(definitions[kind], instances[-1], child_shift)
@@ -369,13 +373,14 @@ def verify_core_modularity(project, control_contract=None):
             tapped.append(groups.index(0))
         tap_signals = {
             "AccumulatorUnit": {"LOAD_ADR", "LOAD_ADR_REG", "LOAD_REG_OFF", "INVERT", "INPUT", "ACC_WRITE_REQUEST"},
-            "AddressUnit": {"LD_REG_CONST", "LD_REG_ADR", "INVERT", "ADDR_REG_ARGUMENT", "STORE_ADR_REG",
-                            "LOAD_ADR_REG", "ADDR_REG_OFFS_ARGUMENT", "STORE_REG_OFF", "LOAD_REG_OFF"},
+            "AddressUnit": {"LD_REG_CONST", "LD_REG_ADR", "ADDR_ARGUMENT", "ADDR_REG_ARGUMENT", "STORE_ADR_REG",
+                            "LOAD_ADR_REG", "ADDR_REG_OFFS_ARGUMENT", "STORE_REG_OFF", "LOAD_REG_OFF",
+                            "LOAD_ADR", "STORE_ADR", "PRINT_ADR"},
             "MemoryUnit": {"ADDR_ARGUMENT", "ADDR_REG_ARGUMENT", "ADDR_REG_OFFS_ARGUMENT",
                            "STORE_ADR", "STORE_ADR_REG", "STORE_REG_OFF", "ACC_MEMORY_REQUEST"},
             "ExecutionUnit": {"ADD_OPERAND", "SUB_OPERAND", "MUL_OPERAND", "DIV_OPERAND",
                               "AND_OPERAND", "OR_OPERAND", "XOR_OPERAND", "CONST_ARGUMENT", "INVERT"},
-            "FaultUnit": {"SET_ILL", "CLEAR_ERROR", "INPUT", "PRINT", "ACC_MEMORY_REQUEST"},
+            "FaultUnit": {"SET_ILL", "CLEAR_ERROR", "INPUT", "PRINT", "PRINT_ADR", "ACC_MEMORY_REQUEST"},
             "BranchUnit": {"JUMP_ADR", "JUMP_ZERO", "JUMP_NOT_ZERO", "JUMP_NEGATIVE",
                            "JUMP_ERROR", "JUMP_NOT_ERROR"},
             # Preserve the existing probe wiring, including its historical
@@ -402,7 +407,7 @@ def find_core_instance(project, label):
         for c in circuit.findall("comp"):
             if attributes(c).get("label") == label:
                 return circuit, c
-            if c.get("name") in CORE_UNITS and c.get("lib") is None:
+            if c.get("name") in CORE_UNITS.keys() | ADDRESS_HELPERS and c.get("lib") is None:
                 found = visit(definitions[c.get("name")])
                 if found is not None:
                     return found

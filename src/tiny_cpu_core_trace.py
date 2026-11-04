@@ -27,6 +27,7 @@ SIGNALS = {
     "PRINT_ADDRESS_VALUE": (16, "PRINT_ADDRESS_VALUE"),
     "PRINT_ADDRESS_VALID": (1, "PRINT_ADDRESS_VALID"),
     "MEM_WRITE": (1, "MEMORY_UNIT/MEMORY_INSTANCE/WRITE_ENABLE"),
+    "EXTERNAL_WRITE_ENABLE": (1, "EXTERNAL_WRITE_ENABLE"),
     "MEM_ADDRESS": (16, "MEMORY_UNIT/MEMORY_INSTANCE/ADDRESS"),
     "MEM_WRITE_VALUE": (16, "MEMORY_UNIT/MEMORY_INSTANCE/DATA_IN"),
     "MEM_WRITE_VALID": (1, "MEMORY_UNIT/MEMORY_INSTANCE/VALID_IN"),
@@ -112,6 +113,7 @@ def expected_trace(program: Program) -> list[dict[str, object]]:
                                PRINT_ADDRESS_VALID=int(valid))
             elif name == "PRINT_ADDRESS":
                 pre.update(PRINT_ADDRESS_VALUE=0, PRINT_ADDRESS_VALID=0)
+        pre["EXTERNAL_WRITE_ENABLE"] = pre["MEM_WRITE"]
         rows.append(pre)
         cpu.step()
         rows.append({"edge": edge, "phase": "post", **_state(cpu)})

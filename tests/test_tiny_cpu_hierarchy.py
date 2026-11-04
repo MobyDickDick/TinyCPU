@@ -35,15 +35,16 @@ class HierarchyTests(unittest.TestCase):
         unit = definitions["MemoryUnit"]
         state = CircuitBits(definitions, unit, "memory")
         memory, = unit.findall("comp[@name='Memory']")
-        write_enable = next(p for p, *_, name in state.ports[id(memory)]
-                            if name == "WRITE_ENABLE")
+        ram_guard = next(c for c in unit.findall("comp[@name='AND Gate']")
+                         if attributes(c).get("label") == "VALID_RAM_WRITE")
+        write_enable = next(p for p, *_, name in state.ports[id(ram_guard)] if name == "0")
         muxes = [c for c in unit.findall("comp[@name='Multiplexer']")
                  if any(name == "output" and state.network.find(p) == state.network.find(write_enable)
                         for p, *_, name in state.ports[id(c)])]
         self.assertEqual(len(muxes), 1)
         ports = {name: p for p, *_, name in state.ports[id(muxes[0])]}
-        request = next(c for c in unit.findall("comp[@name='OR Gate']")
-                       if attributes(c).get("label") == "MEMORY_WRITE_REQUEST")
+        request = next(c for c in unit.findall("comp[@name='AND Gate']")
+                       if attributes(c).get("label") == "VALID_MEMORY_WRITE_REQUEST")
         combined = next(p for p, *_, name in state.ports[id(request)] if name == "output")
         pins = {attributes(c)["label"]: c for c in unit.findall("comp[@name='Pin']")}
         for port, source in (("0", combined), ("1", state.ports[id(pins["RAM_WRITE"])][0][0]),
@@ -139,7 +140,6 @@ class HierarchyTests(unittest.TestCase):
         state = CircuitBits(definitions, unit, "address")
         controls = {signal["bit"]: signal["name"] for signal in self.contract["signals"]}
         expected = {
-            "AR_LOAD_REQUEST": {"LD_REG_CONST", "LD_REG_ADR"},
             "REGISTER_ADDRESS_REQUEST": {"ADDR_REG_ARGUMENT", "STORE_ADR_REG", "LOAD_ADR_REG"},
             "OFFSET_ADDRESS_REQUEST": {"ADDR_REG_OFFS_ARGUMENT", "STORE_REG_OFF", "LOAD_REG_OFF"},
         }
@@ -161,21 +161,34 @@ class HierarchyTests(unittest.TestCase):
     def test_address_register_mux_selects_immediate_or_memory_data(self):
         from tiny_cpu_hierarchy import CircuitBits
         definitions = {c.get("name"): c for c in self.project.findall("circuit")}
-        unit = definitions["AddressUnit"]
+        unit = definitions["AddressRegisterLoad"]
         state = CircuitBits(definitions, unit, "address")
-        mux, = unit.findall("comp[@name='Multiplexer']")
+        mux, = [c for c in unit.findall("comp[@name='Multiplexer']")
+                if any(name == "select" and wire_path_exists(unit, str(p).replace(' ', ''), "(100,220)")
+                       for p, *_, name in state.ports[id(c)])]
         ports = {name: terminal for terminal, _, _, _, name in state.ports[id(mux)]}
         pins = {attributes(c).get("label"): state.ports[id(c)][0][0]
                 for c in unit.findall("comp[@name='Pin']")}
-        for port, source in (("0", "IMMEDIATE_VALUE"), ("1", "READ_VALUE")):
+        for port, source in (("0", "IMMEDIATE"), ("1", "READ_VALUE")):
             with self.subTest(input=port):
                 self.assertEqual(state.network.find(ports[port]), state.network.find(pins[source]))
-        bit = next(signal["bit"] for signal in self.contract["signals"]
-                   if signal["name"] == "LD_REG_ADR")
-        sources = [state.ports[id(splitter)][splitter_groups(splitter)[bit] + 1][0]
-                   for splitter in control_bus_splitters(unit) if splitter_groups(splitter)[bit] >= 0]
-        self.assertEqual(len(sources), 1)
-        self.assertEqual(state.network.find(ports["select"]), state.network.find(sources[0]))
+        self.assertEqual(state.network.find(ports["select"]), state.network.find(pins["LOAD_MEMORY"]))
+
+    def test_address_load_boundary_uses_memory_value_and_validity_together(self):
+        from tiny_cpu_hierarchy import CircuitBits, point
+        definitions = {c.get("name"): c for c in self.project.findall("circuit")}
+        unit = definitions["AddressUnit"]
+        state = CircuitBits(definitions, unit, "address")
+        instance, = unit.findall("comp[@name='AddressRegisterLoad']")
+        ports = generated_symbol_ports(definitions["AddressRegisterLoad"], instance)
+        pins = {attributes(c)["label"]: c.get("loc") for c in unit.findall("comp[@name='Pin']")}
+        for source, target in (("READ_VALUE", "READ_VALUE"), ("READ_VALID", "READ_VALID"),
+                               ("IMMEDIATE_VALUE", "IMMEDIATE")):
+            self.assertTrue(wire_path_exists(unit, pins[source], ports[target]))
+        for bit, target in ((22, "LOAD_CONST"), (23, "LOAD_MEMORY")):
+            tap, = [t for t in control_bus_splitters(unit) if splitter_groups(t)[bit] == 0]
+            source = state.ports[id(tap)][1][0]
+            self.assertEqual(state.network.find(source), state.network.find(point(ports[target])))
 
     def test_splitter_uses_logisim_defaults_for_omitted_bits(self):
         splitter = ET.fromstring('<comp name="Splitter"><a name="incoming" val="7"/>'

@@ -101,7 +101,7 @@ def main() -> int:
         ("register-unselected", "EFFECTIVE_ADDRESS_FBOX", "ADDR_REG_ARGUMENT", 0, 1,
          "register-read", 5, "pre", "MEM_ADDRESS", 20, 0),
         ("negative-offset-carry", "ADDRESS_RANGE_FBOX", "OFFSET_CARRY", 1, 1,
-         "offset-read-negative", 5, "post", "ERROR_ADDR", 0, 1),
+         "offset-read-negative", 5, "post", "ACC", 7, 0),
     )
     for name, owner, port, value, width, case, edge, phase, signal, expected, actual in mutations:
         mutated = args.output / f"{name}.circ"
@@ -115,6 +115,12 @@ def main() -> int:
                     and mismatch.expected == expected and mismatch.actual == actual):
                 raise
             rejected[name] = vars(mismatch)
+            if name == "negative-offset-carry":
+                rows = (args.output / f"{name}.tsv").read_text(encoding="utf-8").splitlines()
+                trace = [dict(zip(rows[0].split("\t"), row.split("\t"))) for row in rows[1:]]
+                affected = next(row for row in trace if row["edge"] == "5" and row["phase"] == "post")
+                if (affected["ACC_VALID"], affected["ERROR_ADDR"], affected["ERROR_INV"]) != ("0", "1", "1"):
+                    raise LogisimError("bad offset carry must reject the read and set ADDR/INV")
         else:
             raise LogisimError(f"address-register mutation unexpectedly passed: {name}")
     if source.read_bytes() != original:

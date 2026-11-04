@@ -1,6 +1,16 @@
 # Funktionsstand der TinyCPU-Befehle
 
-**Aktueller Stand: 31. Oktober 2026 — alle 61 bestehenden Kernfixtures bestehen.**
+**Aktueller Stand: 4. November 2026 — 63 bestehende Kernfixtures und sieben
+Systemfixtures bestehen; zusätzlich 38 Adressgültigkeitsfälle.**
+
+Die fehlende Gültigkeitsprüfung des Adressregisters ist korrigiert; indirekte
+Zugriffe werden bei ungültigem Register gesperrt. Die
+[Nachweise und Abdeckungsgrenzen](tiny_cpu_address_validity.md) umfassen auch
+den öffentlichen Peripherie-Schreibimpuls. Vier projektweite Rasterbefunde
+und der bestehende Decoder-Mutationstest bleiben in der Offline-Suite offen;
+eine neue vollständige Releasefreigabe wird daraus nicht abgeleitet.
+
+**Historischer Stand: 31. Oktober 2026 — alle 61 damaligen Kernfixtures bestehen.**
 
 Die Bestandsaufnahme des vollständigen Kernvergleichs aus AP 22.1 vom
 29. Oktober am Ausgangsstand `9d60c94` fand Abweichungen in 59 von 61

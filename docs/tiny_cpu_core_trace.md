@@ -1,6 +1,15 @@
 # Elektrischer Kernvergleich (AP 22.1)
 
-**Stand: 31. Oktober 2026.** Der Vergleich ist im verpflichtenden Gate aktiv.
+**Stand: 4. November 2026.** Alle 63 bestehenden Kernfixtures sowie 38
+zusätzliche Adressgültigkeitsfälle bestehen. Der TSV-Vertrag enthält jetzt
+auch `EXTERNAL_WRITE_ENABLE`: Die öffentliche Schreibanforderung wird vor
+jeder Flanke gemeinsam mit der internen RAM-Freigabe gegen das erwartete
+Schreibereignis geprüft. Die zusätzliche Spalte ist bei neuen Exporten
+verpflichtend; ältere TSV-Dateien bleiben historische Nachweise.
+Die [Adressgültigkeits-Abnahme](tiny_cpu_address_validity.md) dokumentiert
+die Korrektur, Darstellung, Negativkontrollen und verbleibenden Offline-Befunde.
+
+**Historischer Stand: 31. Oktober 2026.** Der Vergleich ist im verpflichtenden Gate aktiv.
 Beide identischen Minimalkernläufe, der vollständige Countdown und alle
 61 bestehenden ISA-/Fehlerfixtures bestehen jetzt mit vollständigem
 Pre-/Post-Zustandsvergleich. Der CI-Fehler bei `load-address-register` ist

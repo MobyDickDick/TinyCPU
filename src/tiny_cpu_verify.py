@@ -378,9 +378,9 @@ def verify_circuit(path: Path) -> tuple[int, int]:
                 )
             wires += 1
 
-        from tiny_cpu_hierarchy import CORE_UNITS
+        from tiny_cpu_hierarchy import ADDRESS_HELPERS, CORE_UNITS
         from tiny_cpu_wire_contacts import inspect_routing_grid
-        if circuit_name in CORE_UNITS:
+        if circuit_name in CORE_UNITS.keys() | ADDRESS_HELPERS:
             layout_issues = inspect_routing_grid(circuit)
             if layout_issues:
                 raise VerificationError(f"{display_path(path)}: {layout_issues[0]}")
@@ -714,10 +714,36 @@ def verify_system_circuit() -> None:
         if circuit.get("name") == "Memory"
     )
     memory_ports = generated_symbol_ports(memory_definition, memory_instance)
+    from tiny_cpu_hierarchy import component_ports, location
+    definitions = {c.get("name"): c for c in core_project.findall("circuit")}
+
+    def named_core(label):
+        matches = [c for c in core_definition.findall("comp") if _pin_label(c) == label]
+        if len(matches) != 1:
+            raise VerificationError(f"CPU address-validity boundary missing: {label}")
+        return matches[0]
+
+    def terminals(component):
+        return {name: location(p) for p, *_, name in component_ports(definitions, component)}
+
+    access_valid = named_core("ACCESS_VALID").get("loc")
+    write_guard = named_core("VALID_MEMORY_WRITE_REQUEST")
+    write_guard_ports = terminals(write_guard)
+    ram_guard = named_core("VALID_RAM_WRITE")
+    ram_guard_ports = terminals(ram_guard)
+    read_guard = named_core("VALID_MEMORY_READ")
+    read_guard_ports = terminals(read_guard)
+    if not all((
+        core_connected(write_request.get("loc"), write_guard_ports["0"]),
+        core_connected(access_valid, write_guard_ports["1"]),
+        core_connected(access_valid, ram_guard_ports["1"]),
+        core_connected(ram_guard.get("loc"), memory_ports["WRITE_ENABLE"]),
+    )):
+        raise VerificationError("AP-18 CPU RAM write-enable selection paths differ from contract")
     external_write_sources = {
         "EXTERNAL_WRITE_VALUE": memory_ports["DATA_IN"],
         "EXTERNAL_WRITE_VALID": memory_ports["VALID_IN"],
-        "EXTERNAL_WRITE_ENABLE": write_request.get("loc", ""),
+        "EXTERNAL_WRITE_ENABLE": write_guard.get("loc", ""),
     }
     if any(
         not core_connected(source, core_pin_locations[label])
@@ -827,14 +853,14 @@ def verify_system_circuit() -> None:
         selector_external_input = f"({selector_x - 30},{selector_y + 10})"
         selector_control_input = f"({selector_x - 20},{selector_y + 20})"
         if all((
-            core_connected(write_request.get("loc", ""), selector_default_input),
+            core_connected(write_guard.get("loc", ""), selector_default_input),
             core_connected(
                 core_pin_locations["RAM_WRITE_ENABLE"], selector_external_input
             ),
             core_connected(
                 core_pin_locations["USE_EXTERNAL_MEMORY"], selector_control_input
             ),
-            core_connected(component.get("loc", ""), memory_ports["WRITE_ENABLE"]),
+            core_connected(component.get("loc", ""), ram_guard_ports["0"]),
         )):
             write_enable_selectors.append(component)
     if len(write_enable_selectors) != 1:
@@ -1049,6 +1075,22 @@ def verify_system_circuit() -> None:
             memory_selectors[label] = candidates[0]
     if set(memory_selectors) != set(expected_selector_widths):
         raise VerificationError("AP-18 CPU external-memory selection paths differ from contract")
+    # The selected external/internal value is subsequently qualified by the
+    # address contract. Raw RAM exports deliberately remain before this stage.
+    data_guards = [c for c in core_definition.findall("comp[@name='Multiplexer']")
+                   if core_connected(c.get("loc"), core_pin_locations["PRINT_ADDRESS_VALUE"])]
+    if len(data_guards) != 1:
+        raise VerificationError("AP-18 CPU external-memory selection paths differ from contract")
+    data_guard = data_guards[0]
+    data_guard_ports = terminals(data_guard)
+    if not all((
+        core_connected(memory_selectors["EXTERNAL_MEMORY_VALUE_SELECT"].get("loc"), data_guard_ports["1"]),
+        core_connected(access_valid, data_guard_ports["select"]),
+        core_connected(access_valid, read_guard_ports["1"]),
+        core_connected(memory_selectors["EXTERNAL_MEMORY_VALID_SELECT"].get("loc"), read_guard_ports["0"]),
+        core_connected(read_guard.get("loc"), core_pin_locations["PRINT_ADDRESS_VALID"]),
+    )):
+        raise VerificationError("AP-18 CPU external-memory selection paths differ from contract")
     operations_instance = next(
         component for component in core_definition.findall("comp")
         if component.get("name") == "Operations"
@@ -1079,20 +1121,29 @@ def verify_system_circuit() -> None:
                                if core_connected(component.get("loc"), address_ports["ADDRESS_IN"])]
     if len(address_data_candidates) != 1:
         raise VerificationError("CPU address-register reset/load/data paths differ from contract")
-    address_data = address_data_candidates[0]
+    canonical_address_data = address_data_candidates[0]
+    canonical_ports = terminals(canonical_address_data)
+    address_source_candidates = [c for c in core_definition.findall("comp[@name='Multiplexer']")
+                                 if core_connected(c.get("loc"), canonical_ports["1"])]
+    if len(address_source_candidates) != 1:
+        raise VerificationError("CPU address-register reset/load/data paths differ from contract")
+    address_data = address_source_candidates[0]
     load_x, load_y = map(int, address_load.get("loc").strip("()").split(","))
     data_x, data_y = map(int, address_data.get("loc").strip("()").split(","))
     if not all((
         core_connected(core_pin_locations["RESET"], address_ports["ADDRESS_PATH_STARTUP_RESET"]),
-        core_connected(controls_ports["LD_REG_CONST"], f"({load_x - 50},{load_y - 20})"),
-        core_connected(controls_ports["LD_REG_ADR"], f"({load_x - 50},{load_y + 20})"),
+        all(any(core_connected(controls_ports[signal], terminal)
+                for terminal in (f"({load_x - 50},{load_y - 20})", f"({load_x - 50},{load_y + 20})"))
+            for signal in ("LD_REG_CONST", "LD_REG_ADR")),
         core_connected(address_load.get("loc"), address_ports["AR_LOAD"]),
         not core_connected(controls_ports["ACC_WRITE_REQUEST"], address_ports["AR_LOAD"]),
         core_connected(immediate_source, f"({data_x - 30},{data_y - 10})"),
-        core_connected(memory_selectors["EXTERNAL_MEMORY_VALUE_SELECT"].get("loc"),
+        core_connected(data_guard.get("loc"),
                        f"({data_x - 30},{data_y + 10})"),
         core_connected(controls_ports["LD_REG_ADR"], f"({data_x - 20},{data_y + 20})"),
-        core_connected(address_data.get("loc"), address_ports["ADDRESS_IN"]),
+        core_connected(canonical_address_data.get("loc"), address_ports["ADDRESS_IN"]),
+        core_connected(named_core("LOAD_VALID").get("loc"), canonical_ports["select"]),
+        core_connected(named_core("LOAD_VALID").get("loc"), address_ports["VALID_IN"]),
     )):
         raise VerificationError("CPU address-register reset/load/data paths differ from contract")
     register_request = next((component for component in core_definition.findall("comp[@name='OR Gate']")
@@ -1131,15 +1182,17 @@ def verify_system_circuit() -> None:
         external_input = f"({selector_x - 30},{selector_y + 10})"
         select_input = f"({selector_x - 20},{selector_y + 20})"
         output = selector.get("loc")
+        consumer_source = (data_guard_ports["1"] if label == "EXTERNAL_MEMORY_VALUE_SELECT"
+                           else read_guard_ports["0"])
         selector_paths.extend((
             core_connected(memory_output, default_input),
             core_connected(core_pin_locations[external_pin], external_input),
             core_connected(core_pin_locations["USE_EXTERNAL_MEMORY"], select_input),
-            core_connected(output, consumer),
+            core_connected(output, consumer_source),
         ))
     if not all(selector_paths):
         raise VerificationError("AP-18 CPU external-memory selection paths differ from contract")
-    memory_valid_output = memory_selectors["EXTERNAL_MEMORY_VALID_SELECT"].get("loc")
+    memory_valid_output = read_guard.get("loc")
     operations_memory_valid = operations_ports["MEMORY_VALID"]
     datapath_acc_valid = generated_symbol_ports(
         core_project.find("circuit[@name='Datapath']"),

@@ -1,11 +1,24 @@
 # AP 22: Qualitätsbefunde und belastbare Abnahme
 
-**Stand:** 1. November 2026. **Status:** Bestehende 63 elektrische Kernfälle
-und sieben Systemfälle bestanden; eine zusätzliche Funktionslücke bei der
-Adressregister-Gültigkeit ist nachgewiesen und offen. Weitere Qualitätsaufgaben
-bleiben offen.
+**Stand:** 4. November 2026. **Status:** Die Adressregister-Gültigkeit ist
+korrigiert und mit 38 zusätzlichen elektrischen Fällen abgesichert.
+Die bestehende Kern- und Systemmatrix besteht ebenfalls. Weitere
+Qualitätsaufgaben und projektweite Offline-Befunde bleiben offen.
+
+## Fortschritt am 4. November 2026: Adressregister-Gültigkeit und AddressUnit
+
+Registerladen berücksichtigt jetzt Quellgültigkeit und Adressbereich;
+ungültige Register sperren indirekte Zugriffe auf RAM und den exportierten
+Schreibpfad. INV und ADDR bleiben getrennte Fehlerursachen. Die AddressUnit
+ist auf Benutzerwunsch nach Aufgaben geordnet; der geschützte Decoder ist
+unverändert. Die [Abnahme](tiny_cpu_address_validity.md) dokumentiert
+Gegenbeispiele, Korrekturen, Negativkontrollen und verbleibende Prüfbefunde.
+Als nächster Schritt aus 22.1 bleibt die elektrische Schnittstelle und
+Abnahme für gültige externe Eingaben abzugrenzen. 22.2 und 22.5 bleiben offen.
 
 ## Neuer Befund am 1. November 2026: Adressregister-Gültigkeit
+
+Historischer Ausgangsbefund; Korrektur siehe den Nachtrag vom 4. November oben.
 
 `AddressPath.ADDRESS_VALID` bleibt in `AddressUnit` unbenutzt;
 `AddressPath.VALID_IN` liegt fest auf 1. Ein elektrisches Gegenbeispiel mit

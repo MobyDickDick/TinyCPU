@@ -50,6 +50,11 @@ if ! PYTHONPATH=src python3 scripts/test-logisim-address-register.py \
   failed+=(address-register)
 fi
 
+if ! PYTHONPATH=src python3 scripts/test-logisim-address-validity.py \
+    --output "$OUTPUT/address-validity"; then
+  failed+=(address-validity)
+fi
+
 system_args=(--profile tinycpu-16-12
              --system tinycpu-peripherals-16-12-v1
              --system-only

@@ -7,6 +7,7 @@ Start here:
 
 Reference and project records:
 
+- [`tiny_cpu_address_validity.md`](tiny_cpu_address_validity.md): Korrektur der Adressregister-Gültigkeit und nach Aufgaben geordnete AddressUnit mit elektrischen Regressionen
 - [`tiny_cpu_schematic_style.md`](tiny_cpu_schematic_style.md): verbindlicher gemeinsamer Zeichenstil für alle Elektroschemas, einschließlich Pin- und Leitungsgruppen sowie möglichst weniger Konstanten
 - [`tiny_cpu_schematic_reference.md`](tiny_cpu_schematic_reference.md): erste drei überarbeitete Schaltpläne mit sichtbaren Signalbussen, Vorher-/Nachher-Ansichten und Prüfstand
 - [`tiny_cpu_schematic_followup.md`](tiny_cpu_schematic_followup.md): Benutzeranordnung des Akkumulators, ergänzte Flussrichtung, korrigierte Ladegültigkeit und Reset-Erklärung

@@ -1,5 +1,14 @@
 # Arbeitsplan: TinyCPU-Hardware
 
+**Aktueller Nachtrag vom 4. November 2026:** Die zuletzt dokumentierte
+Adressregister-Gültigkeitslücke ist korrigiert. Die AddressUnit wurde auf
+Benutzerwunsch nach Aufgaben angeordnet; 38 zusätzliche elektrische Fälle
+und drei Fehlerkopien sichern den neuen Vertrag ab. Nachweise und Grenzen:
+[`tiny_cpu_address_validity.md`](tiny_cpu_address_validity.md).
+Das nächste begrenzte Paket aus AP 22.1 betrifft die Schnittstelle und
+Abnahme für gültige externe Eingaben. Ältere nächste Schritte unten sind
+historische Zwischenstände.
+
 Dieser Plan führt die vorhandene symbolische ISA schrittweise zu einer in
 Logisim-evolution ausführbaren TinyCPU. Die Python-VM bleibt während des
 gesamten Aufbaus das Referenzmodell. Jeder Schritt muss einzeln prüfbar sein;

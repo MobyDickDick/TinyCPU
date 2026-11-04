@@ -195,7 +195,7 @@
     "CoreDiagnostics": "CORE_DIAGNOSTICS"
   },
   "extraction_baseline_commit": "df3de2bb1afaceabb6f47a67ef10cb474ed25f19",
-  "topology_sha256": "9074ea5b742fc54e1e031f9c1c0aa88fa992ccfe7a20675cfca1a1f27f3c19b3",
+  "topology_sha256": "7757b2d1412aab353c39ec3b754b45b424755ff18c2d2023d24ee10a2e28186f",
   "public_inputs": [
     {
       "name": "CLK",
@@ -331,5 +331,6 @@
       "name": "HALTED_WITH_ERROR",
       "width": 1
     }
-  ]
+  ],
+  "address_validity_acceptance": "docs/tiny_cpu_address_validity.md"
 }

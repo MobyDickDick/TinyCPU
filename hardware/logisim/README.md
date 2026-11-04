@@ -5,7 +5,8 @@ der gleichnamigen `.circ`-Datei. Der [CPU-Kern](TinyCPU.md) beschreibt alle
 29 eingebetteten Teilkreise; ergänzend gibt es Beschreibungen für
 [Peripherie und Interrupts](TinyCPU_Peripherals.md), das
 [Operator-Panel](TinyCPU_Operator.md) sowie sämtliche Diagnose- und Smoke-Dateien.
-Damit sind alle 56 Teilkreisdefinitionen im Bestand erfasst.
+Damit sind einschließlich der beiden neuen Adress-Gültigkeitsbausteine alle
+58 Teilkreisdefinitionen im Bestand erfasst.
 
 `TinyCPUMain` ist die Übersicht aus acht Funktionsboxen. Die Detailverdrahtung
 liegt in den jeweiligen Teilkreisen; auf der obersten Ebene stehen nur diese
