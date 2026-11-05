@@ -13,8 +13,14 @@ Schreibpfad. INV und ADDR bleiben getrennte Fehlerursachen. Die AddressUnit
 ist auf Benutzerwunsch nach Aufgaben geordnet; der geschützte Decoder ist
 unverändert. Die [Abnahme](tiny_cpu_address_validity.md) dokumentiert
 Gegenbeispiele, Korrekturen, Negativkontrollen und verbleibende Prüfbefunde.
-Als nächster Schritt aus 22.1 bleibt die elektrische Schnittstelle und
-Abnahme für gültige externe Eingaben abzugrenzen. 22.2 und 22.5 bleiben offen.
+Die elektrische Schnittstelle und Abnahme für gültige externe Eingaben sind
+inzwischen im [Eingabeplan](tiny_cpu_input_plan.md) abgegrenzt. Die veralteten
+STORE-/Decoder-Mutationsadapter sind repariert und elektrisch abgenommen;
+feste Eingabeerwartungen sind auf VM-Seite geprüft. Als nächster begrenzter
+Schritt folgt die passive INPUT-Baseline vor einer Schaltungsänderung.
+Die elektrische Eingabeimplementierung, 22.2 und 22.5 bleiben offen. Die
+Windows-Suite hat weiterhin vier bestehende Rasterfehlschläge, aber keinen
+Adapterfehler mehr.
 
 ## Neuer Befund am 1. November 2026: Adressregister-Gültigkeit
 
@@ -247,6 +253,9 @@ Defektnachweis für eine konkrete Leitung oder ein bestimmtes Bauteil.
 - [ ] Eingabefälle mit ausdrücklich festgelegten Werten und Gültigkeit prüfen.
   Unerwartete `E`-/`U`-Werte, fehlende Beobachtungen, zusätzliche oder fehlende
   Instruktionsschritte und abweichende Werte müssen die Abnahme abbrechen.
+  Schnittstelle, Taktbezug, Kompatibilitätsgrenze, feste Sollfälle und
+  Negativkontrollen sind im [abgeschlossenen Planungspaket](tiny_cpu_input_plan.md)
+  festgelegt. Die elektrische Umsetzung und Abnahme folgen separat.
 - [x] Einen gezielt falschen Rechenwert bei weiterhin korrektem Halt in einer
   temporären Schaltungskopie elektrisch nachweisen. Das neue Gate muss diesen
   Fall ablehnen; das Erreichen von `HALT` allein darf ihn nicht bestehen lassen.

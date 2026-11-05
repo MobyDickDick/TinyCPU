@@ -112,21 +112,52 @@ def wire_path_exists(circuit, start, end):
     return network.find(a) == network.find(b)
 
 
-def gate_input_constant(circuit, gate_label, input_name):
-    """Locate a constant by the gate contact it drives, even after GUI save."""
-    gates = [c for c in circuit.findall("comp") if attributes(c).get("label") == gate_label]
-    if len(gates) != 1:
-        raise ValueError(f"missing or ambiguous gate: {gate_label}")
-    contacts = [p for p, _, incoming, _, name in component_ports({}, gates[0])
-                if incoming and name == str(input_name)]
-    if len(contacts) != 1:
-        raise ValueError(f"missing gate input: {gate_label}.{input_name}")
-    network = wire_network(circuit, contacts)
-    constants = [c for c in circuit.findall("comp[@name='Constant']")
-                 if network.find(point(c.get("loc"))) == network.find(contacts[0])]
-    if len(constants) != 1:
-        raise ValueError(f"missing or ambiguous constant at {gate_label}.{input_name}")
-    return constants[0]
+def add_output_term(circuit, output_name, term_name):
+    """Inject output OR term into a test copy, independent of gate internals.
+
+    Both signals must be distinct one-bit, right-side output pins. Existing
+    gates and wires stay in place. Extending only the target pin horizontally
+    preserves its automatic symbol order; explicit symbol bindings follow it.
+    Never call this on a production circuit to be saved back to its source.
+    """
+    def output_pin(name):
+        pins = [p for p in circuit.findall("comp[@name='Pin']")
+                if attributes(p).get("label") == name]
+        if len(pins) != 1:
+            raise ValueError(f"missing or ambiguous output: {name}")
+        a = attributes(pins[0])
+        if (a.get("type") != "output" or a.get("width", "1") != "1"
+                or a.get("facing", "east") != "west"):
+            raise ValueError(f"expected a one-bit right-side output: {name}")
+        return pins[0]
+
+    output, term = output_pin(output_name), output_pin(term_name)
+    if output is term:
+        raise ValueError("output and injected term must be distinct")
+    old = output.get("loc")
+    x, y = point(old)
+    tx, ty = point(term.get("loc"))
+    if any(p is not output and point(p.get("loc"))[1] == y
+           for p in circuit.findall("comp[@name='Pin']")
+           if attributes(p).get("type") == "output"):
+        raise ValueError("mutation requires a unique output row")
+    if abs(ty - y) <= 20:
+        raise ValueError("mutation requires separate source and output rows")
+    points = [point(c.get("loc")) for c in circuit.findall("comp")]
+    points += [point(w.get(end)) for w in circuit.findall("wire") for end in ("from", "to")]
+    gx = (max(p[0] for p in points) // 100 + 3) * 100
+    new = location((gx, y))
+    gate = ET.SubElement(circuit, "comp", {"lib": "1", "name": "OR Gate", "loc": new})
+    ET.SubElement(gate, "a", {"name": "label", "val": "TEST_OUTPUT_TERM"})
+    for route in (((x, y), (gx - 100, y), (gx - 100, y - 20), (gx - 50, y - 20)),
+                  ((tx, ty), (gx - 80, ty), (gx - 80, y + 20), (gx - 50, y + 20))):
+        for start, end in zip(route, route[1:]):
+            if start != end:
+                ET.SubElement(circuit, "wire", {"from": location(start), "to": location(end)})
+    output.set("loc", new)
+    for binding in circuit.findall("appear/circ-port"):
+        if binding.get("pin") == old.strip("()"):
+            binding.set("pin", new.strip("()"))
 
 
 def _rotate(dx, dy, facing):

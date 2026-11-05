@@ -7,8 +7,9 @@ import xml.etree.ElementTree as ET
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from tiny_cpu_hierarchy import (
-    attributes, control_bus_splitter, control_bus_splitters, core_topology_fingerprint, flatten_core, gate_input_constant,
-    splitter_groups, verify_core_modularity, wire_path_exists,
+    add_output_term, attributes, component_ports, control_bus_splitter, control_bus_splitters,
+    core_topology_fingerprint, flatten_core, location, point,
+    splitter_groups, verify_core_modularity, wire_network, wire_path_exists,
 )
 from tiny_cpu_verify import generated_symbol_ports
 
@@ -243,16 +244,79 @@ class HierarchyTests(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, mutation):
                         verify_core_modularity(project, self.contract)
 
-    def test_decoder_mutations_find_neutral_inputs_without_constant_labels(self):
-        decoder = self.project.find("circuit[@name='FetchDecodeControls']")
-        for c in decoder.findall("comp[@name='Constant']"):
-            for label in c.findall("a[@name='label']"):
-                c.remove(label)
-        register = gate_input_constant(decoder, "ACC_LOAD_REQUEST", 12)
-        store = gate_input_constant(decoder, "ACC_LOAD_REQUEST", 14)
-        self.assertIsNot(register, store)
-        self.assertEqual(attributes(register)["value"], "0x0")
-        self.assertEqual(attributes(store)["value"], "0x0")
+    def test_decoder_mutations_follow_pins_after_redraw_without_neutral_constants(self):
+        for term in ("LD_REG_CONST", "STORE_ADR"):
+            with self.subTest(term=term):
+                decoder = copy.deepcopy(self.project.find("circuit[@name='FetchDecodeControls']"))
+                # An independently translated/reordered fixture must work too.
+                for c in decoder.findall("comp"):
+                    x, y = point(c.get("loc"))
+                    c.set("loc", location((x + 600, y + 200)))
+                    if c.get("name") == "Constant":
+                        for label in c.findall("a[@name='label']"):
+                            c.remove(label)
+                for w in decoder.findall("wire"):
+                    for end in ("from", "to"):
+                        x, y = point(w.get(end))
+                        w.set(end, location((x + 600, y + 200)))
+                decoder[:] = reversed(list(decoder))
+                instance = ET.Element("comp", {"name": "FetchDecodeControls", "loc": "(100,100)"})
+                interface = generated_symbol_ports(decoder, instance)
+                pins = {attributes(p)["label"]: p for p in decoder.findall("comp[@name='Pin']")}
+                old = pins["ACC_WRITE_REQUEST"].get("loc")
+                original_wires = [dict(w.attrib) for w in decoder.findall("wire")]
+                add_output_term(decoder, "ACC_WRITE_REQUEST", term)
+                self.assertEqual(generated_symbol_ports(decoder, instance), interface)
+                self.assertEqual([dict(w.attrib) for w in decoder.findall("wire")][:len(original_wires)],
+                                 original_wires)
+                gate = next(c for c in decoder.findall("comp")
+                            if attributes(c).get("label") == "TEST_OUTPUT_TERM")
+                contacts = {name: location(p) for p, *_, name in component_ports({}, gate)}
+                self.assertTrue(wire_path_exists(decoder, old, contacts["0"]))
+                self.assertTrue(wire_path_exists(decoder, pins[term].get("loc"), contacts["1"]))
+                network = wire_network(decoder)
+                self.assertEqual(len({network.find(point(p)) for p in contacts.values()}), 3)
+                self.assertEqual(pins["ACC_WRITE_REQUEST"].get("loc"), contacts["output"])
+
+    def test_decoder_mutation_rejects_missing_ambiguous_or_non_bit_output(self):
+        for problem in ("missing", "duplicate", "width", "input", "same"):
+            with self.subTest(problem=problem):
+                decoder = copy.deepcopy(self.project.find("circuit[@name='FetchDecodeControls']"))
+                pin = next(p for p in decoder.findall("comp[@name='Pin']")
+                           if attributes(p).get("label") == "STORE_ADR")
+                term = "STORE_ADR"
+                if problem == "missing":
+                    decoder.remove(pin)
+                elif problem == "duplicate":
+                    decoder.append(copy.deepcopy(pin))
+                elif problem == "width":
+                    ET.SubElement(pin, "a", {"name": "width", "val": "16"})
+                elif problem == "input":
+                    pin.find("a[@name='type']").set("val", "input")
+                else:
+                    term = "ACC_WRITE_REQUEST"
+                before = ET.tostring(decoder)
+                with self.assertRaises(ValueError):
+                    add_output_term(decoder, "ACC_WRITE_REQUEST", term)
+                self.assertEqual(ET.tostring(decoder), before)
+
+    def test_output_mutation_preserves_explicit_symbol_binding(self):
+        circuit = ET.fromstring('''<circuit name="Test">
+            <a name="appearance" val="custom"/>
+            <appear><circ-anchor facing="east" x="100" y="100"/>
+              <circ-port dir="out" pin="200,100" x="100" y="100"/>
+              <circ-port dir="out" pin="200,200" x="100" y="120"/>
+            </appear>
+            <comp name="Pin" lib="0" loc="(200,100)">
+              <a name="label" val="OUT"/><a name="type" val="output"/><a name="facing" val="west"/>
+            </comp>
+            <comp name="Pin" lib="0" loc="(200,200)">
+              <a name="label" val="TERM"/><a name="type" val="output"/><a name="facing" val="west"/>
+            </comp></circuit>''')
+        instance = ET.Element("comp", {"name": "Test", "loc": "(100,100)"})
+        interface = generated_symbol_ports(circuit, instance)
+        add_output_term(circuit, "OUT", "TERM")
+        self.assertEqual(generated_symbol_ports(circuit, instance), interface)
 
     def test_gui_save_defaults_and_xml_order_preserve_topology(self):
         explicit = copy.deepcopy(self.project)

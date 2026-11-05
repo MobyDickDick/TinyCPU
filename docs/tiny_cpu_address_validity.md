@@ -4,6 +4,11 @@ Arbeitspaket vom 4. November 2026, auf dem eingehenden Commit
 `20c14a2` aufbauend. Die Sicherung und elektrischen Rohdaten liegen unter
 `artifacts/address-validity-20261104/`. Die VM und die ISA wurden nicht geändert.
 
+**Späterer Prüfstand vom selben Tag:** Die unten als offen festgehaltenen
+STORE-/Decoder-Mutationsadapter sind inzwischen repariert und elektrisch
+abgenommen. Die [Eingabeplanung](tiny_cpu_input_plan.md) dokumentiert diese
+Nachprüfung; die vier übrigen Rasterbefunde bestehen weiterhin.
+
 ## Elektrischer Ausgangsbefund
 
 Die neue fokussierte Regression enthält 38 Programme. Vor der Korrektur bestanden

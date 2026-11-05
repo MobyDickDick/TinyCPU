@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from tiny_cpu_assembler import assemble, encode_program
 from tiny_cpu_core_trace import CoreMismatch
-from tiny_cpu_hierarchy import gate_input_constant
+from tiny_cpu_hierarchy import add_output_term
 from tiny_cpu_logisim import LogisimError, resolve_jar, run_core_comparison
 from tiny_cpu_profiles import load_profile
 
@@ -32,6 +32,7 @@ def main() -> int:
     profile = load_profile()
     jar = resolve_jar(args.jar)
     source = ROOT / "hardware/logisim" / profile.circuit
+    original = source.read_bytes()
     cases = {
         "negative": "LOAD_CONST(-1)\nSTORE_ADDRESS(101)\nHALT()\n",
         "valid-zero": "LOAD_CONST(0)\nSTORE_ADDRESS(101)\nHALT()\n",
@@ -42,13 +43,11 @@ def main() -> int:
                             jar, args.java, args.output / f"{name}.tsv", 30,
                             f"store-acc-hold-{name}")
 
-    # Re-enable the removed request in a copy by driving its neutral input
-    # high. Follow ACC_LOAD_REQUEST input 14: Constant labels are not saved
-    # by Logisim. The original drawing is never written.
+    # Re-enable only STORE_ADR at the named output in a disposable copy.
+    # This remains valid when the author removes unused gate inputs.
     tree = ET.parse(source)
     decoder = tree.getroot().find("circuit[@name='FetchDecodeControls']")
-    neutral = gate_input_constant(decoder, "ACC_LOAD_REQUEST", 14)
-    neutral.find("a[@name='value']").set("val", "0x1")
+    add_output_term(decoder, "ACC_WRITE_REQUEST", "STORE_ADR")
     mutated = args.output / "store-request-enabled.circ"
     tree.write(mutated, encoding="utf-8", xml_declaration=True)
     program = assemble(cases["negative"], profile)
@@ -65,10 +64,13 @@ def main() -> int:
         mutation_actual = mismatch.actual
     else:
         raise LogisimError("re-enabled accumulator write during STORE unexpectedly passed")
+    if source.read_bytes() != original:
+        raise LogisimError("STORE regression modified the source circuit")
     (args.output / "proof.json").write_text(json.dumps({
         "controls_passed": list(cases), "mutation_rejected": True,
         "edge": 2, "phase": "post", "signal": "ACC",
         "expected": 65535, "actual": mutation_actual,
+        "source_unchanged": True,
     }, indent=2) + "\n", encoding="utf-8")
     print("STORE_ADDRESS accumulator hold passed: negative and valid zero; "
           "re-enabled load request rejected")

@@ -21,6 +21,7 @@ Reference and project records:
 - [`tiny_cpu_modularity_plan.md`](tiny_cpu_modularity_plan.md): aktuelle Vorgabe und Abnahme der CPU-Übersicht aus acht Funktionsboxen (AP 23)
 - [`tiny_cpu_test_guide.md`](tiny_cpu_test_guide.md): Testanleitung für die Logisim-Schaltung
 - [`tiny_cpu_core_trace.md`](tiny_cpu_core_trace.md): elektrischer Kernvergleich, Flankenvertrag, Rohdaten und offene Abnahmebefunde aus AP 22.1
+- [`tiny_cpu_input_plan.md`](tiny_cpu_input_plan.md): abgegrenzte externe Eingabeschnittstelle und elektrische Sollfälle aus AP 22.1; Umsetzung offen, veraltete Mutationsadapter repariert
 - [`tiny_cpu_instruction_status.md`](tiny_cpu_instruction_status.md): aktuell nachgewiesener Funktionsstand aller Befehle
 - [`logisim_diagnostics_known_issues.md`](logisim_diagnostics_known_issues.md): bekannte Besonderheiten der Diagnoseschaltungen
 - [`tiny_cpu_roadmap.md`](tiny_cpu_roadmap.md): Hardware-Arbeitsplan

@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from tiny_cpu_assembler import opcode_table
-from tiny_cpu_hierarchy import gate_input_constant
+from tiny_cpu_hierarchy import add_output_term
 from tiny_cpu_logisim import LogisimError, resolve_jar
 from tiny_cpu_profiles import load_profile
 
@@ -61,7 +61,7 @@ SYSTEM_ROWS = {
 
 
 def expected_row(code: int, opcodes: dict[str, dict[str, object]]) -> dict[str, int]:
-    row = dict.fromkeys(OUTPUTS, 0)
+    row = dict.fromkeys((*OUTPUTS, "ACC_WRITE_REQUEST"), 0)
     instruction = next((item for item in opcodes.values() if item["code"] == code), None)
     if instruction is None:
         if code in SYSTEM_ROWS:
@@ -78,13 +78,10 @@ def expected_row(code: int, opcodes: dict[str, dict[str, object]]) -> dict[str, 
     mnemonic = str(instruction["mnemonic"])
     family = mnemonic.split("_", 1)[0]
     arithmetic = family in {"ADD", "SUB", "MUL", "DIV", "AND", "OR", "XOR"}
-    # Hold/write requirements diagnosed in AP 22.1's complete core traces.
-    if mnemonic in {"STORE_ADDRESS", "STORE_ADDRESS_REGISTER",
-                    "STORE_ADDRESS_REGISTER_PLUS_OFFSET", "LOAD_ADDRESS_REGISTER_CONST",
-                    "LOAD_ADDRESS_REGISTER_ADDRESS", "CLEAR_ERROR"}:
-        row["ACC_WRITE_REQUEST"] = 0
-    if mnemonic == "INPUT":
-        row["ACC_WRITE_REQUEST"] = 1
+    # Check every row, including all holds and reserved/system instructions.
+    row["ACC_WRITE_REQUEST"] = int(arithmetic or mnemonic in {
+        "NOT", "LOAD_CONST", "LOAD_ADDRESS", "LOAD_ADDRESS_REGISTER",
+        "LOAD_ADDRESS_REGISTER_PLUS_OFFSET", "INPUT"})
     if mnemonic in {"LOAD_ADDRESS", "LOAD_ADDRESS_REGISTER",
                     "LOAD_ADDRESS_REGISTER_PLUS_OFFSET"}:
         row["ACC_MEMORY_REQUEST"] = 1
@@ -105,7 +102,8 @@ def expected_row(code: int, opcodes: dict[str, dict[str, object]]) -> dict[str, 
     return row
 
 
-def check_table(output: str, source: Path, opcodes: dict[str, dict[str, object]]) -> None:
+def check_table(output: str, source: Path, opcodes: dict[str, dict[str, object]],
+                *, extra_write_opcode: int | None = None) -> None:
     lines = [line.split() for line in output.splitlines() if line.strip()]
     if (not lines or not lines[0] or lines[0][0] != "OPCODE"
             or not (set(OUTPUTS) | {"ACC_WRITE_REQUEST"}).issubset(lines[0])):
@@ -119,6 +117,8 @@ def check_table(output: str, source: Path, opcodes: dict[str, dict[str, object]]
         if len(cells) != len(actual_header) or int(cells[0], 2) != code:
             raise LogisimError(f"{source.name}: malformed decode row {code}: {' '.join(cells)}")
         expected = expected_row(code, opcodes)
+        if code == extra_write_opcode:
+            expected["ACC_WRITE_REQUEST"] = 1
         actual = dict(zip(actual_header[1:], cells[1:]))
         differences = [f"{name} (expected {value}, actual {actual[name]})"
                        for name, value in expected.items() if actual[name] != str(value)]
@@ -161,22 +161,9 @@ def main() -> int:
         tree = ET.parse(source)
         check_table(run_table(tree, jar, args.output / "control"), source, opcodes)
         decoder = tree.getroot().find("circuit[@name='FetchDecodeControls']")
-        neutral = gate_input_constant(decoder, "ACC_LOAD_REQUEST", 12)
-        pin = next(component for component in decoder.findall("comp[@name='Pin']")
-                   if component.find("a[@name='label'][@val='LD_REG_CONST']") is not None)
-        branches = [wire for wire in decoder.findall("wire")
-                    if pin.get("loc") in {wire.get("from"), wire.get("to")}]
-        if len(branches) != 1:
-            raise LogisimError("register-request mutation requires a single decoded source branch")
-        branch = branches[0]
-        start = branch.get("from") if branch.get("to") == pin.get("loc") else branch.get("to")
-        target = neutral.get("loc")
-        # Restore the diagnosed branch only in the copy, following the named
-        # source junction and gate contact rather than fixed canvas positions.
-        bend = f"({start.strip('()').split(',')[0]},{target.strip('()').split(',')[1]})"
-        decoder.remove(neutral)
-        ET.SubElement(decoder, "wire", {"from": start, "to": bend})
-        ET.SubElement(decoder, "wire", {"from": bend, "to": target})
+        # Inject exactly the forbidden decoded term at the named output in a
+        # disposable copy; no removed constants or gate-input indices required.
+        add_output_term(decoder, "ACC_WRITE_REQUEST", "LD_REG_CONST")
         mutated = run_table(tree, jar, args.output / "register-request-enabled")
         try:
             check_table(mutated, source, opcodes)
@@ -187,10 +174,13 @@ def main() -> int:
                 raise
         else:
             raise LogisimError("re-enabled register-constant load request unexpectedly passed")
+        # Establish that this is the only altered decode, not just the first.
+        check_table(mutated, source, opcodes, extra_write_opcode=39)
         if source.read_bytes() != original:
             raise LogisimError("decoder regression modified the source circuit")
         (args.output / "proof.json").write_text(json.dumps({
             "control_rows_passed": 64, "mutation_rejected": True,
+            "mutation_rows_checked": 64,
             "opcode": 39, "signal": "ACC_WRITE_REQUEST", "expected": 0, "actual": 1,
             "source_unchanged": True,
         }, indent=2) + "\n", encoding="utf-8")

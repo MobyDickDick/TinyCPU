@@ -8,6 +8,10 @@ Schreibereignis geprüft. Die zusätzliche Spalte ist bei neuen Exporten
 verpflichtend; ältere TSV-Dateien bleiben historische Nachweise.
 Die [Adressgültigkeits-Abnahme](tiny_cpu_address_validity.md) dokumentiert
 die Korrektur, Darstellung, Negativkontrollen und verbleibenden Offline-Befunde.
+Der anschließende [Eingabeplan](tiny_cpu_input_plan.md) legt die zusätzliche
+Eingabegrenze und Abnahme fest; sie ist noch nicht elektrisch implementiert.
+Die dort ebenfalls reparierten STORE-/Decoder-Adapter benötigen keine
+historischen Nullkonstanten oder Gattereingangsnummern mehr.
 
 **Historischer Stand: 31. Oktober 2026.** Der Vergleich ist im verpflichtenden Gate aktiv.
 Beide identischen Minimalkernläufe, der vollständige Countdown und alle
@@ -137,8 +141,9 @@ PYTHONPATH=src python scripts/test-logisim-store.py
 
 Sie prüft `LOAD_CONST(-1); STORE_ADDRESS(101); HALT` und den gleichen Ablauf
 mit gültiger `0` vollständig gegen die VM, einschließlich Akkumulatorhalten,
-Speicherwert und -gültigkeit sowie Halt. Anschließend setzt sie ausschließlich
-in einer Kopie die benannte neutrale Konstante `ACC_STORE_DISABLED` auf `1`.
+Speicherwert und -gültigkeit sowie Halt. Anschließend ergänzt sie ausschließlich
+in einer Kopie den benannten Decode `STORE_ADR` über ein ODER am Ausgang
+`ACC_WRITE_REQUEST`.
 Der Vergleich muss dann an Flanke 2, `post`, `ACC` (Soll `65535`, abweichender
 definierter Istwert) ablehnen und den tatsächlichen falschen Wert in
 `proof.json` festhalten. Nach der korrigierten Speicherladeauswahl ist dieser
@@ -185,9 +190,9 @@ Speicherlade-Terme. Die übrigen offenen Register- und Fehlerfälle sind durch
 diese gezielten Prüfungen nicht freigegeben.
 
 Der Decodertest prüft außerdem `ACC_WRITE_REQUEST=0` für
-`LOAD_ADDRESS_REGISTER_CONST` (`0x27`). Eine gesonderte Kopie entfernt nur die
-neutrale Konstante `ACC_LD_REG_CONST_DISABLED` und stellt den belegten
-`LD_REG_CONST`-Zweig zur Akkumulator-Ladeanforderung wieder her. Die gesamte
+`LOAD_ADDRESS_REGISTER_CONST` (`0x27`). Eine gesonderte Kopie ergänzt nur den
+benannten `LD_REG_CONST`-Term über ein ODER am Ausgang `ACC_WRITE_REQUEST`.
+Die gesamte
 64-Zeilen-Prüfung muss dann ausschließlich an Opcode `0x27` bei
 `ACC_WRITE_REQUEST` (Soll `0`, Ist `1`) ablehnen. Unveränderte Quelle,
 Projektkopien, Befehle und beide Rohtraces werden unter `artifacts/decode/`
