@@ -1,14 +1,17 @@
 # Arbeitsplan: TinyCPU-Hardware
 
-**Aktueller Nachtrag vom 4. November 2026:** Die zuletzt dokumentierte
+**Aktueller Nachtrag vom 5. November 2026:** Die zuletzt dokumentierte
 Adressregister-Gültigkeitslücke ist korrigiert. Die AddressUnit wurde auf
 Benutzerwunsch nach Aufgaben angeordnet; 38 zusätzliche elektrische Fälle
 und drei Fehlerkopien sichern den neuen Vertrag ab. Nachweise und Grenzen:
 [`tiny_cpu_address_validity.md`](tiny_cpu_address_validity.md).
 Das begrenzte Paket zur Schnittstelle und Abnahme für gültige externe Eingaben
 ist im [Eingabeplan](tiny_cpu_input_plan.md) abgeschlossen. Die beiden veralteten
-Mutationsadapter sind repariert und elektrisch geprüft. Als Nächstes folgt
-die dort beschriebene passive INPUT-Baseline; Implementierung und elektrische
+Mutationsadapter sind repariert und elektrisch geprüft. Die
+[passive INPUT-Baseline](tiny_cpu_input_baseline.md) ist nun ebenfalls
+abgeschlossen: vollständiger Kern-/VM-Vergleich und interne Messpfade bestehen
+bei unveränderten Quellschaltungen. Als Nächstes folgt Schritt 2 des Eingabeplans,
+die zusätzliche Eingabegrenze mit zwei Boxvarianten. Implementierung und elektrische
 Eingabeabnahme bleiben offen. Ältere nächste Schritte unten sind historische
 Zwischenstände.
 

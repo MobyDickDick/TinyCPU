@@ -1,9 +1,20 @@
 # AP 22: Qualitätsbefunde und belastbare Abnahme
 
-**Stand:** 4. November 2026. **Status:** Die Adressregister-Gültigkeit ist
+**Stand:** 5. November 2026. **Status:** Die Adressregister-Gültigkeit ist
 korrigiert und mit 38 zusätzlichen elektrischen Fällen abgesichert.
 Die bestehende Kern- und Systemmatrix besteht ebenfalls. Weitere
 Qualitätsaufgaben und projektweite Offline-Befunde bleiben offen.
+
+## Fortschritt am 5. November 2026: passive INPUT-Baseline
+
+Schritt 1 des Eingabeplans ist [abgeschlossen](tiny_cpu_input_baseline.md):
+`LOAD_CONST(7); INPUT; HALT` besteht den vollständigen elektrischen
+Kern-/VM-Vergleich sowie die zusätzliche passive Messung der benannten
+Decode-, Lade- und Fehlerpfade. INPUT ohne Angebot lädt `0 INVALID` und setzt
+ausschließlich das INPUT-Flag. Alle Quellschaltungen bleiben bytegleich;
+20 passende Unit-Tests bestehen. Als Nächstes folgt die zusätzliche
+Eingabegrenze mit den zwei Boxvarianten gemäß Schritt 2 des Eingabeplans.
+Die elektrische Eingabeabnahme und AP 22.1 bleiben offen.
 
 ## Fortschritt am 4. November 2026: Adressregister-Gültigkeit und AddressUnit
 
@@ -17,7 +28,7 @@ Die elektrische Schnittstelle und Abnahme für gültige externe Eingaben sind
 inzwischen im [Eingabeplan](tiny_cpu_input_plan.md) abgegrenzt. Die veralteten
 STORE-/Decoder-Mutationsadapter sind repariert und elektrisch abgenommen;
 feste Eingabeerwartungen sind auf VM-Seite geprüft. Als nächster begrenzter
-Schritt folgt die passive INPUT-Baseline vor einer Schaltungsänderung.
+Schritt folgte die inzwischen abgeschlossene passive INPUT-Baseline vor einer Schaltungsänderung.
 Die elektrische Eingabeimplementierung, 22.2 und 22.5 bleiben offen. Die
 Windows-Suite hat weiterhin vier bestehende Rasterfehlschläge, aber keinen
 Adapterfehler mehr.

@@ -1,7 +1,8 @@
 # AP 22.1: Externe Eingabe – Schnittstelle und Abnahme
 
-**Stand: 4. November 2026. Status:** Das begrenzte Planungspaket ist
-abgeschlossen; die elektrische Implementierung und Eingabeabnahme sind offen.
+**Stand: 5. November 2026. Status:** Das begrenzte Planungspaket und die
+[passive INPUT-Baseline](tiny_cpu_input_baseline.md) sind abgeschlossen;
+die elektrische Implementierung und Eingabeabnahme sind offen.
 Ausgangsstand ist Commit `1e7a8f6`. Dieses Dokument legt den nächsten
 Funktionsschritt aus der [Qualitätsplanung](tiny_cpu_quality_work_packages.md)
 fest. Die produktiven `.circ`-Dateien wurden in diesem Paket nicht geändert.
@@ -132,7 +133,7 @@ ausgelassene Transaktionen. Der volle Comparator bleibt für jede Fixture aktiv.
 
 ## Umsetzung in einzeln prüfbaren Schritten
 
-1. **Als Nächstes: passive INPUT-Baseline.** `LOAD_CONST(7); INPUT; HALT`
+1. **Abgeschlossen am 5. November 2026: passive INPUT-Baseline.** `LOAD_CONST(7); INPUT; HALT`
    unverändert am bisherigen Kern ausführen. Um die INPUT-Flanke Decode,
    Datapath-Daten, Ladefreigabe und Ladegültigkeit sowie `ErrorFlags.SET_INPUT`
    und den übernommenen Fehlerzustand über benannte Pfade beobachten. Den
@@ -140,7 +141,10 @@ ausgelassene Transaktionen. Der volle Comparator bleibt für jede Fixture aktiv.
    erweiternden Netze benennen. Eine fehlende öffentliche Eingabe ist kein
    Beleg für eine defekte Leitung in diesem bisherigen Fehlerfall.
    Noch keine Leitungsänderung und keine vollständige Matrixwiederholung.
-2. Die zusätzliche Grenze und die zwei Boxvarianten implementieren; dabei die
+   [Nachweis und Messpfade](tiny_cpu_input_baseline.md): Beide elektrischen
+   Läufe stimmen vollständig mit der VM überein; sämtliche Quellschaltungen
+   blieben bytegleich.
+2. **Als Nächstes:** Die zusätzliche Grenze und die zwei Boxvarianten implementieren; dabei die
    bestehenden sechs Boxen und alle ursprünglichen Blattdefinitionen, besonders
    den geschützten Decoder, bytegleich erhalten. Für jeden Daten-, Gültigkeits-
    und Fehlerpfad zuerst den benannten elektrischen Nachweis sichern, dann nur
