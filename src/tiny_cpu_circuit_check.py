@@ -190,31 +190,23 @@ def _drivers(circuit: ET.Element,
             ))
         elif definitions and kind in definitions:
             result.extend(_subcircuit_outputs(definitions[kind], component))
+        elif kind in {"Constant", "Clock"} or (
+                kind == "Pin" and attributes.get("type", "input") == "input"):
+            result.append(_Driver(_point(component.get("loc")),
+                                  attributes.get("label") or f"{kind}@{component.get('loc')}"))
+        elif kind == "Register" and attributes.get("appearance") == "logisim_evolution":
+            from tiny_cpu_hierarchy import component_ports
+            result.extend(_Driver(p, attributes.get("label") or "Register")
+                          for p, _, _, output, _ in component_ports({}, component) if output)
     return result
 
 
 def _gate_inputs(component: ET.Element) -> list[Point]:
-    """Return input terminals for the standard east-facing gate shape."""
-    attributes = _attributes(component)
-    if attributes.get("facing", "east") != "east":
+    """Use the native-checked geometry, including bubbles and dense inputs."""
+    if not component.get("name", "").endswith(" Gate"):
         return []
-    count = int(attributes.get("inputs", "2"))
-    x, y = _point(component.get("loc", ""))
-    size = int(attributes.get("size", "50"))
-    spacing = 10 if size == 30 else 20
-    if count % 2:
-        offsets = [spacing * (index - count // 2) for index in range(count)]
-    else:
-        # Logisim keeps an empty grid interval on the gate centre line for an
-        # even input count.  In particular, a compact four-input gate uses
-        # -20, -10, +10 and +20 rather than half-grid contacts.
-        offsets = [spacing * (index - count // 2 + (index >= count // 2))
-                   for index in range(count)]
-    return [
-        (x - size - (10 if attributes.get(f"negate{index}") == "true" else 0),
-         y + offset)
-        for index, offset in enumerate(offsets)
-    ]
+    from tiny_cpu_hierarchy import component_ports
+    return [point for point, _, incoming, _, _ in component_ports({}, component) if incoming]
 
 
 def _multiplexer_inputs(component: ET.Element) -> list[Point]:
@@ -508,6 +500,28 @@ def inspect_circuit(circuit: ET.Element,
     issues.extend(_unwired_multiplexer_input_issues(circuit))
     issues.extend(_dangling_subcircuit_output_issues(circuit, definitions))
     issues.extend(_dangling_bus_input_issues(circuit, definitions))
+    # An output pin can be entirely isolated after a manual move. No wire
+    # exists for the older dangling-wire checks to follow in that case.
+    segments = [(_point(w.get("from")), _point(w.get("to")))
+                for w in circuit.findall("wire")]
+    for pin in circuit.findall("comp[@name='Pin']"):
+        attrs = _attributes(pin)
+        if attrs.get("type") != "output":
+            continue
+        terminal = _point(pin.get("loc"))
+        shared_contact = any(
+            other is not pin and _point(other.get("loc")) == terminal
+            for other in circuit.findall("comp") if other.get("name") != "Text")
+        # Subcircuit contacts may be offset from their anchor. Account for
+        # those too, without treating the pin itself as its own connection.
+        if definitions:
+            shared_contact |= any(
+                terminal == driver.point
+                for other in circuit.findall("comp")
+                if other.get("name") in definitions
+                for driver in _subcircuit_outputs(definitions[other.get("name")], other))
+        if not shared_contact and not any(_on_segment(terminal, s) for s in segments):
+            issues.append(CircuitIssue(name, f"{attrs.get('label', 'output')} is an unconnected output pin"))
     return issues
 
 

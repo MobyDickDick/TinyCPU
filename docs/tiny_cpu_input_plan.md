@@ -7,6 +7,14 @@ Ausgangsstand ist Commit `1e7a8f6`. Dieses Dokument legt den nächsten
 Funktionsschritt aus der [Qualitätsplanung](tiny_cpu_quality_work_packages.md)
 fest. Die produktiven `.circ`-Dateien wurden in diesem Paket nicht geändert.
 
+**Nachtrag vom 6. November 2026:** Die zunächst an `ERROR_INPUT=U`
+gestoppte [Eingangskontrolle](tiny_cpu_input_boundary_precheck.md) führte zum
+Auftrag, alle Schaltungen zu korrigieren und zeichnerisch zu überarbeiten.
+Die FaultUnit-Ausgangslücke ist inzwischen produktiv repariert; Nachweise
+und weitere Korrekturen stehen im [Abschlussbericht](tiny_cpu_circuit_repair_20261106.md).
+Schritt 2 mit den beiden Eingabevarianten bleibt offen und ist der nächste
+Funktionsschritt nach der erneuten passiven Baseline.
+
 ## Ausgangspunkt und Ziel
 
 Die VM unterstützt eine Eingabewarteschlange. Der aktuelle öffentliche Kern
@@ -144,7 +152,9 @@ ausgelassene Transaktionen. Der volle Comparator bleibt für jede Fixture aktiv.
    [Nachweis und Messpfade](tiny_cpu_input_baseline.md): Beide elektrischen
    Läufe stimmen vollständig mit der VM überein; sämtliche Quellschaltungen
    blieben bytegleich.
-2. **Als Nächstes:** Die zusätzliche Grenze und die zwei Boxvarianten implementieren; dabei die
+2. **Offen; Eingangskontrolle am 6. November 2026 gestoppt:** Vor der
+   Implementierung zunächst die [belegte FaultUnit-Ausgangslücke](tiny_cpu_input_boundary_precheck.md)
+   beheben und die Baseline erneut abnehmen. Danach die zusätzliche Grenze und die zwei Boxvarianten implementieren; dabei die
    bestehenden sechs Boxen und alle ursprünglichen Blattdefinitionen, besonders
    den geschützten Decoder, bytegleich erhalten. Für jeden Daten-, Gültigkeits-
    und Fehlerpfad zuerst den benannten elektrischen Nachweis sichern, dann nur

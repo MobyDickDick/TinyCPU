@@ -29,7 +29,10 @@ sys.modules[WIRE_SPEC.name] = WIRE_CONTACTS
 WIRE_SPEC.loader.exec_module(WIRE_CONTACTS)
 
 
-from tiny_cpu_hierarchy import flatten_core, wire_path_exists as _hierarchy_wire_path_exists
+from tiny_cpu_hierarchy import (
+    attributes as _attrs, component_ports as _ports, location as _location,
+    point as _point, flatten_core, wire_path_exists as _hierarchy_wire_path_exists,
+)
 
 
 def _parse_project(path):
@@ -81,6 +84,29 @@ def _remove_wire_at(circuit: ET.Element, endpoint: str) -> None:
 
 def _wire_path_exists(circuit, start, end):
     return _hierarchy_wire_path_exists(circuit, start, end)
+
+
+def _terminal(circuit, owner, port, definitions=None):
+    matches = [co for co in circuit.findall('comp') if _attrs(co).get('label') == owner]
+    if not matches:
+        matches = circuit.findall(f"comp[@name='{owner}']")
+    if len(matches) != 1:
+        raise AssertionError(f"ambiguous component {owner}")
+    return next(_location(p) for p, *_, name in _ports(definitions or {}, matches[0]) if name == port)
+
+
+def _disconnect_system_port(path, circuit_name, owner, port):
+    project = ET.parse(path)
+    definitions = {co.get('name'): co for co in project.getroot().findall('circuit')}
+    definitions['TinyCPUMain'] = ET.parse(path.parent / 'TinyCPU.circ').getroot().find("circuit[@name='TinyCPUMain']")
+    circuit = definitions[circuit_name]
+    endpoint = _terminal(circuit, owner, port, definitions)
+    attached = [w for w in circuit.findall('wire') if endpoint in w.attrib.values()]
+    if not attached:
+        raise AssertionError(f"mutation would do nothing: {owner}.{port}")
+    for wire in attached:
+        circuit.remove(wire)
+    project.write(path, encoding='utf-8', xml_declaration=True)
 
 
 def _multiplexer_driven_by(circuit: ET.Element, pin_label: str,
@@ -223,36 +249,12 @@ class CircuitVerificationTests(unittest.TestCase):
         self.assertEqual(project.findall(".//comp[@name='Tunnel']"), [])
 
     def test_ap18_authored_integration_layout_is_not_rebuilt_from_stale_coordinates(self) -> None:
-        """Keep removed pre-redraw routing from being presented as a repair."""
-        project = VERIFY.ET.parse(
-            MODULE_PATH.parents[1] / "hardware/logisim/TinyCPU_Peripherals.circ"
-        ).getroot()
+        project = ET.parse(MODULE_PATH.parents[1] / 'hardware/logisim/TinyCPU_Peripherals.circ').getroot()
         top = project.find("circuit[@name='TinyCPUSystemMain']")
-        boundary = project.find("circuit[@name='CPUIntegrationBoundary']")
-        self.assertIsNotNone(top)
-        self.assertIsNotNone(boundary)
-
-        top_instances = {
-            component.get("name"): component.get("loc")
-            for component in top.findall("comp")
-            if component.get("lib") is None
-        }
-        self.assertEqual(top_instances, {
-            "CPUIntegrationBoundary": "(1260,610)",
-            "OutputMemoryPath": "(810,360)",
-            "InterruptController": "(810,590)",
-        })
-        core = boundary.find("comp[@name='TinyCPUMain']")
-        self.assertIsNotNone(core)
-        self.assertEqual(core.get("loc"), "(660,160)")
-
-        wires = {(wire.get("from"), wire.get("to")) for wire in top.findall("wire")}
-        stale_reconstruction = {
-            ("(1190,830)", "(1270,830)"),
-            ("(1270,830)", "(1270,150)"),
-            ("(1270,150)", "(410,150)"),
-        }
-        self.assertFalse(stale_reconstruction <= wires)
+        self.assertEqual({co.get('name') for co in top.findall('comp') if co.get('lib') is None},
+                         {'CPUIntegrationBoundary', 'OutputMemoryPath', 'InterruptController'})
+        self.assertEqual(project.findall(".//comp[@name='Tunnel']"), [])
+        VERIFY.verify_system_circuit()
 
     def test_ap18_illegal_return_gate_output_reaches_error_flags(self) -> None:
         project = _parse_project(
@@ -323,8 +325,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(820,960)" to="(1540,960)"/>', "", 1), encoding="utf-8")
+        _disconnect_system_port(circuit, 'TinyCPUSystemMain', 'IN_INTERRUPT_HANDLER', 'IN_INTERRUPT_HANDLER')
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -341,8 +342,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(330,630)" to="(590,630)"/>', "", 1), encoding="utf-8")
+        _disconnect_system_port(circuit, 'TinyCPUSystemMain', 'InterruptController', 'INTERRUPT_REQUEST')
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -953,10 +953,11 @@ class CircuitVerificationTests(unittest.TestCase):
         project = _parse_project(circuit)
         boundary = project.getroot().find("circuit[@name='CPUIntegrationBoundary']")
         self.assertIsNotNone(boundary)
-        wire = next(item for item in boundary.findall("wire")
-                    if item.get("from") == "(320,240)")
-        boundary.remove(wire)
-        ET.SubElement(boundary, "wire", {"from": "(320,240)", "to": "(400,180)"})
+        pin = _component_by_label(boundary, 'RAM_READ_VALUE')
+        _remove_wire_at(boundary, pin.get('loc'))
+        core_definition = ET.parse(temporary / 'logisim/TinyCPU.circ').getroot().find("circuit[@name='TinyCPUMain']")
+        core_ports = VERIFY.generated_symbol_ports(core_definition, boundary.find("comp[@name='TinyCPUMain']"))
+        ET.SubElement(boundary, 'wire', {'from':pin.get('loc'), 'to':core_ports['EXTERNAL_MEMORY_VALID']})
         project.write(circuit, encoding="utf-8", xml_declaration=True)
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         with mock.patch.object(VERIFY, "LOGISIM", temporary / "logisim"), \
@@ -1252,22 +1253,21 @@ class CircuitVerificationTests(unittest.TestCase):
         # ports, not merely pass near the three boundary instances.
         root = MODULE_PATH.parents[1]
         source = root / "hardware" / "logisim"
-        terminals = (
-            "(1040,610)", "(1040,630)", "(810,360)", "(810,380)",
-            "(1260,650)", "(1260,670)", "(810,440)", "(1260,710)",
-            "(1260,690)", "(1260,730)", "(1260,750)", "(1260,770)",
-            "(1260,790)", "(1260,810)",
-            "(810,590)", "(810,690)", "(810,650)",
-        )
-        for terminal in terminals:
-            with self.subTest(cpu_hand_off=terminal):
+        reference = ET.parse(source / 'TinyCPU_Peripherals.circ').getroot()
+        definition = reference.find("circuit[@name='CPUIntegrationBoundary']")
+        # READ_VALUE/READ_VALID are optional raw-RAM exports, outside the 17 top-level handoffs.
+        labels = [_attrs(pin)['label'] for pin in definition.findall("comp[@name='Pin']")
+                  if _attrs(pin)['label'] not in {'READ_VALUE', 'READ_VALID'}]
+        for label in labels:
+            with self.subTest(cpu_hand_off=label):
                 temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
                 shutil.copytree(source, temporary / "logisim")
                 circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
                 project = _parse_project(circuit)
                 top = project.getroot().find("circuit[@name='TinyCPUSystemMain']")
-                wire = next(item for item in top.findall("wire")
-                            if terminal in {item.get("from"), item.get("to")})
+                instance = top.find("comp[@name='CPUIntegrationBoundary']")
+                terminal = VERIFY.generated_symbol_ports(definition, instance)[label]
+                wire = next(item for item in top.findall('wire') if terminal in item.attrib.values())
                 top.remove(wire)
                 project.write(circuit, encoding="utf-8", xml_declaration=True)
                 system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
@@ -1316,15 +1316,12 @@ class CircuitVerificationTests(unittest.TestCase):
         top = project.getroot().find("circuit[@name='TinyCPUSystemMain']")
         self.assertIsNotNone(top)
 
-        # Move the CPU ADDRESS route from OutputMemoryPath.ADDRESS (590,400)
-        # onto its 16-bit RAM_READ_VALUE terminal (590,360).  This reproduces
-        # the particularly dangerous redraw regression independently of the
-        # checked-in coordinate contract.
-        address_end = next(
-            wire for wire in top.findall("wire")
-            if wire.get("to") == "(590,400)"
-        )
-        address_end.set("to", "(590,360)")
+        definition = project.getroot().find("circuit[@name='OutputMemoryPath']")
+        instance = top.find("comp[@name='OutputMemoryPath']")
+        ports = VERIFY.generated_symbol_ports(definition, instance)
+        wire = next(w for w in top.findall('wire') if ports['ADDRESS'] in w.attrib.values())
+        endpoint = 'from' if wire.get('from') == ports['ADDRESS'] else 'to'
+        wire.set(endpoint, ports['RAM_READ_VALUE'])
         project.write(circuit, encoding="utf-8", xml_declaration=True)
 
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
@@ -1363,8 +1360,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(340,260)" to="(460,260)"/>', "", 1), encoding="utf-8")
+        _disconnect_system_port(circuit, 'OutputPort', 'OUTPUT_VALID', 'enable')
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -1418,8 +1414,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(600,350)" to="(620,350)"/>', "", 1), encoding="utf-8")
+        _disconnect_system_port(circuit, 'OutputMemoryPath', 'OUTPUT_WRITE_GATE', '0')
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -1436,10 +1431,11 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<comp lib="5" loc="(1200,690)" name="Register">\n      <a name="appearance" val="logisim_evolution"/>\n      <a name="labelfont" val="SansSerif plain 9"/>\n      <a name="width" val="12"/>',
-            '<comp lib="5" loc="(1200,690)" name="Register">\n      <a name="appearance" val="logisim_evolution"/>\n      <a name="labelfont" val="SansSerif plain 9"/>\n      <a name="width" val="1"/>', 1),
-            encoding="utf-8")
+        project = ET.parse(circuit)
+        irq = project.getroot().find("circuit[@name='InterruptController']")
+        register = next(co for co in irq.findall("comp[@name='Register']") if _attrs(co).get('width') == '12')
+        register.find("a[@name='width']").set('val', '1')
+        project.write(circuit, encoding='utf-8', xml_declaration=True)
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -1456,8 +1452,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(1090,160)" to="(1130,160)"/>', "", 1), encoding="utf-8")
+        _disconnect_system_port(circuit, 'InterruptController', 'RISING_EDGE_DETECT', '0')
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -1474,8 +1469,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(1090,410)" to="(1120,410)"/>', "", 1), encoding="utf-8")
+        _disconnect_system_port(circuit, 'InterruptController', 'INTERRUPT_PENDING', 'INTERRUPT_PENDING')
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -1492,8 +1486,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(1090,580)" to="(1190,580)"/>', "", 1), encoding="utf-8")
+        _disconnect_system_port(circuit, 'InterruptController', 'INTERRUPT_ENABLED', 'INTERRUPT_ENABLED')
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -1511,8 +1504,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(990,450)" to="(990,620)"/>', "", 1), encoding="utf-8")
+        _disconnect_system_port(circuit, 'InterruptController', 'MASK_ACCEPT_PRIORITY', '1')
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -1529,8 +1521,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(1350,360)" to="(1390,360)"/>', "", 1), encoding="utf-8")
+        _disconnect_system_port(circuit, 'InterruptController', 'INTERRUPT_ACCEPT', 'INTERRUPT_ACCEPT')
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -1548,8 +1539,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(530,70)" to="(860,70)"/>', "", 1), encoding="utf-8")
+        _disconnect_system_port(circuit, 'InterruptController', 'SYNCHRONOUS_RESET_TRIGGER', '1')
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -1567,10 +1557,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(670,280)" to="(740,280)"/>', "", 1),
-            encoding="utf-8",
-        )
+        _disconnect_system_port(circuit, 'InterruptController', 'INTERRUPT_ACCEPT_SOURCE', '0')
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -1586,25 +1573,14 @@ class CircuitVerificationTests(unittest.TestCase):
                 VERIFY.verify_system_circuit()
 
     def test_ap18_pending_next_state_includes_current_request_edge(self) -> None:
-        """A masked request edge must be stored instead of being tied low."""
-        root = _parse_project(
-            MODULE_PATH.parents[1] / "hardware" / "logisim" / "TinyCPU_Peripherals.circ"
-        ).getroot()
-        interrupt = root.find("circuit[@name='InterruptController']")
-        self.assertIsNotNone(interrupt)
-        wires = {
-            (wire.get("from"), wire.get("to"))
-            for wire in interrupt.findall("wire")
-        }
-        self.assertIn(("(670,280)", "(740,280)"), wires)
-        self.assertIn(("(700,390)", "(700,420)"), wires)
-        self.assertIn(("(700,390)", "(780,390)"), wires)
-        self.assertIn(("(740,280)", "(740,360)"), wires)
-        self.assertIn(("(740,360)", "(780,360)"), wires)
-        self.assertIn(("(810,370)", "(880,370)"), wires)
-        self.assertIn(("(880,370)", "(880,400)"), wires)
-        self.assertIn(("(880,400)", "(890,400)"), wires)
-        self.assertIn(("(920,410)", "(1030,410)"), wires)
+        project = ET.parse(MODULE_PATH.parents[1] / 'hardware/logisim/TinyCPU_Peripherals.circ').getroot()
+        irq = project.find("circuit[@name='InterruptController']")
+        for source, target in [('RISING_EDGE_DETECT', 'PENDING_EDGE_WHEN_DISABLED'),
+                               ('PENDING_EDGE_WHEN_DISABLED', 'PENDING_SET_OR_HOLD')]:
+            start = _terminal(irq, source, 'output')
+            gate = _component_by_label(irq, target)
+            self.assertTrue(any(_wire_path_exists(irq, start, _location(p))
+                                for p, _, incoming, _, _ in _ports({}, gate) if incoming))
 
     def test_ap18_interrupt_controller_requires_return_capture_wiring(self) -> None:
         root = MODULE_PATH.parents[1]
@@ -1612,8 +1588,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(1090,990)" to="(1290,990)"/>', "", 1), encoding="utf-8")
+        _disconnect_system_port(circuit, 'InterruptController', 'RETURN_ADDRESS_CAPTURE', 'output')
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -1630,8 +1605,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(1110,830)" to="(1110,870)"/>', "", 1), encoding="utf-8")
+        _disconnect_system_port(circuit, 'InterruptController', 'RETURN_VALID_NEXT', '1')
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -1648,8 +1622,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(1200,1100)" to="(1230,1100)"/>', "", 1), encoding="utf-8")
+        _disconnect_system_port(circuit, 'InterruptController', 'RETURN_ADDRESS_CLEAR', 'output')
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -1666,8 +1639,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(620,950)" to="(1290,950)"/>', "", 1), encoding="utf-8")
+        _disconnect_system_port(circuit, 'InterruptController', 'HANDLER_HOLD', '0')
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -1684,8 +1656,7 @@ class CircuitVerificationTests(unittest.TestCase):
         temporary = Path(self.enterContext(tempfile.TemporaryDirectory()))
         shutil.copytree(source, temporary / "logisim")
         circuit = temporary / "logisim" / "TinyCPU_Peripherals.circ"
-        circuit.write_text(circuit.read_text(encoding="utf-8").replace(
-            '<wire from="(1270,720)" to="(1420,720)"/>', "", 1), encoding="utf-8")
+        _disconnect_system_port(circuit, 'InterruptController', 'INTERRUPT_TARGET_PC', 'INTERRUPT_TARGET_PC')
         system = VERIFY.load_system_profile("tinycpu-peripherals-16-12-v1")
         original = VERIFY.LOGISIM
         VERIFY.LOGISIM = temporary / "logisim"
@@ -1697,59 +1668,35 @@ class CircuitVerificationTests(unittest.TestCase):
                 VERIFY.verify_system_circuit()
 
     def test_ap18_interrupt_target_reaches_public_pin(self) -> None:
-        root = _parse_project(
-            MODULE_PATH.parents[1] / "hardware" / "logisim" / "TinyCPU_Peripherals.circ"
-        ).getroot()
-        interrupt = root.find("circuit[@name='InterruptController']")
-        self.assertIsNotNone(interrupt)
-        wires = {
-            (wire.get("from"), wire.get("to"))
-            for wire in interrupt.findall("wire")
-        }
-        self.assertIn(("(1510,780)", "(1530,780)"), wires)
-        self.assertIn(("(1530,770)", "(1530,780)"), wires)
-        self.assertIn(("(1530,770)", "(1550,770)"), wires)
+        project = ET.parse(MODULE_PATH.parents[1] / 'hardware/logisim/TinyCPU_Peripherals.circ').getroot()
+        irq = project.find("circuit[@name='InterruptController']")
+        target = _component_by_label(irq, 'INTERRUPT_TARGET_PC').get('loc')
+        self.assertEqual(sum(_wire_path_exists(irq, co.get('loc'), target)
+                             for co in irq.findall("comp[@name='Multiplexer']")), 1)
 
     def test_ap18_interrupt_controller_routing_corridors_are_bounded(self) -> None:
-        """Visual routing rails stop at their first and last electrical branch."""
-        root = _parse_project(
-            MODULE_PATH.parents[1] / "hardware" / "logisim" / "TinyCPU_Peripherals.circ"
-        ).getroot()
-        interrupt = root.find("circuit[@name='InterruptController']")
-        self.assertIsNotNone(interrupt)
-        wires = {
-            (wire.get("from"), wire.get("to"))
-            for wire in interrupt.findall("wire")
-        }
-        self.assertTrue({
-            ("(560,320)", "(560,430)"),
-            ("(600,550)", "(600,770)"),
-            ("(560,850)", "(560,970)"),
-            ("(970,890)", "(970,1010)"),
-            ("(990,1030)", "(990,1150)"),
-            ("(1230,780)", "(1230,1100)"),
-        } <= wires)
-        self.assertFalse(any(
-            start.endswith(",50)") and end.endswith(",850)")
-            for start, end in wires
-        ))
+        project = ET.parse(MODULE_PATH.parents[1] / 'hardware/logisim/TinyCPU_Peripherals.circ').getroot()
+        irq = project.find("circuit[@name='InterruptController']")
+        terminals = {p for co in irq.findall('comp') for p, *_ in _ports({}, co)}
+        endpoints = [_point(w.get(end)) for w in irq.findall('wire') for end in ('from', 'to')]
+        loose = {p for p in endpoints if p not in terminals and endpoints.count(p) == 1}
+        self.assertEqual(loose, set(), 'routing rails must end at a terminal or an explicit branch')
 
     def test_ap18_interrupt_handler_and_return_valid_feedback_are_separate(self) -> None:
-        """The two one-bit states must not share the former x=1040 branch."""
-        root = _parse_project(
-            MODULE_PATH.parents[1] / "hardware" / "logisim" / "TinyCPU_Peripherals.circ"
-        ).getroot()
-        interrupt = root.find("circuit[@name='InterruptController']")
-        self.assertIsNotNone(interrupt)
-        wires = {
-            (wire.get("from"), wire.get("to"))
-            for wire in interrupt.findall("wire")
-        }
-        self.assertIn(("(1090,870)", "(1110,870)"), wires)
-        self.assertIn(("(1110,870)", "(1310,870)"), wires)
-        self.assertIn(("(1090,990)", "(1290,990)"), wires)
-        self.assertIn(("(1290,990)", "(1530,990)"), wires)
-        self.assertNotIn(("(1110,870)", "(1290,990)"), wires)
+        project = ET.parse(MODULE_PATH.parents[1] / 'hardware/logisim/TinyCPU_Peripherals.circ').getroot()
+        irq = project.find("circuit[@name='InterruptController']")
+        outputs = {}
+        for label, hold in [('IN_INTERRUPT_HANDLER', 'HANDLER_HOLD'), ('RET_ADDR_VALID', 'RETURN_VALID_HOLD')]:
+            target = _component_by_label(irq, label).get('loc')
+            sources = [_location(p) for co in irq.findall("comp[@name='Register']")
+                       for p, _, _, outgoing, _ in _ports({}, co)
+                       if outgoing and _wire_path_exists(irq, _location(p), target)]
+            self.assertEqual(len(sources), 1)
+            outputs[label] = sources[0]
+            gate = _component_by_label(irq, hold)
+            self.assertTrue(any(_wire_path_exists(irq, sources[0], _location(p))
+                                for p, _, incoming, _, _ in _ports({}, gate) if incoming))
+        self.assertFalse(_wire_path_exists(irq, *outputs.values()))
 
 
 if __name__ == "__main__":

@@ -217,29 +217,16 @@ def verify_operator_panel() -> None:
             or run_gate is None or run_gate.get("name") != "AND Gate" or clock is None):
         raise VerificationError(f"{display_path(source)}: STEP/RUN clock arbitration differs")
 
-    segments = [(wire.get("from", ""), wire.get("to", "")) for wire in panel.findall("wire")]
-    graph: dict[str, set[str]] = {}
-    for start, end in segments:
-        graph.setdefault(start, set()).add(end)
-        graph.setdefault(end, set()).add(start)
-
-    def connected(start: str, target: str) -> bool:
-        seen, pending = {start}, [start]
-        while pending:
-            current = pending.pop()
-            if current == target:
-                return True
-            for neighbor in graph.get(current, ()):
-                if neighbor not in seen:
-                    seen.add(neighbor)
-                    pending.append(neighbor)
-        return False
-
     core_definition = ET.parse(LOGISIM / "TinyCPU.circ").getroot().find(
         "circuit[@name='TinyCPUMain']"
     )
     if core_definition is None:
         raise VerificationError("TinyCPU.circ: TinyCPUMain is missing")
+    from tiny_cpu_hierarchy import circuit_bit_network, point as signal_point
+    state, aliases = circuit_bit_network({'TinyCPUMain': core_definition}, panel)
+    def connected(start, target, width=1):
+        return all(aliases.find(a) == aliases.find(b) for a, b in zip(
+            state.vector(signal_point(start), width), state.vector(signal_point(target), width)))
     ports = generated_symbol_ports(core_definition, core)
     gate_x, gate_y = point(clock_gate.get("loc", ""), source=source)
     run_x, run_y = point(run_gate.get("loc", ""), source=source)
@@ -297,7 +284,8 @@ def verify_operator_panel() -> None:
     missing = sorted(required_outputs - set(probes))
     disconnected = sorted(label for label in required_outputs
                           if label in probes and not connected(
-                              ports[label], probes[label].get("loc", "")))
+                              ports[label], probes[label].get("loc", ""),
+                              int(attributes[id(probes[label])].get("width", "1"))))
     if missing or disconnected:
         raise VerificationError(
             f"{display_path(source)}: operator observations differ; "
@@ -1448,6 +1436,7 @@ def verify_system_circuit() -> None:
             f"{display_path(system.circuit_path)}: CPU external-memory selection is inactive"
         )
 
+    from tiny_cpu_hierarchy import circuit_topology_fingerprint
     component_contract = contract.get("components", {}).get("output_port", {})
     output_name = component_contract.get("circuit")
     output = project.find(f"circuit[@name='{output_name}']")
@@ -1492,49 +1481,17 @@ def verify_system_circuit() -> None:
         attributes = {item.get("name"): item.get("val") for item in component.findall("a")}
         if attributes.get("label") == "OUTPUT_WRITE_ACCEPTED":
             accepted_write_gates.append((component.get("loc"), attributes.get("inputs", "2")))
-    if (accepted_write_gates != [("(340,260)", "2")]
+    if (len(accepted_write_gates) != 1 or accepted_write_gates[0][1] != "2"
             or component_contract.get("accepted_write") != "WRITE_VALID AND WRITE_ENABLE"):
         raise VerificationError(
             f"{display_path(system.circuit_path)}: OutputPort accepted-write gate differs from contract"
         )
-    output_wires = {
-        (wire.get("from"), wire.get("to")) for wire in output.findall("wire")
-    }
-    # Check the actual Logisim register ports, not merely the presence of
-    # suitably named components. Removing either half of a shared control net
-    # must fail offline before an electrical run is attempted.
-    expected_output_wires = {
-        ("(200,130)", "(500,130)"),
-        ("(200,230)", "(290,230)"),
-        ("(200,270)", "(310,270)"),
-        ("(200,320)", "(480,320)"),
-        ("(200,380)", "(530,380)"),
-        ("(290,230)", "(290,250)"),
-        ("(290,230)", "(560,230)"),
-        ("(290,250)", "(310,250)"),
-        ("(340,260)", "(460,260)"),
-        ("(460,150)", "(460,260)"),
-        ("(460,150)", "(500,150)"),
-        ("(460,260)", "(580,260)"),
-        ("(480,170)", "(480,280)"),
-        ("(480,170)", "(500,170)"),
-        ("(480,280)", "(480,320)"),
-        ("(480,280)", "(580,280)"),
-        ("(530,190)", "(530,310)"),
-        ("(530,310)", "(530,380)"),
-        ("(530,310)", "(610,310)"),
-        ("(560,130)", "(730,130)"),
-        ("(560,230)", "(560,240)"),
-        ("(560,240)", "(580,240)"),
-        ("(610,300)", "(610,310)"),
-        ("(640,240)", "(680,240)"),
-    }
     expected_paths = {
         "write_value_to_value_register", "write_valid_to_valid_register",
         "shared_accepted_write_enable", "shared_clock", "shared_reset",
         "value_register_to_output", "valid_register_to_output",
     }
-    if (output_wires != expected_output_wires
+    if (circuit_topology_fingerprint(project, output_name) != component_contract.get("topology_sha256")
             or set(component_contract.get("verified_paths", [])) != expected_paths):
         raise VerificationError(
             f"{display_path(system.circuit_path)}: OutputPort wiring differs from contract"
@@ -1598,39 +1555,6 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             f"{display_path(system.circuit_path)}: OutputMemoryPath routing differs from contract"
         )
-    memory_wires = {
-        (wire.get("from"), wire.get("to")) for wire in memory_path.findall("wire")
-    }
-    # These segments anchor every functional route at a real component port.
-    # The intervening orthogonal segments remain free to be redrawn, but no
-    # declared path may be replaced with labels alone.
-    required_memory_wires = {
-        ("(410,190)", "(480,190)"),  # address -> comparator
-        ("(460,210)", "(480,210)"),  # reserved constant -> comparator
-        ("(520,200)", "(560,200)"),  # comparator -> address-match rail
-        ("(560,460)", "(610,460)"),  # match -> RAM write gate (negated)
-        ("(540,480)", "(620,480)"),  # write enable -> RAM write gate
-        ("(560,360)", "(620,360)"),  # match -> output write gate
-        ("(600,350)", "(620,350)"),  # validity -> output write gate
-        ("(540,370)", "(620,370)"),  # write enable -> output write gate
-        ("(410,90)", "(920,90)"),  # RAM value -> value mux
-        ("(410,150)", "(920,150)"),  # RAM validity -> validity mux
-        ("(860,110)", "(920,110)"),  # output value -> value mux
-        ("(900,170)", "(920,170)"),  # output validity -> validity mux
-        ("(930,120)", "(930,130)"),  # match -> value selector
-        ("(880,200)", "(930,200)"),  # match -> validity selector
-        ("(410,260)", "(780,260)"),  # write value -> output register
-        ("(700,390)", "(780,390)"),  # write validity -> output register
-        ("(720,410)", "(780,410)"),  # gated write -> valid register
-        ("(740,300)", "(780,300)"),  # shared clock
-        ("(760,330)", "(810,330)"),  # shared reset rail
-        ("(810,320)", "(810,330)"),  # reset branch to value register
-        ("(950,100)", "(970,100)"),  # selected value -> read output
-        ("(950,160)", "(970,160)"),  # selected validity -> read output
-        ("(650,470)", "(980,470)"),  # gated RAM write output
-        ("(860,260)", "(980,260)"),  # output value state
-        ("(900,390)", "(980,390)"),  # output validity state
-    }
     expected_memory_paths = {
         "reserved_address_decode", "ram_write_on_address_mismatch",
         "output_write_on_address_match", "ram_value_read_default",
@@ -1638,7 +1562,7 @@ def verify_system_circuit() -> None:
         "output_valid_read_on_address_match", "output_port_write_value_and_valid",
         "output_port_clock_and_reset", "read_and_state_outputs",
     }
-    if (not required_memory_wires <= memory_wires
+    if (circuit_topology_fingerprint(project, path_name) != path_contract.get("topology_sha256")
             or set(path_contract.get("verified_paths", [])) != expected_memory_paths):
         raise VerificationError(
             f"{display_path(system.circuit_path)}: OutputMemoryPath wiring differs from contract"
@@ -1780,28 +1704,17 @@ def verify_system_circuit() -> None:
         raise VerificationError(
             f"{display_path(system.circuit_path)}: InterruptController contract differs from system profile"
         )
-    interrupt_wires = {
-        (wire.get("from"), wire.get("to")) for wire in interrupt.findall("wire")
-    }
-    required_synchronous_reset_wires = {
-        ("(530,50)", "(880,50)"),
-        ("(530,70)", "(860,70)"),
-        ("(860,70)", "(880,70)"),
-        ("(910,60)", "(1010,60)"),
-    }
-    if (not required_synchronous_reset_wires <= interrupt_wires
-            or ("(530,50)", "(860,50)") in interrupt_wires):
+    from tiny_cpu_hierarchy import component_ports, wire_path_exists, location
+    reset_trigger = next(co for co in interrupt.findall('comp')
+                         if _pin_label(co) == 'SYNCHRONOUS_RESET_TRIGGER')
+    reset_inputs = [location(p) for p, _, incoming, _, _
+                    in component_ports({}, reset_trigger) if incoming]
+    reset_pins = pin_locations(interrupt)
+    if not all(any(wire_path_exists(interrupt, reset_pins[label], terminal)
+                   for terminal in reset_inputs) for label in ('CLK', 'RESET')):
         raise VerificationError(
-            f"{display_path(system.circuit_path)}: InterruptController reset trigger "
-            "differs from contract"
-        )
-    # The controller is a deliberately hand-routed state machine.  Its
-    # versioned canonical wire list lets a visual redraw be reviewed once and
-    # then protects every branch, including long feedback paths which cannot
-    # be identified reliably from component labels alone.
-    wire_fingerprint = hashlib.sha256("\n".join(
-        f"{start}->{end}" for start, end in sorted(interrupt_wires)
-    ).encode("ascii")).hexdigest()
+            f"{display_path(system.circuit_path)}: InterruptController reset trigger differs from contract")
+    wire_fingerprint = circuit_topology_fingerprint(project, interrupt_name)
     expected_interrupt_paths = {
         "request_to_level_register", "request_level_clock_and_reset",
         "previous_level_inversion", "rising_edge_detection",
@@ -1826,7 +1739,7 @@ def verify_system_circuit() -> None:
         "return_state_outputs",
         "synchronous_reset_trigger",
     }
-    if (wire_fingerprint != interrupt_contract.get("wiring_sha256")
+    if (wire_fingerprint != interrupt_contract.get("topology_sha256")
             or set(interrupt_contract.get("verified_paths", []))
             != expected_interrupt_paths):
         raise VerificationError(

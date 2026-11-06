@@ -46,3 +46,12 @@ CI artifact locations are internal. They may change between 1.x releases and
 must not be treated as distribution interfaces. AP-12 evidence remains required
 release input, but AP 13 does not create a release archive; packaging begins in
 AP 14.
+
+## Präzisierung der arithmetischen v1-Grenze am 6. November 2026
+
+Auf ausdrückliche Benutzerentscheidung bleibt `−32768 ÷ −1 = −32768 VALID`
+ohne OVF erhalten. Die VM und das Maschinenformat ändern sich nicht. Die
+allgemeine Überlaufregel gilt für ADD, SUB und MUL; DIV schneidet gegen null
+ab und behält die unteren Datenbits. Die korrigierte elektrische
+MUL-Bereichsprüfung und DIV-Nullprüfung stellen das bestehende VM-Verhalten
+her. [Befund und Grenzfallabnahme](tiny_cpu_circuit_repair_20261106.md).

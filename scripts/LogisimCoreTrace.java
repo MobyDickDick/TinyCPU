@@ -75,27 +75,38 @@ final class LogisimCoreTrace {
   }
 
   private static void run(String[] args) throws Exception {
-    if (args.length != 4)
-      throw new IllegalArgumentException("usage: LogisimCoreTrace TOP PROJECT PROBES MAX_EDGES");
+    boolean operator = args.length == 5 && args[4].equals("--operator");
+    if (args.length != 4 && !operator)
+      throw new IllegalArgumentException("usage: LogisimCoreTrace TOP PROJECT PROBES MAX_EDGES [--operator]");
     var project = ProjectActions.doOpenNoWindow(null, new File(args[1]));
-    var state = CircuitState.createRootState(project,
+    var controller = CircuitState.createRootState(project,
         project.getLogisimFile().getCircuit(args[0]), Thread.currentThread());
+    var state = controller;
+    if (operator) {
+      var cores = controller.getCircuit().getNonWires().stream()
+          .filter(c -> c.getFactory() instanceof SubcircuitFactory
+              && c.getFactory().getName().equals("TinyCPUMain")).toList();
+      if (cores.size() != 1) throw new IllegalArgumentException("operator must contain exactly one core");
+      var core = cores.get(0);
+      state = ((SubcircuitFactory) core.getFactory()).getSubstate(controller, core);
+    }
     // All public core inputs have explicit levels. The standalone core selects
     // internal RAM with USE_EXTERNAL_MEMORY=0. Added inputs fail closed.
-    var inputs = Map.of("CLK", 0L, "RESET", 1L, "ILL_RET", 0L,
+    var inputs = operator ? Map.of("STEP", 0L, "RESET", 1L, "RUN", 0L)
+        : Map.of("CLK", 0L, "RESET", 1L, "ILL_RET", 0L,
         "INTERRUPT_ACCEPT", 0L, "INTERRUPT_TARGET_PC", 0L,
         "EXTERNAL_MEMORY_VALUE", 0L, "EXTERNAL_MEMORY_VALID", 0L,
         "USE_EXTERNAL_MEMORY", 0L, "RAM_WRITE_ENABLE", 0L);
-    for (var pin : state.getCircuit().getNonWires()) {
+    for (var pin : controller.getCircuit().getNonWires()) {
       if (pin.getFactory() instanceof Pin && Circuit.isInput(pin)) {
         String label = pin.getAttributeSet().getValue(StdAttr.LABEL);
         if (!inputs.containsKey(label)) throw new IllegalArgumentException("unspecified input: " + label);
-        drive(state, label, inputs.get(label));
+        drive(controller, label, inputs.get(label));
       }
     }
-    settle(state);
-    drive(state, "RESET", 0);
-    settle(state);
+    settle(controller);
+    drive(controller, "RESET", 0);
+    settle(controller);
     var probes = new ArrayList<Probe>();
     var header = new ArrayList<String>(List.of("edge", "phase"));
     for (String line : Files.readAllLines(Path.of(args[2]))) {
@@ -110,13 +121,13 @@ final class LogisimCoreTrace {
     System.out.println(String.join("\t", header));
     var ram = child(child(state, "MEMORY_UNIT"), "MEMORY_INSTANCE");
     for (int edge = 1; edge <= Integer.parseInt(args[3]); edge++) {
-      drive(state, "CLK", 0);
-      settle(state);
+      drive(controller, operator ? "STEP" : "CLK", 0);
+      settle(controller);
       emit(edge, "pre", probes, ram);
       boolean halt = Value.TRUE.equals(state.getValue(component(state, "HALTED").getLocation()))
           || Value.TRUE.equals(state.getValue(component(state, "HALTED_WITH_ERROR").getLocation()));
-      drive(state, "CLK", 1);
-      settle(state);
+      drive(controller, operator ? "STEP" : "CLK", 1);
+      settle(controller);
       emit(edge, "post", probes, ram);
       if (halt) return;
     }

@@ -1,6 +1,15 @@
 # Arbeitsplan: TinyCPU-Hardware
 
-**Aktueller Nachtrag vom 5. November 2026:** Die zuletzt dokumentierte
+**Aktueller Nachtrag vom 6. November 2026:** Die projektweite
+[Schaltungskorrektur und Zeichenüberarbeitung](tiny_cpu_circuit_repair_20261106.md)
+bearbeitet alle 56 ungeschützten Definitionen. Beide handgezeichneten Decoder
+bleiben bytegleich. Die offene FaultUnit-Ausgangsleitung ist repariert;
+zusätzlich sind Diagnose-Fetch, Operator-Ruhepegel sowie MUL-/DIV-Grenzfälle
+korrigiert. Das v1-Verhalten bei −32768 ÷ −1 bleibt auf Benutzerentscheidung
+erhalten. Die gültige externe Eingabe ist weiterhin offen; als nächster
+Funktionsschritt folgt Schritt 2 des Eingabeplans.
+
+**Vorheriger Nachtrag vom 5. November 2026:** Die zuletzt dokumentierte
 Adressregister-Gültigkeitslücke ist korrigiert. Die AddressUnit wurde auf
 Benutzerwunsch nach Aufgaben angeordnet; 38 zusätzliche elektrische Fälle
 und drei Fehlerkopien sichern den neuen Vertrag ab. Nachweise und Grenzen:

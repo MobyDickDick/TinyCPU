@@ -1,9 +1,15 @@
 # Verification of the Logisim diagnostic circuits
 
-The projects under `hardware/logisim/diagnostics/` are generated directly from
-the integrated `hardware/logisim/TinyCPU.circ` circuit using
-`tiny_cpu_circuit.py --split-output`. The individual sheets therefore use the
-same components, bit widths, and connections as the reference circuit.
+The projects under `hardware/logisim/diagnostics/` are maintained as independent
+sheets corresponding to named circuits in `TinyCPU.circ`. They are not assumed
+to be byte-identical copies: the protected hand-drawn decoder has its own
+baseline, and the diagnostic PC/ROM circuit has a separate drawing. Do not
+regenerate these files wholesale from an older generated source.
+
+The [6 November project-wide repair](tiny_cpu_circuit_repair_20261106.md)
+checks actual native terminal nets and rendered sheets. It repairs the
+interrupt-target/PC short in diagnostic FetchDecode and the arithmetic
+MUL/DIV leaves. Both protected decoder drawings remain byte-identical.
 
 ## Verification result
 
@@ -27,18 +33,15 @@ cannot accumulate unnoticed.
 ## Reproducible verification
 
 ```bash
-PYTHONPATH=src python src/tiny_cpu_circuit.py \
-  --split-output hardware/logisim/diagnostics \
-  hardware/logisim/TinyCPU.circ
-
-for project in hardware/logisim/diagnostics/*.circ; do
-  PYTHONPATH=src python src/tiny_cpu_circuit.py "$project"
-done
+PYTHONPATH=src python src/tiny_cpu_verify.py
+PYTHONPATH=src python -m unittest discover -s tests
+PYTHONPATH=src python scripts/test-logisim-arithmetic-boundaries.py
 ```
 
-This check evaluates structure, port assignments, and bus widths. Electrical
-runtime simulation of the Logisim component library remains the responsibility
-of Logisim-evolution.
+The offline check evaluates structure, named interfaces and bus widths.
+The arithmetic gate uses the pinned Logisim-evolution library to evaluate both
+diagnostic and integrated MUL/DIV leaves, plus full CPU traces against the VM.
+Native renders of all sheets are recorded separately in the project-wide report.
 
 ## Root-cause analysis of the repeated reversion
 

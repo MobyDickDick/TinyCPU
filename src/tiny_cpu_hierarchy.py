@@ -180,7 +180,7 @@ def component_ports(definitions, component):
         dx, dy = _rotate(dx, dy, facing)
         return ((x + dx, y + dy), bits, incoming, outgoing, name)
 
-    if component.get("lib") is None and kind in definitions:
+    if kind in definitions and component.get("lib") not in {str(i) for i in range(10)}:
         # Import lazily: verify imports this module for its analysis view.
         from tiny_cpu_verify import generated_symbol_ports
         definition = definitions[kind]
@@ -224,17 +224,30 @@ def component_ports(definitions, component):
                 + [terminal(-30, 20 * i - 10 * (count - 1), width, True, False, str(i))
                    for i in range(count)]
                 + [terminal(-20, 10 * count, int(a.get("select", "1")), True, False, "select")])
+    if kind == "Comparator":
+        return [terminal(-40, -10, width, True, False, "a"),
+                terminal(-40, 10, width, True, False, "b"),
+                terminal(0, -10, 1, False, True, "gt"),
+                terminal(0, 0, 1, False, True, "eq"),
+                terminal(0, 10, 1, False, True, "lt")]
+    if kind == "Register" and a.get("appearance") == "logisim_evolution":
+        return [terminal(60, 30, width, False, True, "q"),
+                terminal(0, 30, width, True, False, "d"),
+                terminal(0, 70, 1, True, False, "clock"),
+                terminal(30, 90, 1, True, False, "reset"),
+                terminal(0, 50, 1, True, False, "enable")]
     if kind.endswith(" Gate"):
         if kind == "NOT Gate":
             return [terminal(0, 0, width, False, True, "output"),
                     terminal(-int(a.get("size", "30")), 0, width, True, False, "0")]
         count = int(a.get("inputs", "2"))
         size = int(a.get("size", "50"))
+        depth = size + (10 if kind in {"NAND Gate", "NOR Gate", "XNOR Gate"} else 0)
         spacing = 10 if size == 30 or count >= 4 else 20
         offsets = ([spacing * (i - count // 2) for i in range(count)] if count % 2
                    else [spacing * (i - count // 2 + (i >= count // 2)) for i in range(count)])
         return [terminal(0, 0, width, False, True, "output")] + [
-            terminal(-size - (10 if a.get(f"negate{i}") == "true" else 0), dy,
+            terminal(-depth - (10 if a.get(f"negate{i}") == "true" else 0), dy,
                      width, True, False, str(i)) for i, dy in enumerate(offsets)]
     raise ValueError(f"unsupported analysis component: {kind}")
 
@@ -460,6 +473,17 @@ def core_topology_fingerprint(project):
     flat = flatten_core(project)
     definitions = {c.get("name"): c for c in flat.findall("circuit")}
     main = definitions["TinyCPUMain"]
+    return _topology_fingerprint(definitions, main)
+
+
+def circuit_topology_fingerprint(project, name, external_definitions=None):
+    """Fingerprint a circuit's components and real terminal nets, without layout."""
+    definitions = dict(external_definitions or {})
+    definitions.update({c.get("name"): c for c in project.findall("circuit")})
+    return _topology_fingerprint(definitions, definitions[name])
+
+
+def _topology_fingerprint(definitions, main):
     state = CircuitBits(definitions, main, "analysis")
     colours, neighbours = {}, defaultdict(list)
 
@@ -471,16 +495,25 @@ def core_topology_fingerprint(project):
         neighbours[b].append(a)
 
     for index, c in enumerate(main.findall("comp")):
+        if c.get("name") == "Text":
+            continue
         component = ("component", index)
         a = attributes(c)
         kind = c.get("name")
+        commutative = kind in {"AND Gate", "OR Gate", "XOR Gate", "NAND Gate", "NOR Gate", "XNOR Gate"}
+        inversions = {key: value for key, value in a.items() if key.startswith("negate")}
         # Canvas presentation and unsupported labels disappear on a GUI save.
         # Keep electrical parameters, including Logisim's omitted defaults.
         a = {k: v for k, v in a.items()
-             if k not in {"appearance", "facing", "spacing", "label"}}
+             if k not in {"appearance", "facing", "spacing", "label", "radix", "radix2"}}
         if kind.endswith(" Gate"):
             # A gate's caption font changes no electrical port.
             a.pop("labelfont", None)
+            a.pop("labelloc", None)
+        if commutative:
+            # Gate inputs may be exchanged in an authored drawing. Keep each
+            # inversion attached to its connected term instead of its row.
+            a = {key: value for key, value in a.items() if not key.startswith("negate")}
         if kind == "Pin":
             a["label"] = attributes(c)["label"]
         if kind in {"Pin", "Constant", "Multiplexer", "Probe"} or kind.endswith(" Gate"):
@@ -496,7 +529,10 @@ def core_topology_fingerprint(project):
             width = width or state.widths.get(state.network.find(p), 1)
             terminal = ("port", index, port_index)
             net = ("net", state.network.find(p))
-            node(terminal, ["port", port_index, width, incoming, outgoing, label])
+            if commutative and incoming:
+                node(terminal, ["gate-input", width, inversions.get(f"negate{label}") == "true"])
+            else:
+                node(terminal, ["port", port_index, width, incoming, outgoing, label])
             if net not in colours:
                 node(net, ["net", width])
             edge(component, terminal)
@@ -506,3 +542,21 @@ def core_topology_fingerprint(project):
             sorted(colours[other] for other in neighbours[n]))).encode()).hexdigest()
                    for n, colour in colours.items()}
     return hashlib.sha256("\n".join(sorted(colours.values())).encode()).hexdigest()
+
+
+def circuit_bit_network(definitions, circuit):
+    """Return a physical state and bit aliases through all visible splitters."""
+    state = CircuitBits(definitions, circuit, "signals")
+    bits = UnionFind()
+    for splitter in circuit.findall("comp[@name='Splitter']"):
+        ports = state.ports[id(splitter)]
+        incoming = state.vector(ports[0][0], ports[0][1])
+        offsets = defaultdict(int)
+        for bit, group in enumerate(splitter_groups(splitter)):
+            if group < 0:
+                continue
+            branch = ports[group + 1]
+            target = state.vector(branch[0], branch[1])[offsets[group]]
+            bits.union(incoming[bit], target)
+            offsets[group] += 1
+    return state, bits

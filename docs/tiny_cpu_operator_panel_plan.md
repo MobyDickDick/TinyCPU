@@ -3,6 +3,18 @@
 **Status:** als additives AP 21 umgesetzt; der interaktive GUI-Kurztest bleibt
 bis zu einer sichtbaren Bedienumgebung ausdrücklich nachzuholen.
 
+## Korrektur und erweiterte Abnahme vom 6. November 2026
+
+Die als inaktiv gedachten Konstanten besaßen keinen expliziten Wert und
+waren daher in Logisim tatsächlich 1. Sie sind auf 0 korrigiert, gleiche
+skalare Quellen zusammengelegt (sieben auf drei Konstanten). Der neue
+`scripts/test-logisim-operator-core.py` prüft die echte importierte CPU durch
+STEP-Flanken vollständig gegen die VM, einschließlich Ausgabe und Zählschleife.
+Eine Fehlerkopie mit aktiven Ruhepegeln muss an Flanke 1 pre scheitern.
+24 Ausgabebeobachtungen laufen nun in sechs sichtbaren Bussen; die genaue
+Bitbelegung steht im [projektweiten Bericht](tiny_cpu_circuit_repair_20261106.md).
+Der bisherige reine Takt-/Pegeltest bleibt zusätzlich bestehen.
+
 ## Anlass
 
 Die elektrische 16/12-TinyCPU ist über automatische Offline- und

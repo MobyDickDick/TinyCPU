@@ -16,19 +16,19 @@
   <lib desc="#Base" name="9"/>
   <main name="IntegrationReset"/>
   <circuit name="IntegrationReset">
-    <a name="appearance" val="logisim_evolution"/>
-    <a name="circuit" val="IntegrationReset"/>
-    <a name="simulationFrequency" val="1.0"/>
-    <comp lib="0" loc="(120,140)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="RESET"/>
+    <a name="appearance" val="logisim_evolution" />
+    <a name="circuit" val="IntegrationReset" />
+    <a name="simulationFrequency" val="1.0" />
+    <comp lib="0" loc="(200,40)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="RESET" />
     </comp>
-    <comp lib="0" loc="(420,140)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="FETCH_RESET"/>
-      <a name="type" val="output"/>
+    <comp lib="0" loc="(420,40)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="facing" val="west" />
+      <a name="label" val="FETCH_RESET" />
+      <a name="type" val="output" />
     </comp>
-    <wire from="(120,140)" to="(420,140)"/>
+    <wire from="(200,40)" to="(420,40)" />
   </circuit>
 </project>

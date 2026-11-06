@@ -101,14 +101,16 @@ def inspect_project(path: Path, circuits: set[str] | None = None) -> list[Contac
             for issue in inspect_circuit(circuit)]
 
 
-def inspect_routing_grid(circuit: ET.Element) -> list[str]:
+def inspect_routing_grid(circuit: ET.Element, *, origin: Point = (0, 0)) -> list[str]:
     """Check long runs on four 20-pixel tracks followed by a 40-pixel gap.
 
     Logisim's grid pitch is 10 pixels. Coordinates 20/40/60/80 modulo 100
     therefore leave one empty row between wires and three between groups.
     Native component ports require short escapes; runs up to 160 pixels are
     exempt. Merge collinear segments first so junctions cannot hide a long run.
-    This convention applies to the newly arranged functional unit sheets.
+    The overview uses an x offset to clear its fixed symbol contacts.
+    An explicit origin preserves the same spacing without requiring a global
+    canvas translation. Protected hand-drawn decoders are checked separately.
     """
     lines = defaultdict(list)
     for wire in circuit.findall("wire"):
@@ -126,7 +128,8 @@ def inspect_routing_grid(circuit: ET.Element) -> list[str]:
             else:
                 merged.append([start, stop])
         for start, stop in merged:
-            if stop - start > 160 and coordinate % 100 not in (20, 40, 60, 80):
+            offset = origin[0 if orientation == "vertical" else 1]
+            if stop - start > 160 and (coordinate - offset) % 100 not in (20, 40, 60, 80):
                 issues.append(
                     f"{circuit.get('name')}: {orientation} run at {coordinate} "
                     f"from {start} to {stop} violates the grouped routing grid"

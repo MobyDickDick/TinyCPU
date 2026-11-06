@@ -78,7 +78,7 @@ def main() -> int:
                                          "IMMEDIATE_VALUE": 2,
                                          "MEMORY_VALID": 1,
                                          "CONST_OPERAND": 1,
-                                         "MUL_OPERAND": 1}, "0x8000"),
+                                         "MUL_OPERAND": 1}, "0x0000"),
         "multiply-in-range": ({"ACC_VALUE": 3, "MEMORY_VALUE": 0,
                                 "IMMEDIATE_VALUE": 2, "MEMORY_VALID": 1,
                                 "CONST_OPERAND": 1, "MUL_OPERAND": 1},
@@ -94,7 +94,7 @@ def main() -> int:
         "divide-by-zero": ({"ACC_VALUE": 7, "MEMORY_VALUE": 0,
                              "IMMEDIATE_VALUE": 0, "MEMORY_VALID": 1,
                              "CONST_OPERAND": 1, "DIV_OPERAND": 1},
-                           "0x0007"),
+                           "0x0000"),
         "inactive-divide-by-zero": ({"ACC_VALUE": 7, "MEMORY_VALUE": 0,
                                       "IMMEDIATE_VALUE": 0, "MEMORY_VALID": 1,
                                       "CONST_OPERAND": 1}, "0x0000"),
@@ -106,6 +106,7 @@ def main() -> int:
             expected["OVERFLOW"] = (
                 "1" if name == "multiply-positive-overflow" else "0"
             )
+            expected["RESULT_IS_VALID"] = "0" if name == "multiply-positive-overflow" else "1"
         elif name == "inactive-divide-by-zero":
             expected["DIVIDE_BY_ZERO"] = "0"
         elif name.startswith("divide-"):

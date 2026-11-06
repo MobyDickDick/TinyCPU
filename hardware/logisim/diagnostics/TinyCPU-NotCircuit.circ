@@ -16,71 +16,93 @@
   <lib desc="#Base" name="9"/>
   <main name="NotCircuit"/>
   <circuit name="NotCircuit">
-    <a name="appearance" val="logisim_evolution"/>
-    <a name="circuit" val="NotCircuit"/>
-    <a name="circuitnamedboxfixedsize" val="true"/>
-    <a name="simulationFrequency" val="1.0"/>
-    <comp lib="0" loc="(240,100)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="ACC_VALUE"/>
-      <a name="width" val="16"/>
+    <a name="appearance" val="logisim_evolution" />
+    <a name="circuit" val="NotCircuit" />
+    <a name="circuitnamedboxfixedsize" val="true" />
+    <a name="simulationFrequency" val="1.0" />
+    <comp lib="0" loc="(200,40)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="ACC_VALUE" />
+      <a name="width" val="16" />
+      <a name="radix" val="16" />
     </comp>
-    <comp lib="0" loc="(240,160)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="ACC_VALID"/>
+    <comp lib="0" loc="(200,80)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="ACC_VALID" />
     </comp>
-    <comp lib="0" loc="(240,200)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="NOT_IS_ACTIVE"/>
+    <comp lib="0" loc="(200,120)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="NOT_IS_ACTIVE" />
     </comp>
-    <comp lib="0" loc="(340,60)" name="Constant">
-      <a name="value" val="0x0"/>
-      <a name="width" val="16"/>
+    <comp lib="0" loc="(560,120)" name="Constant">
+      <a name="value" val="0x0" />
+      <a name="width" val="16" />
     </comp>
-    <comp lib="0" loc="(460,180)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="RESULT_VALID"/>
-      <a name="type" val="output"/>
+    <comp lib="0" loc="(840,80)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="facing" val="west" />
+      <a name="label" val="RESULT_VALID" />
+      <a name="type" val="output" />
     </comp>
-    <comp lib="0" loc="(460,230)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="RESULT_ACTIVE"/>
-      <a name="type" val="output"/>
+    <comp lib="0" loc="(840,120)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="facing" val="west" />
+      <a name="label" val="RESULT_ACTIVE" />
+      <a name="type" val="output" />
     </comp>
-    <comp lib="0" loc="(460,90)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="RESULT"/>
-      <a name="type" val="output"/>
-      <a name="width" val="16"/>
+    <comp lib="0" loc="(840,40)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="facing" val="west" />
+      <a name="label" val="RESULT" />
+      <a name="type" val="output" />
+      <a name="width" val="16" />
+      <a name="radix" val="16" />
     </comp>
-    <comp lib="1" loc="(320,100)" name="NOT Gate">
-      <a name="label" val="NOT_VALUE"/>
-      <a name="width" val="16"/>
+    <comp lib="1" loc="(520,160)" name="NOT Gate">
+      <a name="label" val="NOT_VALUE" />
+      <a name="width" val="16" />
+      <a name="labelfont" val="SansSerif plain 1" />
     </comp>
-    <comp lib="1" loc="(390,180)" name="AND Gate">
-      <a name="label" val="ACTIVE_NOT_VALID"/>
+    <comp lib="1" loc="(620,240)" name="AND Gate">
+      <a name="label" val="ACTIVE_NOT_VALID" />
+      <a name="labelfont" val="SansSerif plain 1" />
     </comp>
-    <comp lib="2" loc="(410,90)" name="Multiplexer">
-      <a name="width" val="16"/>
+    <comp lib="2" loc="(620,160)" name="Multiplexer">
+      <a name="width" val="16" />
     </comp>
-    <wire from="(240,100)" to="(290,100)"/>
-    <wire from="(240,160)" to="(340,160)"/>
-    <wire from="(240,200)" to="(260,200)"/>
-    <wire from="(260,120)" to="(260,200)"/>
-    <wire from="(260,120)" to="(390,120)"/>
-    <wire from="(260,200)" to="(320,200)"/>
-    <wire from="(320,100)" to="(380,100)"/>
-    <wire from="(320,200)" to="(320,230)"/>
-    <wire from="(320,200)" to="(340,200)"/>
-    <wire from="(320,230)" to="(460,230)"/>
-    <wire from="(340,60)" to="(370,60)"/>
-    <wire from="(370,60)" to="(370,80)"/>
-    <wire from="(370,80)" to="(380,80)"/>
-    <wire from="(390,110)" to="(390,120)"/>
-    <wire from="(390,180)" to="(460,180)"/>
-    <wire from="(410,90)" to="(460,90)"/>
+    <wire from="(200,40)" to="(380,40)" />
+    <wire from="(200,80)" to="(480,80)" />
+    <wire from="(200,120)" to="(520,120)" />
+    <wire from="(380,40)" to="(380,160)" />
+    <wire from="(380,160)" to="(490,160)" />
+    <wire from="(480,80)" to="(480,220)" />
+    <wire from="(480,220)" to="(570,220)" />
+    <wire from="(520,120)" to="(520,140)" />
+    <wire from="(520,140)" to="(540,140)" />
+    <wire from="(520,160)" to="(520,170)" />
+    <wire from="(520,170)" to="(590,170)" />
+    <wire from="(540,140)" to="(540,180)" />
+    <wire from="(540,180)" to="(560,180)" />
+    <wire from="(560,120)" to="(560,150)" />
+    <wire from="(560,150)" to="(590,150)" />
+    <wire from="(560,180)" to="(560,260)" />
+    <wire from="(560,180)" to="(600,180)" />
+    <wire from="(560,260)" to="(570,260)" />
+    <wire from="(600,180)" to="(640,180)" />
+    <wire from="(620,40)" to="(620,160)" />
+    <wire from="(620,40)" to="(840,40)" />
+    <wire from="(620,240)" to="(760,240)" />
+    <wire from="(640,120)" to="(640,180)" />
+    <wire from="(640,120)" to="(840,120)" />
+    <wire from="(760,80)" to="(760,240)" />
+    <wire from="(760,80)" to="(840,80)" />
+    <comp lib="9" name="Text" loc="(525,87)">
+      <a name="text" val="NOT VALUE" />
+      <a name="font" val="SansSerif plain 12" />
+    </comp>
+    <comp lib="9" name="Text" loc="(595,291)">
+      <a name="text" val="ACTIVE NOT VALID" />
+      <a name="font" val="SansSerif plain 12" />
+    </comp>
   </circuit>
 </project>

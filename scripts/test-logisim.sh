@@ -55,6 +55,19 @@ if ! PYTHONPATH=src python3 scripts/test-logisim-address-validity.py \
   failed+=(address-validity)
 fi
 
+if ! PYTHONPATH=src python3 scripts/test-logisim-arithmetic-boundaries.py \
+    --output "$OUTPUT/arithmetic-boundaries"; then
+  failed+=(arithmetic-boundaries)
+fi
+
+if ! PYTHONPATH=src python3 scripts/test-logisim-operations.py; then
+  failed+=(operations)
+fi
+
+if ! PYTHONPATH=src python3 scripts/test-logisim-effective-address.py; then
+  failed+=(effective-address)
+fi
+
 system_args=(--profile tinycpu-16-12
              --system tinycpu-peripherals-16-12-v1
              --system-only
@@ -70,6 +83,11 @@ fi
 
 if ! PYTHONPATH=src python3 scripts/test-logisim-operator.py; then
   failed+=(operator-panel)
+fi
+
+if ! PYTHONPATH=src python3 scripts/test-logisim-operator-core.py \
+    --output "$OUTPUT/operator-core"; then
+  failed+=(operator-core)
 fi
 
 if (( ${#failed[@]} )); then

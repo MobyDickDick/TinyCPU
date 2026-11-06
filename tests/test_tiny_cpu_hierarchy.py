@@ -17,6 +17,33 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class HierarchyTests(unittest.TestCase):
+    def test_inverted_output_gate_inputs_include_the_native_output_bubble_depth(self):
+        for kind in ("NOR Gate", "NAND Gate", "XNOR Gate"):
+            gate = ET.fromstring(f'<comp name="{kind}" loc="(200,100)"/>')
+            inputs = [p for p, _, incoming, _, _ in component_ports({}, gate) if incoming]
+            self.assertEqual(inputs, [(140, 80), (140, 120)])
+
+    def test_fingerprint_keeps_inversion_with_the_commutative_gate_term(self):
+        project = ET.fromstring('''<project><circuit name="TinyCPUMain">
+          <comp lib="0" name="Pin" loc="(20,80)"><a name="label" val="A"/></comp>
+          <comp lib="0" name="Pin" loc="(20,120)"><a name="label" val="B"/></comp>
+          <comp lib="1" name="AND Gate" loc="(200,100)"><a name="negate0" val="true"/></comp>
+          <comp lib="0" name="Pin" loc="(300,100)"><a name="label" val="Y"/><a name="type" val="output"/></comp>
+          <wire from="(20,80)" to="(140,80)"/>
+          <wire from="(20,120)" to="(150,120)"/>
+          <wire from="(200,100)" to="(300,100)"/>
+        </circuit></project>''')
+        original = core_topology_fingerprint(project)
+        circuit = project.find('circuit')
+        gate = circuit.find("comp[@name='AND Gate']")
+        gate.find("a[@name='negate0']").set('name', 'negate1')
+        wires = circuit.findall('wire')
+        wires[0].set('to', '(140,120)')
+        wires[1].set('to', '(150,80)')
+        self.assertEqual(core_topology_fingerprint(project), original)
+        gate.find("a[@name='negate1']").set('name', 'negate0')
+        self.assertNotEqual(core_topology_fingerprint(project), original)
+
     def setUp(self):
         self.project = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         self.contract = json.loads((ROOT / "hardware/logisim/tinycpu-core-control-v1.json").read_text())
@@ -164,12 +191,12 @@ class HierarchyTests(unittest.TestCase):
         definitions = {c.get("name"): c for c in self.project.findall("circuit")}
         unit = definitions["AddressRegisterLoad"]
         state = CircuitBits(definitions, unit, "address")
-        mux, = [c for c in unit.findall("comp[@name='Multiplexer']")
-                if any(name == "select" and wire_path_exists(unit, str(p).replace(' ', ''), "(100,220)")
-                       for p, *_, name in state.ports[id(c)])]
-        ports = {name: terminal for terminal, _, _, _, name in state.ports[id(mux)]}
         pins = {attributes(c).get("label"): state.ports[id(c)][0][0]
                 for c in unit.findall("comp[@name='Pin']")}
+        mux, = [c for c in unit.findall("comp[@name='Multiplexer']")
+                if any(name == "select" and state.network.find(p) == state.network.find(pins["LOAD_MEMORY"])
+                       for p, *_, name in state.ports[id(c)])]
+        ports = {name: terminal for terminal, _, _, _, name in state.ports[id(mux)]}
         for port, source in (("0", "IMMEDIATE"), ("1", "READ_VALUE")):
             with self.subTest(input=port):
                 self.assertEqual(state.network.find(ports[port]), state.network.find(pins[source]))

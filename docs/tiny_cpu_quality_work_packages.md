@@ -5,6 +5,19 @@ korrigiert und mit 38 zusätzlichen elektrischen Fällen abgesichert.
 Die bestehende Kern- und Systemmatrix besteht ebenfalls. Weitere
 Qualitätsaufgaben und projektweite Offline-Befunde bleiben offen.
 
+## Abschluss der Schaltungskorrektur und AP 22.2 am 6. November 2026
+
+Die [projektweite Überarbeitung](tiny_cpu_circuit_repair_20261106.md) behebt
+FaultUnit-Ausgangslücke, Diagnose-PC-Kurzschluss, aktive Operator-Ruhepegel,
+MUL-Bereichserkennung und DIV-Nullprüfung. Auf Benutzerentscheidung bleibt
+der bestehende v1-Sonderfall −32768 ÷ −1 gültig und ohne OVF. Die VM ändert
+sich nicht. 83 mathematisch festgelegte Kernfälle und je 36 Vektoren pro
+MUL-/DIV-Blattfassung sowie gezielte Fehlerkopien sichern AP 22.2 ab.
+Die alte allgemeine Aussage zum Divisionsüberlauf ist damit präzisiert.
+AP 22.1 bleibt wegen der gültigen externen Eingabe offen; AP 22.5 ist kein
+Bestandteil dieser lokalen Abnahme. Frühere Raster- und Adapterfehlschläge
+unten sind historische Befunde.
+
 ## Fortschritt am 5. November 2026: passive INPUT-Baseline
 
 Schritt 1 des Eingabeplans ist [abgeschlossen](tiny_cpu_input_baseline.md):
@@ -276,35 +289,38 @@ Fixture. Ein Fehlerbericht nennt Fixture, erste abweichende Flanke, Signal,
 Soll- und Istwert und bewahrt die elektrischen Rohdaten auf. Ein unveränderter
 korrekter Lauf besteht; der absichtlich falsche Rechenlauf scheitert.
 
-### 22.2 Divisionsüberlauf und arithmetische Grenzen klären — hohe Priorität
+### 22.2 Divisionsüberlauf und arithmetische Grenzen klären — abgeschlossen am 6. November 2026
 
 Zusätzlicher elektrischer Befund vom 31. Oktober: `16384 * 2` liefert im
 isolierten Operationsbaustein `0x8000 VALID` mit `OVF=0`, obwohl das
 mathematische Ergebnis außerhalb des 16-Bit-Bereichs liegt. Dieser Grenzfall
-gehört nicht zu den bestehenden 61 Fixtures und bleibt in 22.2 offen; die
+war nicht Teil der damaligen 61 Fixtures; die
 bestandene Kernmatrix ist kein Nachweis sämtlicher arithmetischer Grenzen.
 Rohbefund: `artifacts/ap22-1-address-path/mul-boundary-known.json`.
 
-- [ ] Den obigen Grenzfall als fokussierte Regression festhalten und das
+- [x] Den obigen Grenzfall als fokussierte Regression festhalten und das
   Sollverhalten vor einer Implementierungsänderung dokumentieren. Nach dem
   allgemeinen Fehlergrundsatz wäre das Ergebnis `0 INVALID` mit `OVF=1`.
-- [ ] Die widersprüchlichen Divisionsverträge abgleichen. Falls die Korrektur
+- [x] Die widersprüchlichen Divisionsverträge abgleichen. Falls die Korrektur
   bislang zugesichertes Version-1-Verhalten ändert, Kompatibilitäts- und
   Versionsfolgen ausdrücklich festhalten.
-- [ ] VM und anschließend die kleinste betroffene elektrische Signalkette
+- [x] VM und anschließend die kleinste betroffene elektrische Signalkette
   entsprechend korrigieren. Einen Fehler in der Schaltung zuerst elektrisch
   belegen; keine Leitungsänderung allein aus dem VM-Befund ableiten.
-- [ ] Alle vier Divisionsadressierungsarten sowie Nullteiler, ungültige
+- [x] Alle vier Divisionsadressierungsarten sowie Nullteiler, ungültige
   Operanden, Vorzeichen und Abschneiden gegen null prüfen. Für Addition,
   Subtraktion und Multiplikation die Grenzwerte und unmittelbar außerhalb
   liegende Ergebnisse mit mathematisch festgelegten Erwartungen absichern.
-- [ ] Prüfen, dass `CLEAR_ERROR()` Flags löscht, aber ungültige Ergebnisse
+- [x] Prüfen, dass `CLEAR_ERROR()` Flags löscht, aber ungültige Ergebnisse
   nicht gültig macht. Erwartungswerte dürfen nicht ausschließlich aus der
   zu prüfenden VM selbst abgeleitet werden.
 
 **Abnahme:** Dokumentation, VM und elektrische Grenzfalltests stimmen überein.
-Der ursprüngliche Divisionsfall kann nicht mehr unbemerkt als gültiges,
-fehlerfreies Ergebnis durchlaufen. Die bestehende ISA-/Peripheriematrix bleibt
+Die v1-DIV-Ausnahme bleibt gemäß Benutzerentscheidung erhalten; bei MUL
+wurde die elektrische Bereichsprüfung korrigiert. Nachweise stehen im
+[Abschlussbericht](tiny_cpu_circuit_repair_20261106.md).
+Der v1-Divisionssonderfall ist ausdrücklich als gültig und fehlerfrei
+festgelegt und in allen vier Operandenarten elektrisch abgesichert. Die bestehende ISA-/Peripheriematrix bleibt
 unter dem ausdrücklich festgelegten Vertrag grün.
 
 ### 22.3 Dokumentation ausführbar und widerspruchsfrei machen — mittlere Priorität

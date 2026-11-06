@@ -16,128 +16,165 @@
   <lib desc="#Base" name="9"/>
   <main name="AddressRangeFBox"/>
   <circuit name="AddressRangeFBox">
-    <a name="appearance" val="logisim_evolution"/>
-    <a name="circuit" val="AddressRangeFBox"/>
-    <a name="circuitnamedboxfixedsize" val="true"/>
-    <a name="simulationFrequency" val="1.0"/>
-    <comp lib="0" loc="(1620,490)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="ACTIVE_ADDRESS_OUT_OF_RANGE"/>
-      <a name="type" val="output"/>
+    <a name="appearance" val="logisim_evolution" />
+    <a name="circuit" val="AddressRangeFBox" />
+    <a name="circuitnamedboxfixedsize" val="true" />
+    <a name="simulationFrequency" val="1.0" />
+    <comp lib="0" loc="(1480,40)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="facing" val="west" />
+      <a name="label" val="ACTIVE_ADDRESS_OUT_OF_RANGE" />
+      <a name="type" val="output" />
     </comp>
-    <comp lib="0" loc="(350,110)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="EFFECTIVE_REGISTER_MODE"/>
+    <comp lib="0" loc="(200,80)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="EFFECTIVE_REGISTER_MODE" />
     </comp>
-    <comp lib="0" loc="(350,130)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="EFFECTIVE_OFFSET_MODE"/>
+    <comp lib="0" loc="(200,120)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="EFFECTIVE_OFFSET_MODE" />
     </comp>
-    <comp lib="0" loc="(350,150)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="ADDRESS_OUT_OF_RANGE"/>
+    <comp lib="0" loc="(200,160)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="ADDRESS_OUT_OF_RANGE" />
     </comp>
-    <comp lib="0" loc="(350,90)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="OFFSET_CARRY"/>
+    <comp lib="0" loc="(200,40)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="OFFSET_CARRY" />
     </comp>
-    <comp lib="0" loc="(590,170)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="LOAD_ADDRESS"/>
+    <comp lib="0" loc="(200,240)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="LOAD_ADDRESS" />
     </comp>
-    <comp lib="0" loc="(590,190)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="ADD_ADDRESS"/>
+    <comp lib="0" loc="(200,280)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="ADD_ADDRESS" />
     </comp>
-    <comp lib="0" loc="(590,210)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="SUB_ADDRESS"/>
+    <comp lib="0" loc="(200,320)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="SUB_ADDRESS" />
     </comp>
-    <comp lib="0" loc="(590,230)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="MUL_ADDRESS"/>
+    <comp lib="0" loc="(200,360)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="MUL_ADDRESS" />
     </comp>
-    <comp lib="0" loc="(590,250)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="DIV_ADDRESS"/>
+    <comp lib="0" loc="(200,440)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="DIV_ADDRESS" />
     </comp>
-    <comp lib="0" loc="(590,270)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="AND_ADDRESS"/>
+    <comp lib="0" loc="(200,480)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="AND_ADDRESS" />
     </comp>
-    <comp lib="0" loc="(590,290)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="OR_ADDRESS"/>
+    <comp lib="0" loc="(200,520)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="OR_ADDRESS" />
     </comp>
-    <comp lib="0" loc="(590,310)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="STORE_ADDRESS"/>
+    <comp lib="0" loc="(200,560)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="STORE_ADDRESS" />
     </comp>
-    <comp lib="1" loc="(1190,510)" name="AND Gate">
-      <a name="label" val="ACTIVE_ADDRESS_RANGE_GATE"/>
+    <comp lib="1" loc="(960,420)" name="AND Gate">
+      <a name="label" val="ACTIVE_ADDRESS_RANGE_GATE" />
+      <a name="labelfont" val="SansSerif plain 1" />
     </comp>
-    <comp lib="1" loc="(1300,440)" name="AND Gate">
-      <a name="label" val="ACTIVE_OFFSET_ADDRESS_ERROR"/>
+    <comp lib="1" loc="(1060,340)" name="AND Gate">
+      <a name="label" val="ACTIVE_OFFSET_ADDRESS_ERROR" />
+      <a name="labelfont" val="SansSerif plain 1" />
     </comp>
-    <comp lib="1" loc="(1500,490)" name="OR Gate">
-      <a name="label" val="ACTIVE_ADDRESS_ERROR"/>
+    <comp lib="1" loc="(1260,420)" name="OR Gate">
+      <a name="label" val="ACTIVE_ADDRESS_ERROR" />
+      <a name="labelfont" val="SansSerif plain 1" />
     </comp>
-    <comp lib="1" loc="(790,270)" name="OR Gate">
-      <a name="inputs" val="8"/>
-      <a name="label" val="DIRECT_MEMORY_ADDRESS_ACTIVE"/>
+    <comp lib="1" loc="(560,160)" name="OR Gate">
+      <a name="inputs" val="8" />
+      <a name="label" val="DIRECT_MEMORY_ADDRESS_ACTIVE" />
+      <a name="labelfont" val="SansSerif plain 1" />
     </comp>
-    <comp lib="1" loc="(990,410)" name="OR Gate">
-      <a name="inputs" val="3"/>
-      <a name="label" val="MEMORY_ADDRESS_ACTIVE"/>
+    <comp lib="1" loc="(760,320)" name="OR Gate">
+      <a name="inputs" val="3" />
+      <a name="label" val="MEMORY_ADDRESS_ACTIVE" />
+      <a name="labelfont" val="SansSerif plain 1" />
     </comp>
-    <wire from="(1090,410)" to="(1090,490)"/>
-    <wire from="(1090,490)" to="(1140,490)"/>
-    <wire from="(1190,510)" to="(1450,510)"/>
-    <wire from="(1200,420)" to="(1250,420)"/>
-    <wire from="(1200,90)" to="(1200,420)"/>
-    <wire from="(1300,440)" to="(1420,440)"/>
-    <wire from="(1420,440)" to="(1420,470)"/>
-    <wire from="(1420,470)" to="(1450,470)"/>
-    <wire from="(1500,490)" to="(1620,490)"/>
-    <wire from="(350,110)" to="(380,110)"/>
-    <wire from="(350,130)" to="(370,130)"/>
-    <wire from="(350,150)" to="(360,150)"/>
-    <wire from="(350,90)" to="(1200,90)"/>
-    <wire from="(360,150)" to="(360,530)"/>
-    <wire from="(360,530)" to="(1140,530)"/>
-    <wire from="(370,130)" to="(370,430)"/>
-    <wire from="(370,430)" to="(890,430)"/>
-    <wire from="(380,110)" to="(380,410)"/>
-    <wire from="(380,410)" to="(940,410)"/>
-    <wire from="(590,170)" to="(670,170)"/>
-    <wire from="(590,190)" to="(660,190)"/>
-    <wire from="(590,210)" to="(650,210)"/>
-    <wire from="(590,230)" to="(640,230)"/>
-    <wire from="(590,250)" to="(630,250)"/>
-    <wire from="(590,270)" to="(620,270)"/>
-    <wire from="(590,290)" to="(610,290)"/>
-    <wire from="(590,310)" to="(740,310)"/>
-    <wire from="(610,290)" to="(610,300)"/>
-    <wire from="(610,300)" to="(740,300)"/>
-    <wire from="(620,270)" to="(620,290)"/>
-    <wire from="(620,290)" to="(740,290)"/>
-    <wire from="(630,250)" to="(630,280)"/>
-    <wire from="(630,280)" to="(740,280)"/>
-    <wire from="(640,230)" to="(640,260)"/>
-    <wire from="(640,260)" to="(740,260)"/>
-    <wire from="(650,210)" to="(650,250)"/>
-    <wire from="(650,250)" to="(740,250)"/>
-    <wire from="(660,190)" to="(660,240)"/>
-    <wire from="(660,240)" to="(740,240)"/>
-    <wire from="(670,170)" to="(670,230)"/>
-    <wire from="(670,230)" to="(740,230)"/>
-    <wire from="(790,270)" to="(930,270)"/>
-    <wire from="(890,430)" to="(890,460)"/>
-    <wire from="(890,430)" to="(940,430)"/>
-    <wire from="(890,460)" to="(1250,460)"/>
-    <wire from="(930,270)" to="(930,390)"/>
-    <wire from="(930,390)" to="(940,390)"/>
-    <wire from="(990,410)" to="(1090,410)"/>
+    <wire from="(200,40)" to="(920,40)" />
+    <wire from="(200,80)" to="(620,80)" />
+    <wire from="(200,120)" to="(460,120)" />
+    <wire from="(200,160)" to="(480,160)" />
+    <wire from="(200,240)" to="(580,240)" />
+    <wire from="(200,280)" to="(280,280)" />
+    <wire from="(200,320)" to="(320,320)" />
+    <wire from="(200,360)" to="(340,360)" />
+    <wire from="(200,440)" to="(360,440)" />
+    <wire from="(200,480)" to="(380,480)" />
+    <wire from="(200,520)" to="(460,520)" />
+    <wire from="(200,560)" to="(440,560)" />
+    <wire from="(280,20)" to="(280,280)" />
+    <wire from="(280,20)" to="(420,20)" />
+    <wire from="(320,60)" to="(320,320)" />
+    <wire from="(320,60)" to="(480,60)" />
+    <wire from="(340,140)" to="(340,360)" />
+    <wire from="(340,140)" to="(420,140)" />
+    <wire from="(360,220)" to="(360,440)" />
+    <wire from="(360,220)" to="(420,220)" />
+    <wire from="(380,180)" to="(380,480)" />
+    <wire from="(380,180)" to="(510,180)" />
+    <wire from="(420,20)" to="(420,130)" />
+    <wire from="(420,130)" to="(510,130)" />
+    <wire from="(420,140)" to="(420,150)" />
+    <wire from="(420,150)" to="(510,150)" />
+    <wire from="(420,170)" to="(420,220)" />
+    <wire from="(420,170)" to="(510,170)" />
+    <wire from="(440,200)" to="(440,560)" />
+    <wire from="(440,200)" to="(510,200)" />
+    <wire from="(460,20)" to="(460,120)" />
+    <wire from="(460,20)" to="(660,20)" />
+    <wire from="(460,190)" to="(460,520)" />
+    <wire from="(460,190)" to="(510,190)" />
+    <wire from="(480,60)" to="(480,140)" />
+    <wire from="(480,140)" to="(510,140)" />
+    <wire from="(480,160)" to="(480,440)" />
+    <wire from="(480,440)" to="(910,440)" />
+    <wire from="(510,120)" to="(580,120)" />
+    <wire from="(560,160)" to="(640,160)" />
+    <wire from="(580,120)" to="(580,240)" />
+    <wire from="(620,80)" to="(620,320)" />
+    <wire from="(620,320)" to="(710,320)" />
+    <wire from="(640,160)" to="(640,300)" />
+    <wire from="(640,300)" to="(710,300)" />
+    <wire from="(660,20)" to="(660,340)" />
+    <wire from="(660,340)" to="(710,340)" />
+    <wire from="(710,340)" to="(710,360)" />
+    <wire from="(710,360)" to="(1010,360)" />
+    <wire from="(760,320)" to="(760,340)" />
+    <wire from="(760,340)" to="(910,340)" />
+    <wire from="(910,340)" to="(910,400)" />
+    <wire from="(920,40)" to="(920,320)" />
+    <wire from="(920,320)" to="(1010,320)" />
+    <wire from="(960,420)" to="(960,440)" />
+    <wire from="(960,440)" to="(1210,440)" />
+    <wire from="(1060,340)" to="(1210,340)" />
+    <wire from="(1210,340)" to="(1210,400)" />
+    <wire from="(1260,40)" to="(1260,420)" />
+    <wire from="(1260,40)" to="(1480,40)" />
+    <comp lib="9" name="Text" loc="(935,471)">
+      <a name="text" val="ACTIVE ADDRESS RANGE GATE" />
+      <a name="font" val="SansSerif plain 12" />
+    </comp>
+    <comp lib="9" name="Text" loc="(1035,291)">
+      <a name="text" val="ACTIVE OFFSET ADDRESS ERROR" />
+      <a name="font" val="SansSerif plain 12" />
+    </comp>
+    <comp lib="9" name="Text" loc="(1175,331)">
+      <a name="text" val="ACTIVE ADDRESS ERROR" />
+      <a name="font" val="SansSerif plain 12" />
+    </comp>
+    <comp lib="9" name="Text" loc="(535,11)">
+      <a name="text" val="DIRECT MEMORY ADDRESS ACTIVE" />
+      <a name="font" val="SansSerif plain 12" />
+    </comp>
+    <comp lib="9" name="Text" loc="(755,271)">
+      <a name="text" val="MEMORY ADDRESS ACTIVE" />
+      <a name="font" val="SansSerif plain 12" />
+    </comp>
   </circuit>
 </project>

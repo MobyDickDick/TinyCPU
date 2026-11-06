@@ -22,6 +22,46 @@ def _labelled(circuit, label):
 
 
 class CircuitCheckTests(unittest.TestCase):
+    def test_input_pin_shorted_to_register_output_is_rejected(self):
+        circuit = ET.fromstring('''<circuit name="InterruptShort">
+          <comp lib="0" name="Pin" loc="(20,130)">
+            <a name="label" val="INTERRUPT_TARGET_PC"/><a name="width" val="12"/>
+          </comp>
+          <comp lib="5" name="Register" loc="(100,100)">
+            <a name="appearance" val="logisim_evolution"/>
+            <a name="label" val="PC"/><a name="width" val="12"/>
+          </comp>
+          <wire from="(20,130)" to="(160,130)"/>
+        </circuit>''')
+        self.assertIn("outputs share one net: INTERRUPT_TARGET_PC, PC",
+                      [i.message for i in inspect_circuit(circuit)])
+
+    def test_diagnostic_interrupt_target_is_separate_from_the_live_pc(self):
+        from tiny_cpu_hierarchy import component_ports, location, wire_path_exists
+        path = ROOT / "hardware/logisim/diagnostics/TinyCPU-FetchDecode.circ"
+        circuit = ET.parse(path).getroot().find("circuit[@name='FetchDecode']")
+        target = _labelled(circuit, "INTERRUPT_TARGET_PC").get("loc")
+        comparator = circuit.find("comp[@name='Comparator']")
+        pc = next(location(p) for p, *_, name in component_ports({}, comparator) if name == "a")
+        override = _labelled(circuit, "INTERRUPT_PC_OVERRIDE")
+        selected = next(location(p) for p, *_, name in component_ports({}, override) if name == "1")
+        self.assertTrue(wire_path_exists(circuit, target, selected))
+        self.assertFalse(wire_path_exists(circuit, target, pc))
+
+    def test_isolated_output_is_rejected_even_without_a_wire_stub(self):
+        circuit = ET.fromstring('''<circuit name="MovedOutput">
+          <comp lib="0" name="Pin" loc="(110,100)">
+            <a name="label" val="STATUS"/><a name="type" val="output"/>
+          </comp>
+          <comp lib="0" name="Pin" loc="(20,120)"><a name="label" val="SOURCE"/></comp>
+          <wire from="(20,120)" to="(120,120)"/>
+          <wire from="(120,100)" to="(120,120)"/>
+        </circuit>''')
+        self.assertIn("STATUS is an unconnected output pin",
+                      [i.message for i in inspect_circuit(circuit)])
+        ET.SubElement(circuit, "wire", {"from": "(110,100)", "to": "(120,100)"})
+        self.assertEqual(inspect_circuit(circuit), [])
+
     def test_long_horizontal_input_to_an_offset_fbox_terminal_is_connected(self):
         definition = ET.fromstring('''<circuit name="Box">
           <comp lib="0" name="Pin" loc="(100,100)">
@@ -65,6 +105,15 @@ class CircuitCheckTests(unittest.TestCase):
             if circuit.get("name") in CORE_UNITS.keys() | ADDRESS_HELPERS:
                 with self.subTest(circuit=circuit.get("name")):
                     self.assertEqual(inspect_routing_grid(circuit), [])
+
+    def test_all_unprotected_project_sheets_use_grouped_routing(self):
+        for path in sorted((ROOT / "hardware/logisim").rglob("*.circ")):
+            for circuit in ET.parse(path).getroot().findall("circuit"):
+                if circuit.get("name") == "FetchDecodeControls":
+                    continue
+                origin = (70, 0) if circuit.get("name") == "TinyCPUMain" else (0, 0)
+                with self.subTest(file=path.name, circuit=circuit.get("name")):
+                    self.assertEqual(inspect_routing_grid(circuit, origin=origin), [])
 
     def test_splitter_branch_requires_a_physically_connected_bus_source(self):
         circuit = ET.fromstring('''<circuit name="Control">
@@ -538,6 +587,7 @@ class CircuitCheckTests(unittest.TestCase):
         project = """<?xml version='1.0'?>
           <project>
             <circuit name="Producer">
+              <comp lib="0" name="Constant" loc="(100,100)"/>
               <comp lib="0" loc="(100,100)" name="Pin">
                 <a name="label" val="VALUE"/><a name="type" val="output"/>
               </comp>

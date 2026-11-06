@@ -16,106 +16,157 @@
   <lib desc="#Base" name="9"/>
   <main name="DivArithmeticCircuit"/>
   <circuit name="DivArithmeticCircuit">
-    <a name="appearance" val="logisim_evolution"/>
-    <a name="circuit" val="DivArithmeticCircuit"/>
-    <a name="circuitnamedboxfixedsize" val="true"/>
-    <a name="simulationFrequency" val="1.0"/>
-    <comp lib="0" loc="(190,130)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="LEFT"/>
-      <a name="width" val="16"/>
+    <a name="appearance" val="logisim_evolution" />
+    <a name="circuit" val="DivArithmeticCircuit" />
+    <a name="circuitnamedboxfixedsize" val="true" />
+    <a name="simulationFrequency" val="1.0" />
+    <comp lib="0" loc="(520,120)" name="Constant">
+      <a name="value" val="0x0" />
+      <a name="width" val="16" />
     </comp>
-    <comp lib="0" loc="(190,210)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="RIGHT"/>
-      <a name="width" val="16"/>
+    <comp lib="0" loc="(520,220)" name="Constant">
+      <a name="width" val="16" />
     </comp>
-    <comp lib="0" loc="(190,250)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="INPUT_VALID"/>
+    <comp lib="1" loc="(1120,280)" name="AND Gate">
+      <a name="inputs" val="3" />
+      <a name="label" val="RANGE_VALID" />
+      <a name="labelfont" val="SansSerif plain 1" />
     </comp>
-    <comp lib="0" loc="(190,80)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="label" val="DIV_ACTIVATED"/>
+    <comp lib="1" loc="(1120,360)" name="AND Gate">
+      <a name="label" val="DIVIDE_BY_ZERO_ACTIVE" />
+      <a name="labelfont" val="SansSerif plain 1" />
+      <a name="inputs" val="3" />
     </comp>
-    <comp lib="0" loc="(240,100)" name="Constant">
-      <a name="value" val="0x0"/>
-      <a name="width" val="16"/>
+    <comp lib="1" loc="(920,220)" name="NOT Gate">
+      <a name="label" val="NONZERO_DIVISOR" />
+      <a name="labelfont" val="SansSerif plain 1" />
     </comp>
-    <comp lib="0" loc="(240,190)" name="Constant">
-      <a name="width" val="16"/>
+    <comp lib="2" loc="(620,140)" name="Multiplexer">
+      <a name="width" val="16" />
     </comp>
-    <comp lib="0" loc="(610,220)" name="Constant">
-      <a name="width" val="16"/>
+    <comp lib="2" loc="(620,220)" name="Multiplexer">
+      <a name="width" val="16" />
     </comp>
-    <comp lib="0" loc="(970,160)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="RESULT"/>
-      <a name="type" val="output"/>
-      <a name="width" val="16"/>
+    <comp lib="3" loc="(720,180)" name="Divider">
+      <a name="mode" val="twosComplement" />
+      <a name="width" val="16" />
     </comp>
-    <comp lib="0" loc="(970,230)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="RESULT_VALID"/>
-      <a name="type" val="output"/>
+    <comp lib="3" loc="(820,240)" name="Comparator">
+      <a name="width" val="16" />
+      <a name="mode" val="unsigned" />
     </comp>
-    <comp lib="0" loc="(970,300)" name="Pin">
-      <a name="appearance" val="classic"/>
-      <a name="facing" val="west"/>
-      <a name="label" val="DIVIDE_BY_ZERO"/>
-      <a name="type" val="output"/>
+    <comp lib="9" loc="(1055,230)" name="Text">
+      <a name="font" val="SansSerif plain 12" />
+      <a name="text" val="RANGE VALID" />
     </comp>
-    <comp lib="1" loc="(820,200)" name="NOT Gate">
-      <a name="label" val="NONZERO_DIVISOR"/>
+    <comp lib="9" loc="(1200,410)" name="Text">
+      <a name="font" val="SansSerif plain 12" />
+      <a name="text" val="DIVIDE BY ZERO ACTIVE" />
     </comp>
-    <comp lib="1" loc="(930,230)" name="AND Gate">
-      <a name="label" val="RANGE_VALID"/>
+    <comp lib="9" loc="(925,185)" name="Text">
+      <a name="font" val="SansSerif plain 12" />
+      <a name="text" val="NONZERO DIVISOR" />
     </comp>
-    <comp lib="2" loc="(300,120)" name="Multiplexer">
-      <a name="width" val="16"/>
+    <wire from="(1060,280)" to="(1060,380)" />
+    <wire from="(1060,280)" to="(1070,280)" />
+    <wire from="(1060,380)" to="(1070,380)" />
+    <wire from="(1120,360)" to="(1260,360)" />
+    <wire from="(1120,80)" to="(1120,280)" />
+    <wire from="(1120,80)" to="(1340,80)" />
+    <wire from="(1260,120)" to="(1260,360)" />
+    <wire from="(1260,120)" to="(1340,120)" />
+    <wire from="(200,120)" to="(480,120)" />
+    <wire from="(200,160)" to="(560,160)" />
+    <wire from="(200,40)" to="(580,40)" />
+    <wire from="(200,80)" to="(540,80)" />
+    <wire from="(480,120)" to="(480,230)" />
+    <wire from="(480,230)" to="(590,230)" />
+    <wire from="(520,120)" to="(520,130)" />
+    <wire from="(520,130)" to="(590,130)" />
+    <wire from="(520,210)" to="(520,220)" />
+    <wire from="(520,210)" to="(590,210)" />
+    <wire from="(540,150)" to="(590,150)" />
+    <wire from="(540,80)" to="(540,150)" />
+    <wire from="(560,160)" to="(560,280)" />
+    <wire from="(560,280)" to="(960,280)" />
+    <wire from="(580,160)" to="(580,240)" />
+    <wire from="(580,160)" to="(600,160)" />
+    <wire from="(580,240)" to="(600,240)" />
+    <wire from="(580,40)" to="(580,160)" />
+    <wire from="(600,240)" to="(620,240)" />
+    <wire from="(620,140)" to="(620,170)" />
+    <wire from="(620,170)" to="(680,170)" />
+    <wire from="(620,190)" to="(620,220)" />
+    <wire from="(620,190)" to="(660,190)" />
+    <wire from="(620,240)" to="(620,320)" />
+    <wire from="(620,320)" to="(980,320)" />
+    <wire from="(660,190)" to="(660,230)" />
+    <wire from="(660,190)" to="(680,190)" />
+    <wire from="(660,230)" to="(780,230)" />
+    <wire from="(720,180)" to="(860,180)" />
+    <wire from="(820,230)" to="(890,230)" />
+    <wire from="(860,40)" to="(1340,40)" />
+    <wire from="(860,40)" to="(860,180)" />
+    <wire from="(890,220)" to="(890,230)" />
+    <wire from="(890,230)" to="(890,260)" />
+    <wire from="(890,260)" to="(1070,260)" />
+    <wire from="(920,220)" to="(920,340)" />
+    <wire from="(920,340)" to="(1070,340)" />
+    <wire from="(960,280)" to="(960,300)" />
+    <wire from="(960,300)" to="(1070,300)" />
+    <wire from="(980,280)" to="(1060,280)" />
+    <wire from="(980,280)" to="(980,320)" />
+    <wire from="(560,280)" to="(560,440)" />
+    <wire from="(560,440)" to="(1040,440)" />
+    <wire from="(1040,440)" to="(1040,360)" />
+    <wire from="(1040,360)" to="(1070,360)" />
+    <wire from="(520,120)" to="(500,120)" />
+    <wire from="(500,120)" to="(500,60)" />
+    <wire from="(500,60)" to="(760,60)" />
+    <wire from="(760,60)" to="(760,250)" />
+    <wire from="(760,250)" to="(780,250)" />
+    <comp lib="0" loc="(200,80)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="LEFT" />
+      <a name="radix" val="16" />
+      <a name="width" val="16" />
     </comp>
-    <comp lib="2" loc="(330,200)" name="Multiplexer">
-      <a name="width" val="16"/>
+    <comp lib="0" loc="(200,120)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="RIGHT" />
+      <a name="radix" val="16" />
+      <a name="width" val="16" />
     </comp>
-    <comp lib="3" loc="(530,160)" name="Divider">
-      <a name="mode" val="twosComplement"/>
-      <a name="width" val="16"/>
+    <comp lib="0" loc="(200,160)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="INPUT_VALID" />
     </comp>
-    <comp lib="3" loc="(710,210)" name="Comparator">
-      <a name="width" val="16"/>
+    <comp lib="0" loc="(200,40)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="label" val="DIV_ACTIVATED" />
     </comp>
-    <wire from="(190,130)" to="(270,130)"/>
-    <wire from="(190,210)" to="(300,210)"/>
-    <wire from="(190,250)" to="(880,250)"/>
-    <wire from="(190,80)" to="(260,80)"/>
-    <wire from="(240,100)" to="(250,100)"/>
-    <wire from="(240,190)" to="(300,190)"/>
-    <wire from="(250,100)" to="(250,110)"/>
-    <wire from="(250,110)" to="(270,110)"/>
-    <wire from="(260,150)" to="(280,150)"/>
-    <wire from="(260,80)" to="(260,150)"/>
-    <wire from="(280,140)" to="(280,150)"/>
-    <wire from="(280,150)" to="(280,230)"/>
-    <wire from="(280,230)" to="(310,230)"/>
-    <wire from="(300,120)" to="(430,120)"/>
-    <wire from="(310,220)" to="(310,230)"/>
-    <wire from="(330,200)" to="(430,200)"/>
-    <wire from="(430,120)" to="(430,150)"/>
-    <wire from="(430,150)" to="(490,150)"/>
-    <wire from="(430,170)" to="(430,200)"/>
-    <wire from="(430,170)" to="(490,170)"/>
-    <wire from="(430,200)" to="(670,200)"/>
-    <wire from="(530,160)" to="(970,160)"/>
-    <wire from="(610,220)" to="(670,220)"/>
-    <wire from="(710,200)" to="(730,200)"/>
-    <wire from="(730,200)" to="(730,300)"/>
-    <wire from="(730,200)" to="(790,200)"/>
-    <wire from="(730,300)" to="(970,300)"/>
-    <wire from="(820,200)" to="(860,200)"/>
-    <wire from="(860,200)" to="(860,210)"/>
-    <wire from="(860,210)" to="(880,210)"/>
-    <wire from="(930,230)" to="(970,230)"/>
+    <comp lib="0" loc="(1340,40)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="facing" val="west" />
+      <a name="label" val="RESULT" />
+      <a name="radix" val="16" />
+      <a name="type" val="output" />
+      <a name="width" val="16" />
+    </comp>
+    <comp lib="0" loc="(1340,80)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="facing" val="west" />
+      <a name="label" val="RESULT_VALID" />
+      <a name="type" val="output" />
+    </comp>
+    <comp lib="0" loc="(1340,120)" name="Pin">
+      <a name="appearance" val="classic" />
+      <a name="facing" val="west" />
+      <a name="label" val="DIVIDE_BY_ZERO" />
+      <a name="type" val="output" />
+    </comp>
   </circuit>
+
+
+
 </project>

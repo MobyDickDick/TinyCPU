@@ -7,6 +7,7 @@ Start here:
 
 Reference and project records:
 
+- [`tiny_cpu_circuit_repair_20261106.md`](tiny_cpu_circuit_repair_20261106.md): projektweite Korrektur und Überarbeitung aller 56 ungeschützten Schaltbilder; MUL-/DIV-Grenzen, Operator-CPU-Abnahme und elektrische Nachweise
 - [`tiny_cpu_address_validity.md`](tiny_cpu_address_validity.md): Korrektur der Adressregister-Gültigkeit und nach Aufgaben geordnete AddressUnit mit elektrischen Regressionen
 - [`tiny_cpu_schematic_style.md`](tiny_cpu_schematic_style.md): verbindlicher gemeinsamer Zeichenstil für alle Elektroschemas, einschließlich Pin- und Leitungsgruppen sowie möglichst weniger Konstanten
 - [`tiny_cpu_schematic_reference.md`](tiny_cpu_schematic_reference.md): erste drei überarbeitete Schaltpläne mit sichtbaren Signalbussen, Vorher-/Nachher-Ansichten und Prüfstand
@@ -23,6 +24,7 @@ Reference and project records:
 - [`tiny_cpu_core_trace.md`](tiny_cpu_core_trace.md): elektrischer Kernvergleich, Flankenvertrag, Rohdaten und offene Abnahmebefunde aus AP 22.1
 - [`tiny_cpu_input_plan.md`](tiny_cpu_input_plan.md): abgegrenzte externe Eingabeschnittstelle und elektrische Sollfälle aus AP 22.1; Umsetzung offen, veraltete Mutationsadapter repariert
 - [`tiny_cpu_input_baseline.md`](tiny_cpu_input_baseline.md): abgeschlossene passive INPUT-Messung vor dem Eingabeumbau, mit benannten Lade-/Fehlerpfaden und vollständigem Kern-/VM-Vergleich
+- [`tiny_cpu_input_boundary_precheck.md`](tiny_cpu_input_boundary_precheck.md): historischer Stop der Eingangskontrolle; die anschließend produktiv reparierte FaultUnit-Ausgangslücke ist mit dem aktuellen Abschlussbericht verknüpft
 - [`tiny_cpu_instruction_status.md`](tiny_cpu_instruction_status.md): aktuell nachgewiesener Funktionsstand aller Befehle
 - [`logisim_diagnostics_known_issues.md`](logisim_diagnostics_known_issues.md): bekannte Besonderheiten der Diagnoseschaltungen
 - [`tiny_cpu_roadmap.md`](tiny_cpu_roadmap.md): Hardware-Arbeitsplan

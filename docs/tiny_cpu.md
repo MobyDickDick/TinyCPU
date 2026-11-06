@@ -139,6 +139,12 @@ permitted, and the result is within the signed range of the configured data bus
 and a specific error flag is set. Invalidity propagates when the value is used
 again.
 
+Version 1 deliberately preserves one DIV exception: `−32768 / −1` yields
+`−32768 VALID` without OVF. Signed division truncates toward zero and retains
+the low data-width bits; division by zero and invalid operands still fail.
+ADD, SUB and MUL outside the signed range produce `0 INVALID` and OVF.
+See the [6 November arithmetic acceptance](tiny_cpu_circuit_repair_20261106.md).
+
 ## Scale-invariant widths
 
 The long-term architecture requirement is **width-independent, not limited to

@@ -226,7 +226,8 @@
         "shared_reset",
         "value_register_to_output",
         "valid_register_to_output"
-      ]
+      ],
+      "topology_sha256": "6a560ae1b6be7b032288181b2aa7875e626151d9374f4d085da7f8cc2588f109"
     },
     "output_memory_path": {
       "circuit": "OutputMemoryPath",
@@ -249,7 +250,8 @@
         "output_port_write_value_and_valid",
         "output_port_clock_and_reset",
         "read_and_state_outputs"
-      ]
+      ],
+      "topology_sha256": "3a0737668c8adf66ed41281c9894bcc5397357c9c0c6751a17d03f29da13804a"
     },
     "interrupt_controller": {
       "circuit": "InterruptController",
@@ -273,7 +275,6 @@
       ],
       "disable_on_accept": true,
       "restore_mask_on_return": true,
-      "wiring_sha256": "c8da95444ec93580cc9501d41ab824a3f81c862a35ff6ed7681c9ebd2b7af5d9",
       "verified_paths": [
         "request_to_level_register",
         "request_level_clock_and_reset",
@@ -308,7 +309,8 @@
         "return_state_clock_and_reset",
         "return_state_outputs",
         "synchronous_reset_trigger"
-      ]
+      ],
+      "topology_sha256": "fab2f87fbbbf68eb907b8ef9629877ad6d7c0fe71747ecddef219de721cf1375"
     }
   },
   "public_pins": {

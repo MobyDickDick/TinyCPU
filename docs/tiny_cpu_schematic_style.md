@@ -142,6 +142,15 @@ einen bisherigen Topologie-Fingerabdruck ändern; dessen Erwartungswert darf
 nicht ohne eigenständigen Nachweis des unveränderten Verhaltens ersetzt werden.
 Abweichungen und noch unbearbeitete Schaltungen ausdrücklich offen führen.
 
+## Projektweiter Durchgang vom 6. November 2026
+
+Die [projektweite Überarbeitung](tiny_cpu_circuit_repair_20261106.md) erfasst
+24 Dateien mit 58 Definitionen: 56 überarbeitet, beide geschützten Decoder
+bytegleich erhalten. Die tatsächliche Eingangsbasis dieses Durchgangs enthält
+63 Konstanten, der korrigierte Stand 59. Native Ansichten und Kontaktvergleiche
+sowie elektrische Grenzfall-, Kern- und Operatorprüfungen sichern die Änderungen.
+Die folgenden Zahlen und offenen Blätter beschreiben den historischen Teilstand.
+
 ## Stand vom 1. November 2026
 
 Die Regeln sind dauerhaft im Projekt hinterlegt. Die frühere Überarbeitung in
