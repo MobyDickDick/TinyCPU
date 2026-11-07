@@ -279,7 +279,9 @@ Defektnachweis für eine konkrete Leitung oder ein bestimmtes Bauteil.
   Instruktionsschritte und abweichende Werte müssen die Abnahme abbrechen.
   Schnittstelle, Taktbezug, Kompatibilitätsgrenze, feste Sollfälle und
   Negativkontrollen sind im [abgeschlossenen Planungspaket](tiny_cpu_input_plan.md)
-  festgelegt. Die elektrische Umsetzung und Abnahme folgen separat.
+  festgelegt. Schritt 2 mit der zusätzlichen elektrischen Grenze ist inzwischen
+  [abgeschlossen](tiny_cpu_input_boundary.md); dynamische Stimuli und die
+  vollständige elektrische Eingabeabnahme bleiben offen.
 - [x] Einen gezielt falschen Rechenwert bei weiterhin korrektem Halt in einer
   temporären Schaltungskopie elektrisch nachweisen. Das neue Gate muss diesen
   Fall ablehnen; das Erreichen von `HALT` allein darf ihn nicht bestehen lassen.

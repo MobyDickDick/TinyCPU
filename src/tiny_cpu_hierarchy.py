@@ -319,6 +319,15 @@ def flatten_core(project):
                         bits.union(outer, inner)
             elif kind not in {"Tunnel", "Text"} and (top or kind != "Pin") and c not in bus_splitters:
                 clone = copy.deepcopy(c)
+                # Logisim drops this hidden caption on a GUI save. Recover the
+                # analysis name from the real public output connection, without
+                # writing a label or changing the authored source drawing.
+                if (circuit.get("name") == "AddressAccess" and kind == "NOR Gate"
+                        and not a.get("label")):
+                    output = next((pin for pin in circuit.findall("comp[@name='Pin']")
+                                   if attributes(pin).get("label") == "ACCESS_VALID"), None)
+                    if output is not None and wire_path_exists(circuit, c.get("loc"), output.get("loc")):
+                        ET.SubElement(clone, "a", name="label", val="ACCESS_VALID")
                 x, y = point(c.get("loc"))
                 clone.set("loc", location((x + shift, y + shift)))
                 ports = [(location((p[0] + shift, p[1] + shift)), state.vector(p, width))

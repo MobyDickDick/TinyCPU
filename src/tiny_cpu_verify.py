@@ -368,7 +368,8 @@ def verify_circuit(path: Path) -> tuple[int, int]:
 
         from tiny_cpu_hierarchy import ADDRESS_HELPERS, CORE_UNITS
         from tiny_cpu_wire_contacts import inspect_schematic_layout
-        if circuit_name in CORE_UNITS.keys() | ADDRESS_HELPERS:
+        if circuit_name in CORE_UNITS.keys() | ADDRESS_HELPERS | {
+                "TinyCPUInputMain", "AccumulatorInputUnit", "FaultInputUnit"}:
             layout_issues = inspect_schematic_layout(circuit)
             if layout_issues:
                 raise VerificationError(f"{display_path(path)}: {layout_issues[0]}")
@@ -721,9 +722,13 @@ def verify_system_circuit() -> None:
     ram_guard_ports = terminals(ram_guard)
     read_guard = named_core("VALID_MEMORY_READ")
     read_guard_ports = terminals(read_guard)
+    write_terms_connected = any(
+        core_connected(write_request.get("loc"), write_guard_ports[request])
+        and core_connected(access_valid, write_guard_ports[valid])
+        for request, valid in (("0", "1"), ("1", "0"))
+    )
     if not all((
-        core_connected(write_request.get("loc"), write_guard_ports["0"]),
-        core_connected(access_valid, write_guard_ports["1"]),
+        write_terms_connected,
         core_connected(access_valid, ram_guard_ports["1"]),
         core_connected(ram_guard.get("loc"), memory_ports["WRITE_ENABLE"]),
     )):
@@ -1902,6 +1907,8 @@ def verify(root: Path = ROOT) -> list[str]:
             core = ET.parse(LOGISIM / "TinyCPU.circ").getroot()
             control = load_json(LOGISIM / "tinycpu-core-control-v1.json")
             verify_core_modularity(core, control)
+            from tiny_cpu_input_boundary import verify_input_boundary
+            verify_input_boundary(core)
             if core_topology_fingerprint(core) != control.get("topology_sha256"):
                 raise ValueError("CPU extracted topology differs from the accepted baseline")
         except ValueError as exc:

@@ -9,6 +9,30 @@ bereitstellen, rechnen, Ergebnisse speichern und den nächsten Befehl bestimmen.
 öffentlichen Pins verbinden den Kern mit Takt, Speicher, Ausgaben und
 Interruptsteuerung.
 
+## TinyCPUInputMain
+
+Zusätzliche, ausdrücklich wählbare CPU-Grenze mit `INPUT_VALUE` (16 Bit),
+`INPUT_VALID` und `INPUT_CONSUME`. Sie verwendet dieselben sechs übrigen
+Funktionsboxen wie `TinyCPUMain`; nur Akkumulator und Fehlerlogik besitzen
+Eingabevarianten. Die bisherige öffentliche CPU-Grenze bleibt erhalten.
+
+## AccumulatorInputUnit
+
+Erweitert die bestehende Akkumulatorbox um die Auswahl externer INPUT-Daten.
+Ein gültiges Angebot lädt den angebotenen Wert; ein ungültiges Angebot lädt
+kanonisch Null mit gelöschter Gültigkeit. `INPUT_CONSUME` folgt dem aktuellen
+INPUT-Decode bei inaktivem Reset; jede steigende Taktflanke ist ein Leseversuch.
+Der bisherige Datapath wird gemeinsam mit der Baseline verwendet.
+
+## FaultInputUnit
+
+Erweitert die Fehlerbox um `INPUT_VALID`. Ausschließlich ein INPUT mit
+ungültigem Angebot setzt die INPUT-Fehlerursache; das gemeinsame `ErrorFlags`
+speichert sie bis `CLEAR_ERROR`. Ein erfolgreicher INPUT löscht keine alten Flags.
+
+Die [Abnahme der Eingabegrenze](../../docs/tiny_cpu_input_boundary.md) beschreibt
+Reproduktion, Nachweise und die noch folgende dynamische Eingabeabnahme.
+
 ## EffectiveAddress
 
 Wählt zwischen direkter Adresse, Adressregister und Adressregister plus Offset. Gibt

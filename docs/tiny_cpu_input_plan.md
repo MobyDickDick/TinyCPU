@@ -1,25 +1,29 @@
 # AP 22.1: Externe Eingabe – Schnittstelle und Abnahme
 
-**Stand: 5. November 2026. Status:** Das begrenzte Planungspaket und die
+**Stand: 7. November 2026. Status:** Das begrenzte Planungspaket und die
 [passive INPUT-Baseline](tiny_cpu_input_baseline.md) sind abgeschlossen;
-die elektrische Implementierung und Eingabeabnahme sind offen.
-Ausgangsstand ist Commit `1e7a8f6`. Dieses Dokument legt den nächsten
-Funktionsschritt aus der [Qualitätsplanung](tiny_cpu_quality_work_packages.md)
-fest. Die produktiven `.circ`-Dateien wurden in diesem Paket nicht geändert.
+die zusätzliche elektrische Eingabegrenze (Schritt 2) ist implementiert und
+[separat abgenommen](tiny_cpu_input_boundary.md). Flankenbezogene Stimuli und
+die vollständige Eingabeabnahme (Schritte 3/4) sind offen.
+Das ursprüngliche Planungspaket hatte Commit `1e7a8f6` als Ausgangsstand
+und änderte keine produktiven `.circ`-Dateien. Schritt 2 baut auf `b3c8500` auf
+und ergänzt drei Definitionen im bestehenden Kernprojekt. Dieses Dokument
+ordnet die Schritte der [Qualitätsplanung](tiny_cpu_quality_work_packages.md) zu.
 
 **Nachtrag vom 6. November 2026:** Die zunächst an `ERROR_INPUT=U`
 gestoppte [Eingangskontrolle](tiny_cpu_input_boundary_precheck.md) führte zum
 Auftrag, alle Schaltungen zu korrigieren und zeichnerisch zu überarbeiten.
 Die FaultUnit-Ausgangslücke ist inzwischen produktiv repariert; Nachweise
 und weitere Korrekturen stehen im [Abschlussbericht](tiny_cpu_circuit_repair_20261106.md).
-Schritt 2 mit den beiden Eingabevarianten bleibt offen und ist der nächste
-Funktionsschritt nach der erneuten passiven Baseline.
+Schritt 2 mit den beiden Eingabevarianten ist am 7. November nach erneuter
+passiver Baseline abgeschlossen. Der nächste Funktionsschritt ist Schritt 3: der
+flankenbezogene Stimulusvertrag mit Exporter, Comparator und dynamischer Fallliste.
 
 ## Ausgangspunkt und Ziel
 
 Die VM unterstützt eine Eingabewarteschlange. Der aktuelle öffentliche Kern
 `TinyCPUMain` besitzt dagegen weder Eingabewert noch Eingabegültigkeit.
-`expected_trace()` verwendet deshalb ausdrücklich eine leere Warteschlange;
+`expected_trace()` verwendet für diese Grenze weiterhin standardmäßig eine leere Warteschlange;
 `LogisimCoreTrace.java` treibt nur die neun vorhandenen Kerneingänge.
 Eine erfolgreiche Fixture mit `INPUT()` belegt bisher nur den Fehlerfall.
 
@@ -53,7 +57,7 @@ Ein späteres Zusammenführen der öffentlichen Grenzen ist ein eigenes
 Kompatibilitätspaket, kein stiller Austausch des bisherigen Symbols.
 
 Zusätzlich gelten folgende Pins; die Namen sind für die Umsetzung reserviert,
-im aktuellen Projekt aber noch nicht vorhanden:
+seit Schritt 2 in `TinyCPUInputMain` vorhanden:
 
 | Pin | Richtung am Kern | Breite | Bedeutung |
 | --- | --- | --- | --- |
@@ -152,14 +156,14 @@ ausgelassene Transaktionen. Der volle Comparator bleibt für jede Fixture aktiv.
    [Nachweis und Messpfade](tiny_cpu_input_baseline.md): Beide elektrischen
    Läufe stimmen vollständig mit der VM überein; sämtliche Quellschaltungen
    blieben bytegleich.
-2. **Offen; Eingangskontrolle am 6. November 2026 gestoppt:** Vor der
-   Implementierung zunächst die [belegte FaultUnit-Ausgangslücke](tiny_cpu_input_boundary_precheck.md)
-   beheben und die Baseline erneut abnehmen. Danach die zusätzliche Grenze und die zwei Boxvarianten implementieren; dabei die
-   bestehenden sechs Boxen und alle ursprünglichen Blattdefinitionen, besonders
-   den geschützten Decoder, bytegleich erhalten. Für jeden Daten-, Gültigkeits-
-   und Fehlerpfad zuerst den benannten elektrischen Nachweis sichern, dann nur
-   die kleinste belegte Änderung vornehmen. Zeichenstil und native Sichtprüfung
-   gelten auch für die Varianten.
+2. **Abgeschlossen am 7. November 2026:** Die FaultUnit-Ausgangslücke ist
+   repariert, die passive Baseline erneut bestanden. `TinyCPUInputMain`,
+   `AccumulatorInputUnit` und `FaultInputUnit` sind ergänzt. Alle bisherigen
+   Definitionen und beide geschützten Decoder sind bytegleich zum Eingang
+   erhalten. Zehn statisch gespeiste elektrische Kern-/VM-Fälle, sieben
+   Reset-/Verbrauchsvektoren und drei abgelehnte elektrische Fehlerkopien
+   sichern die neue Grenze ab. Native Sichtkontrolle und Kontaktprüfung sind
+   dokumentiert; [Abschluss und Reproduktion](tiny_cpu_input_boundary.md).
 3. Stimulusvertrag, Exporter und Comparator erweitern; den ersten gültigen
    INPUT und anschließend die Fälle oben sowie ihre Mutationen abnehmen.
 4. Den neuen Treiber in `scripts/test-logisim.sh` verpflichtend einbinden.

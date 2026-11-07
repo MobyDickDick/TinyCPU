@@ -104,7 +104,7 @@
     {
       "file": "TinyCPU.circ",
       "circuit": "TinyCPUMain",
-      "geometry_sha256": "0a98bfa4a08324e70803157aab2c8c4849c6c637b1d3e2ef4b5296cd7915bc42"
+      "geometry_sha256": "a6c8c4899307484f54451c1dab263bc2f1da85f826ca16a62a548b05ef508340"
     },
     {
       "file": "TinyCPU.circ",
@@ -209,27 +209,27 @@
     {
       "file": "TinyCPU.circ",
       "circuit": "AccumulatorUnit",
-      "geometry_sha256": "1869ebdf1be646a2ce94a05e7c3663c1d032d524bd4cc463796525e1b6fed778"
+      "geometry_sha256": "fdd495a178f6571047312ba04025b63fa7c19ad02602eddedb7419a8d0818876"
     },
     {
       "file": "TinyCPU.circ",
       "circuit": "AddressUnit",
-      "geometry_sha256": "940df22005b03e611ff8ef020004c43241979f10c4c8a863deccd6f7a853cf11"
+      "geometry_sha256": "4bbf6fc857dfe2b40452e2612ee73d5f56447a816dc542827480ec04075e7902"
     },
     {
       "file": "TinyCPU.circ",
       "circuit": "MemoryUnit",
-      "geometry_sha256": "2395bf0520ea069fb4e1b2aa285a539bcd2d0ce12a90611749c3148f895b38ac"
+      "geometry_sha256": "b12a530d6381e2b567a60aaca53253edfd60f1a8a30925b88cb6eb3e6c2c8ecb"
     },
     {
       "file": "TinyCPU.circ",
       "circuit": "ExecutionUnit",
-      "geometry_sha256": "7b2e939de55510c294cd44431cb40d8f16d12ec1101637dbf79539d89db68b23"
+      "geometry_sha256": "56441a1cef59c2d08892cbc4f500bd87ffdb21498b2abef517d8195debc43df0"
     },
     {
       "file": "TinyCPU.circ",
       "circuit": "FaultUnit",
-      "geometry_sha256": "632e48017dfca71cbbdf8e111dc7a0b1e75aa67222334722d1d98ad3db1e51c3"
+      "geometry_sha256": "ea45a0db8919068860121ae785da5b97cd609bd284e2b1f5b8697485b7f7eed4"
     },
     {
       "file": "TinyCPU.circ",
@@ -244,12 +244,12 @@
     {
       "file": "TinyCPU.circ",
       "circuit": "AddressRegisterLoad",
-      "geometry_sha256": "87e608fc6f68ae45adf99a9aa1d380e9f40af5afa7799bf5a2be34a5001b8918"
+      "geometry_sha256": "a1764132c1947055c4df91c590bc8ad0702baa929c66b00d7f13806fc25d18d5"
     },
     {
       "file": "TinyCPU.circ",
       "circuit": "AddressAccess",
-      "geometry_sha256": "57a5fa2f1e1623df60992de1bb8ac4618b35f96d84399e78c4124612a96f8ca1"
+      "geometry_sha256": "dbb21b5239041435ea6bb31011784961e18497a5012a111255d507cbf6229c19"
     },
     {
       "file": "TinyCPU_Operator.circ",
@@ -280,6 +280,24 @@
       "file": "TinyCPU_Peripherals.circ",
       "circuit": "InterruptController",
       "geometry_sha256": "7d5f34e66df38f3ceff38358d44b0f9bf7dc9a850899445aec8b4de06e035cc4"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "AccumulatorInputUnit",
+      "geometry_sha256": "2fc8952debce3b5159b64d1a40606331f941e1c88cc84656f058f6bee552eeb8",
+      "reason": "Local INPUT extensions of authored geometry, native review and electrical boundary acceptance 2026-11-07."
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "FaultInputUnit",
+      "geometry_sha256": "3c25ce8d9b36bef9deed8b04c7eef066d045b4168b8260a526eb1e203b948a0a",
+      "reason": "Local INPUT extensions of authored geometry, native review and electrical boundary acceptance 2026-11-07."
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "TinyCPUInputMain",
+      "geometry_sha256": "07a02dac97fc09d1071d4e618b668b117bb1062f759d4224501faccd1c54c056",
+      "reason": "Local INPUT extensions of authored geometry, native review and electrical boundary acceptance 2026-11-07."
     }
   ]
 }

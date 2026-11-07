@@ -72,13 +72,14 @@ def _state(cpu: TinyCPU) -> dict[str, int | str]:
     }
 
 
-def expected_trace(program: Program) -> list[dict[str, object]]:
+def expected_trace(program: Program, *, inputs=()) -> list[dict[str, object]]:
     """Terminal decodes are pre-edge events; VM step includes their flag edge.
 
-    The current core has no public INPUT value/valid port: INPUT is explicitly
-    unavailable (value 0, valid 0), matching an empty VM input queue.
+    The compatible core defaults to an empty input queue. Boundary tests may
+    supply a queue explicitly; copy it so producing a trace never consumes the
+    caller's input data. This is not a per-edge external stimulus contract.
     """
-    cpu = TinyCPU(program, inputs=[])
+    cpu = TinyCPU(program, inputs=list(inputs))
     rows: list[dict[str, object]] = []
     for edge in range(1, max(64, len(program.instructions) * 8) + 2):
         if not 0 <= cpu.pc < len(program.instructions):
