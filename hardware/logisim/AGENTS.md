@@ -71,7 +71,7 @@ Schnittstelle, während die Blattpins nach Signalhöhe angeordnet werden.
 Beim Verschieben eines Pins muss seine Koordinatenreferenz im Symbol
 mitgeführt werden. Die Symbolanschlüsse dürfen dabei nicht neu sortiert werden.
 
-Die acht Funktionsboxen verwenden dafür lange Spuren auf den Koordinaten
+Die frühere Rasterüberarbeitung verwendete lange Spuren auf den Koordinaten
 20/40/60/80 modulo 100 in beiden Achsen. Der Offline-Verifikator prüft
 zusammenhängende gerade Läufe über 160 Pixel, auch über Leitungsabzweige
 hinweg. Kurze Anschlussauffächerungen an unveränderlichen Bauteilpins,
@@ -79,6 +79,15 @@ insbesondere am Decoder und an Splittern, dürfen von diesem Raster abweichen.
 Diese Ausnahme ist auf den Anschlussbereich begrenzt; sie rechtfertigt keine
 engen Bündel über das gesamte Schaltblatt. Die geschützte interne Zeichnung
 von `FetchDecodeControls` bleibt weiterhin unangetastet.
+
+Am 7. November 2026 hat der Benutzer diese großflächige Umzeichnung
+zurückgewiesen und die Angleichung an das vorherige Layout verlangt.
+Die [wiederhergestellten Referenzzeichnungen](../../docs/tiny_cpu_layout_restoration_20261107.md)
+bleiben daher erhalten. Die Gestaltungsziele rechtfertigen keine erneute
+automatische Anordnung der bestehenden Blätter. Für exakt die im
+`layout-restoration-v1.json` dokumentierten Geometrien gilt eine Ausnahme
+von der Modulo-Rasterprüfung. Änderungen fallen wieder unter die Prüfung;
+elektrische Netze, Schnittstellen und Tunnelverbot sind niemals ausgenommen.
 
 Diese vom Benutzer am 31. Oktober 2026 ausdrücklich gewünschte
 Modularisierung erlaubt das Umstrukturieren der Übersicht und das Extrahieren

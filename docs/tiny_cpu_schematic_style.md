@@ -5,6 +5,27 @@ Benutzerwunsch vom 1. November 2026, einschließlich der Ergänzung
 für weitere Bearbeitungen fest. Es ist ein Arbeitspaket im bestehenden TinyCPU-
 Projekt; ein separates CPU-Projekt ist dafür nicht erforderlich.
 
+## Präzisierung vom 7. November 2026: bestehende Zeichnung erhalten
+
+Der Benutzer hat die großflächige Umzeichnung vom 6. November anhand des
+Vorher-/Nachher-Bildes ausdrücklich zurückgewiesen. Die vorherige Anordnung
+und Leitungsführung wurden deshalb [wiederhergestellt](tiny_cpu_layout_restoration_20261107.md).
+Bei bestehenden Blättern hat die Nähe zu dieser gestalteten Referenz Vorrang
+vor einer automatischen Neuanordnung zur Erfüllung eines starren Koordinatenrasters.
+Die unten genannten Abstände bleiben Gestaltungsziele für neue und lokal
+ergänzte Zeichnungsteile; sie sind kein Auftrag, bestehende Blätter erneut
+großflächig umzubauen. Elektrische Fehler werden weiter möglichst lokal behoben.
+
+Die wiederhergestellten Geometrien sind in
+`hardware/logisim/layout-restoration-v1.json` festgehalten. Nur diese exakten
+Zeichnungen sind von der bisherigen Modulo-Rasterprüfung ausgenommen;
+Verbindungs-, Schnittstellen-, Tunnel- und elektrische Prüfungen bleiben aktiv.
+Eine geänderte Leitung oder Bauteilposition hebt die betreffende Ausnahme auf.
+Nach einem notwendigen lokalen Eingriff ist die Referenz nach elektrischem
+Verbindungsvergleich und nativer Sichtkontrolle nachzuführen; die Rastermeldung
+rechtfertigt keine erneute großflächige Umzeichnung.
+Eine bestandene Prüfung ersetzt weiterhin keine Beurteilung der Lesbarkeit.
+
 ## Ziel und Geltungsbereich
 
 Eine Zeichnung ist gut lesbar, wenn man Eingänge findet, ihre Verarbeitung von

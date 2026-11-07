@@ -6,7 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from tiny_cpu_circuit_check import inspect_circuit, inspect_project, repair_project
 from tiny_cpu_wire_contacts import inspect_circuit as inspect_wire_contacts
-from tiny_cpu_wire_contacts import inspect_routing_grid
+from tiny_cpu_wire_contacts import inspect_routing_grid, inspect_schematic_layout
 from tiny_cpu_hierarchy import ADDRESS_HELPERS, CORE_UNITS
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -99,21 +99,28 @@ class CircuitCheckTests(unittest.TestCase):
         self.assertEqual(len(issues), 1)
         self.assertIn("horizontal run at 30", issues[0])
 
-    def test_all_functional_units_use_the_grouped_routing_grid(self):
+    def test_all_functional_units_preserve_reviewed_layout_or_grouped_grid(self):
         project = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()
         for circuit in project.findall("circuit"):
             if circuit.get("name") in CORE_UNITS.keys() | ADDRESS_HELPERS:
                 with self.subTest(circuit=circuit.get("name")):
-                    self.assertEqual(inspect_routing_grid(circuit), [])
+                    self.assertEqual(inspect_schematic_layout(circuit), [])
 
-    def test_all_unprotected_project_sheets_use_grouped_routing(self):
+    def test_all_unprotected_sheets_preserve_reviewed_layout_or_grouped_grid(self):
         for path in sorted((ROOT / "hardware/logisim").rglob("*.circ")):
             for circuit in ET.parse(path).getroot().findall("circuit"):
                 if circuit.get("name") == "FetchDecodeControls":
                     continue
                 origin = (70, 0) if circuit.get("name") == "TinyCPUMain" else (0, 0)
                 with self.subTest(file=path.name, circuit=circuit.get("name")):
-                    self.assertEqual(inspect_routing_grid(circuit, origin=origin), [])
+                    self.assertEqual(inspect_schematic_layout(circuit, origin=origin), [])
+
+    def test_restored_layout_exception_does_not_accept_an_added_wire(self):
+        project = ET.parse(ROOT / 'hardware/logisim/TinyCPU.circ').getroot()
+        circuit = project.find("circuit[@name='FetchUnit']")
+        self.assertEqual(inspect_schematic_layout(circuit), [])
+        ET.SubElement(circuit, 'wire', {'from': '(20,30)', 'to': '(500,30)'})
+        self.assertTrue(inspect_schematic_layout(circuit))
 
     def test_splitter_branch_requires_a_physically_connected_bus_source(self):
         circuit = ET.fromstring('''<circuit name="Control">

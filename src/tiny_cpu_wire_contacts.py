@@ -4,14 +4,49 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from dataclasses import asdict, dataclass
+from functools import lru_cache
 from pathlib import Path
 
 Point = tuple[int, int]
 Segment = tuple[Point, Point]
+
+
+def schematic_geometry_digest(circuit: ET.Element) -> str:
+    """Identify a reviewed drawing independent of XML order and ROM contents."""
+    components = []
+    for component in circuit.findall('comp'):
+        attributes = sorted((a.get('name'), a.get('val'), a.text or '')
+                            for a in component.findall('a')
+                            if a.get('name') not in {'contents', 'value'})
+        components.append((sorted(component.attrib.items()), attributes))
+    wires = sorted(tuple(sorted((_point(w.get('from')), _point(w.get('to')))))
+                   for w in circuit.findall('wire'))
+    payload = [circuit.get('name'), sorted(components), wires]
+    return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+
+
+@lru_cache(maxsize=1)
+def _restored_layouts() -> set[str]:
+    manifest = Path(__file__).resolve().parents[1] / 'hardware/logisim/layout-restoration-v1.json'
+    data = json.loads(manifest.read_text(encoding='utf-8'))
+    return {entry['geometry_sha256'] for entry in data['circuits']}
+
+
+def inspect_schematic_layout(circuit: ET.Element, origin=(0, 0)) -> list[str]:
+    """Keep the user's restored drawings; check other geometry on the grid.
+
+    The exception covers exact reviewed geometry only. Adding or moving any
+    wire or component falls back to the strict grid check. Electrical checks
+    and interface validation are independent and always remain active.
+    """
+    if schematic_geometry_digest(circuit) in _restored_layouts():
+        return []
+    return inspect_routing_grid(circuit, origin=origin)
 
 
 def _point(value: str) -> Point:

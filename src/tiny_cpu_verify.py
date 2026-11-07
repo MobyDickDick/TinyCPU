@@ -367,9 +367,9 @@ def verify_circuit(path: Path) -> tuple[int, int]:
             wires += 1
 
         from tiny_cpu_hierarchy import ADDRESS_HELPERS, CORE_UNITS
-        from tiny_cpu_wire_contacts import inspect_routing_grid
+        from tiny_cpu_wire_contacts import inspect_schematic_layout
         if circuit_name in CORE_UNITS.keys() | ADDRESS_HELPERS:
-            layout_issues = inspect_routing_grid(circuit)
+            layout_issues = inspect_schematic_layout(circuit)
             if layout_issues:
                 raise VerificationError(f"{display_path(path)}: {layout_issues[0]}")
 

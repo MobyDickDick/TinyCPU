@@ -19,49 +19,49 @@
     <a name="appearance" val="logisim_evolution" />
     <a name="circuit" val="IntegrationClock" />
     <a name="simulationFrequency" val="1.0" />
-    <comp lib="0" loc="(200,40)" name="Pin">
+    <comp lib="0" loc="(120,200)" name="Pin">
       <a name="appearance" val="classic" />
       <a name="label" val="CLK" />
     </comp>
-    <comp lib="0" loc="(420,80)" name="Pin">
+    <comp lib="0" loc="(420,140)" name="Pin">
       <a name="appearance" val="classic" />
       <a name="facing" val="west" />
       <a name="label" val="DATAPATH_CLK" />
       <a name="type" val="output" />
     </comp>
-    <comp lib="0" loc="(420,120)" name="Pin">
+    <comp lib="0" loc="(420,200)" name="Pin">
       <a name="appearance" val="classic" />
       <a name="facing" val="west" />
       <a name="label" val="ADDRESS_CLK" />
       <a name="type" val="output" />
     </comp>
-    <comp lib="0" loc="(420,160)" name="Pin">
+    <comp lib="0" loc="(420,260)" name="Pin">
       <a name="appearance" val="classic" />
       <a name="facing" val="west" />
       <a name="label" val="MEMORY_CLK" />
       <a name="type" val="output" />
     </comp>
-    <comp lib="0" loc="(420,240)" name="Pin">
+    <comp lib="0" loc="(420,320)" name="Pin">
       <a name="appearance" val="classic" />
       <a name="facing" val="west" />
       <a name="label" val="ERROR_FLAGS_CLK" />
       <a name="type" val="output" />
     </comp>
-    <comp lib="0" loc="(420,40)" name="Pin">
+    <comp lib="0" loc="(420,80)" name="Pin">
       <a name="appearance" val="classic" />
       <a name="facing" val="west" />
       <a name="label" val="FETCH_CLK" />
       <a name="type" val="output" />
     </comp>
-    <wire from="(200,40)" to="(380,40)" />
-    <wire from="(380,40)" to="(380,80)" />
-    <wire from="(380,40)" to="(420,40)" />
-    <wire from="(380,80)" to="(380,120)" />
-    <wire from="(380,80)" to="(420,80)" />
-    <wire from="(380,120)" to="(380,160)" />
-    <wire from="(380,120)" to="(420,120)" />
-    <wire from="(380,160)" to="(380,240)" />
-    <wire from="(380,160)" to="(420,160)" />
-    <wire from="(380,240)" to="(420,240)" />
+    <wire from="(120,200)" to="(240,200)" />
+    <wire from="(240,140)" to="(240,200)" />
+    <wire from="(240,140)" to="(420,140)" />
+    <wire from="(240,200)" to="(240,260)" />
+    <wire from="(240,200)" to="(420,200)" />
+    <wire from="(240,260)" to="(240,320)" />
+    <wire from="(240,260)" to="(420,260)" />
+    <wire from="(240,320)" to="(420,320)" />
+    <wire from="(240,80)" to="(240,140)" />
+    <wire from="(240,80)" to="(420,80)" />
   </circuit>
 </project>

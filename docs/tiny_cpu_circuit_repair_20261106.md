@@ -1,5 +1,11 @@
 # Projektweite Schaltungskorrektur und Zeichenüberarbeitung
 
+**Nachtrag vom 7. November:** Der Benutzer hat das Ergebnis der zeichnerischen
+Überarbeitung zurückgewiesen. Die damalige Feststellung einer abgeschlossenen
+zeichnerischen Abnahme ist damit überholt. Die
+[Wiederherstellung der früheren Layouts](tiny_cpu_layout_restoration_20261107.md)
+erhält die hier beschriebenen elektrischen Korrekturen.
+
 Stand: 6. November 2026. Auftrag: elektrische Fehler korrigieren und zusätzlich
 sämtliche Schaltbilder nach dem [Benutzerstil](tiny_cpu_schematic_style.md)
 überarbeiten. Die elektrische und zeichnerische Abnahme ist abgeschlossen.
