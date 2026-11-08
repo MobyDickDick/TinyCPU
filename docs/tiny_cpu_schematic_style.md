@@ -5,6 +5,70 @@ Benutzerwunsch vom 1. November 2026, einschließlich der Ergänzung
 für weitere Bearbeitungen fest. Es ist ein Arbeitspaket im bestehenden TinyCPU-
 Projekt; ein separates CPU-Projekt ist dafür nicht erforderlich.
 
+Bauteilbeschriftungen erhalten gemäß Benutzerwunsch vom 8. November 2026
+mindestens 10 Punkt Schriftgröße. Insbesondere dürfen sie nicht durch eine
+Schriftgröße von 1 Punkt praktisch unsichtbar gemacht werden.
+
+ODER-Eingänge werden von der Eingangsseite angefahren: bei nach rechts
+gerichteten Gattern endet die Leitung von links waagrecht am Pin. Abzweige
+liegen vor dem Pin; Leitungen dürfen nicht hinter den Eingang zurücklaufen.
+Die [Korrektur und Prüfung vom 8. November](tiny_cpu_or_inputs_20261108.md)
+dokumentiert die betroffenen Auffächerungen.
+
+## Präzisierung vom 8. November 2026: Gatterabstand und Rückführungsrichtung
+
+Die zwei Punktreihen Freiraum gelten auch an einzelnen AND-/OR-Gliedern und
+Registern. Gemessen wird zur tatsächlichen äußeren Symbolkante, nicht nur
+zum Anschlusspunkt oder zu einer Funktionsbox. Gerade eigene Anschlussstücke
+dürfen bis zum Pin reichen. Beschriftungen erhalten zusätzlich freie Flächen;
+weder Eingangsleitungen noch Rückführungen dürfen sie überzeichnen.
+
+Rückführungen sind vom Ausgang aus im Gegenuhrzeigersinn zu zeichnen. Bei
+einer von links nach rechts angeordneten Speicherzelle führt der Weg vom
+Q-Ausgang nach rechts, nach oben und oberhalb der Logik nach links zurück.
+Der obere Korridor muss auch Register- und Gatterbezeichnungen freihalten.
+Der Schutz des handgezeichneten Decoders bleibt bestehen.
+Die konkrete Korrektur beider `ErrorFlags`-Fassungen und ihre nativen
+Nachweise stehen im [ErrorFlags-Layoutbericht](tiny_cpu_errorflags_layout_20261108.md).
+Die Korrektur der Gatterabstände und des linken INPUT_VALID-Verteilers in
+beiden MUL-Fassungen steht im [MUL-Layoutbericht](tiny_cpu_mul_layout_20261108.md).
+Die anschließende elektrische Korrektur der MUL-Symbolanschlüsse in
+`Operations` ist im [Operations-Bericht](tiny_cpu_operations_repair_20261108.md)
+mit integrierten CPU- und Arithmetikprüfungen dokumentiert.
+
+## Präzisierung vom 8. November 2026: strikt kompakte Anschlusskorridore
+
+Der Benutzer hat den ersten Durchgang anhand zweier Ansichten von
+`CPUAddressUnitLink` als noch zu großzügig korrigiert. Maßgeblich ist die
+zweite, kompaktere Ansicht: Busabgriffe möglichst direkt auf die Anschlusszeilen
+legen, unnötige Höhenversätze entfernen und Ausgangsbusse an die Box heranführen.
+Freie Korridore werden bis zum tatsächlich benötigten Platz verkürzt. Pauschale
+Restabstände von 80 oder 100 Pixeln sind kein Gestaltungsziel. Auch ein festes
+Modulo-Raster rechtfertigt keine künstliche Verlängerung eines übersichtlichen
+Signalwegs. Die wirklichen Leitungslücken und der 20-Pixel-Freiraum der Boxen
+bleiben verbindlich. Native Symbolgrößen, Anschlussbelegung und geschützte
+Decoderzeichnungen bleiben erhalten.
+Native Vorher-/Nachher-Ansichten und Nachweise stehen im
+[Bericht zur strikten Verdichtung](tiny_cpu_strict_layout_20261108.md).
+
+## Präzisierung vom 8. November 2026: übrige Blätter an TinyCPUMain angleichen
+
+Der Benutzer hat die Überarbeitung der übrigen Schaltschemen ausdrücklich
+beauftragt: möglichst wenige Kreuzungen, kurze Leitungen und mindestens zwei
+Punktreihen Abstand zu Funktionsboxen. Bei Logisims 10-Pixel-Raster bedeutet
+das mindestens 20 Pixel für parallel an einer Box vorbeigeführte Leitungen
+und für den ersten Knick einer Anschlussleitung. Die geraden Anschlussstücke
+führen selbstverständlich bis zum jeweiligen Pin. Freie Leitungskorridore
+werden vor dem Verkürzen berücksichtigt; die vorhandenen Funktionsgruppen
+bleiben erkennbar. `TinyCPUMain` dient als Referenz.
+
+Dieser konkrete Auftrag erlaubt die unten zuvor ausgeschlossene Überarbeitung
+der übrigen bestehenden Blätter. Der Schutz beider `FetchDecodeControls`-
+Zeichnungen bleibt bestehen. Die neuen exakten Geometrien werden erst nach
+nativem Anschlussvergleich und Sichtkontrolle in der Layoutreferenz nachgeführt.
+Umfang, native Ansichten und Prüfergebnisse stehen im
+[Layoutbericht vom 8. November](tiny_cpu_remaining_layout_20261108.md).
+
 ## Präzisierung vom 7. November 2026: bestehende Zeichnung erhalten
 
 Der Benutzer hat die großflächige Umzeichnung vom 6. November anhand des

@@ -17,6 +17,59 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class HierarchyTests(unittest.TestCase):
+    def test_multiplier_has_stable_explicit_symbol_ports(self):
+        expected = {
+            'MUL_ACTIVATED': '(780,1000)', 'LEFT': '(780,1020)',
+            'RIGHT': '(780,1040)', 'INPUT_VALID': '(780,1060)',
+            'RESULT': '(1000,1000)', 'OVERFLOW': '(1000,1020)',
+            'RESULT_VALID': '(1000,1040)',
+        }
+        instance = ET.Element('comp', name='MulArithmeticCircuit', loc='(1000,1000)')
+        for relative in ('TinyCPU.circ', 'diagnostics/TinyCPU-MulArithmeticCircuit.circ'):
+            with self.subTest(project=relative):
+                definition = ET.parse(ROOT / 'hardware/logisim' / relative).find(
+                    "circuit[@name='MulArithmeticCircuit']")
+                self.assertIsNotNone(definition.find('appear'),
+                                     'MUL must not fall back to an implicit custom symbol')
+                self.assertEqual(generated_symbol_ports(definition, instance), expected)
+
+    def test_operations_multiplier_handoffs_reach_named_ports(self):
+        from tiny_cpu_hierarchy import CircuitBits
+        definitions = {c.get('name'): c for c in self.project.findall('circuit')}
+        self.assertIsNotNone(definitions['MulArithmeticCircuit'].find('appear'))
+        circuit = definitions['Operations']
+        state = CircuitBits(definitions, circuit, 'operations-mul-handoffs')
+        labelled = {attributes(c).get('label'): c for c in circuit.findall('comp')
+                    if attributes(c).get('label')}
+
+        def terminals(component):
+            return {name: (p, width) for p, width, _, _, name
+                    in state.ports[id(component)]}
+
+        mul = terminals(labelled['MUL_OPERATION'])
+        add = terminals(labelled['ADD_OPERATION'])
+        for port, source, width in (
+            ('MUL_ACTIVATED', point(labelled['MUL_OPERAND'].get('loc')), 1),
+            ('LEFT', point(labelled['ACC_VALUE'].get('loc')), 16),
+            ('RIGHT', add['RIGHT'][0], 16),
+            ('INPUT_VALID', add['INPUT_VALID'][0], 1),
+        ):
+            with self.subTest(input=port):
+                self.assertEqual(mul[port][1], width)
+                self.assertEqual(state.network.find(mul[port][0]),
+                                 state.network.find(source))
+        for port, destination, width in (
+            ('RESULT', 'RESULT', 16),
+            ('OVERFLOW', 'OVERFLOW_SET', 1),
+            ('RESULT_VALID', 'OPERATION_RESULT_VALID', 1),
+        ):
+            with self.subTest(output=port):
+                sinks = {state.network.find(p) for p, bits, incoming, _, _
+                         in state.ports[id(labelled[destination])]
+                         if incoming and bits == width}
+                self.assertEqual(mul[port][1], width)
+                self.assertIn(state.network.find(mul[port][0]), sinks)
+
     def test_transport_rejects_logic_hidden_inside_a_stage(self):
         stage = self.project.find("circuit[@name='CPUComputeStage']")
         ET.SubElement(stage, "comp", {"lib": "1", "name": "AND Gate", "loc": "(100,100)"})
@@ -34,12 +87,14 @@ class HierarchyTests(unittest.TestCase):
 
     def test_transport_leaves_an_empty_row_even_in_short_fanouts(self):
         from tiny_cpu_hierarchy import CORE_CONTAINERS
-        from tiny_cpu_wire_contacts import inspect_parallel_spacing, inspect_routing_grid
+        from tiny_cpu_wire_contacts import inspect_parallel_spacing, inspect_schematic_layout
         for circuit in self.project.findall('circuit'):
             if circuit.get('name') in CORE_CONTAINERS | {'TinyCPUMain', 'TinyCPUInputMain'}:
                 with self.subTest(circuit=circuit.get('name')):
                     self.assertEqual(inspect_parallel_spacing(circuit), [])
-                    self.assertEqual(inspect_routing_grid(circuit), [])
+                    # Match production's exact-reviewed-drawing policy. The
+                    # actual empty row above remains mandatory for all wires.
+                    self.assertEqual(inspect_schematic_layout(circuit), [])
         fixture = ET.fromstring('<circuit name="ShortFanout"><wire from="(20,20)" to="(80,20)"/><wire from="(20,30)" to="(80,30)"/></circuit>')
         self.assertEqual(len(inspect_parallel_spacing(fixture)), 1)
         fixture.findall('wire')[1].set('from', '(20,40)')

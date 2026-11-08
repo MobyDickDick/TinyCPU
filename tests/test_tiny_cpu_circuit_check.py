@@ -7,6 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from tiny_cpu_circuit_check import inspect_circuit, inspect_project, repair_project
 from tiny_cpu_wire_contacts import inspect_circuit as inspect_wire_contacts
 from tiny_cpu_wire_contacts import inspect_routing_grid, inspect_schematic_layout
+from tiny_cpu_wire_contacts import inspect_or_input_directions
 from tiny_cpu_hierarchy import ADDRESS_HELPERS, CORE_UNITS
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,6 +23,78 @@ def _labelled(circuit, label):
 
 
 class CircuitCheckTests(unittest.TestCase):
+    def test_or_inputs_reject_backwards_and_vertical_only_approaches(self):
+        circuit = ET.fromstring('''<circuit name="BackwardsOr">
+          <comp lib="1" name="OR Gate" loc="(200,100)"/>
+          <wire from="(150,80)" to="(180,80)"/>
+          <wire from="(150,120)" to="(150,160)"/>
+        </circuit>''')
+        self.assertEqual(len(inspect_or_input_directions(circuit)), 2)
+
+    def test_or_input_rejects_a_wire_passing_through_the_pin(self):
+        circuit = ET.fromstring('''<circuit name="OrBranch">
+          <comp lib="1" name="OR Gate" loc="(200,100)"/>
+          <wire from="(100,80)" to="(180,80)"/>
+          <wire from="(100,120)" to="(150,120)"/>
+        </circuit>''')
+        self.assertEqual(len(inspect_or_input_directions(circuit)), 1)
+        circuit.find('wire').set('to', '(150,80)')
+        self.assertEqual(inspect_or_input_directions(circuit), [])
+
+    def test_or_input_direction_rotates_with_the_gate(self):
+        circuit = ET.fromstring('''<circuit name="WestOr">
+          <comp lib="1" name="OR Gate" loc="(200,100)">
+            <a name="facing" val="west"/>
+          </comp>
+          <wire from="(250,80)" to="(280,80)"/>
+          <wire from="(250,120)" to="(280,120)"/>
+        </circuit>''')
+        self.assertEqual(inspect_or_input_directions(circuit), [])
+        circuit.find('wire').set('to', '(220,80)')
+        self.assertEqual(len(inspect_or_input_directions(circuit)), 1)
+
+    def test_subcircuit_output_reaches_offset_splitter_branch(self):
+        producer = ET.fromstring('''<circuit name="Producer">
+          <comp lib="0" loc="(100,100)" name="Pin">
+            <a name="label" val="DATA"/><a name="type" val="output"/>
+            <a name="width" val="16"/>
+          </comp>
+        </circuit>''')
+        circuit = ET.fromstring('''<circuit name="OffsetSplitter">
+          <comp loc="(200,100)" name="Producer"/>
+          <comp lib="0" loc="(320,100)" name="Splitter">
+            <a name="facing" val="west"/><a name="appear" val="center"/>
+            <a name="fanout" val="1"/><a name="incoming" val="16"/>
+          </comp>
+          <comp lib="0" loc="(500,100)" name="Pin">
+            <a name="label" val="RESULT"/><a name="type" val="output"/>
+            <a name="width" val="16"/>
+          </comp>
+          <wire from="(200,100)" to="(300,100)"/>
+          <wire from="(320,100)" to="(500,100)"/>
+        </circuit>''')
+        self.assertEqual(inspect_circuit(circuit, {'Producer': producer}), [])
+
+    def test_subcircuit_wire_stopping_before_splitter_is_still_dangling(self):
+        producer = ET.fromstring('''<circuit name="Producer">
+          <comp lib="0" loc="(100,100)" name="Pin">
+            <a name="label" val="DATA"/><a name="type" val="output"/>
+            <a name="width" val="16"/>
+          </comp>
+        </circuit>''')
+        circuit = ET.fromstring('''<circuit name="BrokenOffsetSplitter">
+          <comp loc="(200,100)" name="Producer"/>
+          <comp lib="0" loc="(320,100)" name="Splitter">
+            <a name="facing" val="west"/><a name="appear" val="center"/>
+            <a name="fanout" val="1"/><a name="incoming" val="16"/>
+          </comp>
+          <wire from="(200,100)" to="(290,100)"/>
+        </circuit>''')
+        messages = [issue.message for issue in inspect_circuit(
+            circuit, {'Producer': producer})]
+        self.assertIn('DATA of Producer has a dangling output wire ending at (290, 100)',
+                      messages)
+
     def test_input_pin_shorted_to_register_output_is_rejected(self):
         circuit = ET.fromstring('''<circuit name="InterruptShort">
           <comp lib="0" name="Pin" loc="(20,130)">

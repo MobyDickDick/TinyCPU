@@ -23,12 +23,12 @@
       <a name="appearance" val="classic" />
       <a name="label" val="RESET" />
     </comp>
-    <comp lib="0" loc="(420,140)" name="Pin">
+    <comp lib="0" loc="(140,140)" name="Pin">
       <a name="appearance" val="classic" />
       <a name="facing" val="west" />
       <a name="label" val="FETCH_RESET" />
       <a name="type" val="output" />
     </comp>
-    <wire from="(120,140)" to="(420,140)" />
+    <wire from="(120,140)" to="(140,140)" />
   </circuit>
 </project>

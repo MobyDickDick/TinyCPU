@@ -44,9 +44,49 @@ def inspect_schematic_layout(circuit: ET.Element, origin=(0, 0)) -> list[str]:
     wire or component falls back to the strict grid check. Electrical checks
     and interface validation are independent and always remain active.
     """
-    if schematic_geometry_digest(circuit) in _restored_layouts():
-        return []
-    return inspect_routing_grid(circuit, origin=origin)
+    issues = inspect_or_input_directions(circuit)
+    if schematic_geometry_digest(circuit) not in _restored_layouts():
+        issues.extend(inspect_routing_grid(circuit, origin=origin))
+    return issues
+
+
+def inspect_or_input_directions(circuit: ET.Element) -> list[str]:
+    """Require OR input wires to approach the pin from outside the symbol.
+
+    A wire extending behind an input is also rejected when a correct wire
+    arrives from the front: such a branch belongs before the input pin.
+    This check also finds pins in the middle of an unsplit wire.
+    """
+    from tiny_cpu_hierarchy import attributes, component_ports
+
+    segments = [(_point(w.get('from')), _point(w.get('to')))
+                for w in circuit.findall('wire')]
+    directions = {'east': (1, 0), 'west': (-1, 0),
+                  'south': (0, 1), 'north': (0, -1)}
+    issues = []
+    for component in circuit.findall("comp[@name='OR Gate']"):
+        attrs = attributes(component)
+        dx, dy = directions[attrs.get('facing', 'east')]
+        for pin, _, incoming, _, number in component_ports({}, component):
+            if not incoming:
+                continue
+            front = behind = connected = False
+            for a, b in segments:
+                if pin not in (a, b) and not _strictly_inside(pin, (a, b)):
+                    continue
+                connected = True
+                for end in (a, b):
+                    x, y = end[0] - pin[0], end[1] - pin[1]
+                    if x * dy != y * dx:
+                        continue
+                    distance = x * dx + y * dy
+                    front |= distance < 0
+                    behind |= distance > 0
+            if connected and (behind or not front):
+                label = attrs.get('label', component.get('loc'))
+                issues.append(f"{circuit.get('name')}: OR input {number} of "
+                              f"{label} must approach from the input side")
+    return issues
 
 
 def _point(value: str) -> Point:

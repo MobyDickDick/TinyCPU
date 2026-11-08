@@ -1,145 +1,205 @@
 {
-  "description": "User-requested restoration of authored layouts, 2026-11-07. Exact geometry exceptions only; electrical and interface checks always apply.",
+  "description": "Exact native/visually reviewed drawings: restoration 2026-11-07; compact wiring and strict user screenshot reference 2026-11-08. No exemption for electrical nets, interfaces, tunnels or actual transport wire spacing.",
   "circuits": [
     {
-      "file": "diagnostics/TinyCPU-AddArithmeticCircuit.circ",
+      "file": "TinyCPU.circ",
+      "circuit": "AccumulatorInputUnit",
+      "geometry_sha256": "088a7ab593ce73ca0879db30800fedec2b074ad8b87d12212454798f9f4c2011"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "AccumulatorUnit",
+      "geometry_sha256": "62ed6636792889867fe4c3fe52a1807d91401782ca43f6a28fbfffed757f62af"
+    },
+    {
+      "file": "TinyCPU.circ",
       "circuit": "AddArithmeticCircuit",
-      "geometry_sha256": "d3d33968634ba34272441ddfa870f1bf0fe73e2dc234e182867a0ec36c489d24"
+      "geometry_sha256": "e2e82854735a48f11d585725eb9467648ec5148403d00e485471db1dab44d710"
     },
     {
-      "file": "diagnostics/TinyCPU-AddressPath.circ",
+      "file": "TinyCPU.circ",
+      "circuit": "AddressAccess",
+      "geometry_sha256": "ca61a7fc6b4576da792c330eda30e971a4fa8f2328e3be069588a9ec39976c71"
+    },
+    {
+      "file": "TinyCPU.circ",
       "circuit": "AddressPath",
-      "geometry_sha256": "a196354d944223d62bbf26707dabfdc40171007d9adcea77f9a9b8e72afd5f36"
+      "geometry_sha256": "eb508c98811a81d2996d21c31fae9874e1514f6823601cffb1ac966b21fd4160"
     },
     {
-      "file": "diagnostics/TinyCPU-AddressRangeFBox.circ",
+      "file": "TinyCPU.circ",
       "circuit": "AddressRangeFBox",
-      "geometry_sha256": "d69a896155517a5a902a0ab00aa6d25f35844c7b02d731ea163e0bdfca742639"
+      "geometry_sha256": "c3536f3bb107c9cd1eee96c7e0a57d450f7f5fafd775f5fa62814aeb2a7c5c04"
     },
     {
-      "file": "diagnostics/TinyCPU-AndArithmeticCircuit.circ",
+      "file": "TinyCPU.circ",
+      "circuit": "AddressRegisterLoad",
+      "geometry_sha256": "5cf96dd6bdf4bd2a532d7a04b37248807f4a43a5cb15850692eb2e86e439dea4"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "AddressUnit",
+      "geometry_sha256": "4bdd326ef63927d9c34fbba085ac374a2d42be56ec692ca6e3558cd7b48c1e0d"
+    },
+    {
+      "file": "TinyCPU.circ",
       "circuit": "AndArithmeticCircuit",
-      "geometry_sha256": "634fed64c8946c8bfed68d93bed2d45def9abad8e25fb4e9e58c2fefc1293b0a"
+      "geometry_sha256": "910a9cbc6d819b12232c950a1e9eacf6a9c875a91ac6ad5bbab51b49945fa0c1"
     },
     {
-      "file": "diagnostics/TinyCPU-Datapath.circ",
+      "file": "TinyCPU.circ",
+      "circuit": "BranchUnit",
+      "geometry_sha256": "b447921f99c6f44bbd94f86de2bddd6d324336ab957eb278a976b019ff4b77b8"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CPUAccumulatorInputUnitLink",
+      "geometry_sha256": "507d3e6875420d3d6159083cb3f79ffaadcba25083b7dde188cd04b14d892c7c"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CPUAccumulatorUnitLink",
+      "geometry_sha256": "3d86a8c4f8265ce9a00ee057b21a8cdca6f8871cf434c8026463cf13bcb3177c"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CPUAddressUnitLink",
+      "geometry_sha256": "7c9bf5d1510131124ec8035f77a327dca063df3913ca31db6c802dbf9230652d"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CPUBranchUnitLink",
+      "geometry_sha256": "05b0daf23084beed189d84fbee48a9fdeab5578d294b992d434a296c6b5c942a"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CPUComputeStage",
+      "geometry_sha256": "e28b87d2d6ad1dfa9cf665b01cecef1f9681c76b319ba4c78913e2a966a19988"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CPUComputeStageInput",
+      "geometry_sha256": "318def0e2ef8c7c046baa9f970e982bac8b6106bbfb3d4adabacfb861f86a0d4"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CPUCoreDiagnosticsLink",
+      "geometry_sha256": "5277cdedabd0a954737b55c1b98ec42ad277982e36a62823fb33742b9e7c78c4"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CPUExecutionUnitLink",
+      "geometry_sha256": "618e6ed4e4ab4fa37582fef81c728bc95af264a3aa6ef988ba08a727c6b75fbc"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CPUFaultInputUnitLink",
+      "geometry_sha256": "608a66595c1576f00eaca8fb405676b748214d0cf126d4b229fdabd5a3a1fc99"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CPUFaultUnitLink",
+      "geometry_sha256": "c16b92e545166d51bcbfd4b1ffbbbedf1fa5b0a0bc67b8617ed8f83d75082d91"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CPUFetchUnitLink",
+      "geometry_sha256": "db75269fda58ada5c95061c4d4a749aed00c0fbe41c6f49678a0887f8a0b41c4"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CPUFlowStage",
+      "geometry_sha256": "234a10963228356ee08b5d541ad1fb5f03d30a4767e959e9f1a8155e95c4a734"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CPUHostInputs",
+      "geometry_sha256": "a459752a4e56615e4165f30ce8d69c5247feb8571bd20572f2b3f26c2c6a88aa"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CPUHostOutputs",
+      "geometry_sha256": "93a9f16acbd1e1f44bf72df252b361e7ebb902065428673537f27bd7f8c7b2a9"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CPUInputSource",
+      "geometry_sha256": "dc330da31b076e84ca70a07e671432c364148830349449168934c27a8f55aef8"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CPUMemoryStage",
+      "geometry_sha256": "c58b3db63488949baab853f13e686f61ae2eb5d6571dfbfca7ab105f94d2d2f1"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CPUMemoryUnitLink",
+      "geometry_sha256": "0c02ebe3cf0a4ad49a1524a90f18eb3ef83ab8023ba2e21a1ec656fc48a02bf7"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CPUStatusStage",
+      "geometry_sha256": "9677be0abee08241555d535d5ee10fe986520e93c53a4ca97bc5c8e1432546f3"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CPUStatusStageInput",
+      "geometry_sha256": "8420346f9b81f74c5a7b0f7944e8b89d294de544469dfd56f7b4c13287e72408"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "CoreDiagnostics",
+      "geometry_sha256": "910e823325022677e78d2a11098fa3b833941fe8b8ea430c82b0d82eb2b28d8a"
+    },
+    {
+      "file": "TinyCPU.circ",
       "circuit": "Datapath",
-      "geometry_sha256": "1bc70c2c49bb9b89039b15d0e52058edc3b22873c175e20dab43bc1f6408e1e3"
+      "geometry_sha256": "0ddc90947b795be7eecdf061118efddb09f9e2befc8f060eefa33b93e1c631be"
     },
     {
-      "file": "diagnostics/TinyCPU-DivArithmeticCircuit.circ",
+      "file": "TinyCPU.circ",
       "circuit": "DivArithmeticCircuit",
-      "geometry_sha256": "bc52b3500208ac774f087a6cb22569bcd22d83d92c7bd4f6fee4b8dbe1a415de"
-    },
-    {
-      "file": "diagnostics/TinyCPU-EffectiveAddress.circ",
-      "circuit": "EffectiveAddress",
-      "geometry_sha256": "1f089a252f0da9a49a61ba195ee9b8a405b116305c771267175b68fb963bf03d"
-    },
-    {
-      "file": "diagnostics/TinyCPU-ErrorFlags.circ",
-      "circuit": "ErrorFlags",
-      "geometry_sha256": "3e760419c3d01896407cc4cac3d4f3f821fc904d975a695ce4866296c12e39e4"
-    },
-    {
-      "file": "diagnostics/TinyCPU-FetchDecode.circ",
-      "circuit": "FetchDecode",
-      "geometry_sha256": "eef1138337400882dc268b151197fef49111bd867fe4d8e5a3537ea256cf95fe"
-    },
-    {
-      "file": "diagnostics/TinyCPU-IntegrationClock.circ",
-      "circuit": "IntegrationClock",
-      "geometry_sha256": "20171e749ebaa43f8a3e4e5a20831fa35c6ea66faf0177b81da92099857b42ce"
-    },
-    {
-      "file": "diagnostics/TinyCPU-IntegrationReset.circ",
-      "circuit": "IntegrationReset",
-      "geometry_sha256": "dfb35d543752d5e6a045c9c000399c4931f8686e31469f95d55d888d616263c8"
-    },
-    {
-      "file": "diagnostics/TinyCPU-Memory.circ",
-      "circuit": "Memory",
-      "geometry_sha256": "71b068bbf6b65b201ec6d0bd291dcc1943d249c7369691e63798049dd6cc38db"
-    },
-    {
-      "file": "diagnostics/TinyCPU-MulArithmeticCircuit.circ",
-      "circuit": "MulArithmeticCircuit",
-      "geometry_sha256": "4c9f94c2cac375a1b0a583570098d4fef4cd9203b0196023f0c8dcfba48dd45a"
-    },
-    {
-      "file": "diagnostics/TinyCPU-NotCircuit.circ",
-      "circuit": "NotCircuit",
-      "geometry_sha256": "d6cdc2ce9f67b0d35b2a8c8b292929e274fb28e003ad255e6bf90e56b9a090b4"
-    },
-    {
-      "file": "diagnostics/TinyCPU-OrArithmeticCircuit.circ",
-      "circuit": "OrArithmeticCircuit",
-      "geometry_sha256": "0c1efcdc7e7ced065a7ed87bd6498289c95a512ad0e08b9a5724466879733610"
-    },
-    {
-      "file": "diagnostics/TinyCPU-SubArithmeticCircuit.circ",
-      "circuit": "SubArithmeticCircuit",
-      "geometry_sha256": "71b54f76c8fd2beb10379a9c43bcdbe2cddef7eb816ffc0bddb5ce9c673a45d7"
-    },
-    {
-      "file": "diagnostics/TinyCPU-XorArithmeticCircuit.circ",
-      "circuit": "XorArithmeticCircuit",
-      "geometry_sha256": "9fdac647be9f3b4d60cebba91f5d4c2e6c236f5018696a44513f3d313fffcf40"
-    },
-    {
-      "file": "smoke/PinPair-12bit.circ",
-      "circuit": "PinPair12",
-      "geometry_sha256": "40a603d60924e4ba3b3f000169b9b9b754bca24f37e90e1ef4d1814d72cc21f5"
-    },
-    {
-      "file": "smoke/PinPair-16bit.circ",
-      "circuit": "PinPair16",
-      "geometry_sha256": "7c65382084855b453e1c879cf83cf9cfbc7dae587dcbf6f7ef3d58d03a920251"
-    },
-    {
-      "file": "smoke/PinPair-1bit.circ",
-      "circuit": "PinPair1",
-      "geometry_sha256": "80201a32de20586cfefa2e67524c6c37354d8728fe08b39a110ead85a6b4a211"
-    },
-    {
-      "file": "TinyCPU.circ",
-      "circuit": "TinyCPUMain",
-      "geometry_sha256": "a6c8c4899307484f54451c1dab263bc2f1da85f826ca16a62a548b05ef508340"
+      "geometry_sha256": "599203b21275a68089be36189b63596af16bce1488e7feb2631c4b3de15d2a7c"
     },
     {
       "file": "TinyCPU.circ",
       "circuit": "EffectiveAddress",
-      "geometry_sha256": "d487529d90fddca6bd7025faa83d99843d8bd79b82ed70b02158bc604752fa48"
-    },
-    {
-      "file": "TinyCPU.circ",
-      "circuit": "Datapath",
-      "geometry_sha256": "e8dc05269b4a23e54903fd738babc18fd5d98bcbb98c4692bb640ab2290580ca"
-    },
-    {
-      "file": "TinyCPU.circ",
-      "circuit": "AddressPath",
-      "geometry_sha256": "9871e231be9466d7d2df4da1563190900f8808d50369e14db9b6a26aabb5d096"
-    },
-    {
-      "file": "TinyCPU.circ",
-      "circuit": "Memory",
-      "geometry_sha256": "595685f335d80428e392c29609c29645a67d119210d3982eabbd00285d4465a6"
+      "geometry_sha256": "61ddd94bd10030806c61490b1d688bbc496c20da4d6c688ee0c661f08e922b87"
     },
     {
       "file": "TinyCPU.circ",
       "circuit": "ErrorFlags",
-      "geometry_sha256": "50bff82bfb824d2e46376e154db24b8f9285c7d3cfcd133e6391042e182ed86d"
+      "geometry_sha256": "b2ba4d29c3ee2b2d6c4a7e14504b3cbbe536f9b34459fd43792c3c0e805cadf5"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "ExecutionUnit",
+      "geometry_sha256": "9c4a275cac55dd1ea63729c1136f19cdb46158ea5e3297e3e35d30095f857c54"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "FaultInputUnit",
+      "geometry_sha256": "341cd2099a29f5d38beafb20a6ec8baa696e47b3e6889c0871ef834ebdf3d881"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "FaultUnit",
+      "geometry_sha256": "f3a1a758a1a4bc181ba5f868d3500d3f159b18ff3481dff26e78c9cc34ead675"
     },
     {
       "file": "TinyCPU.circ",
       "circuit": "FetchDecode",
-      "geometry_sha256": "971498a9156cfde7937ef85ce7e0bfb45999c20d08dc7bf90ab0f1653db152b6"
+      "geometry_sha256": "4f2e4f96175fd88e2b548069fce8128a7f150190ab3f4c6e250c8e2fcaaf2032"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "FetchUnit",
+      "geometry_sha256": "af9b50074c5c7fc3bad8f33aaec9b6039c090559b8c3628682ddfcae25b5a89f"
     },
     {
       "file": "TinyCPU.circ",
       "circuit": "IntegrationClock",
-      "geometry_sha256": "2db55f19397d342d7363a0fe86576ea98d54a997aac7a9adf6f8dfebe6324a74"
+      "geometry_sha256": "52704f64e6de1c6e5d4809cab5603ff68b6158a86bb57737f1412f97ff10fc66"
     },
     {
       "file": "TinyCPU.circ",
@@ -148,156 +208,188 @@
     },
     {
       "file": "TinyCPU.circ",
-      "circuit": "AndArithmeticCircuit",
-      "geometry_sha256": "0d34681a2adfc1786e809717e1516da3eab600145ca0a6623dfa4ffb87c2a8e3"
-    },
-    {
-      "file": "TinyCPU.circ",
-      "circuit": "Operations",
-      "geometry_sha256": "5283d9f2f9f1a66c932d6403e93f2b487081a058c8195a348e634c2f2fd417ca"
-    },
-    {
-      "file": "TinyCPU.circ",
-      "circuit": "NotCircuit",
-      "geometry_sha256": "06fccb28153c7d59523228945e1c1651a2c4db3844fcd931f5c95ea3e14a2916"
-    },
-    {
-      "file": "TinyCPU.circ",
-      "circuit": "MulArithmeticCircuit",
-      "geometry_sha256": "4c9f94c2cac375a1b0a583570098d4fef4cd9203b0196023f0c8dcfba48dd45a"
-    },
-    {
-      "file": "TinyCPU.circ",
-      "circuit": "DivArithmeticCircuit",
-      "geometry_sha256": "bc52b3500208ac774f087a6cb22569bcd22d83d92c7bd4f6fee4b8dbe1a415de"
-    },
-    {
-      "file": "TinyCPU.circ",
-      "circuit": "AddArithmeticCircuit",
-      "geometry_sha256": "009928e336e6009cf8b962adf2e53e992107548dd79c41c7e6477600e317086f"
-    },
-    {
-      "file": "TinyCPU.circ",
-      "circuit": "SubArithmeticCircuit",
-      "geometry_sha256": "6bf766feaea99d1bf6f93de9c73fcf3aa2239977c1d226193fc5f66a09bf43df"
-    },
-    {
-      "file": "TinyCPU.circ",
-      "circuit": "AddressRangeFBox",
-      "geometry_sha256": "d688f1dcbc31ab301b5c352cc8547f1ddf94de2a3631fcd189dda1a3e94a1730"
-    },
-    {
-      "file": "TinyCPU.circ",
-      "circuit": "OrArithmeticCircuit",
-      "geometry_sha256": "2dfa22d8a45e4312ef657fa8abb059edd8650fb325347c887a8ec23a4d687a87"
-    },
-    {
-      "file": "TinyCPU.circ",
-      "circuit": "XorArithmeticCircuit",
-      "geometry_sha256": "3af7991723078d0b1ffbef474e1a14314e1920f0fb1b0f67bbe07ca726a4c818"
-    },
-    {
-      "file": "TinyCPU.circ",
       "circuit": "JumpBox",
-      "geometry_sha256": "e29a65aa29e0bccbf4b0957ce18052af1bdcb33ac2ce52b9e350fdab95777d7d"
+      "geometry_sha256": "fc0b017d23a50973cea7db11ba21ca24f66f8f0c57d4eff79741eb09df4f4123"
     },
     {
       "file": "TinyCPU.circ",
-      "circuit": "FetchUnit",
-      "geometry_sha256": "36c347254170705b1b8a9d74e9c457f29ff0e7378b312028fb8a33bf2f6f18c6"
-    },
-    {
-      "file": "TinyCPU.circ",
-      "circuit": "AccumulatorUnit",
-      "geometry_sha256": "fdd495a178f6571047312ba04025b63fa7c19ad02602eddedb7419a8d0818876"
-    },
-    {
-      "file": "TinyCPU.circ",
-      "circuit": "AddressUnit",
-      "geometry_sha256": "4bbf6fc857dfe2b40452e2612ee73d5f56447a816dc542827480ec04075e7902"
+      "circuit": "Memory",
+      "geometry_sha256": "9c566acaed74892240f04190950b0b88baf84b29b3116ff6a8c95a73a0cd4d3c"
     },
     {
       "file": "TinyCPU.circ",
       "circuit": "MemoryUnit",
-      "geometry_sha256": "b12a530d6381e2b567a60aaca53253edfd60f1a8a30925b88cb6eb3e6c2c8ecb"
+      "geometry_sha256": "ec4de14494c32a40d68bde85419e836e14f771554c57208ea1d3e0289b9f04aa"
     },
     {
       "file": "TinyCPU.circ",
-      "circuit": "ExecutionUnit",
-      "geometry_sha256": "56441a1cef59c2d08892cbc4f500bd87ffdb21498b2abef517d8195debc43df0"
+      "circuit": "MulArithmeticCircuit",
+      "geometry_sha256": "25984fa241955b9b25e00015c046886fb8572ae3dbc77960858a8841ccec837f"
     },
     {
       "file": "TinyCPU.circ",
-      "circuit": "FaultUnit",
-      "geometry_sha256": "ea45a0db8919068860121ae785da5b97cd609bd284e2b1f5b8697485b7f7eed4"
+      "circuit": "NotCircuit",
+      "geometry_sha256": "294331d36bb56b71649a3fdc8605e26e4a9ae448e8f4f31d659a3d94bcf11f47"
     },
     {
       "file": "TinyCPU.circ",
-      "circuit": "BranchUnit",
-      "geometry_sha256": "fb2be0d86f4c72d9e026b854822cb3f8ed87644d12f3e9475a905bb8956d0e26"
+      "circuit": "Operations",
+      "geometry_sha256": "3e766644fad8d58416f2f32db40fb4ef92d88f278f7e7621c75615ada77c7386"
     },
     {
       "file": "TinyCPU.circ",
-      "circuit": "CoreDiagnostics",
-      "geometry_sha256": "ebcc688b9fb08ab2657fc3d42b861eb7ae91d842fa917d48153f0656eb0060b8"
+      "circuit": "OrArithmeticCircuit",
+      "geometry_sha256": "e2c695c90e6fccae9096624c0408355567c9fda46c2c2a48215a9d4c170bd04f"
     },
     {
       "file": "TinyCPU.circ",
-      "circuit": "AddressRegisterLoad",
-      "geometry_sha256": "a1764132c1947055c4df91c590bc8ad0702baa929c66b00d7f13806fc25d18d5"
-    },
-    {
-      "file": "TinyCPU.circ",
-      "circuit": "AddressAccess",
-      "geometry_sha256": "dbb21b5239041435ea6bb31011784961e18497a5012a111255d507cbf6229c19"
-    },
-    {
-      "file": "TinyCPU_Operator.circ",
-      "circuit": "TinyCPUOperator",
-      "geometry_sha256": "965bdec8cbc858fd39099ed0fedd0bf009ef875a5981875e6ae96a4de75ae6bf"
-    },
-    {
-      "file": "TinyCPU_Peripherals.circ",
-      "circuit": "TinyCPUSystemMain",
-      "geometry_sha256": "d07371267d6b3878cd764f27dd04f3af7672765cbc3eccb29f6f23cdbbacb7c2"
-    },
-    {
-      "file": "TinyCPU_Peripherals.circ",
-      "circuit": "CPUIntegrationBoundary",
-      "geometry_sha256": "f39c8d7899a71eef62bd9756e7a3a221211e5d240788c2a7ef574898956b186e"
-    },
-    {
-      "file": "TinyCPU_Peripherals.circ",
-      "circuit": "OutputPort",
-      "geometry_sha256": "90c987d9fb2362e2620611811c1151c32d537585f8acee7dac412a90df985f6e"
-    },
-    {
-      "file": "TinyCPU_Peripherals.circ",
-      "circuit": "OutputMemoryPath",
-      "geometry_sha256": "e9e5cde2dbaeea1d5aeac5fea8a6c5aa724bbb95206bf8d781837570addb2026"
-    },
-    {
-      "file": "TinyCPU_Peripherals.circ",
-      "circuit": "InterruptController",
-      "geometry_sha256": "7d5f34e66df38f3ceff38358d44b0f9bf7dc9a850899445aec8b4de06e035cc4"
-    },
-    {
-      "file": "TinyCPU.circ",
-      "circuit": "AccumulatorInputUnit",
-      "geometry_sha256": "2fc8952debce3b5159b64d1a40606331f941e1c88cc84656f058f6bee552eeb8",
-      "reason": "Local INPUT extensions of authored geometry, native review and electrical boundary acceptance 2026-11-07."
-    },
-    {
-      "file": "TinyCPU.circ",
-      "circuit": "FaultInputUnit",
-      "geometry_sha256": "3c25ce8d9b36bef9deed8b04c7eef066d045b4168b8260a526eb1e203b948a0a",
-      "reason": "Local INPUT extensions of authored geometry, native review and electrical boundary acceptance 2026-11-07."
+      "circuit": "SubArithmeticCircuit",
+      "geometry_sha256": "cbc411c1c7d9dc44ed161ca70a565230ac3cb1f9718b8c20e503083d24ba5e57"
     },
     {
       "file": "TinyCPU.circ",
       "circuit": "TinyCPUInputMain",
-      "geometry_sha256": "07a02dac97fc09d1071d4e618b668b117bb1062f759d4224501faccd1c54c056",
-      "reason": "Local INPUT extensions of authored geometry, native review and electrical boundary acceptance 2026-11-07."
+      "geometry_sha256": "91915fb1c4e037749a8d6f33a8f422d897a9e297a000533b462c387eeafb86c3"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "TinyCPUMain",
+      "geometry_sha256": "8609b4d224818467960c9407ab2456d86215b53c0f21fd6369b5ad6a3d98a7cd"
+    },
+    {
+      "file": "TinyCPU.circ",
+      "circuit": "XorArithmeticCircuit",
+      "geometry_sha256": "577daa767e8068eef66ba2b816283a03fed947b527666d658e0c9785ebb2a967"
+    },
+    {
+      "file": "TinyCPU_Operator.circ",
+      "circuit": "TinyCPUOperator",
+      "geometry_sha256": "92e97d00eaad22d0f6ffcdf69e7ae254148086a34ef2af17e2bbb147e1cf387a"
+    },
+    {
+      "file": "TinyCPU_Peripherals.circ",
+      "circuit": "CPUIntegrationBoundary",
+      "geometry_sha256": "67a3213a705f583919014374f863986972524ed2ed0e5d137c3c40c2cae0e3d8"
+    },
+    {
+      "file": "TinyCPU_Peripherals.circ",
+      "circuit": "InterruptController",
+      "geometry_sha256": "8233ba21585db74be6bd147eda5b6d65cb366574e1d8bc48bf807ce5967885d2"
+    },
+    {
+      "file": "TinyCPU_Peripherals.circ",
+      "circuit": "OutputMemoryPath",
+      "geometry_sha256": "3a9c4940d71f12b6031184f9934c70380116cf2637247a2a5dfba79e5c826442"
+    },
+    {
+      "file": "TinyCPU_Peripherals.circ",
+      "circuit": "OutputPort",
+      "geometry_sha256": "133fb3ca93b487474c3a6b06e81cac884228179894f117d51c99455d9fcbe4cc"
+    },
+    {
+      "file": "TinyCPU_Peripherals.circ",
+      "circuit": "TinyCPUSystemMain",
+      "geometry_sha256": "b07c26198ef7a5901cdeff176e1d3cf14b52679bd4e4efeabeca8ca3d6135c29"
+    },
+    {
+      "file": "diagnostics/TinyCPU-AddArithmeticCircuit.circ",
+      "circuit": "AddArithmeticCircuit",
+      "geometry_sha256": "061da2e78610bebe565ee53388174898c956754f51036cae38681a5e8b1f7751"
+    },
+    {
+      "file": "diagnostics/TinyCPU-AddressPath.circ",
+      "circuit": "AddressPath",
+      "geometry_sha256": "1ed465a8be87c58937ca7b5d0b108c59c97dc16fa27038ca5517a75f5a5718de"
+    },
+    {
+      "file": "diagnostics/TinyCPU-AddressRangeFBox.circ",
+      "circuit": "AddressRangeFBox",
+      "geometry_sha256": "14665470845467c3c7e8946e3f2bb108bc5bd78d98cd8a746a8bb88a5c396e9a"
+    },
+    {
+      "file": "diagnostics/TinyCPU-AndArithmeticCircuit.circ",
+      "circuit": "AndArithmeticCircuit",
+      "geometry_sha256": "3f2f24b3398a00d3e85ec6ac898677c0b912ee9c814d46de050460f4f7666713"
+    },
+    {
+      "file": "diagnostics/TinyCPU-Datapath.circ",
+      "circuit": "Datapath",
+      "geometry_sha256": "0682611ea7f51aaa66f56fed5be4d52b2182ee5ea7c26ea7bde55dc5f6788ea7"
+    },
+    {
+      "file": "diagnostics/TinyCPU-DivArithmeticCircuit.circ",
+      "circuit": "DivArithmeticCircuit",
+      "geometry_sha256": "15148646ea001097001162696cf7df1477ff81de726afc06c1e9a15879e889f4"
+    },
+    {
+      "file": "diagnostics/TinyCPU-EffectiveAddress.circ",
+      "circuit": "EffectiveAddress",
+      "geometry_sha256": "2d99dd95fc6e6b1b25f63579eee0368a07acadaec4ccd9e896c29924210e80ba"
+    },
+    {
+      "file": "diagnostics/TinyCPU-ErrorFlags.circ",
+      "circuit": "ErrorFlags",
+      "geometry_sha256": "55e66dd29ba0ebb1a8698ca02fd10e14d1dcce4cc75699f7f57371937d410b61"
+    },
+    {
+      "file": "diagnostics/TinyCPU-FetchDecode.circ",
+      "circuit": "FetchDecode",
+      "geometry_sha256": "a420f2ac4c6666477f4f971c2267e064d15a093efb122eab1aa7397d9fe0aeb0"
+    },
+    {
+      "file": "diagnostics/TinyCPU-IntegrationClock.circ",
+      "circuit": "IntegrationClock",
+      "geometry_sha256": "a0d42296eb62bedfa520e177278f54a6fa4cefa0231848f150b2f6ed3bfbb9fa"
+    },
+    {
+      "file": "diagnostics/TinyCPU-IntegrationReset.circ",
+      "circuit": "IntegrationReset",
+      "geometry_sha256": "8cd3b60e5717a1e028783d6da60e16c325b6c119cab364287fc1d32422b8fce5"
+    },
+    {
+      "file": "diagnostics/TinyCPU-Memory.circ",
+      "circuit": "Memory",
+      "geometry_sha256": "c7b648d5d4d528aca982e6603198f3bb36abb980ae2c9aba702c8576d8450952"
+    },
+    {
+      "file": "diagnostics/TinyCPU-MulArithmeticCircuit.circ",
+      "circuit": "MulArithmeticCircuit",
+      "geometry_sha256": "7ac72e55a93101d1d5118a27ca7e14fa7ff1c1cd7d56168e3a699abbc6c0390f"
+    },
+    {
+      "file": "diagnostics/TinyCPU-NotCircuit.circ",
+      "circuit": "NotCircuit",
+      "geometry_sha256": "c5ab26d6a51cfd4c0eea62b47d9c3dd7844421e70b0483467f1807fb2ab7feec"
+    },
+    {
+      "file": "diagnostics/TinyCPU-OrArithmeticCircuit.circ",
+      "circuit": "OrArithmeticCircuit",
+      "geometry_sha256": "95c8a5ecce6504340c28b5bb1226e228a3427dd8bbcee38d612e637b07a157a5"
+    },
+    {
+      "file": "diagnostics/TinyCPU-SubArithmeticCircuit.circ",
+      "circuit": "SubArithmeticCircuit",
+      "geometry_sha256": "bbc30bb63bf6d91465a0c4e5f453f14c1f3cab6b8e4f53513a1fce064556201e"
+    },
+    {
+      "file": "diagnostics/TinyCPU-XorArithmeticCircuit.circ",
+      "circuit": "XorArithmeticCircuit",
+      "geometry_sha256": "96fb1e1c00f76b2d72194cee3e87ab6fb2fed56b206201731d0d9e64367ee442"
+    },
+    {
+      "file": "smoke/PinPair-12bit.circ",
+      "circuit": "PinPair12",
+      "geometry_sha256": "a18d8bccd8228cd287f3285ee29c5681868b2335f5869333da8c9823c5116da6"
+    },
+    {
+      "file": "smoke/PinPair-16bit.circ",
+      "circuit": "PinPair16",
+      "geometry_sha256": "63196feede104469c333685156a4350090619dfa549e4aa7bdbe01b64e71a110"
+    },
+    {
+      "file": "smoke/PinPair-1bit.circ",
+      "circuit": "PinPair1",
+      "geometry_sha256": "e385b377b91b7823ba652dfe627edc779b155d54fc347fbd3cbe5e3761770fbf"
     }
   ]
 }

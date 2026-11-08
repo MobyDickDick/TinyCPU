@@ -20,7 +20,7 @@
     <a name="circuit" val="AddressRangeFBox" />
     <a name="circuitnamedboxfixedsize" val="true" />
     <a name="simulationFrequency" val="1.0" />
-    <comp lib="0" loc="(1620,490)" name="Pin">
+    <comp lib="0" loc="(1190,470)" name="Pin">
       <a name="appearance" val="classic" />
       <a name="facing" val="west" />
       <a name="label" val="ACTIVE_ADDRESS_OUT_OF_RANGE" />
@@ -42,102 +42,127 @@
       <a name="appearance" val="classic" />
       <a name="label" val="OFFSET_CARRY" />
     </comp>
-    <comp lib="0" loc="(590,170)" name="Pin">
+    <comp lib="0" loc="(430,170)" name="Pin">
       <a name="appearance" val="classic" />
       <a name="label" val="LOAD_ADDRESS" />
     </comp>
-    <comp lib="0" loc="(590,190)" name="Pin">
+    <comp lib="0" loc="(430,190)" name="Pin">
       <a name="appearance" val="classic" />
       <a name="label" val="ADD_ADDRESS" />
     </comp>
-    <comp lib="0" loc="(590,210)" name="Pin">
+    <comp lib="0" loc="(430,210)" name="Pin">
       <a name="appearance" val="classic" />
       <a name="label" val="SUB_ADDRESS" />
     </comp>
-    <comp lib="0" loc="(590,230)" name="Pin">
+    <comp lib="0" loc="(430,230)" name="Pin">
       <a name="appearance" val="classic" />
       <a name="label" val="MUL_ADDRESS" />
     </comp>
-    <comp lib="0" loc="(590,250)" name="Pin">
+    <comp lib="0" loc="(430,250)" name="Pin">
       <a name="appearance" val="classic" />
       <a name="label" val="DIV_ADDRESS" />
     </comp>
-    <comp lib="0" loc="(590,270)" name="Pin">
+    <comp lib="0" loc="(430,270)" name="Pin">
       <a name="appearance" val="classic" />
       <a name="label" val="AND_ADDRESS" />
     </comp>
-    <comp lib="0" loc="(590,290)" name="Pin">
+    <comp lib="0" loc="(430,290)" name="Pin">
       <a name="appearance" val="classic" />
       <a name="label" val="OR_ADDRESS" />
     </comp>
-    <comp lib="0" loc="(590,310)" name="Pin">
+    <comp lib="0" loc="(430,310)" name="Pin">
       <a name="appearance" val="classic" />
       <a name="label" val="STORE_ADDRESS" />
     </comp>
-    <comp lib="1" loc="(1190,510)" name="AND Gate">
+    <comp lib="1" loc="(880,490)" name="AND Gate">
       <a name="label" val="ACTIVE_ADDRESS_RANGE_GATE" />
+      <a name="labelfont" val="SansSerif plain 10"/>
     </comp>
-    <comp lib="1" loc="(1300,440)" name="AND Gate">
+    <comp lib="1" loc="(990,420)" name="AND Gate">
       <a name="label" val="ACTIVE_OFFSET_ADDRESS_ERROR" />
+      <a name="labelfont" val="SansSerif plain 10"/>
     </comp>
-    <comp lib="1" loc="(1500,490)" name="OR Gate">
+    <comp lib="1" loc="(1120,470)" name="OR Gate">
       <a name="label" val="ACTIVE_ADDRESS_ERROR" />
+      <a name="labelfont" val="SansSerif plain 10"/>
     </comp>
-    <comp lib="1" loc="(790,270)" name="OR Gate">
+    <comp lib="1" loc="(620,270)" name="OR Gate">
       <a name="inputs" val="8" />
       <a name="label" val="DIRECT_MEMORY_ADDRESS_ACTIVE" />
+      <a name="labelfont" val="SansSerif plain 10"/>
     </comp>
-    <comp lib="1" loc="(990,410)" name="OR Gate">
+    <comp lib="1" loc="(750,390)" name="OR Gate">
       <a name="inputs" val="3" />
       <a name="label" val="MEMORY_ADDRESS_ACTIVE" />
+      <a name="labelfont" val="SansSerif plain 10"/>
     </comp>
-    <wire from="(1090,410)" to="(1090,490)" />
-    <wire from="(1090,490)" to="(1140,490)" />
-    <wire from="(1190,510)" to="(1450,510)" />
-    <wire from="(1200,420)" to="(1250,420)" />
-    <wire from="(1200,90)" to="(1200,420)" />
-    <wire from="(1300,440)" to="(1420,440)" />
-    <wire from="(1420,440)" to="(1420,470)" />
-    <wire from="(1420,470)" to="(1450,470)" />
-    <wire from="(1500,490)" to="(1620,490)" />
-    <wire from="(350,110)" to="(380,110)" />
-    <wire from="(350,130)" to="(370,130)" />
-    <wire from="(350,150)" to="(360,150)" />
-    <wire from="(350,90)" to="(1200,90)" />
-    <wire from="(360,150)" to="(360,530)" />
-    <wire from="(360,530)" to="(1140,530)" />
-    <wire from="(370,130)" to="(370,430)" />
-    <wire from="(370,430)" to="(890,430)" />
-    <wire from="(380,110)" to="(380,410)" />
-    <wire from="(380,410)" to="(940,410)" />
-    <wire from="(590,170)" to="(670,170)" />
-    <wire from="(590,190)" to="(660,190)" />
-    <wire from="(590,210)" to="(650,210)" />
-    <wire from="(590,230)" to="(640,230)" />
-    <wire from="(590,250)" to="(630,250)" />
-    <wire from="(590,270)" to="(620,270)" />
-    <wire from="(590,290)" to="(610,290)" />
-    <wire from="(590,310)" to="(740,310)" />
-    <wire from="(610,290)" to="(610,300)" />
-    <wire from="(610,300)" to="(740,300)" />
-    <wire from="(620,270)" to="(620,290)" />
-    <wire from="(620,290)" to="(740,290)" />
-    <wire from="(630,250)" to="(630,280)" />
-    <wire from="(630,280)" to="(740,280)" />
-    <wire from="(640,230)" to="(640,260)" />
-    <wire from="(640,260)" to="(740,260)" />
-    <wire from="(650,210)" to="(650,250)" />
-    <wire from="(650,250)" to="(740,250)" />
-    <wire from="(660,190)" to="(660,240)" />
-    <wire from="(660,240)" to="(740,240)" />
-    <wire from="(670,170)" to="(670,230)" />
-    <wire from="(670,230)" to="(740,230)" />
-    <wire from="(790,270)" to="(930,270)" />
-    <wire from="(890,430)" to="(890,460)" />
-    <wire from="(890,430)" to="(940,430)" />
-    <wire from="(890,460)" to="(1250,460)" />
-    <wire from="(930,270)" to="(930,390)" />
-    <wire from="(930,390)" to="(940,390)" />
-    <wire from="(990,410)" to="(1090,410)" />
+    <comp lib="9" name="Text" loc="(860,540)">
+      <a name="text" val="ACTIVE ADDRESS RANGE GATE" />
+      <a name="font" val="SansSerif plain 10" />
+    </comp>
+    <comp lib="9" name="Text" loc="(1000,380)">
+      <a name="text" val="ACTIVE OFFSET ADDRESS ERROR" />
+      <a name="font" val="SansSerif plain 10" />
+    </comp>
+    <comp lib="9" name="Text" loc="(1100,520)">
+      <a name="text" val="ACTIVE ADDRESS ERROR" />
+      <a name="font" val="SansSerif plain 10" />
+    </comp>
+    <comp lib="9" name="Text" loc="(600,160)">
+      <a name="text" val="DIRECT MEMORY ADDRESS ACTIVE" />
+      <a name="font" val="SansSerif plain 10" />
+    </comp>
+    <comp lib="9" name="Text" loc="(730,350)">
+      <a name="text" val="MEMORY ADDRESS ACTIVE" />
+      <a name="font" val="SansSerif plain 10" />
+    </comp>
+      <wire from="(350,90)" to="(890,90)"/>
+    <wire from="(350,110)" to="(400,110)"/>
+    <wire from="(350,130)" to="(380,130)"/>
+    <wire from="(350,150)" to="(360,150)"/>
+    <wire from="(360,150)" to="(360,510)"/>
+    <wire from="(360,510)" to="(830,510)"/>
+    <wire from="(380,130)" to="(380,410)"/>
+    <wire from="(380,410)" to="(640,410)"/>
+    <wire from="(400,110)" to="(400,390)"/>
+    <wire from="(400,390)" to="(700,390)"/>
+    <wire from="(430,230)" to="(490,230)"/>
+    <wire from="(430,250)" to="(470,250)"/>
+    <wire from="(430,270)" to="(450,270)"/>
+    <wire from="(430,290)" to="(440,290)"/>
+    <wire from="(430,310)" to="(570,310)"/>
+    <wire from="(440,290)" to="(440,300)"/>
+    <wire from="(440,300)" to="(570,300)"/>
+    <wire from="(450,270)" to="(450,290)"/>
+    <wire from="(450,290)" to="(570,290)"/>
+    <wire from="(470,250)" to="(470,280)"/>
+    <wire from="(470,280)" to="(570,280)"/>
+    <wire from="(490,230)" to="(490,260)"/>
+    <wire from="(490,260)" to="(570,260)"/>
+    <wire from="(620,270)" to="(640,270)"/>
+    <wire from="(640,270)" to="(640,370)"/>
+    <wire from="(640,370)" to="(700,370)"/>
+    <wire from="(640,410)" to="(640,440)"/>
+    <wire from="(640,410)" to="(700,410)"/>
+    <wire from="(640,440)" to="(940,440)"/>
+    <wire from="(750,390)" to="(770,390)"/>
+    <wire from="(770,390)" to="(770,470)"/>
+    <wire from="(770,470)" to="(830,470)"/>
+    <wire from="(880,490)" to="(1070,490)"/>
+    <wire from="(890,90)" to="(890,400)"/>
+    <wire from="(890,400)" to="(940,400)"/>
+    <wire from="(990,420)" to="(1010,420)"/>
+    <wire from="(1010,420)" to="(1010,450)"/>
+    <wire from="(1010,450)" to="(1070,450)"/>
+    <wire from="(1120,470)" to="(1190,470)"/>
+    <wire from="(430,170)" to="(550,170)"/>
+    <wire from="(550,170)" to="(550,230)"/>
+    <wire from="(550,230)" to="(570,230)"/>
+    <wire from="(430,190)" to="(530,190)"/>
+    <wire from="(530,190)" to="(530,240)"/>
+    <wire from="(530,240)" to="(570,240)"/>
+    <wire from="(430,210)" to="(510,210)"/>
+    <wire from="(510,210)" to="(510,250)"/>
+    <wire from="(510,250)" to="(570,250)"/>
   </circuit>
 </project>

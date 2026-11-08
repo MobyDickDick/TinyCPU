@@ -20,19 +20,19 @@
     <a name="circuit" val="DivArithmeticCircuit" />
     <a name="circuitnamedboxfixedsize" val="true" />
     <a name="simulationFrequency" val="1.0" />
-    <comp lib="0" loc="(1240,270)" name="Pin">
+    <comp lib="0" loc="(1060,270)" name="Pin">
       <a name="appearance" val="classic" />
       <a name="facing" val="west" />
       <a name="label" val="RESULT_VALID" />
       <a name="type" val="output" />
     </comp>
-    <comp lib="0" loc="(1240,340)" name="Pin">
+    <comp lib="0" loc="(1060,340)" name="Pin">
       <a name="appearance" val="classic" />
       <a name="facing" val="west" />
       <a name="label" val="DIVIDE_BY_ZERO" />
       <a name="type" val="output" />
     </comp>
-    <comp lib="0" loc="(1250,170)" name="Pin">
+    <comp lib="0" loc="(1070,170)" name="Pin">
       <a name="appearance" val="classic" />
       <a name="facing" val="west" />
       <a name="label" val="RESULT" />
@@ -60,98 +60,95 @@
       <a name="appearance" val="classic" />
       <a name="label" val="DIV_ACTIVATED" />
     </comp>
-    <comp lib="0" loc="(570,120)" name="Constant">
+    <comp lib="0" loc="(490,120)" name="Constant">
       <a name="value" val="0x0" />
       <a name="width" val="16" />
     </comp>
-    <comp lib="0" loc="(570,200)" name="Constant">
+    <comp lib="0" loc="(490,200)" name="Constant">
       <a name="width" val="16" />
     </comp>
-    <comp lib="1" loc="(1140,270)" name="AND Gate">
+    <comp lib="1" loc="(960,270)" name="AND Gate">
       <a name="inputs" val="3" />
       <a name="label" val="RANGE_VALID" />
-      <a name="labelfont" val="SansSerif plain 1" />
+      <a name="labelfont" val="SansSerif plain 10" />
     </comp>
-    <comp lib="1" loc="(1140,340)" name="AND Gate">
+    <comp lib="1" loc="(960,340)" name="AND Gate">
       <a name="label" val="DIVIDE_BY_ZERO_ACTIVE" />
       <a name="inputs" val="3" />
-      <a name="labelfont" val="SansSerif plain 1" />
+      <a name="labelfont" val="SansSerif plain 10" />
     </comp>
-    <comp lib="1" loc="(970,210)" name="NOT Gate">
+    <comp lib="1" loc="(860,210)" name="NOT Gate">
       <a name="label" val="NONZERO_DIVISOR" />
-      <a name="labelfont" val="SansSerif plain 1" />
+      <a name="labelfont" val="SansSerif plain 10" />
     </comp>
-    <comp lib="2" loc="(630,130)" name="Multiplexer">
+    <comp lib="2" loc="(540,130)" name="Multiplexer">
       <a name="width" val="16" />
     </comp>
-    <comp lib="2" loc="(660,210)" name="Multiplexer">
+    <comp lib="2" loc="(570,210)" name="Multiplexer">
       <a name="width" val="16" />
     </comp>
-    <comp lib="3" loc="(750,170)" name="Divider">
+    <comp lib="3" loc="(640,170)" name="Divider">
       <a name="mode" val="twosComplement" />
       <a name="width" val="16" />
     </comp>
-    <comp lib="3" loc="(860,220)" name="Comparator">
+    <comp lib="3" loc="(750,220)" name="Comparator">
       <a name="width" val="16" />
       <a name="mode" val="unsigned" />
     </comp>
-    <comp lib="9" name="Text" loc="(860,190)">
+    <comp lib="9" name="Text" loc="(750,190)">
       <a name="text" val="Divisor &gt; 0 (unsigned)" />
       <a name="font" val="SansSerif plain 12" />
     </comp>
-    <comp lib="9" name="Text" loc="(1140,230)">
+    <comp lib="9" name="Text" loc="(960,230)">
       <a name="text" val="Ergebnis gueltig" />
       <a name="font" val="SansSerif plain 12" />
     </comp>
-    <comp lib="9" name="Text" loc="(1140,410)">
+    <comp lib="9" name="Text" loc="(960,400)">
       <a name="text" val="Division durch null" />
       <a name="font" val="SansSerif plain 12" />
     </comp>
-    <wire from="(1050,210)" to="(1050,320)" />
-    <wire from="(1050,320)" to="(1090,320)" />
-    <wire from="(1140,270)" to="(1240,270)" />
-    <wire from="(1140,340)" to="(1240,340)" />
-    <wire from="(440,140)" to="(600,140)" />
-    <wire from="(440,220)" to="(630,220)" />
-    <wire from="(440,290)" to="(1030,290)" />
-    <wire from="(1030,290)" to="(1090,290)" />
-    <wire from="(440,90)" to="(500,90)" />
-    <wire from="(500,270)" to="(1090,270)" />
-    <wire from="(500,270)" to="(500,360)" />
-    <wire from="(500,90)" to="(500,270)" />
-    <wire from="(500,90)" to="(590,90)" />
-    <wire from="(570,120)" to="(600,120)" />
-    <wire from="(570,200)" to="(630,200)" />
-    <wire from="(590,160)" to="(610,160)" />
-    <wire from="(590,90)" to="(590,160)" />
-    <wire from="(610,150)" to="(610,160)" />
-    <wire from="(610,160)" to="(610,240)" />
-    <wire from="(610,240)" to="(640,240)" />
-    <wire from="(630,130)" to="(680,130)" />
-    <wire from="(640,230)" to="(640,240)" />
-    <wire from="(660,210)" to="(680,210)" />
-    <wire from="(680,130)" to="(680,160)" />
-    <wire from="(680,160)" to="(710,160)" />
-    <wire from="(680,180)" to="(680,210)" />
-    <wire from="(680,180)" to="(710,180)" />
-    <wire from="(680,210)" to="(820,210)" />
-    <wire from="(750,170)" to="(1250,170)" />
-    <wire from="(860,210)" to="(910,210)" />
-    <wire from="(910,210)" to="(910,250)" />
-    <wire from="(910,210)" to="(940,210)" />
-    <wire from="(910,250)" to="(1090,250)" />
-    <wire from="(970,210)" to="(1050,210)" />
-    <wire from="(570,50)" to="(570,120)" />
-    <wire from="(570,50)" to="(800,50)" />
-    <wire from="(800,50)" to="(800,230)" />
-    <wire from="(800,230)" to="(820,230)" />
-    <wire from="(500,360)" to="(1010,360)" />
-    <wire from="(1010,340)" to="(1010,360)" />
-    <wire from="(1010,340)" to="(1090,340)" />
-    <wire from="(1030,290)" to="(1030,390)" />
-    <wire from="(1030,390)" to="(1070,390)" />
-    <wire from="(1070,360)" to="(1070,390)" />
-    <wire from="(1070,360)" to="(1090,360)" />
+    <wire from="(440,90)" to="(460,90)" />
+    <wire from="(440,140)" to="(510,140)" />
+    <wire from="(440,220)" to="(540,220)" />
+    <wire from="(440,290)" to="(870,290)" />
+    <wire from="(460,90)" to="(460,270)" />
+    <wire from="(460,90)" to="(470,90)" />
+    <wire from="(460,270)" to="(890,270)" />
+    <wire from="(470,90)" to="(470,160)" />
+    <wire from="(470,160)" to="(520,160)" />
+    <wire from="(490,110)" to="(490,120)" />
+    <wire from="(490,110)" to="(650,110)" />
+    <wire from="(490,120)" to="(510,120)" />
+    <wire from="(490,200)" to="(540,200)" />
+    <wire from="(520,150)" to="(520,160)" />
+    <wire from="(520,160)" to="(520,240)" />
+    <wire from="(520,240)" to="(550,240)" />
+    <wire from="(540,130)" to="(580,130)" />
+    <wire from="(550,230)" to="(550,240)" />
+    <wire from="(570,210)" to="(590,210)" />
+    <wire from="(580,130)" to="(580,160)" />
+    <wire from="(580,160)" to="(600,160)" />
+    <wire from="(590,180)" to="(590,210)" />
+    <wire from="(590,180)" to="(600,180)" />
+    <wire from="(590,210)" to="(710,210)" />
+    <wire from="(640,170)" to="(1070,170)" />
+    <wire from="(650,110)" to="(650,230)" />
+    <wire from="(650,230)" to="(710,230)" />
+    <wire from="(750,210)" to="(820,210)" />
+    <wire from="(820,210)" to="(820,250)" />
+    <wire from="(820,210)" to="(830,210)" />
+    <wire from="(820,250)" to="(910,250)" />
+    <wire from="(860,210)" to="(1080,210)" />
+    <wire from="(870,290)" to="(870,360)" />
+    <wire from="(870,290)" to="(910,290)" />
+    <wire from="(870,360)" to="(910,360)" />
+    <wire from="(890,270)" to="(890,340)" />
+    <wire from="(890,270)" to="(910,270)" />
+    <wire from="(890,340)" to="(910,340)" />
+    <wire from="(910,320)" to="(1080,320)" />
+    <wire from="(960,270)" to="(1060,270)" />
+    <wire from="(960,340)" to="(1060,340)" />
+    <wire from="(1080,210)" to="(1080,320)" />
   </circuit>
 
 

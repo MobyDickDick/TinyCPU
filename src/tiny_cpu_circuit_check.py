@@ -70,10 +70,13 @@ def _subcircuit_outputs(definition: ET.Element, instance: ET.Element) -> list[_D
 
 
 def _component_contact_locations(circuit, definitions=None):
-    """Include offset FBox inputs, which are not the component's anchor."""
+    """Include offset FBox and splitter contacts, not just their anchors."""
+    from tiny_cpu_hierarchy import component_ports
     from tiny_cpu_verify import generated_symbol_ports
     points = {_point(c.get("loc")) for c in circuit.findall("comp")}
     for component in circuit.findall("comp"):
+        if component.get("name") == "Splitter":
+            points.update(p for p, *_ in component_ports({}, component))
         if definitions and component.get("name") in definitions:
             points.update(_point(p) for p in generated_symbol_ports(
                 definitions[component.get("name")], component).values())
