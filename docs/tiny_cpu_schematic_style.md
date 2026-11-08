@@ -15,6 +15,10 @@ liegen vor dem Pin; Leitungen dürfen nicht hinter den Eingang zurücklaufen.
 Die [Korrektur und Prüfung vom 8. November](tiny_cpu_or_inputs_20261108.md)
 dokumentiert die betroffenen Auffächerungen.
 
+Die anschließende [Fortsetzung nach der handbereinigten OR-Schaltung](tiny_cpu_author_style_followup_20261108.md)
+verwendet die aktuellen Benutzerzeichnungen bis einschließlich
+`OrArithmeticCircuit` als Referenz und prüft die 34 nachfolgenden Kernblätter.
+
 ## Präzisierung vom 8. November 2026: Gatterabstand und Rückführungsrichtung
 
 Die zwei Punktreihen Freiraum gelten auch an einzelnen AND-/OR-Gliedern und
