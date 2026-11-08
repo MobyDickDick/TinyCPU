@@ -1,6 +1,6 @@
 """Structural contract for AP 22.1's opt-in INPUT boundary."""
 from collections import Counter, defaultdict
-from tiny_cpu_hierarchy import (CORE_UNITS, CircuitBits, attributes, circuit_bit_network,
+from tiny_cpu_hierarchy import (CORE_UNITS, CircuitBits, attributes, circuit_bit_network, flatten_core,
                                 component_ports, wire_path_exists, location)
 
 VARIANTS = {'AccumulatorUnit': 'AccumulatorInputUnit', 'FaultUnit': 'FaultInputUnit'}
@@ -19,6 +19,9 @@ def verify_input_boundary(project):
     for name, (baseline, extra) in wanted.items():
         if name not in definitions or pin_contract(definitions[name]) != {**pin_contract(definitions[baseline]), **extra}:
             raise ValueError(f'{name}: INPUT pin contract differs')
+    project = flatten_core(project, transport_only=True, top_name='TinyCPUInputMain')
+    definitions = {c.get('name'): c for c in project.findall('circuit')}
+    for name in wanted:
         # Check actual terminals, including all old public outputs. Two equal-width
         # output drivers shorted together are also an error, not just width mismatches.
         circuit = definitions[name]

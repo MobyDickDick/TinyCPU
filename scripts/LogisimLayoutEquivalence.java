@@ -34,6 +34,7 @@ final class LogisimLayoutEquivalence {
 
   public static void main(String[] args) throws Exception {
     Path before = Path.of(args[0]), after = Path.of(args[1]);
+    Set<String> selected = new HashSet<>(Arrays.asList(args).subList(2, args.length));
     int circuits = 0, samples = 0;
     try (var files = Files.walk(before)) {
       for (var file : files.filter(p -> p.toString().endsWith(".circ")).sorted().toList()) {
@@ -41,6 +42,7 @@ final class LogisimLayoutEquivalence {
         var a = ProjectActions.doOpenNoWindow(null, file.toFile());
         var b = ProjectActions.doOpenNoWindow(null, after.resolve(relative).toFile());
         for (var ca : a.getLogisimFile().getCircuits()) {
+          if (!selected.isEmpty() && !selected.contains(ca.getName())) continue;
           var cb = b.getLogisimFile().getCircuit(ca.getName());
           if (cb == null) throw new IllegalStateException("missing circuit " + ca.getName());
           var sa = CircuitState.createRootState(a, ca, Thread.currentThread());

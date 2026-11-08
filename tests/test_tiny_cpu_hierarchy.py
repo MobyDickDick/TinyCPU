@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from tiny_cpu_hierarchy import (
     add_output_term, attributes, component_ports, control_bus_splitter, control_bus_splitters,
-    core_topology_fingerprint, flatten_core, location, point,
+    core_topology_fingerprint, flatten_core, find_core_instance, location, point,
     splitter_groups, verify_core_modularity, wire_network, wire_path_exists,
 )
 from tiny_cpu_verify import generated_symbol_ports
@@ -17,6 +17,35 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class HierarchyTests(unittest.TestCase):
+    def test_transport_rejects_logic_hidden_inside_a_stage(self):
+        stage = self.project.find("circuit[@name='CPUComputeStage']")
+        ET.SubElement(stage, "comp", {"lib": "1", "name": "AND Gate", "loc": "(100,100)"})
+        with self.assertRaisesRegex(ValueError, "primitive"):
+            verify_core_modularity(self.project, self.contract)
+
+    def test_transport_bit_swap_changes_accepted_core_topology(self):
+        link = self.project.find("circuit[@name='CPUAccumulatorUnitLink']")
+        tap = next(s for s in link.findall("comp[@name='Splitter']")
+                   if attributes(s).get('incoming') == '51')
+        bit = splitter_groups(tap).index(0)
+        tap.find(f"a[@name='bit{bit}']").set('val', 'none')
+        tap.find(f"a[@name='bit{(bit + 1) % 51}']").set('val', '0')
+        self.assertNotEqual(core_topology_fingerprint(self.project), self.contract['topology_sha256'])
+
+    def test_transport_leaves_an_empty_row_even_in_short_fanouts(self):
+        from tiny_cpu_hierarchy import CORE_CONTAINERS
+        from tiny_cpu_wire_contacts import inspect_parallel_spacing, inspect_routing_grid
+        for circuit in self.project.findall('circuit'):
+            if circuit.get('name') in CORE_CONTAINERS | {'TinyCPUMain', 'TinyCPUInputMain'}:
+                with self.subTest(circuit=circuit.get('name')):
+                    self.assertEqual(inspect_parallel_spacing(circuit), [])
+                    self.assertEqual(inspect_routing_grid(circuit), [])
+        fixture = ET.fromstring('<circuit name="ShortFanout"><wire from="(20,20)" to="(80,20)"/><wire from="(20,30)" to="(80,30)"/></circuit>')
+        self.assertEqual(len(inspect_parallel_spacing(fixture)), 1)
+        fixture.findall('wire')[1].set('from', '(20,40)')
+        fixture.findall('wire')[1].set('to', '(80,40)')
+        self.assertEqual(inspect_parallel_spacing(fixture), [])
+
     def test_inverted_output_gate_inputs_include_the_native_output_bubble_depth(self):
         for kind in ("NOR Gate", "NAND Gate", "XNOR Gate"):
             gate = ET.fromstring(f'<comp name="{kind}" loc="(200,100)"/>')
@@ -107,8 +136,7 @@ class HierarchyTests(unittest.TestCase):
         self.assertEqual(core_topology_fingerprint(self.project), self.contract["topology_sha256"])
 
     def test_disconnected_control_bus_is_not_hidden_by_scoped_tunnel_names(self):
-        main = self.project.find("circuit[@name='TinyCPUMain']")
-        unit = next(c for c in main.findall("comp") if c.get("name") == "MemoryUnit")
+        main, unit = find_core_instance(self.project, "MEMORY_UNIT")
         definition = self.project.find("circuit[@name='MemoryUnit']")
         terminal = generated_symbol_ports(definition, unit)["CONTROL"]
 
@@ -389,10 +417,11 @@ class HierarchyTests(unittest.TestCase):
         self.assertEqual(core_topology_fingerprint(self.project), self.contract["topology_sha256"])
 
     def test_named_fault_feedback_and_error_halt_are_separate_nets(self):
-        main = self.project.find("circuit[@name='TinyCPUMain']")
+        project = flatten_core(self.project, transport_only=True)
+        main = project.find("circuit[@name='TinyCPUMain']")
 
         def ports(name):
-            return generated_symbol_ports(self.project.find(f"circuit[@name='{name}']"),
+            return generated_symbol_ports(project.find(f"circuit[@name='{name}']"),
                                           main.find(f"comp[@name='{name}']"))
 
         faults, branch, fetch = ports("FaultUnit"), ports("BranchUnit"), ports("FetchUnit")

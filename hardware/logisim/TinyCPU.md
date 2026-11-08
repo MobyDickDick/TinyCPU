@@ -4,10 +4,15 @@ Begleitbeschreibung zu [TinyCPU.circ](TinyCPU.circ).
 
 ## TinyCPUMain
 
-Verbindet die acht Funktionsboxen zur CPU: Befehle holen und dekodieren, Operanden
+Verbindet vier fachliche Bereiche mit den darin enthaltenen acht Funktionsboxen:
+Befehle holen und dekodieren, Operanden
 bereitstellen, rechnen, Ergebnisse speichern und den nächsten Befehl bestimmen. Die
 öffentlichen Pins verbinden den Kern mit Takt, Speicher, Ausgaben und
 Interruptsteuerung.
+
+Die [Aufteilung der beiden Übersichten vom 8. November 2026](../../docs/tiny_cpu_main_modules_20261108.md)
+ersetzt den verworfenen Zwischenstand durch Befehlsablauf, Compute, Speicher
+und Status, verbunden über dokumentierte, sichtbar verdrahtete Busse.
 
 ## TinyCPUInputMain
 

@@ -172,6 +172,34 @@ def inspect_routing_grid(circuit: ET.Element, *, origin: Point = (0, 0)) -> list
     return issues
 
 
+def inspect_parallel_spacing(circuit: ET.Element) -> list[str]:
+    """Require an empty 10-pixel row between overlapping parallel wire spans.
+
+    Unlike the long-run grid check, this also inspects short pin fan-outs.
+    Adjacent bends whose projections only meet at one point are not parallel
+    runs. Collinear electrical contacts are checked by inspect_circuit.
+    """
+    segments = [(_point(w.get("from")), _point(w.get("to")))
+                for w in circuit.findall("wire")]
+    issues = []
+    for index, (a, b) in enumerate(segments):
+        direction = _orientation((a, b))
+        if direction == "invalid":
+            continue
+        axis = 0 if direction == "horizontal" else 1
+        fixed = 1 - axis
+        for c, d in segments[index + 1:]:
+            if _orientation((c, d)) != direction:
+                continue
+            gap = abs(a[fixed] - c[fixed])
+            overlap = (min(max(a[axis], b[axis]), max(c[axis], d[axis]))
+                       - max(min(a[axis], b[axis]), min(c[axis], d[axis])))
+            if 0 < gap < 20 and overlap > 0:
+                issues.append(f"{circuit.get('name')}: parallel {direction} wires "
+                              f"at {a[fixed]} and {c[fixed]} leave no empty row")
+    return issues
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="find inconspicuous electrical contacts between Logisim wires")

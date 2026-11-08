@@ -31,8 +31,21 @@ final class LogisimCoreTrace {
   }
 
   private static CircuitState child(CircuitState state, String label) {
-    var instance = component(state, label);
-    return ((SubcircuitFactory) instance.getFactory()).getSubstate(state, instance);
+    var matches = new ArrayList<CircuitState>();
+    findChildren(state, label, matches);
+    if (matches.size() != 1)
+      throw new IllegalArgumentException("ambiguous/missing child label: " + label);
+    return matches.get(0);
+  }
+
+  private static void findChildren(CircuitState state, String label, List<CircuitState> matches) {
+    for (var instance : state.getCircuit().getNonWires()) {
+      if (!(instance.getFactory() instanceof SubcircuitFactory factory)) continue;
+      if (label.equals(instance.getAttributeSet().getValue(StdAttr.LABEL)))
+        matches.add(factory.getSubstate(state, instance));
+      else if (factory.getName().startsWith("CPU"))
+        findChildren(factory.getSubstate(state, instance), label, matches);
+    }
   }
 
   private static void drive(CircuitState state, String label, long value) {

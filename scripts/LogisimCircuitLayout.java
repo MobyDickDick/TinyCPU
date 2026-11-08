@@ -12,6 +12,7 @@ import javax.imageio.ImageIO;
 /** Native terminal geometry and drawings, without saving a Logisim project. */
 final class LogisimCircuitLayout {
   public static void main(String[] args) throws Exception {
+    com.cburch.logisim.Main.headless = true;
     Path output = Path.of(args[0]);
     Files.createDirectories(output);
     try (var manifest = Files.newBufferedWriter(output.resolve("contacts.tsv"))) {

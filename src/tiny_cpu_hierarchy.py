@@ -28,6 +28,20 @@ CORE_UNITS = {
 # These local boxes have no control-bus boundary of their own.
 ADDRESS_HELPERS = {"AddressRegisterLoad", "AddressAccess"}
 
+# Wiring-only transport sheets and functional groups; original unit interfaces stay intact.
+CORE_CONTAINERS = {
+    *(f"CPU{name}Link" for name in CORE_UNITS),
+    "CPUAccumulatorInputUnitLink", "CPUFaultInputUnitLink",
+    "CPUFlowStage", "CPUComputeStage", "CPUComputeStageInput",
+    "CPUMemoryStage", "CPUStatusStage", "CPUStatusStageInput",
+    "CPUHostInputs", "CPUHostOutputs", "CPUInputSource",
+}
+CORE_OVERVIEW_UNITS = {
+    "CPUHostInputs": "HOST_INPUTS", "CPUHostOutputs": "HOST_OUTPUTS",
+    "CPUFlowStage": "FLOW_STAGE", "CPUComputeStage": "COMPUTE_STAGE",
+    "CPUMemoryStage": "MEMORY_STAGE", "CPUStatusStage": "STATUS_STAGE",
+}
+
 
 def attributes(component):
     return {a.get("name"): a.get("val") for a in component.findall("a")}
@@ -282,17 +296,20 @@ class CircuitBits:
         return [(self.path, net, bit) for bit in range(width)]
 
 
-def flatten_core(project):
-    """Expand only the new functional units for semantic offline checks.
+def flatten_core(project, *, transport_only=False, top_name="TinyCPUMain"):
+    """Expand the declared CPU hierarchy for semantic offline checks.
 
+    With transport_only, keep the original eight functional units atomic.
+    This compares their original terminals through the new wiring sheets.
     Control buses are followed bit by bit. Tunnel names are scoped to each
     instance; matching names alone never connect different units. Resulting
     wires are analysis aliases, not a drawable or runnable replacement CPU.
     """
     result = copy.deepcopy(project)
     definitions = {c.get("name"): c for c in result.findall("circuit")}
-    main = definitions.get("TinyCPUMain")
-    if main is None or not any(c.get("name") in CORE_UNITS for c in main.findall("comp")):
+    main = definitions.get(top_name)
+    expanded = CORE_CONTAINERS if transport_only else CORE_CONTAINERS | CORE_UNITS.keys() | ADDRESS_HELPERS
+    if main is None or not any(c.get("name") in expanded for c in main.findall("comp")):
         return result
     bits = UnionFind()
     kept = []
@@ -300,12 +317,14 @@ def flatten_core(project):
 
     def visit(circuit, path, shift, top=False):
         state = CircuitBits(definitions, circuit, path)
-        bus_splitters = (set(control_bus_splitters(circuit))
-                         if not top and circuit.get("name") in CORE_UNITS else set())
+        bus_splitters = (set(circuit.findall("comp[@name='Splitter']"))
+                         if circuit.get("name") in CORE_CONTAINERS else
+                         set(control_bus_splitters(circuit))
+                         if not transport_only and not top and circuit.get("name") in CORE_UNITS else set())
         for c in circuit.findall("comp"):
             kind = c.get("name")
             a = attributes(c)
-            if kind in CORE_UNITS.keys() | ADDRESS_HELPERS and c.get("lib") is None:
+            if kind in expanded and c.get("lib") is None:
                 child_shift = 10000 * (len(instances) + 1)
                 instances.append(path + "/" + a.get("label", kind))
                 child = visit(definitions[kind], instances[-1], child_shift)
@@ -348,7 +367,7 @@ def flatten_core(project):
                     offsets[group] += 1
         return state
 
-    visit(main, "TinyCPUMain", 0, top=True)
+    visit(main, top_name, 0, top=True)
     for c in list(main):
         if c.tag in {"comp", "wire"}:
             main.remove(c)
@@ -370,8 +389,28 @@ def verify_core_modularity(project, control_contract=None):
     main = project.find("circuit[@name='TinyCPUMain']")
     if main is None:
         raise ValueError("CPU overview is missing")
+    definitions = {c.get("name"): c for c in project.findall("circuit")}
+    modular = any(c.get("name") in CORE_CONTAINERS for c in main.findall("comp"))
+    if modular:
+        boxes = {c.get("name"): attributes(c).get("label") for c in main.findall("comp") if c.get("name") != "Pin"}
+        if boxes != CORE_OVERVIEW_UNITS or len(main.findall("comp")) != len(main.findall("comp[@name='Pin']")) + len(CORE_OVERVIEW_UNITS):
+            raise ValueError("CPU overview contains a primitive or undeclared functional box")
+        def audit(circuit, active=()):
+            name = circuit.get("name")
+            if name in active:
+                raise ValueError("recursive CPU transport hierarchy")
+            for component in circuit.findall("comp"):
+                kind = component.get("name")
+                if kind in CORE_CONTAINERS and component.get("lib") is None:
+                    audit(definitions[kind], (*active, name))
+                elif kind not in CORE_UNITS and kind not in {"Pin", "Splitter"}:
+                    raise ValueError(f"CPU transport contains a primitive or undeclared box: {kind}")
+        audit(main)
+        overview = flatten_core(project, transport_only=True).find("circuit[@name='TinyCPUMain']")
+    else:
+        overview = main
     counts = defaultdict(int)
-    for c in main.findall("comp"):
+    for c in overview.findall("comp"):
         if c.get("name") == "Pin":
             continue
         if c.get("lib") is not None or c.get("name") not in CORE_UNITS:
@@ -460,7 +499,7 @@ def find_core_instance(project, label):
         for c in circuit.findall("comp"):
             if attributes(c).get("label") == label:
                 return circuit, c
-            if c.get("name") in CORE_UNITS.keys() | ADDRESS_HELPERS and c.get("lib") is None:
+            if c.get("name") in CORE_UNITS.keys() | ADDRESS_HELPERS | CORE_CONTAINERS and c.get("lib") is None:
                 found = visit(definitions[c.get("name")])
                 if found is not None:
                     return found

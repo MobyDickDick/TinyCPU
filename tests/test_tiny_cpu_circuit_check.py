@@ -111,9 +111,8 @@ class CircuitCheckTests(unittest.TestCase):
             for circuit in ET.parse(path).getroot().findall("circuit"):
                 if circuit.get("name") == "FetchDecodeControls":
                     continue
-                origin = (70, 0) if circuit.get("name") == "TinyCPUMain" else (0, 0)
                 with self.subTest(file=path.name, circuit=circuit.get("name")):
-                    self.assertEqual(inspect_schematic_layout(circuit, origin=origin), [])
+                    self.assertEqual(inspect_schematic_layout(circuit), [])
 
     def test_restored_layout_exception_does_not_accept_an_added_wire(self):
         project = ET.parse(ROOT / 'hardware/logisim/TinyCPU.circ').getroot()

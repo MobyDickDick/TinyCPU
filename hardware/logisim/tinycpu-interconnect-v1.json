@@ -1,0 +1,652 @@
+{
+  "buses": {
+    "HOST": {
+      "width": 35,
+      "fields": [
+        {
+          "source": "CLK",
+          "port": "CLK",
+          "bits": [
+            0
+          ]
+        },
+        {
+          "source": "RESET",
+          "port": "RESET",
+          "bits": [
+            1
+          ]
+        },
+        {
+          "source": "ILL_RET",
+          "port": "ILL_RET",
+          "bits": [
+            2
+          ]
+        },
+        {
+          "source": "INTERRUPT_ACCEPT",
+          "port": "INTERRUPT_ACCEPT",
+          "bits": [
+            3
+          ]
+        },
+        {
+          "source": "INTERRUPT_TARGET_PC",
+          "port": "INTERRUPT_TARGET_PC",
+          "bits": [
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ]
+        },
+        {
+          "source": "EXTERNAL_MEMORY_VALUE",
+          "port": "EXTERNAL_MEMORY_VALUE",
+          "bits": [
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31
+          ]
+        },
+        {
+          "source": "EXTERNAL_MEMORY_VALID",
+          "port": "EXTERNAL_MEMORY_VALID",
+          "bits": [
+            32
+          ]
+        },
+        {
+          "source": "USE_EXTERNAL_MEMORY",
+          "port": "USE_EXTERNAL_MEMORY",
+          "bits": [
+            33
+          ]
+        },
+        {
+          "source": "RAM_WRITE_ENABLE",
+          "port": "RAM_WRITE_ENABLE",
+          "bits": [
+            34
+          ]
+        }
+      ]
+    },
+    "CONTROL": {
+      "width": 45,
+      "fields": [
+        {
+          "source": "FETCH_UNIT",
+          "port": "CONTROL",
+          "bits": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44
+          ]
+        }
+      ]
+    },
+    "FLOW": {
+      "width": 40,
+      "fields": [
+        {
+          "source": "FETCH_UNIT",
+          "port": "BOUNDARY",
+          "bits": [
+            0
+          ]
+        },
+        {
+          "source": "FETCH_UNIT",
+          "port": "ERROR_HALT",
+          "bits": [
+            1
+          ]
+        },
+        {
+          "source": "FETCH_UNIT",
+          "port": "HALT",
+          "bits": [
+            2
+          ]
+        },
+        {
+          "source": "FETCH_UNIT",
+          "port": "HALT_MONITOR",
+          "bits": [
+            3
+          ]
+        },
+        {
+          "source": "FETCH_UNIT",
+          "port": "IMMEDIATE_VALUE",
+          "bits": [
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19
+          ]
+        },
+        {
+          "source": "FETCH_UNIT",
+          "port": "IRQ_DISABLE",
+          "bits": [
+            20
+          ]
+        },
+        {
+          "source": "FETCH_UNIT",
+          "port": "IRQ_ENABLE",
+          "bits": [
+            21
+          ]
+        },
+        {
+          "source": "FETCH_UNIT",
+          "port": "IRQ_RETURN",
+          "bits": [
+            22
+          ]
+        },
+        {
+          "source": "FETCH_UNIT",
+          "port": "JUMP_OCCURRED",
+          "bits": [
+            23
+          ]
+        },
+        {
+          "source": "FETCH_UNIT",
+          "port": "PC",
+          "bits": [
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35
+          ]
+        },
+        {
+          "source": "FETCH_UNIT",
+          "port": "PRINT",
+          "bits": [
+            36
+          ]
+        },
+        {
+          "source": "FETCH_UNIT",
+          "port": "PRINT_ADDR",
+          "bits": [
+            37
+          ]
+        },
+        {
+          "source": "BRANCH_UNIT",
+          "port": "BRANCH_NOT_ZERO",
+          "bits": [
+            38
+          ]
+        },
+        {
+          "source": "BRANCH_UNIT",
+          "port": "BRANCH_TAKEN",
+          "bits": [
+            39
+          ]
+        }
+      ]
+    },
+    "COMPUTE": {
+      "width": 40,
+      "fields": [
+        {
+          "source": "ACCUMULATOR_UNIT",
+          "port": "ACC_VALID",
+          "bits": [
+            0
+          ]
+        },
+        {
+          "source": "ACCUMULATOR_UNIT",
+          "port": "ACC_VALUE",
+          "bits": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
+        },
+        {
+          "source": "ACCUMULATOR_UNIT",
+          "port": "NEGATIVE",
+          "bits": [
+            17
+          ]
+        },
+        {
+          "source": "ACCUMULATOR_UNIT",
+          "port": "ZERO",
+          "bits": [
+            18
+          ]
+        },
+        {
+          "source": "EXECUTION_UNIT",
+          "port": "ALU_ACTIVE",
+          "bits": [
+            19
+          ]
+        },
+        {
+          "source": "EXECUTION_UNIT",
+          "port": "ALU_VALID",
+          "bits": [
+            20
+          ]
+        },
+        {
+          "source": "EXECUTION_UNIT",
+          "port": "DIVIDE_BY_ZERO",
+          "bits": [
+            21
+          ]
+        },
+        {
+          "source": "EXECUTION_UNIT",
+          "port": "INVALID_OPERAND",
+          "bits": [
+            22
+          ]
+        },
+        {
+          "source": "EXECUTION_UNIT",
+          "port": "OVERFLOW",
+          "bits": [
+            23
+          ]
+        },
+        {
+          "source": "EXECUTION_UNIT",
+          "port": "RESULT_VALUE",
+          "bits": [
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39
+          ]
+        }
+      ]
+    },
+    "ADDRESS": {
+      "width": 35,
+      "fields": [
+        {
+          "source": "ADDRESS_UNIT",
+          "port": "ACCESS_VALID",
+          "bits": [
+            0
+          ]
+        },
+        {
+          "source": "ADDRESS_UNIT",
+          "port": "ADDRESS",
+          "bits": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16
+          ]
+        },
+        {
+          "source": "ADDRESS_UNIT",
+          "port": "ADDRESS_INVALID",
+          "bits": [
+            17
+          ]
+        },
+        {
+          "source": "ADDRESS_UNIT",
+          "port": "ADDRESS_RANGE_FBOX_ACTIVE_ADDRESS_OUT_OF_RANGE_8a6c16f5",
+          "bits": [
+            18
+          ]
+        },
+        {
+          "source": "ADDRESS_UNIT",
+          "port": "SELECTED_ADDR",
+          "bits": [
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34
+          ]
+        }
+      ]
+    },
+    "MEMORY": {
+      "width": 51,
+      "fields": [
+        {
+          "source": "MEMORY_UNIT",
+          "port": "OPERAND",
+          "bits": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ]
+        },
+        {
+          "source": "MEMORY_UNIT",
+          "port": "RAW_VALID",
+          "bits": [
+            16
+          ]
+        },
+        {
+          "source": "MEMORY_UNIT",
+          "port": "RAW_VALUE",
+          "bits": [
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32
+          ]
+        },
+        {
+          "source": "MEMORY_UNIT",
+          "port": "READ_VALID",
+          "bits": [
+            33
+          ]
+        },
+        {
+          "source": "MEMORY_UNIT",
+          "port": "READ_VALUE",
+          "bits": [
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49
+          ]
+        },
+        {
+          "source": "MEMORY_UNIT",
+          "port": "WRITE_REQUEST",
+          "bits": [
+            50
+          ]
+        }
+      ]
+    },
+    "STATUS": {
+      "width": 6,
+      "fields": [
+        {
+          "source": "FAULT_UNIT",
+          "port": "ADDR",
+          "bits": [
+            0
+          ]
+        },
+        {
+          "source": "FAULT_UNIT",
+          "port": "DIV0",
+          "bits": [
+            1
+          ]
+        },
+        {
+          "source": "FAULT_UNIT",
+          "port": "ILL",
+          "bits": [
+            2
+          ]
+        },
+        {
+          "source": "FAULT_UNIT",
+          "port": "INPUT",
+          "bits": [
+            3
+          ]
+        },
+        {
+          "source": "FAULT_UNIT",
+          "port": "INV",
+          "bits": [
+            4
+          ]
+        },
+        {
+          "source": "FAULT_UNIT",
+          "port": "OVF",
+          "bits": [
+            5
+          ]
+        }
+      ]
+    },
+    "INPUT": {
+      "width": 17,
+      "fields": [
+        {
+          "source": "INPUT_VALUE",
+          "port": "INPUT_VALUE",
+          "bits": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ]
+        },
+        {
+          "source": "INPUT_VALID",
+          "port": "INPUT_VALID",
+          "bits": [
+            16
+          ]
+        }
+      ]
+    }
+  },
+  "containers": [
+    "CPUFetchUnitLink",
+    "CPUAccumulatorUnitLink",
+    "CPUAccumulatorInputUnitLink",
+    "CPUAddressUnitLink",
+    "CPUMemoryUnitLink",
+    "CPUExecutionUnitLink",
+    "CPUFaultUnitLink",
+    "CPUFaultInputUnitLink",
+    "CPUBranchUnitLink",
+    "CPUCoreDiagnosticsLink",
+    "CPUFlowStage",
+    "CPUComputeStage",
+    "CPUComputeStageInput",
+    "CPUMemoryStage",
+    "CPUStatusStage",
+    "CPUStatusStageInput",
+    "CPUHostInputs",
+    "CPUInputSource",
+    "CPUHostOutputs"
+  ]
+}
