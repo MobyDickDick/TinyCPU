@@ -1,5 +1,6 @@
 import sys
 import unittest
+from unittest import mock
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -8,6 +9,7 @@ from tiny_cpu_circuit_check import inspect_circuit, inspect_project, repair_proj
 from tiny_cpu_wire_contacts import inspect_circuit as inspect_wire_contacts
 from tiny_cpu_wire_contacts import inspect_routing_grid, inspect_schematic_layout
 from tiny_cpu_wire_contacts import inspect_or_input_directions
+from tiny_cpu_wire_contacts import inspect_parallel_spacing, schematic_geometry_digest
 from tiny_cpu_hierarchy import ADDRESS_HELPERS, CORE_UNITS
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -171,6 +173,37 @@ class CircuitCheckTests(unittest.TestCase):
         issues = inspect_routing_grid(circuit)
         self.assertEqual(len(issues), 1)
         self.assertIn("horizontal run at 30", issues[0])
+
+    def test_long_parallel_spacing_merges_junction_segments_but_allows_local_fanout(self):
+        circuit = ET.Element('circuit', name='LongBundle')
+        for row in (20, 30):
+            for start in (0, 100, 200):
+                ET.SubElement(circuit, 'wire', {'from': f'({start},{row})',
+                                               'to': f'({start + 100},{row})'})
+        self.assertEqual(len(inspect_parallel_spacing(circuit, min_overlap=160)), 1)
+        for wire in circuit.findall('wire'):
+            for key in ('from', 'to'):
+                wire.set(key, wire.get(key).replace(',30)', ',40)'))
+        self.assertEqual(inspect_parallel_spacing(circuit, min_overlap=160), [])
+        short = ET.fromstring('''<circuit name="NativeFanout">
+          <wire from="(0,20)" to="(160,20)"/>
+          <wire from="(0,30)" to="(160,30)"/>
+        </circuit>''')
+        self.assertEqual(inspect_parallel_spacing(short, min_overlap=160), [])
+        self.assertTrue(inspect_parallel_spacing(short))
+
+    def test_reviewed_layout_never_exempts_long_parallel_spacing(self):
+        circuit = ET.fromstring('''<circuit name="ReviewedBundle">
+          <wire from="(0,20)" to="(300,20)"/>
+          <wire from="(0,30)" to="(300,30)"/>
+        </circuit>''')
+        # The verifier tests also load this module through an isolated spec.
+        # Patch the function's own globals rather than another module instance.
+        with mock.patch.dict(inspect_schematic_layout.__globals__,
+                             {'_restored_layouts': lambda: {schematic_geometry_digest(circuit)}}):
+            issues = inspect_schematic_layout(circuit)
+        self.assertEqual(len(issues), 1)
+        self.assertIn('leave no empty row', issues[0])
 
     def test_all_functional_units_preserve_reviewed_layout_or_grouped_grid(self):
         project = ET.parse(ROOT / "hardware/logisim/TinyCPU.circ").getroot()

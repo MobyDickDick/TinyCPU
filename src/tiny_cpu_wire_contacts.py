@@ -41,10 +41,12 @@ def inspect_schematic_layout(circuit: ET.Element, origin=(0, 0)) -> list[str]:
     """Keep the user's restored drawings; check other geometry on the grid.
 
     The exception covers exact reviewed geometry only. Adding or moving any
-    wire or component falls back to the strict grid check. Electrical checks
-    and interface validation are independent and always remain active.
+    wire or component falls back to the strict grid check. Long parallel
+    spacing and OR input approaches are checked even for reviewed geometry.
+    Electrical checks and interface validation remain independent.
     """
     issues = inspect_or_input_directions(circuit)
+    issues.extend(inspect_parallel_spacing(circuit, min_overlap=160))
     if schematic_geometry_digest(circuit) not in _restored_layouts():
         issues.extend(inspect_routing_grid(circuit, origin=origin))
     return issues
@@ -212,15 +214,37 @@ def inspect_routing_grid(circuit: ET.Element, *, origin: Point = (0, 0)) -> list
     return issues
 
 
-def inspect_parallel_spacing(circuit: ET.Element) -> list[str]:
+def inspect_parallel_spacing(circuit: ET.Element, *, min_overlap: int = 0) -> list[str]:
     """Require an empty 10-pixel row between overlapping parallel wire spans.
 
     Unlike the long-run grid check, this also inspects short pin fan-outs.
     Adjacent bends whose projections only meet at one point are not parallel
     runs. Collinear electrical contacts are checked by inspect_circuit.
+    With a positive min_overlap, merge contiguous runs before checking so
+    explicit T junctions cannot hide a long, tightly spaced bundle. The
+    schematic audit uses 160px to retain local native-port fan-outs.
     """
     segments = [(_point(w.get("from")), _point(w.get("to")))
                 for w in circuit.findall("wire")]
+    if min_overlap > 0:
+        lines = defaultdict(list)
+        for a, b in segments:
+            orientation = _orientation((a, b))
+            if orientation == "invalid":
+                continue
+            axis = 0 if orientation == "horizontal" else 1
+            lines[(axis, a[1 - axis])].append(sorted((a[axis], b[axis])))
+        segments = []
+        for (axis, coordinate), spans in sorted(lines.items()):
+            merged = []
+            for start, stop in sorted(spans):
+                if merged and start <= merged[-1][1]:
+                    merged[-1][1] = max(merged[-1][1], stop)
+                else:
+                    merged.append([start, stop])
+            for start, stop in merged:
+                segments.append(((start, coordinate), (stop, coordinate)) if axis == 0
+                                else ((coordinate, start), (coordinate, stop)))
     issues = []
     for index, (a, b) in enumerate(segments):
         direction = _orientation((a, b))
@@ -234,7 +258,7 @@ def inspect_parallel_spacing(circuit: ET.Element) -> list[str]:
             gap = abs(a[fixed] - c[fixed])
             overlap = (min(max(a[axis], b[axis]), max(c[axis], d[axis]))
                        - max(min(a[axis], b[axis]), min(c[axis], d[axis])))
-            if 0 < gap < 20 and overlap > 0:
+            if 0 < gap < 20 and overlap > min_overlap:
                 issues.append(f"{circuit.get('name')}: parallel {direction} wires "
                               f"at {a[fixed]} and {c[fixed]} leave no empty row")
     return issues

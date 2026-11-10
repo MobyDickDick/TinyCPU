@@ -572,13 +572,13 @@
     <comp lib="5" loc="(780,220)" name="Register">
       <a name="appearance" val="logisim_evolution" />
       <a name="label" val="OUTPUT_VALUE" />
-      <a name="labelfont" val="SansSerif plain 9" />
+      <a name="labelfont" val="SansSerif plain 10" />
       <a name="width" val="16" />
     </comp>
     <comp lib="5" loc="(780,350)" name="Register">
       <a name="appearance" val="logisim_evolution" />
       <a name="label" val="OUTPUT_VALID" />
-      <a name="labelfont" val="SansSerif plain 9" />
+      <a name="labelfont" val="SansSerif plain 10" />
       <a name="width" val="1" />
     </comp>
     <comp lib="9" loc="(540,50)" name="Text">
@@ -589,7 +589,8 @@
     <wire from="(410,140)" to="(880,140)" />
     <wire from="(410,180)" to="(480,180)" />
     <wire from="(410,250)" to="(780,250)" />
-    <wire from="(410,310)" to="(630,310)" />
+    <wire from="(410,310)" to="(580,310)" />
+    <wire from="(580,310)" to="(630,310)" />
     <wire from="(410,360)" to="(580,360)" />
     <wire from="(410,500)" to="(770,500)" />
     <wire from="(410,530)" to="(960,530)" />
@@ -603,8 +604,6 @@
     <wire from="(600,350)" to="(600,450)" />
     <wire from="(600,350)" to="(620,350)" />
     <wire from="(600,450)" to="(610,450)" />
-    <wire from="(620,340)" to="(630,340)" />
-    <wire from="(630,310)" to="(630,340)" />
     <wire from="(630,310)" to="(700,310)" />
     <wire from="(650,350)" to="(680,350)" />
     <wire from="(650,460)" to="(940,460)" />
@@ -638,6 +637,8 @@
     <wire from="(950,120)" to="(950,190)" />
     <wire from="(960,320)" to="(960,440)" />
     <wire from="(960,440)" to="(960,530)" />
+    <wire from="(580,310)" to="(580,340)" />
+    <wire from="(580,340)" to="(620,340)" />
     <comp lib="9" name="Text" loc="(670,420)">
       <a name="text" val="OUTPUT WRITE GATE" />
       <a name="font" val="SansSerif plain 10" />
@@ -809,7 +810,7 @@
     </comp>
     <comp lib="1" loc="(810,380)" name="AND Gate">
       <a name="label" val="PENDING_EDGE_WHEN_DISABLED" />
-      <a name="labelfont" val="SansSerif plain 9" />
+      <a name="labelfont" val="SansSerif plain 10" />
       <a name="negate1" val="true" />
       <a name="size" val="30" />
     </comp>
@@ -859,38 +860,38 @@
     <comp lib="5" loc="(1030,1100)" name="Register">
       <a name="appearance" val="logisim_evolution" />
       <a name="label" val="RETURN_ADDRESS_CLEAR_PENDING" />
-      <a name="labelfont" val="SansSerif plain 9" />
+      <a name="labelfont" val="SansSerif plain 10" />
       <a name="width" val="1" />
     </comp>
     <comp lib="5" loc="(1030,110)" name="Register">
       <a name="appearance" val="logisim_evolution" />
       <a name="label" val="REQUEST_LEVEL" />
-      <a name="labelfont" val="SansSerif plain 9" />
+      <a name="labelfont" val="SansSerif plain 10" />
       <a name="width" val="1" />
     </comp>
     <comp lib="5" loc="(1030,390)" name="Register">
       <a name="appearance" val="logisim_evolution" />
-      <a name="labelfont" val="SansSerif plain 9" />
+      <a name="labelfont" val="SansSerif plain 10" />
       <a name="width" val="1" />
     </comp>
     <comp lib="5" loc="(1030,570)" name="Register">
       <a name="appearance" val="logisim_evolution" />
-      <a name="labelfont" val="SansSerif plain 9" />
+      <a name="labelfont" val="SansSerif plain 10" />
       <a name="width" val="1" />
     </comp>
     <comp lib="5" loc="(1030,870)" name="Register">
       <a name="appearance" val="logisim_evolution" />
-      <a name="labelfont" val="SansSerif plain 9" />
+      <a name="labelfont" val="SansSerif plain 10" />
       <a name="width" val="1" />
     </comp>
     <comp lib="5" loc="(1030,990)" name="Register">
       <a name="appearance" val="logisim_evolution" />
-      <a name="labelfont" val="SansSerif plain 9" />
+      <a name="labelfont" val="SansSerif plain 10" />
       <a name="width" val="1" />
     </comp>
     <comp lib="5" loc="(1200,710)" name="Register">
       <a name="appearance" val="logisim_evolution" />
-      <a name="labelfont" val="SansSerif plain 9" />
+      <a name="labelfont" val="SansSerif plain 10" />
       <a name="width" val="12" />
     </comp>
     <comp lib="9" loc="(1170,20)" name="Text">
@@ -902,7 +903,7 @@
       <a name="text" val="EDGE / INPUTS" />
     </comp>
     <comp lib="9" loc="(685,1060)" name="Text">
-      <a name="font" val="SansSerif plain 9" />
+      <a name="font" val="SansSerif plain 10" />
       <a name="text" val="feedback buses: ACCEPT / VALID_RETURN" />
     </comp>
     <comp lib="9" loc="(735,20)" name="Text">
@@ -1004,30 +1005,23 @@
     <wire from="(520,140)" to="(620,140)"/>
     <wire from="(520,350)" to="(1260,350)"/>
     <wire from="(520,600)" to="(640,600)"/>
-    <wire from="(520,680)" to="(1380,680)"/>
+    <wire from="(520,680)" to="(1350,680)" />
+    <wire from="(1350,680)" to="(1380,680)" />
     <wire from="(520,740)" to="(650,740)"/>
     <wire from="(530,50)" to="(880,50)"/>
     <wire from="(530,70)" to="(870,70)"/>
     <wire from="(620,140)" to="(620,280)"/>
     <wire from="(620,140)" to="(1030,140)"/>
     <wire from="(620,280)" to="(640,280)"/>
-    <wire from="(630,260)" to="(640,260)"/>
     <wire from="(630,610)" to="(630,620)"/>
     <wire from="(630,610)" to="(640,610)"/>
     <wire from="(630,620)" to="(850,620)"/>
-    <wire from="(640,110)" to="(640,260)"/>
     <wire from="(640,110)" to="(1100,110)"/>
     <wire from="(640,710)" to="(640,720)"/>
     <wire from="(640,710)" to="(1280,710)"/>
     <wire from="(640,720)" to="(650,720)"/>
-    <wire from="(640,900)" to="(650,900)"/>
-    <wire from="(640,1020)" to="(650,1020)"/>
-    <wire from="(650,590)" to="(660,590)"/>
-    <wire from="(650,850)" to="(650,900)"/>
     <wire from="(650,850)" to="(1100,850)"/>
-    <wire from="(650,980)" to="(650,1020)"/>
     <wire from="(650,980)" to="(1320,980)"/>
-    <wire from="(660,520)" to="(660,590)"/>
     <wire from="(660,520)" to="(760,520)"/>
     <wire from="(660,750)" to="(660,760)"/>
     <wire from="(670,270)" to="(770,270)"/>
@@ -1120,7 +1114,8 @@
     <wire from="(1190,520)" to="(1190,600)"/>
     <wire from="(1190,600)" to="(1550,600)"/>
     <wire from="(1200,1120)" to="(1230,1120)"/>
-    <wire from="(1220,280)" to="(1350,280)"/>
+    <wire from="(1220,280)" to="(1310,280)" />
+    <wire from="(1310,280)" to="(1350,280)" />
     <wire from="(1230,800)" to="(1230,1120)"/>
     <wire from="(1260,350)" to="(1260,360)"/>
     <wire from="(1260,360)" to="(1340,360)"/>
@@ -1138,17 +1133,13 @@
     <wire from="(1320,980)" to="(1320,1020)"/>
     <wire from="(1320,980)" to="(1370,980)"/>
     <wire from="(1320,1020)" to="(1550,1020)"/>
-    <wire from="(1340,350)" to="(1350,350)"/>
     <wire from="(1350,230)" to="(1350,280)"/>
-    <wire from="(1350,280)" to="(1350,350)"/>
     <wire from="(1360,900)" to="(1360,970)"/>
     <wire from="(1360,900)" to="(1560,900)"/>
     <wire from="(1360,970)" to="(1370,970)"/>
     <wire from="(1370,370)" to="(1380,370)"/>
-    <wire from="(1370,960)" to="(1380,960)"/>
     <wire from="(1380,320)" to="(1380,370)"/>
     <wire from="(1380,370)" to="(1550,370)"/>
-    <wire from="(1380,680)" to="(1380,960)"/>
     <wire from="(1380,680)" to="(1500,680)"/>
     <wire from="(1400,970)" to="(1420,970)"/>
     <wire from="(1420,500)" to="(1420,700)"/>
@@ -1173,5 +1164,21 @@
     <wire from="(490,570)" to="(750,570)"/>
     <wire from="(750,570)" to="(750,590)"/>
     <wire from="(750,590)" to="(790,590)"/>
+    <wire from="(1310,280)" to="(1310,350)" />
+    <wire from="(1310,350)" to="(1340,350)" />
+    <wire from="(1350,680)" to="(1350,960)" />
+    <wire from="(1350,960)" to="(1370,960)" />
+    <wire from="(610,980)" to="(650,980)" />
+    <wire from="(610,980)" to="(610,1020)" />
+    <wire from="(610,1020)" to="(640,1020)" />
+    <wire from="(610,110)" to="(640,110)" />
+    <wire from="(610,110)" to="(610,260)" />
+    <wire from="(610,260)" to="(630,260)" />
+    <wire from="(610,850)" to="(650,850)" />
+    <wire from="(610,850)" to="(610,900)" />
+    <wire from="(610,900)" to="(640,900)" />
+    <wire from="(620,520)" to="(660,520)" />
+    <wire from="(620,520)" to="(620,590)" />
+    <wire from="(620,590)" to="(650,590)" />
   </circuit>
 </project>

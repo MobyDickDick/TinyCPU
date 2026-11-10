@@ -65,11 +65,17 @@ So weit wie möglich gilt für sichtbare Leitungen:
 - Splitter/Bus-Zusammenführungen müssen zu den angeschlossenen Signalen zeigen.
   Eine Spiegelung darf weder die Bitreihenfolge noch die Busbelegung verändern.
 
-Die acht Funktionsboxen besitzen explizite, aus Logisim exportierte
-Symbolansichten. Deren `circ-port`-Bindungen sichern die bisherige
-Schnittstelle, während die Blattpins nach Signalhöhe angeordnet werden.
-Beim Verschieben eines Pins muss seine Koordinatenreferenz im Symbol
-mitgeführt werden. Die Symbolanschlüsse dürfen dabei nicht neu sortiert werden.
+Seit dem Benutzerauftrag vom 9. November 2026 verwenden sämtliche FBoxen
+ausschließlich Logisims eingebaute Darstellung `logisim_evolution`.
+Eigene `appear`-Zeichnungen und nachgebildete Standardrechtecke sind nicht
+zulässig. Die frühere Festlegung auf explizite Symbolansichten ist damit
+ersetzt. Die Anschlussreihenfolge ergibt sich aus Logisims Standardgenerator
+und den Blattpins; beim Verschieben von Blattpins sind deshalb sämtliche
+betroffenen Instanzen nach Signalnamen neu zu verbinden und nativ zu prüfen.
+Signalnamen, Breiten, Richtungen und Busbitbelegungen bleiben verbindlich.
+Der Benutzer hat die Vierergruppen der äußeren Blattpins ausdrücklich bestätigt,
+auch wenn die Auffächerung zu den dichteren Standardanschlüssen mehr Platz braucht.
+Die folgenden Schutzregeln für die Decoderzeichnungen bleiben unverändert.
 
 Die frühere Rasterüberarbeitung verwendete lange Spuren auf den Koordinaten
 20/40/60/80 modulo 100 in beiden Achsen. Der Offline-Verifikator prüft

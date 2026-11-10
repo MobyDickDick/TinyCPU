@@ -251,7 +251,7 @@
         "output_port_clock_and_reset",
         "read_and_state_outputs"
       ],
-      "topology_sha256": "3a0737668c8adf66ed41281c9894bcc5397357c9c0c6751a17d03f29da13804a"
+      "topology_sha256": "8cc8ac3f2ddae2d953cd6d2ea9950a6cf902332477be7406489067a6c575af41"
     },
     "interrupt_controller": {
       "circuit": "InterruptController",
@@ -310,7 +310,7 @@
         "return_state_outputs",
         "synchronous_reset_trigger"
       ],
-      "topology_sha256": "fab2f87fbbbf68eb907b8ef9629877ad6d7c0fe71747ecddef219de721cf1375"
+      "topology_sha256": "8080de0c5224cc7afae7262464d7ea285bfc9b38c06f46ddea1db6fac6941a95"
     }
   },
   "public_pins": {

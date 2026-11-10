@@ -9,6 +9,24 @@ Bauteilbeschriftungen erhalten gemäß Benutzerwunsch vom 8. November 2026
 mindestens 10 Punkt Schriftgröße. Insbesondere dürfen sie nicht durch eine
 Schriftgröße von 1 Punkt praktisch unsichtbar gemacht werden.
 
+Seit dem Benutzerauftrag vom 9. November 2026 verwenden alle Funktionsboxen
+die von Logisim erzeugte Darstellung `logisim_evolution`. Eigene Symbolformen
+und `appear`-Zeichnungen sind damit ersetzt. Die vorhandenen fachlichen Namen
+und elektrischen Schnittstellen bleiben erhalten; geänderte Standardanschlüsse
+werden nach Signalnamen verbunden und nativ geprüft. Die Vierergruppen der
+äußeren Blattpins bleiben auf ausdrücklichen Benutzerwunsch erhalten, auch
+wenn dafür breitere Anschlussauffächerungen erforderlich sind. Die dichten,
+von Logisim fest vorgegebenen Symbolanschlüsse werden nur im Anschlussbereich
+aufgefächert. Der Schutz beider Decoderzeichnungen gilt weiterhin.
+
+Die [Leitungskontrolle vom 10. November](tiny_cpu_wire_review_20261110.md)
+prüft lange parallele Leitungen zusätzlich unabhängig von der Layoutreferenz.
+Zusammenhängende Abschnitte werden auch über explizite Abzweigpunkte hinweg
+gezählt: Überlappen parallele Läufe über mehr als 160 Pixel, bleibt mindestens
+eine Rasterreihe frei. Die 160-Pixel-Grenze der automatischen Prüfung ist keine
+Erlaubnis für beliebige enge Leitungen; kurze Auffächerungen bleiben auf die
+festen Bauteilanschlüsse beschränkt. Beide geschützten Decoder bleiben ausgenommen.
+
 ODER-Eingänge werden von der Eingangsseite angefahren: bei nach rechts
 gerichteten Gattern endet die Leitung von links waagrecht am Pin. Abzweige
 liegen vor dem Pin; Leitungen dürfen nicht hinter den Eingang zurücklaufen.

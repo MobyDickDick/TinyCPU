@@ -17,9 +17,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class HierarchyTests(unittest.TestCase):
-    def test_multiplier_has_stable_explicit_symbol_ports(self):
+    def test_multiplier_uses_native_evolution_symbol_ports(self):
         expected = {
-            'MUL_ACTIVATED': '(780,1000)', 'LEFT': '(780,1020)',
+            'LEFT': '(780,1000)', 'MUL_ACTIVATED': '(780,1020)',
             'RIGHT': '(780,1040)', 'INPUT_VALID': '(780,1060)',
             'RESULT': '(1000,1000)', 'OVERFLOW': '(1000,1020)',
             'RESULT_VALID': '(1000,1040)',
@@ -29,14 +29,20 @@ class HierarchyTests(unittest.TestCase):
             with self.subTest(project=relative):
                 definition = ET.parse(ROOT / 'hardware/logisim' / relative).find(
                     "circuit[@name='MulArithmeticCircuit']")
-                self.assertIsNotNone(definition.find('appear'),
-                                     'MUL must not fall back to an implicit custom symbol')
-                self.assertEqual(generated_symbol_ports(definition, instance), expected)
+                self.assertEqual(attributes(definition)['appearance'], 'logisim_evolution')
+                self.assertIsNone(definition.find('appear'))
+                project_expected = dict(expected)
+                if relative.startswith('diagnostics/'):
+                    # The diagnostic sheet puts activation above LEFT. Native
+                    # symbols follow each authored sheet's public pin order.
+                    project_expected.update(MUL_ACTIVATED='(780,1000)', LEFT='(780,1020)')
+                self.assertEqual(generated_symbol_ports(definition, instance), project_expected)
 
     def test_operations_multiplier_handoffs_reach_named_ports(self):
         from tiny_cpu_hierarchy import CircuitBits
         definitions = {c.get('name'): c for c in self.project.findall('circuit')}
-        self.assertIsNotNone(definitions['MulArithmeticCircuit'].find('appear'))
+        self.assertEqual(attributes(definitions['MulArithmeticCircuit'])['appearance'],
+                         'logisim_evolution')
         circuit = definitions['Operations']
         state = CircuitBits(definitions, circuit, 'operations-mul-handoffs')
         labelled = {attributes(c).get('label'): c for c in circuit.findall('comp')
@@ -75,6 +81,39 @@ class HierarchyTests(unittest.TestCase):
         ET.SubElement(stage, "comp", {"lib": "1", "name": "AND Gate", "loc": "(100,100)"})
         with self.assertRaisesRegex(ValueError, "primitive"):
             verify_core_modularity(self.project, self.contract)
+
+    def test_project_uses_supplied_logisim_symbols_in_every_definition(self):
+        for source in sorted((ROOT / 'hardware/logisim').rglob('*.circ')):
+            for circuit in ET.parse(source).getroot().findall('circuit'):
+                with self.subTest(file=source.name, circuit=circuit.get('name')):
+                    self.assertEqual(attributes(circuit).get('appearance'), 'logisim_evolution')
+                    self.assertIsNone(circuit.find('appear'))
+
+    def test_access_valid_analysis_name_follows_the_connected_public_output(self):
+        circuit = self.project.find("circuit[@name='AddressAccess']")
+        output = next(p for p in circuit.findall("comp[@name='Pin']")
+                      if attributes(p).get('label') == 'ACCESS_VALID')
+        gate = next(g for g in circuit.findall("comp[@name='NOR Gate']")
+                    if wire_path_exists(circuit, g.get('loc'), output.get('loc')))
+        label = gate.find("a[@name='label']")
+        if label is None:
+            label = ET.SubElement(gate, 'a', name='label')
+        for caption in ('', 'ACCESS_VALID_OR', 'Address ready'):
+            with self.subTest(caption=caption):
+                label.set('val', caption)
+                before = ET.tostring(self.project)
+                flat = flatten_core(self.project).find("circuit[@name='TinyCPUMain']")
+                matches = [g for g in flat.findall("comp[@name='NOR Gate']")
+                           if attributes(g).get('label') == 'ACCESS_VALID']
+                self.assertEqual(len(matches), 1)
+                self.assertEqual(ET.tostring(self.project), before)
+        # A matching caption must not manufacture a disconnected boundary.
+        for wire in list(circuit.findall('wire')):
+            if gate.get('loc') in (wire.get('from'), wire.get('to')):
+                circuit.remove(wire)
+        flat = flatten_core(self.project).find("circuit[@name='TinyCPUMain']")
+        self.assertFalse(any(attributes(g).get('label') == 'ACCESS_VALID'
+                             for g in flat.findall("comp[@name='NOR Gate']")))
 
     def test_transport_bit_swap_changes_accepted_core_topology(self):
         link = self.project.find("circuit[@name='CPUAccumulatorUnitLink']")

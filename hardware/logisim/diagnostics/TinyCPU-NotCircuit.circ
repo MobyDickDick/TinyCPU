@@ -72,10 +72,10 @@
     </comp>
     <wire from="(240,100)" to="(280,100)" />
     <wire from="(240,160)" to="(330,160)" />
-    <wire from="(240,200)" to="(330,200)" />
+    <wire from="(240,200)" to="(310,200)" />
+    <wire from="(310,200)" to="(330,200)" />
     <wire from="(310,100)" to="(370,100)" />
     <wire from="(330,60)" to="(360,60)" />
-    <wire from="(330,200)" to="(420,200)" />
     <wire from="(360,60)" to="(360,80)" />
     <wire from="(360,80)" to="(370,80)" />
     <wire from="(380,110)" to="(380,120)" />
@@ -86,6 +86,9 @@
     <wire from="(420,200)" to="(450,200)" />
     <wire from="(420,230)" to="(430,230)" />
     <wire from="(450,120)" to="(450,200)" />
+    <wire from="(310,200)" to="(310,260)" />
+    <wire from="(310,260)" to="(420,260)" />
+    <wire from="(420,230)" to="(420,260)" />
     <comp lib="9" name="Text" loc="(290,130)">
       <a name="text" val="NOT VALUE" />
       <a name="font" val="SansSerif plain 10" />
