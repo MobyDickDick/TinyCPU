@@ -1,10 +1,14 @@
 # AP 22.1: Externe Eingabe – Schnittstelle und Abnahme
 
-**Stand: 7. November 2026. Status:** Das begrenzte Planungspaket und die
+**Stand: 10. November 2026. Status:** Das begrenzte Planungspaket und die
 [passive INPUT-Baseline](tiny_cpu_input_baseline.md) sind abgeschlossen;
 die zusätzliche elektrische Eingabegrenze (Schritt 2) ist implementiert und
-[separat abgenommen](tiny_cpu_input_boundary.md). Flankenbezogene Stimuli und
-die vollständige Eingabeabnahme (Schritte 3/4) sind offen.
+[separat abgenommen](tiny_cpu_input_boundary.md). Schritte 3 und 4 sind ebenfalls
+abgeschlossen: Nach der gezielten Resetkorrektur bestehen 23 dynamische Fälle,
+drei elektrische Fehlerkopien und alle 63 bestehenden Kernfixtures über das
+Eingabetop mit inaktiver Eingabe. Der Treiber ist verpflichtend eingebunden;
+Baseline-, System- und Operator-Gates bestehen weiter.
+[Abschluss und Nachweise](tiny_cpu_input_reset_repair.md).
 Das ursprüngliche Planungspaket hatte Commit `1e7a8f6` als Ausgangsstand
 und änderte keine produktiven `.circ`-Dateien. Schritt 2 baut auf `b3c8500` auf
 und ergänzt drei Definitionen im bestehenden Kernprojekt. Dieses Dokument
@@ -20,6 +24,8 @@ passiver Baseline abgeschlossen. Der nächste Funktionsschritt ist Schritt 3: de
 flankenbezogene Stimulusvertrag mit Exporter, Comparator und dynamischer Fallliste.
 
 ## Ausgangspunkt und Ziel
+
+Die folgende Bestandsaufnahme beschreibt die Ausgangslage vor Schritt 2.
 
 Die VM unterstützt eine Eingabewarteschlange. Der aktuelle öffentliche Kern
 `TinyCPUMain` besitzt dagegen weder Eingabewert noch Eingabegültigkeit.
@@ -164,12 +170,17 @@ ausgelassene Transaktionen. Der volle Comparator bleibt für jede Fixture aktiv.
    Reset-/Verbrauchsvektoren und drei abgelehnte elektrische Fehlerkopien
    sichern die neue Grenze ab. Native Sichtkontrolle und Kontaktprüfung sind
    dokumentiert; [Abschluss und Reproduktion](tiny_cpu_input_boundary.md).
-3. Stimulusvertrag, Exporter und Comparator erweitern; den ersten gültigen
-   INPUT und anschließend die Fälle oben sowie ihre Mutationen abnehmen.
-4. Den neuen Treiber in `scripts/test-logisim.sh` verpflichtend einbinden.
-   Bestehende Kernfixtures außerdem mit dem Eingabetop und explizit inaktiver
-   Eingabe ausführen; Baseline, System- und Operator-Gates müssen weiter bestehen.
-   Erst danach die offene Eingabe-Checkbox in AP 22.1 schließen.
+3. **Abgeschlossen am 10. November 2026:** Stimulusvertrag, Exporter,
+   Comparator und dynamische Fallliste sind ergänzt. Der zunächst gefundene
+   Reset-Übernahmefehler und das unabhängig belegte INPUT-Flag während Reset
+   sind lokal korrigiert. Alle 23 Fälle und drei elektrische Fehlerkopien
+   bestehen; [ursprünglicher Stop](tiny_cpu_input_dynamic.md) und
+   [abschließende Korrektur](tiny_cpu_input_reset_repair.md) bleiben getrennt nachvollziehbar.
+4. **Abgeschlossen am 10. November 2026:** Der Treiber ist mit
+   `--baseline-matrix` verpflichtend in `scripts/test-logisim.sh` eingebunden.
+   Alle 63 bestehenden Kernfixtures bestehen zusätzlich mit dem Eingabetop
+   und explizit inaktiver Eingabe. Baseline-, System- und Operator-Gates
+   bestehen weiter. Die Eingabe-Checkbox in AP 22.1 ist geschlossen.
 
 Beim ersten elektrischen Unterschied wird gestoppt. Timeouts, neue E/U-Werte
 und andere Fehlerketten dürfen weder durch abgesenkte Anforderungen noch

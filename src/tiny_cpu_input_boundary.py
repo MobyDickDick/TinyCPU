@@ -1,9 +1,44 @@
 """Structural contract for AP 22.1's opt-in INPUT boundary."""
 from collections import Counter, defaultdict
+import xml.etree.ElementTree as ET
 from tiny_cpu_hierarchy import (CORE_UNITS, CircuitBits, attributes, circuit_bit_network, flatten_core,
                                 component_ports, wire_path_exists, location)
 
 VARIANTS = {'AccumulatorUnit': 'AccumulatorInputUnit', 'FaultUnit': 'FaultInputUnit'}
+
+
+def force_terminal(root, circuit_name, instance_label, port, value, width):
+    """Disconnect one labelled terminal and force it in a disposable test copy."""
+    definitions = {c.get('name'): c for c in root.findall('circuit')}
+    circuit = definitions[circuit_name]
+    instance = next(c for c in circuit.findall('comp') if attributes(c).get('label') == instance_label)
+    terminal = location(next(p for p, *_, label in component_ports(definitions, instance) if label == port))
+    branches = [w for w in circuit.findall('wire') if terminal in {w.get('from'), w.get('to')}]
+    if len(branches) != 1:
+        raise ValueError(f'{instance_label}.{port}: expected one branch, found {len(branches)}')
+    circuit.remove(branches[0])
+    constant = ET.SubElement(circuit, 'comp', lib='0', name='Constant', loc=terminal)
+    ET.SubElement(constant, 'a', name='value', val=hex(value))
+    ET.SubElement(constant, 'a', name='width', val=str(width))
+
+
+def mutate_input(root, mutation):
+    if mutation == 'value':
+        force_terminal(root, 'AccumulatorInputUnit', 'DATAPATH_INSTANCE', 'DATA_IN', 42, 16)
+    elif mutation == 'valid':
+        force_terminal(root, 'AccumulatorInputUnit', 'DATAPATH_INSTANCE', 'VALID_IN', 1, 1)
+    elif mutation == 'consume':
+        main = root.find("circuit[@name='TinyCPUInputMain']")
+        pin = next(p for p in main.findall("comp[@name='Pin']") if attributes(p)['label'] == 'INPUT_CONSUME')
+        terminal = pin.get('loc')
+        branches = [w for w in main.findall('wire') if terminal in w.attrib.values()]
+        if len(branches) != 1:
+            raise ValueError('consume mutation requires one public output branch')
+        main.remove(branches[0])
+        constant = ET.SubElement(main, 'comp', lib='0', name='Constant', loc=terminal)
+        ET.SubElement(constant, 'a', name='value', val='0x0')
+    else:
+        raise ValueError(f'unknown INPUT mutation: {mutation}')
 
 
 def pin_contract(circuit):
@@ -15,7 +50,7 @@ def verify_input_boundary(project):
     definitions = {c.get('name'): c for c in project.findall('circuit')}
     wanted = {'TinyCPUInputMain': ('TinyCPUMain', {'INPUT_VALUE': ('input',16), 'INPUT_VALID': ('input',1), 'INPUT_CONSUME': ('output',1)}),
               'AccumulatorInputUnit': ('AccumulatorUnit', {'INPUT_VALUE': ('input',16), 'INPUT_VALID': ('input',1), 'RESET': ('input',1), 'INPUT_CONSUME': ('output',1)}),
-              'FaultInputUnit': ('FaultUnit', {'INPUT_VALID': ('input',1)})}
+              'FaultInputUnit': ('FaultUnit', {'INPUT_VALID': ('input',1), 'RESET': ('input',1)})}
     for name, (baseline, extra) in wanted.items():
         if name not in definitions or pin_contract(definitions[name]) != {**pin_contract(definitions[baseline]), **extra}:
             raise ValueError(f'{name}: INPUT pin contract differs')
@@ -59,10 +94,10 @@ def verify_input_boundary(project):
         def require(a,b):
             if not same(a,b):
                 raise ValueError(f'{name}: INPUT path {a} -> {b} disconnected')
-        def decode(label, port):
+        def decode(label, port, bit=34):
             p,w = terminal(label,port);control,bits = terminal('CONTROL')
-            if w != 1 or aliases.find(state.vector(p,w)[0]) != aliases.find(state.vector(control,bits)[34]):
-                raise ValueError(f'{name}: INPUT decode is not CONTROL.34')
+            if w != 1 or aliases.find(state.vector(p,w)[0]) != aliases.find(state.vector(control,bits)[bit]):
+                raise ValueError(f'{name}: INPUT decode is not CONTROL.{bit}')
         if name == 'AccumulatorInputUnit':
             # Multiplexer captions may disappear on a native GUI save. Follow
             # the real data path instead of requiring those optional labels.
@@ -83,6 +118,7 @@ def verify_input_boundary(project):
                 (('INPUT_VALID',),('ACCUMULATOR_UNIT','INPUT_VALID')),
                 (('INPUT_VALID',),('FAULT_UNIT','INPUT_VALID')),
                 (('RESET',),('ACCUMULATOR_UNIT','RESET')),
+                (('RESET',),('FAULT_UNIT','RESET')),
                 (('INPUT_CONSUME',),('ACCUMULATOR_UNIT','INPUT_CONSUME'))]:
         require(a,b)
     c,require,decode = network('AccumulatorInputUnit')
@@ -105,9 +141,20 @@ def verify_input_boundary(project):
     decode('INPUT_DATA_SELECT','select');decode('INPUT_CONSUME_REQUEST','0')
     if c['INPUT_CONSUME_REQUEST'].get('name') != 'AND Gate' or attributes(c['INPUT_CONSUME_REQUEST']).get('negate1') != 'true':
         raise ValueError('AccumulatorInputUnit: INPUT reset guard differs')
+    for a,b in [(('RESET',),('G1','1')),
+                (('G1','output'),('G2','1')),
+                (('G2','output'),('DATAPATH_INSTANCE','ACC_LOAD'))]:
+        require(a,b)
+    decode('G1','0');decode('G2','0',41)
+    if c['G1'].get('name') != 'NAND Gate' or c['G2'].get('name') != 'AND Gate':
+        raise ValueError('AccumulatorInputUnit: INPUT load reset guard differs')
     c,require,decode = network('FaultInputUnit')
     require(('INPUT_VALID',),('INPUT_FAILED','1'))
+    require(('RESET',),('INPUT_FAILED','2'))
     require(('INPUT_FAILED','output'),('ERROR_FLAGS','SET_INPUT'))
     decode('INPUT_FAILED','0')
-    if c['INPUT_FAILED'].get('name') != 'AND Gate' or attributes(c['INPUT_FAILED']).get('negate1') != 'true':
+    if (c['INPUT_FAILED'].get('name') != 'AND Gate'
+            or attributes(c['INPUT_FAILED']).get('negate1') != 'true'
+            or attributes(c['INPUT_FAILED']).get('negate2') != 'true'
+            or attributes(c['INPUT_FAILED']).get('inputs') != '3'):
         raise ValueError('FaultInputUnit: INPUT failure guard differs')

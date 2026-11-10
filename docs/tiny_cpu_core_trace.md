@@ -1,5 +1,14 @@
 # Elektrischer Kernvergleich (AP 22.1)
 
+**Ergänzung vom 10. November 2026:** Die optionale Eingabegrenze aus Schritt 2
+ist implementiert und statisch abgenommen. Der Exporter unterstützt jetzt
+flankenbezogene Stimuli über `--inputs STIMULI LEDGER`. Diese Tracevariante
+ergänzt die bisherigen Spalten um INPUT_VALUE[16], INPUT_VALID, INPUT_CONSUME
+und RESET; das Baselineformat bleibt erhalten. Nach der [Resetkorrektur](tiny_cpu_input_reset_repair.md)
+bestehen 23 dynamische Fälle, drei Fehlerkopien und alle 63 bestehenden
+Kernfixtures über das Eingabetop. [Stimulusvertrag und ursprünglicher Befund](tiny_cpu_input_dynamic.md).
+Die folgenden älteren Statusaussagen beschreiben ihren jeweiligen damaligen Stand.
+
 **Stand: 4. November 2026.** Alle 63 bestehenden Kernfixtures sowie 38
 zusätzliche Adressgültigkeitsfälle bestehen. Der TSV-Vertrag enthält jetzt
 auch `EXTERNAL_WRITE_ENABLE`: Die öffentliche Schreibanforderung wird vor

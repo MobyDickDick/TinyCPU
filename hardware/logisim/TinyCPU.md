@@ -27,16 +27,20 @@ Erweitert die bestehende Akkumulatorbox um die Auswahl externer INPUT-Daten.
 Ein gültiges Angebot lädt den angebotenen Wert; ein ungültiges Angebot lädt
 kanonisch Null mit gelöschter Gültigkeit. `INPUT_CONSUME` folgt dem aktuellen
 INPUT-Decode bei inaktivem Reset; jede steigende Taktflanke ist ein Leseversuch.
-Der bisherige Datapath wird gemeinsam mit der Baseline verwendet.
+`G1 = NOT (INPUT AND RESET)` und `G2 = ACC_WRITE_REQUEST AND G1` sperren
+zusätzlich die Übernahme während Reset. Vorhandener Wert und Gültigkeit bleiben
+dabei erhalten; der Datapath wird weiterhin gemeinsam mit der Baseline verwendet.
 
 ## FaultInputUnit
 
-Erweitert die Fehlerbox um `INPUT_VALID`. Ausschließlich ein INPUT mit
-ungültigem Angebot setzt die INPUT-Fehlerursache; das gemeinsame `ErrorFlags`
+Erweitert die Fehlerbox um `INPUT_VALID` und `RESET`. Ausschließlich ein INPUT
+mit ungültigem Angebot bei inaktivem Reset setzt die INPUT-Fehlerursache;
+das gemeinsame `ErrorFlags`
 speichert sie bis `CLEAR_ERROR`. Ein erfolgreicher INPUT löscht keine alten Flags.
 
-Die [Abnahme der Eingabegrenze](../../docs/tiny_cpu_input_boundary.md) beschreibt
-Reproduktion, Nachweise und die noch folgende dynamische Eingabeabnahme.
+Die [statische Eingabegrenze](../../docs/tiny_cpu_input_boundary.md) und die
+[dynamische Eingabeabnahme](../../docs/tiny_cpu_input_dynamic.md) beschreiben
+Reproduktion, Nachweise und Reset-Regressionsfälle.
 
 ## EffectiveAddress
 

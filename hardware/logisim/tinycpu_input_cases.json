@@ -1,0 +1,1814 @@
+{
+  "schema": "tinycpu-input-cases-v1",
+  "cases": [
+    {
+      "name": "valid0",
+      "program": "INPUT()\nPRINT()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 0,
+            "valid": 1,
+            "source": "host",
+            "entry": "a",
+            "host_value": 0
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 32768,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 3,
+            "reset": 0,
+            "value": 65535,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 1,
+          "entry": "a",
+          "source": "host"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 1,
+          "phase": "post",
+          "values": {
+            "ACC": 0,
+            "ACC_VALID": 1,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 0
+          }
+        },
+        {
+          "edge": 2,
+          "phase": "pre",
+          "values": {
+            "PRINT_ENABLE": 1,
+            "PRINT_VALUE": 0,
+            "PRINT_VALID": 1
+          }
+        },
+        {
+          "edge": 3,
+          "phase": "post",
+          "values": {
+            "ACC": 0,
+            "ACC_VALID": 1,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "validminus1",
+      "program": "INPUT()\nPRINT()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 65535,
+            "valid": 1,
+            "source": "host",
+            "entry": "a",
+            "host_value": -1
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 32768,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 3,
+            "reset": 0,
+            "value": 65535,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 1,
+          "entry": "a",
+          "source": "host"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 1,
+          "phase": "post",
+          "values": {
+            "ACC": 65535,
+            "ACC_VALID": 1,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 0
+          }
+        },
+        {
+          "edge": 2,
+          "phase": "pre",
+          "values": {
+            "PRINT_ENABLE": 1,
+            "PRINT_VALUE": 65535,
+            "PRINT_VALID": 1
+          }
+        },
+        {
+          "edge": 3,
+          "phase": "post",
+          "values": {
+            "ACC": 65535,
+            "ACC_VALID": 1,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "validmin",
+      "program": "INPUT()\nPRINT()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 32768,
+            "valid": 1,
+            "source": "host",
+            "entry": "a",
+            "host_value": -32768
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 32768,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 3,
+            "reset": 0,
+            "value": 65535,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 1,
+          "entry": "a",
+          "source": "host"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 1,
+          "phase": "post",
+          "values": {
+            "ACC": 32768,
+            "ACC_VALID": 1,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 0
+          }
+        },
+        {
+          "edge": 2,
+          "phase": "pre",
+          "values": {
+            "PRINT_ENABLE": 1,
+            "PRINT_VALUE": 32768,
+            "PRINT_VALID": 1
+          }
+        },
+        {
+          "edge": 3,
+          "phase": "post",
+          "values": {
+            "ACC": 32768,
+            "ACC_VALID": 1,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "validmax",
+      "program": "INPUT()\nPRINT()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 32767,
+            "valid": 1,
+            "source": "host",
+            "entry": "a",
+            "host_value": 32767
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 32768,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 3,
+            "reset": 0,
+            "value": 65535,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 1,
+          "entry": "a",
+          "source": "host"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 1,
+          "phase": "post",
+          "values": {
+            "ACC": 32767,
+            "ACC_VALID": 1,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 0
+          }
+        },
+        {
+          "edge": 2,
+          "phase": "pre",
+          "values": {
+            "PRINT_ENABLE": 1,
+            "PRINT_VALUE": 32767,
+            "PRINT_VALID": 1
+          }
+        },
+        {
+          "edge": 3,
+          "phase": "post",
+          "values": {
+            "ACC": 32767,
+            "ACC_VALID": 1,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "valid23",
+      "program": "INPUT()\nPRINT()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 23,
+            "valid": 1,
+            "source": "host",
+            "entry": "a",
+            "host_value": 23
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 32768,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 3,
+            "reset": 0,
+            "value": 65535,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 1,
+          "entry": "a",
+          "source": "host"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 1,
+          "phase": "post",
+          "values": {
+            "ACC": 23,
+            "ACC_VALID": 1,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 0
+          }
+        },
+        {
+          "edge": 2,
+          "phase": "pre",
+          "values": {
+            "PRINT_ENABLE": 1,
+            "PRINT_VALUE": 23,
+            "PRINT_VALID": 1
+          }
+        },
+        {
+          "edge": 3,
+          "phase": "post",
+          "values": {
+            "ACC": 23,
+            "ACC_VALID": 1,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "missing",
+      "program": "LOAD_CONST(7)\nINPUT()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 65535,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 0,
+            "valid": 0,
+            "source": "empty",
+            "entry": null
+          },
+          {
+            "edge": 3,
+            "reset": 0,
+            "value": 32768,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 2,
+          "entry": null,
+          "source": "empty"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 1,
+          "phase": "post",
+          "values": {
+            "ACC": 7,
+            "ACC_VALID": 1
+          }
+        },
+        {
+          "edge": 2,
+          "phase": "post",
+          "values": {
+            "PC": 2,
+            "ACC": 0,
+            "ACC_VALID": 0,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "invalid0000",
+      "program": "INPUT()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 0,
+            "valid": 0,
+            "source": "invalid",
+            "entry": "a"
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 23,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 1,
+          "entry": "a",
+          "source": "invalid"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 1,
+          "phase": "post",
+          "values": {
+            "PC": 1,
+            "ACC": 0,
+            "ACC_VALID": 0,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "invalid8000",
+      "program": "INPUT()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 32768,
+            "valid": 0,
+            "source": "invalid",
+            "entry": "a"
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 23,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 1,
+          "entry": "a",
+          "source": "invalid"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 1,
+          "phase": "post",
+          "values": {
+            "PC": 1,
+            "ACC": 0,
+            "ACC_VALID": 0,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "invalidffff",
+      "program": "INPUT()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 65535,
+            "valid": 0,
+            "source": "invalid",
+            "entry": "a"
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 23,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 1,
+          "entry": "a",
+          "source": "invalid"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 1,
+          "phase": "post",
+          "values": {
+            "PC": 1,
+            "ACC": 0,
+            "ACC_VALID": 0,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "hostbelow",
+      "program": "INPUT()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 32767,
+            "valid": 0,
+            "source": "host",
+            "entry": "a",
+            "host_value": -32769
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 23,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 1,
+          "entry": "a",
+          "source": "host"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 1,
+          "phase": "post",
+          "values": {
+            "PC": 1,
+            "ACC": 0,
+            "ACC_VALID": 0,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "hostabove",
+      "program": "INPUT()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 32768,
+            "valid": 0,
+            "source": "host",
+            "entry": "a",
+            "host_value": 32768
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 23,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 1,
+          "entry": "a",
+          "source": "host"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 1,
+          "phase": "post",
+          "values": {
+            "PC": 1,
+            "ACC": 0,
+            "ACC_VALID": 0,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "consecutive",
+      "program": "INPUT()\nINPUT()\nPRINT()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 0,
+            "valid": 1,
+            "source": "host",
+            "entry": "a",
+            "host_value": 0
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 65535,
+            "valid": 1,
+            "source": "host",
+            "entry": "b",
+            "host_value": -1
+          },
+          {
+            "edge": 3,
+            "reset": 0,
+            "value": 32768,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 4,
+            "reset": 0,
+            "value": 23,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 1,
+          "entry": "a",
+          "source": "host"
+        },
+        {
+          "edge": 2,
+          "entry": "b",
+          "source": "host"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 1,
+          "phase": "post",
+          "values": {
+            "ACC": 0,
+            "ACC_VALID": 1,
+            "INPUT_CONSUME": 1
+          }
+        },
+        {
+          "edge": 2,
+          "phase": "post",
+          "values": {
+            "ACC": 65535,
+            "ACC_VALID": 1,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 0
+          }
+        },
+        {
+          "edge": 4,
+          "phase": "post",
+          "values": {
+            "ACC": 65535,
+            "ACC_VALID": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "interleaved",
+      "program": "INPUT()\nPRINT()\nINPUT()\nPRINT()\nINPUT()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 0,
+            "valid": 1,
+            "source": "host",
+            "entry": "a",
+            "host_value": 0
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 65535,
+            "valid": 1,
+            "source": "host",
+            "entry": "b",
+            "host_value": -1
+          },
+          {
+            "edge": 3,
+            "reset": 0,
+            "value": 65535,
+            "valid": 1,
+            "source": "host",
+            "entry": "b",
+            "host_value": -1
+          },
+          {
+            "edge": 4,
+            "reset": 0,
+            "value": 0,
+            "valid": 0,
+            "source": "empty",
+            "entry": null
+          },
+          {
+            "edge": 5,
+            "reset": 0,
+            "value": 0,
+            "valid": 0,
+            "source": "empty",
+            "entry": null
+          },
+          {
+            "edge": 6,
+            "reset": 0,
+            "value": 32768,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 1,
+          "entry": "a",
+          "source": "host"
+        },
+        {
+          "edge": 3,
+          "entry": "b",
+          "source": "host"
+        },
+        {
+          "edge": 5,
+          "entry": null,
+          "source": "empty"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 1,
+          "phase": "post",
+          "values": {
+            "ACC": 0,
+            "ACC_VALID": 1
+          }
+        },
+        {
+          "edge": 3,
+          "phase": "post",
+          "values": {
+            "ACC": 65535,
+            "ACC_VALID": 1
+          }
+        },
+        {
+          "edge": 5,
+          "phase": "post",
+          "values": {
+            "ACC": 0,
+            "ACC_VALID": 0,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 1
+          }
+        }
+      ]
+    },
+    {
+      "name": "recovery",
+      "program": "INPUT()\nINPUT()\nCLEAR_ERROR()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 32768,
+            "valid": 0,
+            "source": "host",
+            "entry": "bad",
+            "host_value": 32768
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 23,
+            "valid": 1,
+            "source": "host",
+            "entry": "good",
+            "host_value": 23
+          },
+          {
+            "edge": 3,
+            "reset": 0,
+            "value": 65535,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 4,
+            "reset": 0,
+            "value": 32768,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 1,
+          "entry": "bad",
+          "source": "host"
+        },
+        {
+          "edge": 2,
+          "entry": "good",
+          "source": "host"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 1,
+          "phase": "post",
+          "values": {
+            "ACC": 0,
+            "ACC_VALID": 0,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 1
+          }
+        },
+        {
+          "edge": 2,
+          "phase": "post",
+          "values": {
+            "ACC": 23,
+            "ACC_VALID": 1,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 1
+          }
+        },
+        {
+          "edge": 3,
+          "phase": "post",
+          "values": {
+            "ACC": 23,
+            "ACC_VALID": 1,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "clearinvalid",
+      "program": "INPUT()\nCLEAR_ERROR()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 65535,
+            "valid": 0,
+            "source": "invalid",
+            "entry": "bad"
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 23,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 3,
+            "reset": 0,
+            "value": 32768,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 1,
+          "entry": "bad",
+          "source": "invalid"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 1,
+          "phase": "post",
+          "values": {
+            "ACC": 0,
+            "ACC_VALID": 0,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 1
+          }
+        },
+        {
+          "edge": 2,
+          "phase": "post",
+          "values": {
+            "ACC": 0,
+            "ACC_VALID": 0,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "invalidprint",
+      "program": "INPUT()\nPRINT()\nCLEAR_ERROR()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 32768,
+            "valid": 0,
+            "source": "invalid",
+            "entry": "bad"
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 23,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 3,
+            "reset": 0,
+            "value": 0,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 4,
+            "reset": 0,
+            "value": 65535,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 1,
+          "entry": "bad",
+          "source": "invalid"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 2,
+          "phase": "post",
+          "values": {
+            "ACC": 0,
+            "ACC_VALID": 0,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 1,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 1
+          }
+        },
+        {
+          "edge": 3,
+          "phase": "post",
+          "values": {
+            "ACC": 0,
+            "ACC_VALID": 0,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "memory",
+      "program": "INPUT()\nSTORE_ADDRESS(101)\nLOAD_CONST(7)\nLOAD_ADDRESS(101)\nPRINT()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 32768,
+            "valid": 1,
+            "source": "host",
+            "entry": "a",
+            "host_value": -32768
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 65535,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 3,
+            "reset": 0,
+            "value": 42,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 4,
+            "reset": 0,
+            "value": 0,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 5,
+            "reset": 0,
+            "value": 32767,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 6,
+            "reset": 0,
+            "value": 65535,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 1,
+          "entry": "a",
+          "source": "host"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 2,
+          "phase": "post",
+          "values": {
+            "MEMORY": "101:32768:1",
+            "ACC": 32768,
+            "ACC_VALID": 1
+          }
+        },
+        {
+          "edge": 3,
+          "phase": "post",
+          "values": {
+            "ACC": 7,
+            "ACC_VALID": 1
+          }
+        },
+        {
+          "edge": 4,
+          "phase": "post",
+          "values": {
+            "ACC": 32768,
+            "ACC_VALID": 1,
+            "MEMORY": "101:32768:1",
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "noinput",
+      "program": "LOAD_CONST(7)\nPRINT()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 65535,
+            "valid": 1,
+            "source": "host",
+            "entry": "a",
+            "host_value": -1
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 32768,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 3,
+            "reset": 0,
+            "value": 23,
+            "valid": 1,
+            "source": "host",
+            "entry": "b",
+            "host_value": 23
+          }
+        ]
+      },
+      "events": [],
+      "checks": [
+        {
+          "edge": 1,
+          "phase": "post",
+          "values": {
+            "ACC": 7,
+            "ACC_VALID": 1
+          }
+        },
+        {
+          "edge": 3,
+          "phase": "post",
+          "values": {
+            "ACC": 7,
+            "ACC_VALID": 1,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "skipinput",
+      "program": "LOAD_CONST(7)\nJUMP_ADDRESS(3)\nINPUT()\nPRINT()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 65535,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 32768,
+            "valid": 1,
+            "source": "host",
+            "entry": "a",
+            "host_value": -32768
+          },
+          {
+            "edge": 3,
+            "reset": 0,
+            "value": 42,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 4,
+            "reset": 0,
+            "value": 32768,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [],
+      "checks": [
+        {
+          "edge": 2,
+          "phase": "post",
+          "values": {
+            "PC": 3,
+            "ACC": 7,
+            "ACC_VALID": 1
+          }
+        },
+        {
+          "edge": 4,
+          "phase": "post",
+          "values": {
+            "ACC": 7,
+            "ACC_VALID": 1,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "reset",
+      "program": "INPUT()\nPRINT()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 1,
+            "value": 23,
+            "valid": 1,
+            "source": "host",
+            "entry": "a",
+            "host_value": 23
+          },
+          {
+            "edge": 2,
+            "reset": 1,
+            "value": 23,
+            "valid": 1,
+            "source": "host",
+            "entry": "a",
+            "host_value": 23
+          },
+          {
+            "edge": 3,
+            "reset": 0,
+            "value": 23,
+            "valid": 1,
+            "source": "host",
+            "entry": "a",
+            "host_value": 23
+          },
+          {
+            "edge": 4,
+            "reset": 0,
+            "value": 65535,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 5,
+            "reset": 0,
+            "value": 32768,
+            "valid": 1,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 3,
+          "entry": "a",
+          "source": "host"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 1,
+          "phase": "post",
+          "values": {
+            "PC": 0,
+            "ACC": 0,
+            "ACC_VALID": 0,
+            "INPUT_CONSUME": 0,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 0
+          }
+        },
+        {
+          "edge": 2,
+          "phase": "post",
+          "values": {
+            "PC": 0,
+            "ACC": 0,
+            "ACC_VALID": 0,
+            "INPUT_CONSUME": 0
+          }
+        },
+        {
+          "edge": 3,
+          "phase": "post",
+          "values": {
+            "ACC": 23,
+            "ACC_VALID": 1,
+            "ERROR_OVF": 0,
+            "ERROR_DIV0": 0,
+            "ERROR_ADDR": 0,
+            "ERROR_INV": 0,
+            "ERROR_ILL": 0,
+            "ERROR_INPUT": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "resetinvalid",
+      "program": "INPUT()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 1,
+            "value": 65535,
+            "valid": 0,
+            "source": "invalid",
+            "entry": "bad"
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 23,
+            "valid": 1,
+            "source": "host",
+            "entry": "good",
+            "host_value": 23
+          },
+          {
+            "edge": 3,
+            "reset": 0,
+            "value": 0,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 2,
+          "entry": "good",
+          "source": "host"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 1,
+          "phase": "post",
+          "values": {
+            "ACC": 0,
+            "ACC_VALID": 0,
+            "ERROR_INPUT": 0,
+            "INPUT_CONSUME": 0
+          }
+        },
+        {
+          "edge": 2,
+          "phase": "post",
+          "values": {
+            "ACC": 23,
+            "ACC_VALID": 1,
+            "ERROR_INPUT": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "resetretain",
+      "program": "INPUT()\nPRINT()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 23,
+            "valid": 1,
+            "source": "host",
+            "entry": "a",
+            "host_value": 23
+          },
+          {
+            "edge": 2,
+            "reset": 1,
+            "value": 65535,
+            "valid": 0,
+            "source": "invalid",
+            "entry": "bad"
+          },
+          {
+            "edge": 3,
+            "reset": 0,
+            "value": 65535,
+            "valid": 1,
+            "source": "host",
+            "entry": "b",
+            "host_value": -1
+          },
+          {
+            "edge": 4,
+            "reset": 0,
+            "value": 0,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 5,
+            "reset": 0,
+            "value": 0,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 1,
+          "entry": "a",
+          "source": "host"
+        },
+        {
+          "edge": 3,
+          "entry": "b",
+          "source": "host"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 1,
+          "phase": "post",
+          "values": {
+            "ACC": 23,
+            "ACC_VALID": 1
+          }
+        },
+        {
+          "edge": 2,
+          "phase": "post",
+          "values": {
+            "PC": 0,
+            "ACC": 23,
+            "ACC_VALID": 1,
+            "ERROR_INPUT": 0,
+            "INPUT_CONSUME": 0
+          }
+        },
+        {
+          "edge": 3,
+          "phase": "post",
+          "values": {
+            "ACC": 65535,
+            "ACC_VALID": 1,
+            "ERROR_INPUT": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "resetstates",
+      "program": "INPUT()\nINPUT()\nSTORE_ADDRESS(101)\nCLEAR_ERROR()\nHALT()\n",
+      "inputs": {
+        "schema": "tinycpu-input-stimuli-v1",
+        "edges": [
+          {
+            "edge": 1,
+            "reset": 0,
+            "value": 32768,
+            "valid": 0,
+            "source": "host",
+            "entry": "bad",
+            "host_value": 32768
+          },
+          {
+            "edge": 2,
+            "reset": 0,
+            "value": 23,
+            "valid": 1,
+            "source": "host",
+            "entry": "a",
+            "host_value": 23
+          },
+          {
+            "edge": 3,
+            "reset": 0,
+            "value": 0,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 4,
+            "reset": 1,
+            "value": 42,
+            "valid": 1,
+            "source": "host",
+            "entry": "b",
+            "host_value": 42
+          },
+          {
+            "edge": 5,
+            "reset": 1,
+            "value": 42,
+            "valid": 1,
+            "source": "host",
+            "entry": "b",
+            "host_value": 42
+          },
+          {
+            "edge": 6,
+            "reset": 0,
+            "value": 42,
+            "valid": 1,
+            "source": "host",
+            "entry": "b",
+            "host_value": 42
+          },
+          {
+            "edge": 7,
+            "reset": 0,
+            "value": 65535,
+            "valid": 1,
+            "source": "host",
+            "entry": "c",
+            "host_value": -1
+          },
+          {
+            "edge": 8,
+            "reset": 0,
+            "value": 0,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 9,
+            "reset": 0,
+            "value": 0,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          },
+          {
+            "edge": 10,
+            "reset": 0,
+            "value": 0,
+            "valid": 0,
+            "source": "idle",
+            "entry": null
+          }
+        ]
+      },
+      "events": [
+        {
+          "edge": 1,
+          "entry": "bad",
+          "source": "host"
+        },
+        {
+          "edge": 2,
+          "entry": "a",
+          "source": "host"
+        },
+        {
+          "edge": 6,
+          "entry": "b",
+          "source": "host"
+        },
+        {
+          "edge": 7,
+          "entry": "c",
+          "source": "host"
+        }
+      ],
+      "checks": [
+        {
+          "edge": 3,
+          "phase": "post",
+          "values": {
+            "ACC": 23,
+            "ACC_VALID": 1,
+            "ERROR_INPUT": 1,
+            "MEMORY": "101:23:1"
+          }
+        },
+        {
+          "edge": 4,
+          "phase": "post",
+          "values": {
+            "PC": 0,
+            "ACC": 23,
+            "ACC_VALID": 1,
+            "ERROR_INPUT": 1,
+            "MEMORY": "101:23:1",
+            "INPUT_CONSUME": 0
+          }
+        },
+        {
+          "edge": 5,
+          "phase": "post",
+          "values": {
+            "ACC": 23,
+            "ACC_VALID": 1,
+            "ERROR_INPUT": 1,
+            "MEMORY": "101:23:1"
+          }
+        },
+        {
+          "edge": 6,
+          "phase": "post",
+          "values": {
+            "ACC": 42,
+            "ACC_VALID": 1,
+            "ERROR_INPUT": 1
+          }
+        },
+        {
+          "edge": 9,
+          "phase": "post",
+          "values": {
+            "ACC": 65535,
+            "ACC_VALID": 1,
+            "ERROR_INPUT": 0,
+            "MEMORY": "101:65535:1"
+          }
+        }
+      ]
+    }
+  ]
+}

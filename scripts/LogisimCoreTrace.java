@@ -8,17 +8,45 @@ import com.cburch.logisim.proj.ProjectActions;
 import com.cburch.logisim.std.memory.Ram;
 import com.cburch.logisim.std.wiring.Pin;
 import java.io.File;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 /** Deterministic, settled pre/post-edge observations using pinned Logisim APIs.
  * No VM expectations are passed to this exporter. Labels resolve the existing
  * hierarchy; neither observation pins nor replacement logic are inserted.
  */
 final class LogisimCoreTrace {
+  private record Offer(long reset, long value, long valid) {}
+
+  private static List<Offer> readOffers(Path path, int limit) throws Exception {
+    var lines = Files.readAllLines(path);
+    if (lines.size() != limit + 1 || !lines.get(0).equals("edge\tRESET\tINPUT_VALUE\tINPUT_VALID"))
+      throw new IllegalArgumentException("missing/extra stimulus rows or wrong columns");
+    var offers = new ArrayList<Offer>();
+    for (int edge = 1; edge < lines.size(); edge++) {
+      var cells = lines.get(edge).split("\t", -1);
+      if (cells.length != 4 || !cells[0].equals(Integer.toString(edge))
+          || !cells[1].matches("[01]") || !cells[2].matches("[01]{16}")
+          || !cells[3].matches("[01]"))
+        throw new IllegalArgumentException("invalid stimulus at edge " + edge);
+      offers.add(new Offer(Long.parseLong(cells[1]), Long.parseLong(cells[2], 2),
+          Long.parseLong(cells[3])));
+    }
+    return offers;
+  }
+
+  private static String known(CircuitState state, String label, int width) {
+    var bits = state.getValue(component(state, label).getLocation())
+        .toBinaryString().replace(" ", "");
+    if (bits.length() != width || !bits.matches("[01]+"))
+      throw new IllegalStateException("undefined/wrong-width input readback: " + label + "=" + bits);
+    return bits;
+  }
   private record Probe(String name, CircuitState state, Component component) {
     Value value() { return state.getValue(component.getLocation()); }
   }
@@ -89,8 +117,11 @@ final class LogisimCoreTrace {
 
   private static void run(String[] args) throws Exception {
     boolean operator = args.length == 5 && args[4].equals("--operator");
-    if (args.length != 4 && !operator)
-      throw new IllegalArgumentException("usage: LogisimCoreTrace TOP PROJECT PROBES MAX_EDGES [--operator]");
+    boolean input = args.length == 7 && args[4].equals("--inputs");
+    if (args.length != 4 && !operator && !input)
+      throw new IllegalArgumentException("usage: LogisimCoreTrace TOP PROJECT PROBES MAX_EDGES [--operator | --inputs STIMULI LEDGER]");
+    int limit = Integer.parseInt(args[3]);
+    var offers = input ? readOffers(Path.of(args[5]), limit) : List.<Offer>of();
     var project = ProjectActions.doOpenNoWindow(null, new File(args[1]));
     var controller = CircuitState.createRootState(project,
         project.getLogisimFile().getCircuit(args[0]), Thread.currentThread());
@@ -105,11 +136,20 @@ final class LogisimCoreTrace {
     }
     // All public core inputs have explicit levels. The standalone core selects
     // internal RAM with USE_EXTERNAL_MEMORY=0. Added inputs fail closed.
-    var inputs = operator ? Map.of("STEP", 0L, "RESET", 1L, "RUN", 0L)
+    var inputs = new HashMap<>(operator ? Map.of("STEP", 0L, "RESET", 1L, "RUN", 0L)
         : Map.of("CLK", 0L, "RESET", 1L, "ILL_RET", 0L,
         "INTERRUPT_ACCEPT", 0L, "INTERRUPT_TARGET_PC", 0L,
         "EXTERNAL_MEMORY_VALUE", 0L, "EXTERNAL_MEMORY_VALID", 0L,
-        "USE_EXTERNAL_MEMORY", 0L, "RAM_WRITE_ENABLE", 0L);
+        "USE_EXTERNAL_MEMORY", 0L, "RAM_WRITE_ENABLE", 0L));
+    if (input) {
+      inputs.put("INPUT_VALUE", offers.get(0).value());
+      inputs.put("INPUT_VALID", offers.get(0).valid());
+      for (var spec : Map.of("INPUT_VALUE", 16, "INPUT_VALID", 1).entrySet()) {
+        var pin = component(controller, spec.getKey());
+        if (pin.getAttributeSet().getValue(StdAttr.WIDTH).getWidth() != spec.getValue())
+          throw new IllegalArgumentException("INPUT pin width differs: " + spec.getKey());
+      }
+    }
     for (var pin : controller.getCircuit().getNonWires()) {
       if (pin.getFactory() instanceof Pin && Circuit.isInput(pin)) {
         String label = pin.getAttributeSet().getValue(StdAttr.LABEL);
@@ -133,16 +173,39 @@ final class LogisimCoreTrace {
     header.add("MEMORY");
     System.out.println(String.join("\t", header));
     var ram = child(child(state, "MEMORY_UNIT"), "MEMORY_INSTANCE");
-    for (int edge = 1; edge <= Integer.parseInt(args[3]); edge++) {
-      drive(controller, operator ? "STEP" : "CLK", 0);
-      settle(controller);
-      emit(edge, "pre", probes, ram);
-      boolean halt = Value.TRUE.equals(state.getValue(component(state, "HALTED").getLocation()))
-          || Value.TRUE.equals(state.getValue(component(state, "HALTED_WITH_ERROR").getLocation()));
-      drive(controller, operator ? "STEP" : "CLK", 1);
-      settle(controller);
-      emit(edge, "post", probes, ram);
-      if (halt) return;
+    try (var ledger = input ? new PrintWriter(Files.newBufferedWriter(Path.of(args[6]))) : null) {
+      if (input) ledger.println("edge\tRESET\tINPUT_VALUE\tINPUT_VALID\tINPUT_CONSUME");
+      for (int edge = 1; edge <= limit; edge++) {
+        drive(controller, operator ? "STEP" : "CLK", 0);
+        settle(controller);
+        if (input) {
+          var offer = offers.get(edge - 1);
+          drive(controller, "RESET", offer.reset());
+          drive(controller, "INPUT_VALUE", offer.value());
+          drive(controller, "INPUT_VALID", offer.valid());
+          settle(controller);
+        }
+        emit(edge, "pre", probes, ram);
+        // Independent provider ledger reads the real public pins directly; it
+        // does not use the probe list or any VM state/transaction expectations.
+        if (input) {
+          ledger.println(edge + "\t" + known(state, "RESET", 1) + "\t"
+              + known(state, "INPUT_VALUE", 16) + "\t" + known(state, "INPUT_VALID", 1)
+              + "\t" + known(state, "INPUT_CONSUME", 1));
+          ledger.flush();
+          if (ledger.checkError()) throw new IllegalStateException("cannot write consumption ledger");
+        }
+        boolean halt = Value.TRUE.equals(state.getValue(component(state, "HALTED").getLocation()))
+            || Value.TRUE.equals(state.getValue(component(state, "HALTED_WITH_ERROR").getLocation()));
+        if (input && offers.get(edge - 1).reset() == 1) halt = false;
+        drive(controller, operator ? "STEP" : "CLK", 1);
+        settle(controller);
+        emit(edge, "post", probes, ram);
+        if (halt) {
+          if (input && edge != offers.size()) throw new IllegalArgumentException("extra stimulus rows after halt");
+          return;
+        }
+      }
     }
     throw new IllegalStateException("no terminal instruction within edge limit");
   }

@@ -9314,14 +9314,7 @@
     <comp lib="2" loc="(960,660)" name="Multiplexer">
       <a name="width" val="16"/>
     </comp>
-    <comp lib="9" loc="(1145,650)" name="Text">
-      <a name="font" val="SansSerif plain 12"/>
-      <a name="text" val="INPUT und kein Reset: Verbrauch"/>
-    </comp>
-    <comp lib="9" loc="(1155,600)" name="Text">
-      <a name="font" val="SansSerif plain 12"/>
-      <a name="text" val="Reset = 0: Löschen deaktiviert"/>
-    </comp>
+
     <comp lib="9" loc="(420,515)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="41 ACC_WRITE_REQUEST"/>
@@ -9389,10 +9382,31 @@
     <comp loc="(1300,320)" name="Datapath">
       <a name="label" val="DATAPATH_INSTANCE"/>
     </comp>
+    <comp name="NAND Gate" loc="(1210,640)" lib="1">
+      <a name="size" val="30"/>
+      <a name="label" val="G1"/>
+      <a name="labelfont" val="SansSerif plain 10"/>
+    </comp>
+    <comp name="AND Gate" loc="(1210,540)" lib="1">
+      <a name="size" val="30"/>
+      <a name="label" val="G2"/>
+      <a name="labelfont" val="SansSerif plain 10"/>
+    </comp>
+    <comp name="Text" loc="(1100,780)" lib="9">
+      <a name="font" val="SansSerif plain 12"/>
+      <a name="text" val="G1: nicht (INPUT und RESET); G2: ACC_WRITE_REQUEST und G1"/>
+    </comp>
+    <comp name="Text" loc="(1100,800)" lib="9">
+      <a name="font" val="SansSerif plain 12"/>
+      <a name="text" val="Reset sperrt INPUT; der Register-Loscheingang bleibt inaktiv."/>
+    </comp>
+    <comp name="Text" loc="(1100,820)" lib="9">
+      <a name="font" val="SansSerif plain 12"/>
+      <a name="text" val="INPUT_CONSUME = INPUT und nicht RESET"/>
+    </comp>
     <wire from="(1000,380)" to="(1080,380)"/>
     <wire from="(1020,320)" to="(1020,660)"/>
     <wire from="(1020,320)" to="(1080,320)"/>
-    <wire from="(1040,360)" to="(1040,500)"/>
     <wire from="(1040,360)" to="(1080,360)"/>
     <wire from="(1050,340)" to="(1080,340)"/>
     <wire from="(1060,400)" to="(1060,520)"/>
@@ -9423,7 +9437,6 @@
     <wire from="(280,70)" to="(640,70)"/>
     <wire from="(280,90)" to="(950,90)"/>
     <wire from="(290,230)" to="(290,730)"/>
-    <wire from="(290,730)" to="(1090,730)"/>
     <wire from="(310,210)" to="(310,520)"/>
     <wire from="(310,520)" to="(630,520)"/>
     <wire from="(330,190)" to="(330,680)"/>
@@ -9451,7 +9464,6 @@
     <wire from="(520,340)" to="(530,340)"/>
     <wire from="(520,410)" to="(770,410)"/>
     <wire from="(520,460)" to="(840,460)"/>
-    <wire from="(520,500)" to="(1040,500)"/>
     <wire from="(530,240)" to="(530,270)"/>
     <wire from="(530,270)" to="(550,270)"/>
     <wire from="(530,310)" to="(530,340)"/>
@@ -9478,7 +9490,6 @@
     <wire from="(800,380)" to="(800,520)"/>
     <wire from="(800,380)" to="(830,380)"/>
     <wire from="(840,390)" to="(840,460)"/>
-    <wire from="(840,460)" to="(840,690)"/>
     <wire from="(840,690)" to="(940,690)"/>
     <wire from="(860,370)" to="(970,370)"/>
     <wire from="(890,50)" to="(890,650)"/>
@@ -9493,6 +9504,29 @@
     <wire from="(950,90)" to="(950,420)"/>
     <wire from="(960,660)" to="(1020,660)"/>
     <wire from="(980,400)" to="(980,420)"/>
+    <wire from="(1000,650)" to="(1000,710)"/>
+    <wire from="(1000,650)" to="(1170,650)"/>
+    <wire from="(1040,360)" to="(1040,460)"/>
+    <wire from="(1040,460)" to="(1300,460)"/>
+    <wire from="(1100,500)" to="(1100,530)"/>
+    <wire from="(1100,530)" to="(1180,530)"/>
+    <wire from="(1120,560)" to="(1120,630)"/>
+    <wire from="(1120,630)" to="(1170,630)"/>
+    <wire from="(1140,500)" to="(1140,550)"/>
+    <wire from="(1140,500)" to="(1280,500)"/>
+    <wire from="(1140,550)" to="(1180,550)"/>
+    <wire from="(1210,540)" to="(1300,540)"/>
+    <wire from="(1210,640)" to="(1280,640)"/>
+    <wire from="(1280,500)" to="(1280,640)"/>
+    <wire from="(1300,460)" to="(1300,540)"/>
+    <wire from="(290,730)" to="(820,730)"/>
+    <wire from="(520,500)" to="(1100,500)"/>
+    <wire from="(820,710)" to="(1000,710)"/>
+    <wire from="(820,710)" to="(820,730)"/>
+    <wire from="(820,730)" to="(1090,730)"/>
+    <wire from="(840,460)" to="(840,560)"/>
+    <wire from="(840,560)" to="(1120,560)"/>
+    <wire from="(840,560)" to="(840,690)"/>
   </circuit>
   <circuit name="FaultInputUnit">
     <a name="appearance" val="logisim_evolution"/>
@@ -9918,6 +9952,8 @@
       <a name="label" val="INPUT_FAILED"/>
       <a name="labelfont" val="SansSerif plain 10"/>
       <a name="negate1" val="true"/>
+      <a name="inputs" val="3" />
+  <a name="negate2" val="true" />
     </comp>
     <comp lib="9" loc="(1145,385)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
@@ -9933,6 +9969,10 @@
     </comp>
     <comp loc="(1830,170)" name="ErrorFlags">
       <a name="label" val="ERROR_FLAGS"/>
+    </comp>
+    <comp name="Pin" loc="(880,450)" lib="0">
+      <a name="appearance" val="classic"/>
+      <a name="label" val="RESET"/>
     </comp>
     <wire from="(1040,320)" to="(1130,320)"/>
     <wire from="(1040,360)" to="(1070,360)"/>
@@ -10011,7 +10051,6 @@
     <wire from="(880,410)" to="(960,410)"/>
     <wire from="(880,430)" to="(900,430)"/>
     <wire from="(900,430)" to="(900,690)"/>
-    <wire from="(900,690)" to="(1370,690)"/>
     <wire from="(920,390)" to="(920,670)"/>
     <wire from="(920,670)" to="(1310,670)"/>
     <wire from="(940,350)" to="(940,490)"/>
@@ -10022,6 +10061,15 @@
     <wire from="(960,430)" to="(1090,430)"/>
     <wire from="(980,310)" to="(980,320)"/>
     <wire from="(980,320)" to="(1010,320)"/>
+    <wire from="(1330,670)" to="(1330,710)"/>
+    <wire from="(1330,670)" to="(1370,670)"/>
+    <wire from="(1350,690)" to="(1350,750)"/>
+    <wire from="(1350,690)" to="(1370,690)"/>
+    <wire from="(880,450)" to="(960,450)"/>
+    <wire from="(900,690)" to="(900,710)"/>
+    <wire from="(900,710)" to="(1330,710)"/>
+    <wire from="(960,450)" to="(960,750)"/>
+    <wire from="(960,750)" to="(1350,750)"/>
   </circuit>
   <circuit name="TinyCPUInputMain">
     <a name="appearance" val="logisim_evolution"/>
@@ -15504,6 +15552,46 @@
     <comp loc="(920,570)" name="FaultInputUnit">
       <a name="label" val="FAULT_UNIT"/>
     </comp>
+    <comp name="Splitter" loc="(630,790)" lib="0">
+      <a name="appear" val="center"/>
+      <a name="incoming" val="35"/>
+      <a name="fanout" val="1"/>
+      <a name="bit0" val="none"/>
+      <a name="bit1" val="0"/>
+      <a name="bit2" val="none"/>
+      <a name="bit3" val="none"/>
+      <a name="bit4" val="none"/>
+      <a name="bit5" val="none"/>
+      <a name="bit6" val="none"/>
+      <a name="bit7" val="none"/>
+      <a name="bit8" val="none"/>
+      <a name="bit9" val="none"/>
+      <a name="bit10" val="none"/>
+      <a name="bit11" val="none"/>
+      <a name="bit12" val="none"/>
+      <a name="bit13" val="none"/>
+      <a name="bit14" val="none"/>
+      <a name="bit15" val="none"/>
+      <a name="bit16" val="none"/>
+      <a name="bit17" val="none"/>
+      <a name="bit18" val="none"/>
+      <a name="bit19" val="none"/>
+      <a name="bit20" val="none"/>
+      <a name="bit21" val="none"/>
+      <a name="bit22" val="none"/>
+      <a name="bit23" val="none"/>
+      <a name="bit24" val="none"/>
+      <a name="bit25" val="none"/>
+      <a name="bit26" val="none"/>
+      <a name="bit27" val="none"/>
+      <a name="bit28" val="none"/>
+      <a name="bit29" val="none"/>
+      <a name="bit30" val="none"/>
+      <a name="bit31" val="none"/>
+      <a name="bit32" val="none"/>
+      <a name="bit33" val="none"/>
+      <a name="bit34" val="none"/>
+    </comp>
     <wire from="(500,550)" to="(630,550)"/>
     <wire from="(500,570)" to="(540,570)"/>
     <wire from="(500,590)" to="(660,590)"/>
@@ -15543,6 +15631,8 @@
     <wire from="(950,610)" to="(950,630)"/>
     <wire from="(950,630)" to="(950,650)"/>
     <wire from="(950,650)" to="(950,670)"/>
+    <wire from="(630,710)" to="(630,790)"/>
+    <wire from="(650,790)" to="(700,790)"/>
   </circuit>
   <circuit name="CPUBranchUnitLink">
     <a name="appearance" val="logisim_evolution"/>

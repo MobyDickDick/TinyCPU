@@ -1,9 +1,31 @@
 # AP 22: Qualitätsbefunde und belastbare Abnahme
 
-**Stand:** 5. November 2026. **Status:** Die Adressregister-Gültigkeit ist
-korrigiert und mit 38 zusätzlichen elektrischen Fällen abgesichert.
-Die bestehende Kern- und Systemmatrix besteht ebenfalls. Weitere
-Qualitätsaufgaben und projektweite Offline-Befunde bleiben offen.
+**Stand:** 10. November 2026. **Status:** AP 22.1 und 22.2 sind lokal elektrisch
+abgenommen. Die INPUT-Resetfehler und sieben Layout-Testfehler sind behoben;
+die Offline-Suite besteht. Dokumentationspflege, der Linux-Nachweis aus 22.4
+und die Release-Neuabnahme aus 22.5 bleiben eigene Aufgaben.
+
+## Abschluss am 10. November 2026: INPUT und Layout-Testreferenzen
+
+Beide belegten INPUT-Wirkungen während Reset sind gezielt gesperrt, ohne
+vorhandene Register oder Sticky-Flags zu löschen. 23 dynamische Fälle, drei
+elektrische Fehlerkopien und alle 63 bestehenden Kernfixtures über das
+Eingabetop mit inaktiver Eingabe bestehen. Der neue Treiber läuft verpflichtend
+im elektrischen Gate; Baseline, System und Operator bleiben grün.
+Die neun exakten Layoutreferenzen wurden nach nativer Prüfung nachgeführt;
+294 Unit-Tests bestehen ohne übersprungene oder entfernte Assertions.
+[Abschluss, Quellenabgrenzung und Nachweise](tiny_cpu_input_reset_repair.md).
+
+## Vorheriger Fortschritt am 10. November 2026: dynamische INPUT-Stimuli
+
+Schritt 2 der zusätzlichen Eingabegrenze ist abgenommen. Schritt 3 ist
+implementiert; 19 dynamische Kern-/VM-Fälle samt separatem Quellenverbrauch
+bestehen. Der Reset-Fall stoppt an Flanke 1 post bei ACC: Soll 0, Ist 23,
+obwohl RESET=1 und INPUT_CONSUME=0. Die produktiven Schaltungen bleiben
+bytegleich. Die drei elektrischen Fehlerkopien wurden gemäß Stop-Regel noch
+nicht ausgeführt; Schritt 4 und die INPUT-Checkbox bleiben offen.
+Zuerst wird ausschließlich die INPUT-Übernahme während Reset passiv verfolgt.
+[Vertrag, Nachweise und Abgrenzung](tiny_cpu_input_dynamic.md).
 
 ## Abschluss der Schaltungskorrektur und AP 22.2 am 6. November 2026
 
@@ -264,7 +286,7 @@ Defektnachweis für eine konkrete Leitung oder ein bestimmtes Bauteil.
 
 ## Offene Aufgaben und Abnahmekriterien
 
-### 22.1 Vollständigen Kernvergleich herstellen — hohe Priorität
+### 22.1 Vollständigen Kernvergleich herstellen — abgeschlossen am 10. November 2026
 
 - [x] Das tatsächlich beobachtbare Trace-Schema und den Bezug auf steigende
   Taktflanken festlegen. Logisims nur bei Änderungen ausgegebene Tabellenzeilen
@@ -274,14 +296,15 @@ Defektnachweis für eine konkrete Leitung oder ein bestimmtes Bauteil.
   Adressregister samt Gültigkeit, alle Fehlerflags, Ausgabeereignisse mit
   Wert/Gültigkeit sowie Normal- und Fehlerhalt. Speicheränderungen müssen
   Adresse, Wert und Gültigkeit einschließlich anschließenden Lesens abdecken.
-- [ ] Eingabefälle mit ausdrücklich festgelegten Werten und Gültigkeit prüfen.
+- [x] Eingabefälle mit ausdrücklich festgelegten Werten und Gültigkeit prüfen.
   Unerwartete `E`-/`U`-Werte, fehlende Beobachtungen, zusätzliche oder fehlende
   Instruktionsschritte und abweichende Werte müssen die Abnahme abbrechen.
   Schnittstelle, Taktbezug, Kompatibilitätsgrenze, feste Sollfälle und
   Negativkontrollen sind im [abgeschlossenen Planungspaket](tiny_cpu_input_plan.md)
   festgelegt. Schritt 2 mit der zusätzlichen elektrischen Grenze ist inzwischen
-  [abgeschlossen](tiny_cpu_input_boundary.md); dynamische Stimuli und die
-  vollständige elektrische Eingabeabnahme bleiben offen.
+  [abgeschlossen](tiny_cpu_input_boundary.md). Nach der [Resetkorrektur](tiny_cpu_input_reset_repair.md)
+  bestehen alle 23 dynamischen Fälle, drei Fehlerkopien und 63 bestehende
+  Kernfixtures über das Eingabetop. Die Gate-Integration ist abgeschlossen.
 - [x] Einen gezielt falschen Rechenwert bei weiterhin korrektem Halt in einer
   temporären Schaltungskopie elektrisch nachweisen. Das neue Gate muss diesen
   Fall ablehnen; das Erreichen von `HALT` allein darf ihn nicht bestehen lassen.

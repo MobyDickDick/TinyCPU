@@ -1,10 +1,10 @@
 {
-  "description": "Exact native/visually reviewed drawings through 2026-11-10: user-edited sheets, built-in Logisim-evolution symbols and local wire-corridor corrections. Only the modulo grid is exempt; electrical nets, interfaces, tunnels, OR input approach and long parallel spacing remain checked.",
+  "description": "Exact native/visually reviewed drawings through 2026-11-10: user-edited sheets, built-in Logisim-evolution symbols and local wire-corridor corrections. Only the modulo grid is exempt; electrical nets, interfaces, tunnels, OR input approach and long parallel spacing remain checked. INPUT reset guard repair and native re-review on 2026-11-10; nine exact references refreshed.",
   "circuits": [
     {
       "file": "TinyCPU.circ",
       "circuit": "AccumulatorInputUnit",
-      "geometry_sha256": "4fb1aac4f2f34f320f11165a468f3c26d058c409eb3b219e0f5f163baac65d57"
+      "geometry_sha256": "4d1e708161dfaad2ef763d8697fac16dacd5bbb002560387e48c82b7f15b6d55"
     },
     {
       "file": "TinyCPU.circ",
@@ -24,7 +24,7 @@
     {
       "file": "TinyCPU.circ",
       "circuit": "AddressPath",
-      "geometry_sha256": "5bdb4db69c0a9bab6ea40569b623178d004ae348fecc2ebd4d3e428899b25d5c"
+      "geometry_sha256": "8f5f5e9615d569d2a676f419efcad8adac16e3fe09ce34db5a0c6a444650878e"
     },
     {
       "file": "TinyCPU.circ",
@@ -94,7 +94,7 @@
     {
       "file": "TinyCPU.circ",
       "circuit": "CPUFaultInputUnitLink",
-      "geometry_sha256": "154991b7833161522099ed2cfeba7b667d1d48ca44e3d28150aa113410ba3601"
+      "geometry_sha256": "d43b1e05e29ed215796086712e2827d6a4770b1667f3fc0a98a03cf0bbeeb0f0"
     },
     {
       "file": "TinyCPU.circ",
@@ -164,7 +164,7 @@
     {
       "file": "TinyCPU.circ",
       "circuit": "EffectiveAddress",
-      "geometry_sha256": "be2467f60210aedc8bbfdb48c2ca47dbdfd85ef5a1cfd370116cfccd93e19f12"
+      "geometry_sha256": "fdcf460b9745db2cd48fed14fec2bf4a4df5f034d3cdd419f5c646447089963c"
     },
     {
       "file": "TinyCPU.circ",
@@ -179,7 +179,7 @@
     {
       "file": "TinyCPU.circ",
       "circuit": "FaultInputUnit",
-      "geometry_sha256": "4e12ef5266553fb2f1b0f01b93344961e3fe0a5f38ad5edadece4530d05c1fc3"
+      "geometry_sha256": "b74846f22fd3c04a5e3e86c557f29e4164f10df595f887e6f858e0de84b0fda7"
     },
     {
       "file": "TinyCPU.circ",
@@ -189,7 +189,7 @@
     {
       "file": "TinyCPU.circ",
       "circuit": "FetchDecode",
-      "geometry_sha256": "94b4861c5fe315a09978e3fb4a9a2375489c2edf9c36fe653a0e6d7c72e93f1e"
+      "geometry_sha256": "2acdd5349c2fd35114de34f5b474bfeaceb32a847efd1683f27b633c6c68eb2a"
     },
     {
       "file": "TinyCPU.circ",
@@ -224,7 +224,7 @@
     {
       "file": "TinyCPU.circ",
       "circuit": "MulArithmeticCircuit",
-      "geometry_sha256": "49b6fd9d361e223a8912cc9a59847971f80857e362f44bf86be57ae73d3e164e"
+      "geometry_sha256": "05a453ff68ae926d7f36eecd78cdae1498d1aef88a5f59b15d26dd0ac379c1d1"
     },
     {
       "file": "TinyCPU.circ",
@@ -234,7 +234,7 @@
     {
       "file": "TinyCPU.circ",
       "circuit": "Operations",
-      "geometry_sha256": "8ad445b5236fcbbe419fa8ab1836af3818d9414ce752cbd49682f18daf70e92f"
+      "geometry_sha256": "c74b68310862e08f1976702a901654656cc3b72ef5c5613fc957c2cd24f1b0e8"
     },
     {
       "file": "TinyCPU.circ",
@@ -254,7 +254,7 @@
     {
       "file": "TinyCPU.circ",
       "circuit": "TinyCPUMain",
-      "geometry_sha256": "7a1e422e276aeb635181b7046d47e37475b22cff28543b4e91101bbea57ad33c"
+      "geometry_sha256": "631c2fddf3398516c79079d26f4595115c619633735b12b68f592a02c5a34c98"
     },
     {
       "file": "TinyCPU.circ",

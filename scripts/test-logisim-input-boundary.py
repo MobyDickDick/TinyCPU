@@ -18,7 +18,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
 from tiny_cpu_assembler import assemble, encode_program
 from tiny_cpu_core_trace import CoreMismatch, SIGNALS, compare_trace, expected_trace
-from tiny_cpu_hierarchy import attributes, component_ports, location
+from tiny_cpu_hierarchy import attributes
+from tiny_cpu_input_boundary import mutate_input
 from tiny_cpu_logisim import LogisimError, _inject_rom, resolve_jar
 from tiny_cpu_profiles import load_profile
 
@@ -63,20 +64,6 @@ def compare_boundary(text, expected, program):
     compare_trace('\n'.join(projected) + '\n', expected)
 
 
-def force_terminal(root, circuit_name, instance_label, port, value, width):
-    definitions = {c.get('name'): c for c in root.findall('circuit')}
-    circuit = definitions[circuit_name]
-    instance = next(c for c in circuit.findall('comp') if attributes(c).get('label') == instance_label)
-    terminal = location(next(p for p, *_, label in component_ports(definitions, instance) if label == port))
-    branches = [w for w in circuit.findall('wire') if terminal in {w.get('from'), w.get('to')}]
-    if len(branches) != 1:
-        raise LogisimError(f'{instance_label}.{port}: expected one branch, found {len(branches)}')
-    circuit.remove(branches[0])
-    constant = ET.SubElement(circuit, 'comp', lib='0', name='Constant', loc=terminal)
-    ET.SubElement(constant, 'a', name='value', val=hex(value))
-    ET.SubElement(constant, 'a', name='width', val=str(width))
-
-
 def run_case(source, output, jar, java, code, value, valid, mutation=None):
     output.mkdir(parents=True, exist_ok=True)
     (output / 'diagnostic.json').unlink(missing_ok=True)
@@ -88,21 +75,8 @@ def run_case(source, output, jar, java, code, value, valid, mutation=None):
     root = tree.getroot()
     _inject_rom(root, source, tuple(encode_program(program)))
     bind_static_input(root, value, valid)
-    if mutation == 'value':
-        force_terminal(root, 'AccumulatorInputUnit', 'DATAPATH_INSTANCE', 'DATA_IN', 42, 16)
-    elif mutation == 'valid':
-        force_terminal(root, 'AccumulatorInputUnit', 'DATAPATH_INSTANCE', 'VALID_IN', 1, 1)
-    elif mutation == 'consume':
-        main = root.find("circuit[@name='TinyCPUInputMain']")
-        pin = next(p for p in main.findall("comp[@name='Pin']")
-                   if attributes(p)['label'] == 'INPUT_CONSUME')
-        terminal = pin.get('loc')
-        branches = [w for w in main.findall('wire') if terminal in w.attrib.values()]
-        if len(branches) != 1:
-            raise LogisimError('consume mutation requires one public output branch')
-        main.remove(branches[0])
-        constant = ET.SubElement(main, 'comp', lib='0', name='Constant', loc=terminal)
-        ET.SubElement(constant, 'a', name='value', val='0x0')
+    if mutation:
+        mutate_input(root, mutation)
     project = output / 'TinyCPU.circ'
     tree.write(project, encoding='utf-8', xml_declaration=True)
     probes = output / 'probes.tsv'

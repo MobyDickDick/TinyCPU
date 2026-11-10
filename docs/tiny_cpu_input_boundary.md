@@ -1,5 +1,11 @@
 # AP 22.1: Zusätzliche INPUT-Grenze
 
+**Fortsetzung vom 10. November 2026:** Die [dynamischen Stimuli](tiny_cpu_input_dynamic.md)
+und die [Resetkorrektur](tiny_cpu_input_reset_repair.md) sind implementiert:
+23 dynamische Fälle, drei Fehlerkopien und 63 Kernfixtures über das Eingabetop
+bestehen. Der folgende Bericht bleibt der historische Abschlussnachweis des
+statischen Schritts 2; seine damaligen offenen Folgeaufgaben sind fortgesetzt.
+
 **Stand: 7. November 2026.** Schritt 2 des
 [Eingabeplans](tiny_cpu_input_plan.md) ist abgeschlossen. Ausgangscommit:
 `b3c8500a4c7c870d57d947473e4ba5241bf78519`, anschließend die hier beschriebenen

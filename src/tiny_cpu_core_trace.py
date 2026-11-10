@@ -35,6 +35,12 @@ SIGNALS = {
     "MEM_READ_VALID": (1, "MEMORY_UNIT/MEMORY_INSTANCE/MEMORY_VALID"),
 }
 
+# Opt-in schema; the compatible core and all existing trace consumers retain
+# their original columns. All three public INPUT pins have explicit widths.
+INPUT_SIGNALS = {**SIGNALS, "INPUT_VALUE": (16, "INPUT_VALUE"),
+                 "INPUT_VALID": (1, "INPUT_VALID"),
+                 "INPUT_CONSUME": (1, "INPUT_CONSUME"), "RESET": (1, "RESET")}
+
 
 @dataclass
 class CoreMismatch(ValueError):
@@ -49,9 +55,9 @@ class CoreMismatch(ValueError):
                 f"expected {self.expected}, actual {self.actual}")
 
 
-def write_probes(path: Path) -> None:
+def write_probes(path: Path, *, signals=SIGNALS) -> None:
     path.write_text("".join(f"{name}\t{location}\n"
-                            for name, (_, location) in SIGNALS.items()), encoding="utf-8")
+                            for name, (_, location) in signals.items()), encoding="utf-8")
 
 
 def _memory(cpu: TinyCPU) -> str:
@@ -72,16 +78,39 @@ def _state(cpu: TinyCPU) -> dict[str, int | str]:
     }
 
 
-def expected_trace(program: Program, *, inputs=()) -> list[dict[str, object]]:
+def expected_trace(program: Program, *, inputs=(), stimuli=None) -> list[dict[str, object]]:
     """Terminal decodes are pre-edge events; VM step includes their flag edge.
 
     The compatible core defaults to an empty input queue. Boundary tests may
     supply a queue explicitly; copy it so producing a trace never consumes the
-    caller's input data. This is not a per-edge external stimulus contract.
+    caller's input data. The opt-in stimuli contract supplies one offer per
+    rising edge, held from low-phase pre through post, including reset cycles.
     """
     cpu = TinyCPU(program, inputs=list(inputs))
+    offers = None
+    if stimuli is not None:
+        from tiny_cpu_input_stimuli import validate_stimuli
+        if inputs:
+            raise ValueError("queue and per-edge stimuli are mutually exclusive")
+        offers = validate_stimuli(stimuli)
     rows: list[dict[str, object]] = []
-    for edge in range(1, max(64, len(program.instructions) * 8) + 2):
+    limit = len(offers) if offers is not None else max(64, len(program.instructions) * 8) + 1
+    for edge in range(1, limit + 1):
+        offer = offers[edge - 1] if offers is not None else None
+        reset = offer is not None and bool(offer["reset"])
+        if reset:
+            # The electrical core's RESET restarts fetch only. It is not the
+            # VM's architectural reset: ACC/AR/RAM/sticky flags must survive.
+            # An INPUT offer with RESET=1 is not an executed transaction.
+            cpu.pc = 0
+            cpu.halted = cpu.halt_error = False
+        if offer is not None:
+            # Preserve an invalid host integer to exercise the VM's own range
+            # check; raw invalid/empty bus offers use its empty-queue path.
+            value = offer.get("host_value")
+            if value is None and offer["valid"]:
+                value = offer["value"] if offer["value"] < 32768 else offer["value"] - 65536
+            cpu.inputs = [value] if value is not None else []
         if not 0 <= cpu.pc < len(program.instructions):
             raise ValueError("core fixture fetches outside its ROM program")
         instruction = program.instructions[cpu.pc]
@@ -115,18 +144,30 @@ def expected_trace(program: Program, *, inputs=()) -> list[dict[str, object]]:
             elif name == "PRINT_ADDRESS":
                 pre.update(PRINT_ADDRESS_VALUE=0, PRINT_ADDRESS_VALID=0)
         pre["EXTERNAL_WRITE_ENABLE"] = pre["MEM_WRITE"]
+        if offer is not None:
+            pre.update(INPUT_VALUE=offer["value"], INPUT_VALID=offer["valid"],
+                       INPUT_CONSUME=int(name == "INPUT" and not reset), RESET=int(reset))
         rows.append(pre)
-        cpu.step()
-        rows.append({"edge": edge, "phase": "post", **_state(cpu)})
+        if not reset:
+            cpu.step()
+        post = {"edge": edge, "phase": "post", **_state(cpu)}
+        if offer is not None:
+            next_input = (0 <= cpu.pc < len(program.instructions)
+                          and program.instructions[cpu.pc].mnemonic == "INPUT")
+            post.update(INPUT_VALUE=offer["value"], INPUT_VALID=offer["valid"],
+                        INPUT_CONSUME=int(next_input and not reset), RESET=int(reset))
+        rows.append(post)
         if cpu.halted:
+            if offers is not None and edge != len(offers):
+                raise ValueError("extra stimulus rows after terminal instruction")
             return rows
     raise ValueError("core fixture does not halt in the reference VM")
 
 
-def compare_trace(text: str, expected: list[dict[str, object]]) -> None:
+def compare_trace(text: str, expected: list[dict[str, object]], *, signals=SIGNALS) -> None:
     """Fail closed on missing/extra samples, undefined bits and first mismatch."""
     lines = text.splitlines()
-    header = ["edge", "phase", *SIGNALS, "MEMORY"]
+    header = ["edge", "phase", *signals, "MEMORY"]
     if not lines or lines[0].split("\t") != header:
         raise CoreMismatch(0, "schema", "columns", header, lines[0] if lines else "<missing>")
     for index, line in enumerate(lines[1:]):
@@ -141,7 +182,7 @@ def compare_trace(text: str, expected: list[dict[str, object]]) -> None:
         for field in ("edge", "phase"):
             if actual[field] != str(wanted[field]):
                 raise CoreMismatch(edge, phase, field, wanted[field], actual[field])
-        for name, (width, _) in SIGNALS.items():
+        for name, (width, _) in signals.items():
             raw = str(actual[name])
             if len(raw) != width or any(bit not in "01" for bit in raw):
                 raise CoreMismatch(edge, phase, name, f"{width} defined bits", raw)

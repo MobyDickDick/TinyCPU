@@ -21,6 +21,11 @@ for profile in "${profiles[@]}"; do
   fi
 done
 
+if ! PYTHONPATH=src python3 scripts/test-logisim-input.py --baseline-matrix \
+    --output "$OUTPUT/input"; then
+  failed+=(input)
+fi
+
 if ! PYTHONPATH=src python3 scripts/test-logisim-core-mutation.py \
     --output "$OUTPUT/core-mutation"; then
   failed+=(core-mutation)

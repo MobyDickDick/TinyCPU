@@ -22,8 +22,10 @@ Reference and project records:
 - [`tiny_cpu_modularity_plan.md`](tiny_cpu_modularity_plan.md): aktuelle Vorgabe und Abnahme der CPU-Übersicht aus acht Funktionsboxen (AP 23)
 - [`tiny_cpu_test_guide.md`](tiny_cpu_test_guide.md): Testanleitung für die Logisim-Schaltung
 - [`tiny_cpu_core_trace.md`](tiny_cpu_core_trace.md): elektrischer Kernvergleich, Flankenvertrag, Rohdaten und offene Abnahmebefunde aus AP 22.1
-- [`tiny_cpu_input_plan.md`](tiny_cpu_input_plan.md): externe Eingabeschnittstelle und elektrische Sollfälle aus AP 22.1; zusätzliche Grenze umgesetzt, dynamische Abnahme offen
-- [`tiny_cpu_input_boundary.md`](tiny_cpu_input_boundary.md): abgeschlossene zusätzliche INPUT-Grenze (Schritt 2), statische elektrische Abnahme und unveränderte Bestandszeichnungen; dynamische Stimuli folgen separat
+- [`tiny_cpu_input_plan.md`](tiny_cpu_input_plan.md): externe Eingabeschnittstelle, Taktvertrag und feste elektrische Sollfälle aus AP 22.1
+- [`tiny_cpu_input_boundary.md`](tiny_cpu_input_boundary.md): abgeschlossene zusätzliche INPUT-Grenze (Schritt 2), historischer Nachweis der statischen elektrischen Abnahme
+- [`tiny_cpu_input_dynamic.md`](tiny_cpu_input_dynamic.md): dynamischer Stimulusvertrag und historischer erster Reset-Befund mit Rohdaten
+- [`tiny_cpu_input_reset_repair.md`](tiny_cpu_input_reset_repair.md): gezielte INPUT-Resetkorrektur, reparierte Layout-Testreferenzen und verpflichtende Regression mit 23 dynamischen und 63 bestehenden Kernfixtures
 - [`tiny_cpu_input_baseline.md`](tiny_cpu_input_baseline.md): abgeschlossene passive INPUT-Messung vor dem Eingabeumbau, mit benannten Lade-/Fehlerpfaden und vollständigem Kern-/VM-Vergleich
 - [`tiny_cpu_input_boundary_precheck.md`](tiny_cpu_input_boundary_precheck.md): historischer Stop der Eingangskontrolle; die anschließend produktiv reparierte FaultUnit-Ausgangslücke ist mit dem aktuellen Abschlussbericht verknüpft
 - [`tiny_cpu_instruction_status.md`](tiny_cpu_instruction_status.md): aktuell nachgewiesener Funktionsstand aller Befehle

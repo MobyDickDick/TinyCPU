@@ -1,6 +1,23 @@
 # Arbeitsplan: TinyCPU-Hardware
 
-**Aktueller Nachtrag vom 6. November 2026:** Die projektweite
+**Abschluss vom 10. November 2026:** AP 22.1 ist abgeschlossen. Die beiden
+INPUT-Resetfehler sind lokal korrigiert; 23 dynamische Fälle, drei Fehlerkopien
+und alle 63 bestehenden Kernfixtures über das Eingabetop bestehen. Der neue
+Treiber ist verpflichtend integriert; Baseline-, System- und Operator-Gates
+bleiben grün. Die sieben Layout-Testfehler sind nach nativer Prüfung der
+Referenzzeichnungen behoben; 294 Unit-Tests bestehen.
+[Abschluss und Nachweise](tiny_cpu_input_reset_repair.md).
+
+**Vorheriger Nachtrag vom 10. November 2026:** Schritt 2 des Eingabeplans ist
+abgenommen; Schritt 3 mit dynamischen Stimuli, Exporter, vollständigem Comparator
+und Quellenprotokoll ist implementiert. 19 Fälle bestehen, `reset` stoppt an
+Flanke 1 post: ACC=23 statt 0 trotz RESET=1 und INPUT_CONSUME=0. Die Schaltungen
+bleiben unverändert. Als nächster begrenzter Schritt folgt ausschließlich die
+passive Eingrenzung dieses INPUT-Übernahmepfads während Reset. Die dynamischen
+Fehlerkopien und Schritt 4 bleiben offen. [Nachweis und Reproduktion](tiny_cpu_input_dynamic.md).
+Ältere nächste Schritte in den folgenden Nachträgen sind historische Zwischenstände.
+
+**Nachtrag vom 6. November 2026:** Die projektweite
 [Schaltungskorrektur und Zeichenüberarbeitung](tiny_cpu_circuit_repair_20261106.md)
 bearbeitet alle 56 ungeschützten Definitionen. Beide handgezeichneten Decoder
 bleiben bytegleich. Die offene FaultUnit-Ausgangsleitung ist repariert;

@@ -37,6 +37,30 @@ class InputBoundaryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'guard differs|undriven'):
             verify_input_boundary(self.project)
 
+    def test_input_load_and_error_reset_guards_are_both_required(self):
+        for unit, label, change in [('AccumulatorInputUnit', 'G1', 'gate'),
+                                    ('FaultInputUnit', 'INPUT_FAILED', 'reset')]:
+            project = copy.deepcopy(self.project)
+            gate = next(c for c in project.find(f"circuit[@name='{unit}']").findall('comp')
+                        if attributes(c).get('label') == label)
+            if change == 'gate':
+                gate.set('name', 'OR Gate')
+            else:
+                gate.remove(gate.find("a[@name='negate2']"))
+            with self.subTest(unit=unit), self.assertRaisesRegex(ValueError, 'guard differs|undriven|disconnected'):
+                verify_input_boundary(project)
+
+    def test_fault_reset_must_reach_the_public_cpu_reset(self):
+        main = self.project.find("circuit[@name='CPUFaultInputUnitLink']")
+        from tiny_cpu_hierarchy import component_ports, location
+        definitions = {c.get('name'): c for c in self.project.findall('circuit')}
+        unit = main.find("comp[@name='FaultInputUnit']")
+        terminal = location(next(p for p, *_, label in component_ports(definitions, unit) if label == 'RESET'))
+        wire = next(w for w in main.findall('wire') if terminal in w.attrib.values())
+        main.remove(wire)
+        with self.assertRaisesRegex(ValueError, 'undriven|disconnected'):
+            verify_input_boundary(self.project)
+
     def test_reset_consumption_and_same_width_driver_short_are_rejected(self):
         main=self.project.find("circuit[@name='TinyCPUInputMain']")
         pins={attributes(p)['label']:p.get('loc') for p in main.findall("comp[@name='Pin']")}
