@@ -1,278 +1,73 @@
 # TinyCPU documentation
 
-Start here:
+## Current entry points
 
-- [`tiny_cpu_quickstart.md`](tiny_cpu_quickstart.md): a beginner-friendly explanation and first run
-- [`tiny_cpu_development_directions.md`](tiny_cpu_development_directions.md): evaluated ideas, scope boundaries, and a recommended next step
+Start with the [ten-minute quickstart](tiny_cpu_quickstart.md). Its first
+program run uses the existing debugger CLI, requires only Python, and shows
+the complete output and exit code.
 
-Reference and project records:
+| Page | Purpose |
+|---|---|
+| [Architecture and ISA](tiny_cpu.md) | Machine state, syntax, error semantics, implemented tools, executable examples |
+| [Test guide](tiny_cpu_test_guide.md) | Current Bash/PowerShell commands, required gates, artifacts, and GUI limits |
+| [Instruction status](tiny_cpu_instruction_status.md) | Latest local evidence and remaining acceptance gaps; older results clearly dated |
+| [Debugger](tiny_cpu_debugger.md) | CLI/API, breakpoints, input, JSON, and exit codes |
+| [Core trace](tiny_cpu_core_trace.md) | Pre/post clock-edge observations and full observed-state comparison |
+| [Peripherals](tiny_cpu_peripherals.md) | Optional output-port and interrupt-system contract |
+| [Compatibility](tiny_cpu_compatibility.md) | Format boundaries, corrections, and the preserved v1 DIV exception |
+| [Hardware guide](../hardware/logisim/README.md) | Circuit files, native launch instructions, and manual GUI procedure |
+| [Core sheets](../hardware/logisim/TinyCPU.md) | Functional explanations of the circuit hierarchy |
+| [Operator](../hardware/logisim/TinyCPU_Operator.md) | Implemented RESET/STEP/RUN circuit |
+| [System sheets](../hardware/logisim/TinyCPU_Peripherals.md) | Integration, output, and interrupt blocks |
+| [Runtime provisioning](../vendor/README.md) | Pinned Logisim JAR resolution |
+| [Development directions](tiny_cpu_development_directions.md) | Bounded future ideas, after the required quality tasks |
 
-- [`tiny_cpu_circuit_repair_20261106.md`](tiny_cpu_circuit_repair_20261106.md): projektweite Korrektur und Überarbeitung aller 56 ungeschützten Schaltbilder; MUL-/DIV-Grenzen, Operator-CPU-Abnahme und elektrische Nachweise
-- [`tiny_cpu_address_validity.md`](tiny_cpu_address_validity.md): Korrektur der Adressregister-Gültigkeit und nach Aufgaben geordnete AddressUnit mit elektrischen Regressionen
-- [`tiny_cpu_schematic_style.md`](tiny_cpu_schematic_style.md): verbindlicher gemeinsamer Zeichenstil für alle Elektroschemas, einschließlich Pin- und Leitungsgruppen sowie möglichst weniger Konstanten
-- [`tiny_cpu_schematic_reference.md`](tiny_cpu_schematic_reference.md): erste drei überarbeitete Schaltpläne mit sichtbaren Signalbussen, Vorher-/Nachher-Ansichten und Prüfstand
-- [`tiny_cpu_schematic_followup.md`](tiny_cpu_schematic_followup.md): Benutzeranordnung des Akkumulators, ergänzte Flussrichtung, korrigierte Ladegültigkeit und Reset-Erklärung
-- [`tiny_cpu_operations_repair.md`](tiny_cpu_operations_repair.md): gezielte Reparatur der Operations-Einbettung und Gültigkeitsauswahl bei erhaltener Benutzerzeichnung
-- [`tiny_cpu_schematic_review.md`](tiny_cpu_schematic_review.md): Prüfung weiterer Umzeichnungen und lokale Korrektur der Steuerbit-Auswahl im Akkumulator
-- [`tiny_cpu_address_review.md`](tiny_cpu_address_review.md): korrigierte Steuerbit-Abgriffe und Datenwahl der AddressUnit; offene Funktionslücke beim unbenutzten ADDRESS_VALID mit elektrischem Gegenbeispiel
-- [`hardware/logisim/TinyCPU.md`](../hardware/logisim/TinyCPU.md): kurze Grundfunktion jedes Kern-Teilkreises; Begleitbeschreibungen stehen ebenso neben allen übrigen `.circ`-Dateien
-- [`tiny_cpu.md`](tiny_cpu.md): Architektur, Befehlssatz und Simulator
-- [`tiny_cpu_alu_sketch.md`](tiny_cpu_alu_sketch.md): Entwurf der ALU
-- [`tiny_cpu_top_level_template.md`](tiny_cpu_top_level_template.md): Referenz für die Top-Level-Integration
-- [`tiny_cpu_modularity_plan.md`](tiny_cpu_modularity_plan.md): aktuelle Vorgabe und Abnahme der CPU-Übersicht aus acht Funktionsboxen (AP 23)
-- [`tiny_cpu_test_guide.md`](tiny_cpu_test_guide.md): Testanleitung für die Logisim-Schaltung
-- [`tiny_cpu_core_trace.md`](tiny_cpu_core_trace.md): elektrischer Kernvergleich, Flankenvertrag, Rohdaten und offene Abnahmebefunde aus AP 22.1
-- [`tiny_cpu_input_plan.md`](tiny_cpu_input_plan.md): externe Eingabeschnittstelle, Taktvertrag und feste elektrische Sollfälle aus AP 22.1
-- [`tiny_cpu_input_boundary.md`](tiny_cpu_input_boundary.md): abgeschlossene zusätzliche INPUT-Grenze (Schritt 2), historischer Nachweis der statischen elektrischen Abnahme
-- [`tiny_cpu_input_dynamic.md`](tiny_cpu_input_dynamic.md): dynamischer Stimulusvertrag und historischer erster Reset-Befund mit Rohdaten
-- [`tiny_cpu_input_reset_repair.md`](tiny_cpu_input_reset_repair.md): gezielte INPUT-Resetkorrektur, reparierte Layout-Testreferenzen und verpflichtende Regression mit 23 dynamischen und 63 bestehenden Kernfixtures
-- [`tiny_cpu_input_baseline.md`](tiny_cpu_input_baseline.md): abgeschlossene passive INPUT-Messung vor dem Eingabeumbau, mit benannten Lade-/Fehlerpfaden und vollständigem Kern-/VM-Vergleich
-- [`tiny_cpu_input_boundary_precheck.md`](tiny_cpu_input_boundary_precheck.md): historischer Stop der Eingangskontrolle; die anschließend produktiv reparierte FaultUnit-Ausgangslücke ist mit dem aktuellen Abschlussbericht verknüpft
-- [`tiny_cpu_instruction_status.md`](tiny_cpu_instruction_status.md): aktuell nachgewiesener Funktionsstand aller Befehle
-- [`logisim_diagnostics_known_issues.md`](logisim_diagnostics_known_issues.md): bekannte Besonderheiten der Diagnoseschaltungen
-- [`tiny_cpu_roadmap.md`](tiny_cpu_roadmap.md): Hardware-Arbeitsplan
-- [`tiny_cpu_quality_work_packages.md`](tiny_cpu_quality_work_packages.md): offene Qualitätsaufgaben aus der Projektbewertung (AP 22), mit Prioritäten und Abnahmekriterien
-- [`tiny_cpu_debugger_plan.md`](tiny_cpu_debugger_plan.md): abgegrenzter Vorschlag für AP 16 (symbolisches Debugging)
-- [`tiny_cpu_debugger.md`](tiny_cpu_debugger.md): Bedienung und JSON-Vertrag des symbolischen Debuggers
-- [`tiny_cpu_profiles_plan.md`](tiny_cpu_profiles_plan.md): abgegrenzter Vorschlag für AP 17 (zweites Hardwareprofil)
-- [`tiny_cpu_peripherals_plan.md`](tiny_cpu_peripherals_plan.md): abgegrenzter Vorschlag für AP 18 (Peripherie und Integration)
-- [`tiny_cpu_peripherals.md`](tiny_cpu_peripherals.md): sichtbarer Maschinenvertrag und Erklärung der AP-18-Referenzlösung
-- [`tiny_cpu_circuit_debug_plan.md`](tiny_cpu_circuit_debug_plan.md): zehnstufiger Arbeitsplan für die reproduzierbare Fehlersuche in `TinyCPU.circ`
-- [`tiny_cpu_recovery_work_packages.md`](tiny_cpu_recovery_work_packages.md): priorisierte Arbeitspakete zur Wiederherstellung der elektrischen 16/12-CPU
-- [`tiny_cpu_operator_panel_plan.md`](tiny_cpu_operator_panel_plan.md): Bedienbarkeitsbefund und abgegrenzter Vorschlag für ein Operator-Panel
-- [`tiny_cpu_compatibility.md`](tiny_cpu_compatibility.md): Kompatibilitätsregeln
-- [`tiny_cpu_1_0_release_plan.md`](tiny_cpu_1_0_release_plan.md): Releaseplan für TinyCPU 1.0
-- [`tiny_cpu_1_0_release_notes.md`](tiny_cpu_1_0_release_notes.md): Release Notes für TinyCPU 1.0
-- [`tiny_cpu_1_1_release_notes.md`](tiny_cpu_1_1_release_notes.md): Release Notes für TinyCPU 1.1
+These pages and this index form the current-documentation inventory checked by
+[test_tiny_cpu_documentation.py](../tests/test_tiny_cpu_documentation.py).
+Its local-file and heading-link checks do not require web access. The central
+program examples are executed verbatim and checked for stdout, stderr, and
+exit code by the mandatory offline suite.
 
-Die Dokumentation der Logisim-Implementierung befindet sich ergänzend unter
-[`hardware/logisim/README.md`](../hardware/logisim/README.md).
+## Current work and evidence
 
-## Enthaltene Logisim-Unterstützung
+AP 22.1 and 22.2 are locally accepted. The supported base profile is
+**tinycpu-16-12**; the 8/8 experiment is retired. AP 18's optional peripheral
+system, AP 21's operator panel, and AP 23's eight-box core overview are
+implemented. Their existence does not imply a newly qualified release.
 
-Logisim-evolution ist als festgelegte Projektabhängigkeit vollständig in den
-TinyCPU-Prüfablauf integriert: Das Repository enthält das ausführbare
-16/12-Schaltungsprojekt, Profil, ROM-Fixtures, elektrische Testmatrix, Launcher
-und CI-Konfiguration. Die unterstützte Simulatorversion 4.1.0 ist fest
-vorgegeben und wird vom Launcher automatisch aus `vendor/`, dem lokalen Cache
-oder – als letzte Möglichkeit – von der versionierten Upstream-Adresse
-bezogen. Das große Upstream-JAR selbst wird derzeit nicht als Git-Blob
-dupliziert. „Logisim ist im Projekt enthalten“ bezeichnet daher die
-reproduzierbare Integration und automatische Bereitstellung, nicht eine
-Quellkopie des externen Simulators.
+The [10 November local acceptance](tiny_cpu_input_reset_repair.md) covers
+63 baseline core fixtures, 23 dynamic INPUT cases, arithmetic/address
+boundaries, seven system cases, operator tests, and negative controls.
+The [6 November report](tiny_cpu_circuit_repair_20261106.md) records the
+arithmetic contract, including the preserved v1 division exception.
+The Linux evidence from AP 22.4, common fresh-checkout release acceptance from
+AP 22.5, and interactive GUI acceptance remain open.
 
-## Planungsstand
+- [Quality work packages (AP 22)](tiny_cpu_quality_work_packages.md): required next work and acceptance criteria.
+- [Roadmap](tiny_cpu_roadmap.md): package sequence and dated progress.
+- [Documentation acceptance (AP 22.3)](tiny_cpu_documentation_acceptance.md): scope, fresh source snapshot, commands, and evidence for these pages.
 
-Die Arbeitspakete AP 1 bis AP 16 sind abgeschlossen. Das in AP 17 ergänzte
-8/8-Experiment wurde stillgelegt und vollständig aus der ausführbaren
-Unterstützung entfernt: Sechs Opcode-Bits des weiter unterstützten
-16/12-Profils reichen für die vorgesehene Befehlsmenge aus. Der historische
-Plan enthält den Stilllegungsvermerk. Als nächster
-optionaler Entwicklungsschritt ist AP 18 für einen Ausgabeport und eine
-maskierbare Interruptquelle abgegrenzt. Dessen versionierte System-,
-Maschinenformat- und Trace-Verträge sowie das Softwaremodell sind
-abgeschlossen. Die elektrische Implementierung ist mit einem vertraglich
-geprüften Ausgabeport-Baustein begonnen, dessen atomare Daten- und
-Steuerverdrahtung vollständig offline geprüft wird. Speicherpfad- und
-Interruptsteuerungsgrenze sind ebenfalls vertraglich festgelegt. Die
-Interruptanforderung besitzt nun einen direkt verdrahteten, taktsynchron
-zurücksetzbaren Pegelspeicher und eine geprüfte Erkennung ausschließlich
-ansteigender Flanken. Der Impuls setzt ein taktsynchrones Pending-Register;
-dessen Rückkopplung hält maskierte Anforderungen, während Reset den Zustand
-löscht. Pending-Zustand, Interruptmaske, Instruktionsgrenze und invertierter
-Handlerzustand sind nun zum Annahmeimpuls verknüpft; derselbe Impuls löscht das
-Pending-Bit gezielt. Bei der Annahme erfassen außerdem Rückkehradress- und
-Validitätsregister den nächsten PC; ihre Daten-, Annahme-, Takt-, Reset- und
-Ausgangspfade sind vertraglich und per Mutationstest geschützt. Eine zulässige
-Rückkehr verbraucht die gespeicherte Gültigkeit nun über einen geprüften
-Next-State-Pfad. Der Handlerzustand wird bei Annahme gesetzt, bis zu einer
-gültigen Rückkehr gehalten und dann gelöscht. Der Zielmultiplexer führt den
-Interruptvektor und schaltet bei einer gültigen Rückkehr auf die gespeicherte
-Rückkehradresse um; auch dieser Pfad ist vertraglich und per Mutationstest
-geschützt. Beide Bausteingrenzen stehen nun genau einmal auf dem System-
-Top-Level; ihre sieben öffentlichen Zustandsausgänge sind direkt und per
-Mutationstest geschützt mit den Trace-Pins verbunden. Takt, Reset und externe
-Interruptanforderung sind nach Kontrolle der beibehaltenen Neuanordnung direkt
-mit den betroffenen Bausteingrenzen verdrahtet. Die CPU-seitigen Daten-,
-Befehls- und PC-Steuerpfade sind nun an einer maschinenlesbar geprüften
-`CPUIntegrationBoundary` vollständig nach Richtung und Breite benannt. Deren
-erster funktionaler CPU-Pfad reicht RAM-Lesewert und -Gültigkeit gemeinsam und
-mutationstestgeschützt zur Leseauswahl weiter. Der folgende Pfad führt nun auch
-die 12-Bit-Adresse vom vorläufigen Kernanschluss zur Speichergrenze. Die
-CPU-seitigen Signale für Schreibwert, Schreibgültigkeit und Schreibfreigabe
-reichen ebenfalls direkt bis zur Speichergrenze. Die Regression verfolgt all
-diese Wege anhand der benannten Pins statt veralteter Zeichenkoordinaten.
-Die Schreibanforderung wird nun ausschließlich aus den drei Store-Decodes
-gebildet; zwei zuvor versehentlich angeschlossene Fehler-Setzsignale sind durch
-getrennte sichtbare Leitungen ersetzt und per Mutationstest abgesichert. Die
-anschließende elektrische Messung des eingebetteten Kerns bestätigt vor der
-entscheidenden steigenden Flanke den Opcode `0x29`, `STORE_ADR=1` und
-`EXTERNAL_WRITE_ENABLE=1`. Nach der Flanke zeigt der kombinatorische Decoder
-bereits den Folgebefehl `0x24`; eine frühere Messung ausschließlich am
-fehlgeschlagenen Post-Edge-Vektor hatte diesen Taktbezug übersehen. Der erste
-elektrische Systemfall bleibt beim Portschreibvorgang offen. Der anschließende
-Grenzvergleich zeigt die Schreibfreigabe in den Vektoren 2 und 3 korrekt auf
-`1` und den gemeinsamen Takt phasengleich an CPU- und Speichergrenze; die
-Schreibgültigkeit bleibt dagegen bereits am Ausgang der
-`CPUIntegrationBoundary` auf `0`. Da dasselbe Netz direkt den Eingang des
-aktiven `OutputMemoryPath` speist, liegt der erste Unterschied vor der
-Systemgrenze. Der anschließende interne Vergleich zeigt, dass
-`Datapath.ACC_VALID_OUT` und der Export `EXTERNAL_WRITE_VALID` im eingebetteten
-System in allen acht Vektoren gemeinsam `0` führen. Ein eigenständiger
-Kernlauf setzt dasselbe Akkumulator-Gültigkeitsregister nach `LOAD_CONST(23)`
-dagegen korrekt auf `1`. Als Nächstes werden deshalb ausschließlich
-`ACC_LOAD`, `VALID_IN` und `CLK` am `Datapath` während der ersten steigenden
-Systemflanke mit dem eigenständigen Kernlauf verglichen. Dieser Vergleich
-schließt Ladefreigabe und Takt inzwischen aus: `VALID_IN` führt nur im
-eingebetteten Lauf fälschlich `0`. Der anschließende Vergleich zeigt
-`Operations.RESULT_IS_VALID` und `Datapath.VALID_IN` in allen Systemvektoren
-gemeinsam auf `0`; eine Leitungsreparatur ist daraus nicht zulässig. Für
-`LOAD_CONST` ist der inaktive Operations-Ausgang zudem nicht die erwartete
-Gültigkeitsquelle. Als Nächstes wird deshalb ausschließlich die dokumentierte
-Immediate-Gültigkeitsauswahl über `ACC_MEMORY_SELECT` bis zum
-`Datapath.VALID_IN` verfolgt; erst ein dort benannter erster Unterschied darf
-eine Schaltungsänderung auslösen.
-Diese Auswahl ist inzwischen mit drei benannten Ein-Bit-Multiplexern
-wiederhergestellt; `LOAD_CONST(23)` führt vor der ersten Flanke nachweislich
-`VALID_IN=1`, und die vollständige 61-Fall-Kernmatrix bleibt grün. Der
-eingebettete Systemfall übernimmt den gültigen Portwert dennoch noch nicht.
-Als nächstes wird daher ausschließlich die Speicherung von `VALID_IN` nach
-`Datapath.ACC_VALID_OUT` an der ersten Systemflanke erneut gemessen.
-Diese Speicherung und der nachgelagerte CPU-Adressexport sind inzwischen
-bestätigt. Die weitere Adressdiagnose hat außerdem den unmittelbaren
-Instruktionsoperanden korrigierend als `0xffff` vom 22-Bit-Splitter bis
-`EffectiveAddress.DIRECT_ADDR` nachgewiesen; der zuvor dort berichtete Wert
-`0x0001` stammte von einem falsch zugeordneten temporären Messpunkt. Als
-nächstes werden ausschließlich die vier 16-Bit-Eingänge, beide Selektoren und
-die beiden Multiplexerausgänge der effektiven Adressauswahl elektrisch
-verglichen. Danach folgt als eigenes Paket zunächst die Wiederholung des Falls
-`output-valid-write` und erst bei dessen Erfolg die vollständige Systemmatrix.
-Die Instruktionsgrenze und die drei Befehlsimpulse für Interruptaktivierung,
--deaktivierung und Rückkehr sind nun ebenfalls direkt und
-mutationstestgeschützt weitergereicht. Auch der Folge-PC gelangt von einem
-benannten vorläufigen Kernanschluss direkt und mutationstestgeschützt zur
-Interruptsteuerungsgrenze. Die vollständige CPU ist inzwischen einmalig hinter
-dieser Grenze platziert; ihre Takt- und Resetanschlüsse sind direkt verdrahtet
-und per Mutationstest geschützt. Der vollständige Kern exportiert nun
-zusätzlich die gemeinsam zum bisherigen RAM geführten Signale für Schreibwert,
-Schreibgültigkeit und Schreibfreigabe; Richtung, Breite und elektrische
-Verbindung jedes dieser Pfade sind durch Mutationstests geschützt. Ihre
-Verbindung zur Systemgrenze ist abgeschlossen. Ein eigener Systemopcode-
-Decoder im vollständigen Kern exportiert inzwischen auch Instruktionsgrenze,
-Interruptaktivierung, -deaktivierung und Rückkehr; diese vier Signale ersetzen
-die vorläufigen Befehlseingänge der Integrationsgrenze und sind durch einen
-gezielten Mutationstest geschützt. Der Folge-PC des vollständigen Kerns ist ebenfalls direkt und
-mutationstestgeschützt an die Interruptsteuerung angebunden. Offen bleibt damit
-die Auswertung und gegebenenfalls Reparatur der elektrischen Systemabnahme.
-Die dafür verbindliche
-elektrische Fallliste ist inzwischen versioniert, mit den übrigen
-Systemverträgen quergeprüft und deckt alle neuen Opcodes und Verhaltensfälle
-ab. Sie wird nun im elektrischen Gate als sequenzieller, flankengenauer
-Logisim-/VM-Vergleich ausgeführt. Die Speicherpfadgrenze
-des Ausgabeports ist inzwischen vollständig
-verdrahtet und wird offline einschließlich ihrer getrennten RAM-/Port-Freigaben
-und gemeinsamen Wert-/Validitätsauswahl geprüft.
+## Binding circuit rules
 
-Unabhängig von dieser Funktionserweiterung grenzt
-[`tiny_cpu_circuit_debug_plan.md`](tiny_cpu_circuit_debug_plan.md) AP 19 als
-zehn einzeln abnehmbare Aufgaben ab. Das Paket dient der reproduzierbaren
-Fehlersuche an der aktuellen `TinyCPU.circ`, ohne einen manuellen Redraw durch
-eine historische Zeichnung zu ersetzen oder die abgeschlossenen ISA-Verträge
-neu zu öffnen.
+[AGENTS.md](../AGENTS.md), the [schematic style](tiny_cpu_schematic_style.md),
+and the [Logisim rules](../hardware/logisim/AGENTS.md) remain binding. They
+include visible wiring without tunnels, protected hand-drawn decoders, and
+named interface contracts. Historical layout proposals do not override them.
 
-Die Wiederherstellung und Endabnahme der Offline- und elektrischen Profilgates
-wird in
-[`tiny_cpu_recovery_work_packages.md`](tiny_cpu_recovery_work_packages.md) als
-AP 20 behandelt. Reset, Takt und Fetch des 16/12-Profils sind mit dem
-zweifach ausgeführten Minimalprogramm aus `LOAD_CONST(3)` und `HALT()` wieder
-abgenommen; die vollständige ISA-, Fehler- und Mutationsregression aus 20.6
-und 20.7 ist ebenfalls abgeschlossen. AP 20.8 hat die automatischen Gates
-zuletzt am 20. September 2026 auf dem Kandidaten
-`f151841191802745cf0c1e73f6f99f72ebaf39c9` zweimal in einem frischen Worktree
-bestanden und wird damit vorläufig als abgeschlossen betrachtet. Der manuelle
-GUI-Kurztest ist ausdrücklich auf einen späteren Zeitpunkt mit verfügbarer
-interaktiver Anzeige verschoben: Ein früherer Bedienversuch lieferte
-undefinierte beziehungsweise elektrische Fehlerwerte und damit kein
-verwertbares Testprotokoll. Der Aufschub ändert den vollständig elektrisch
-nachgewiesenen Funktionsstatus nicht.
+## Historical plans and diagnosis records
 
-Der elektrische Vergleich der effektiven Adressauswahl ist nun mit
-unterscheidbaren Eingangswerten abgeschlossen: Die erste Stufe wählt den
-direkten Operanden `0xffff` korrekt, die zweite Stufe liefert bei inaktivem
-Offsetselektor jedoch den eigenständigen Eingang `REG_SELECTED=0x0001`. Ihr
-Dateneingang wird nicht vom Ausgang der ersten Stufe gespeist. Die Schaltung
-blieb gemäß Stop-Regel unverändert; als nächstes wird ausschließlich dieser
-Übergang repariert und danach zunächst die Effective-Address-Abnahme und der
-Fall `output-valid-write` wiederholt.
+The other dated repair, layout, diagnosis, recovery, and release documents
+are project records. Their commands, counts, and open items describe their
+stated candidate and date; they are not instructions for the current checkout.
+Use the current entry pages above for running programs and tests. In mixed
+records such as the roadmap and instruction-status page, the newest status
+appears first and older sections retain explicit dates.
 
-Der belegte Übergangsfehler in `EffectiveAddress` ist inzwischen repariert:
-Die erste Multiplexerstufe speist direkt die Standardseite der zweiten, während
-`REG_SELECTED` nur deren Offset-Zweig erreicht. Der unterscheidbare elektrische
-Regressionsfall und der zweimalige autonome Kernlauf bestehen. Die danach
-zuerst wiederholte Fixture `output-valid-write` meldet jedoch bereits ab ihrem
-ersten Vektor alle öffentlichen Systemzustände als oszillierend. Deshalb wurde
-die vollständige Systemmatrix gemäß Stop-Regel noch nicht geöffnet; als
-nächstes wird ausschließlich diese Oszillation eingegrenzt.
-
-### Aktueller AP-18-Diagnosestand
-
-Der fehlende Löschpfad der Interrupt-Rückkehradresse ist als taktsynchron
-verzögerter Next-State-Pfad ergänzt und gegen Leitungsänderungen geschützt.
-Die elektrischen Systemfälle bestehen nun bis einschließlich
-`disable-interrupts`. Der nächste dokumentierte Schritt untersucht
-`reset-states` ab seinem ersten Unterschied an Vektor 6. Dieser Schritt ist
-inzwischen eingegrenzt: Die Annahme erfolgt einen steigenden Takt zu spät und
-übernimmt deshalb auch die Rückkehradresse verspätet; außerdem löschen die
-Ein-Bit-Zustände bei erneutem Reset bereits in der niedrigen Taktphase, der
-Adresszustand dagegen erst an der steigenden Flanke. Als nächstes werden nur
-Flankenerkennung und Annahmesignal um Vektoren 5 bis 8 passiv verfolgt.
-
-Diese passive Messung ist abgeschlossen: `RISING_EDGE_DETECT` wird in Vektor 5
-noch vor der ersten steigenden Flanke aktiv, `INTERRUPT_ACCEPT` dagegen erst
-nach dem Speichern des Pending-Zustands in Vektor 6. Der belegte Unterschied
-liegt damit in der verzögerten Übergabe des Flankenimpulses an die
-Annahmelogik, nicht am externen Anforderungspegel oder Flankendetektor. Die
-Schaltung blieb unverändert; als nächstes wird ausschließlich dieser Übergang
-repariert und danach zunächst `reset-states` samt den vier zuvor bestandenen
-Systemfällen wiederholt.
-
-
-Die anschließenden Pakete haben diesen Übergang, den taktsynchronen Reset und
-zuletzt die Maskenpriorität bei einer erneuten Interruptannahme repariert. Ein
-benanntes Prioritätsgatter sperrt nun den gesamten Masken-Next-State bei
-`INTERRUPT_ACCEPT`; dadurch kann ein gleichzeitig noch sichtbarer
-Aktivierungsimpuls die vertragliche Deaktivierung nicht mehr überstimmen. Nach
-der Wiederholung der vier zuvor bestandenen Fälle und `reset-states` besteht
-erstmals auch die vollständige elektrische Systemmatrix mit allen sieben
-Fixtures. Die elektrische AP-18-Systemintegration ist damit abgeschlossen.
-
-Die anschließende Sichtprüfung hat außerdem die wirkungslose Beschaltung von
-`PENDING_SET_OR_HOLD` mit einer Nullkonstante korrigiert. Eine erkannte Flanke
-wird jetzt bei deaktivierter Maske über `PENDING_EDGE_WHEN_DISABLED` in den
-Pending-Zustand übernommen, während eine unmittelbar angenommene Flanke nicht
-erneut gespeichert wird. Strukturtest, Verdrahtungsfingerprint und die
-vollständige elektrische Systemmatrix sichern die Korrektur ab.
-
-Auch die danach manuell angepasste Anordnung des Interruptcontrollers ist
-abgenommen. Zwei beim Speichern verlorene Multiplexerbezeichnungen wurden
-wiederhergestellt, der Verdrahtungsfingerprint auf die geprüfte Leitungsführung
-fortgeschrieben und alle sieben elektrischen Systemfixtures erneut erfolgreich
-gegen das VM-Modell ausgeführt. Für AP 18 bleibt damit kein dokumentierter
-elektrischer Reparaturschritt offen.
-
-Die Projektbewertung vom 21. Oktober 2026 hat weitere Qualitätsbefunde
-aufgenommen. Das neue [AP 22](tiny_cpu_quality_work_packages.md) sammelt den
-fehlenden vollständigen Kernzustandsvergleich, den Divisionsüberlauf,
-Dokumentationsmängel, einen Windows-Testfehler und die anschließende erneute
-Abnahme als offene Aufgaben. Frühere Abschlussvermerke belegen nur den damals
-tatsächlich ausgeführten Prüfumfang. AP 22 hat Vorrang vor weiteren
-Funktionserweiterungen. Zusätzlich bleibt der in AP 21 ausdrücklich
-verschobene manuelle GUI-Kurztest in einer interaktiven Umgebung offen.
-
-Die [Layoutüberarbeitung von MemoryUnit bis CoreDiagnostics](tiny_cpu_units_layout.md)
-vom 2. November 2026 zeigt die fünf neu angeordneten Funktionsboxen samt
-Netzvergleich, nativen Ansichten und elektrischen Nachweisen.
-
-Die [erneute Schaltplanprüfung](tiny_cpu_schematic_recheck.md) erhält die danach
-angepasste Benutzeranordnung, korrigiert einen Anschluss der RAM-Schreibfreigabe
-und bestätigt die vereinfachte FaultUnit mit aktualisierten Strukturprüfungen.
+Useful records include the [AP 19 diagnosis](tiny_cpu_circuit_debug_plan.md),
+[AP 20 recovery](tiny_cpu_recovery_work_packages.md),
+[AP 21 operator implementation](tiny_cpu_operator_panel_plan.md),
+[AP 23 modularity](tiny_cpu_modularity_plan.md), and
+[INPUT reset repair](tiny_cpu_input_reset_repair.md).
+The [1.0 notes](tiny_cpu_1_0_release_notes.md) and
+[1.1 notes](tiny_cpu_1_1_release_notes.md) retain historical release claims;
+they do not replace the open AP 22.5 qualification of the current candidate.

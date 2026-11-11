@@ -1,5 +1,16 @@
 # Arbeitsplan: TinyCPU-Hardware
 
+**Aktueller Stand vom 11. November 2026:** AP 22.3 ist abgeschlossen:
+aktuelle Dokumentation und historische Protokolle sind getrennt; sechs
+veröffentlichte Programmläufe und lokale Links auf 15 aktuellen Seiten werden
+im Offline-Gate geprüft. Ein frischer Quellsnapshot besteht Verifikator,
+Strukturprüfung und alle 296 Windows-Unit-Tests ohne PYTHONPATH.
+[Abschluss und Reproduktion](tiny_cpu_documentation_acceptance.md).
+AP 22.1 und 22.2 bleiben lokal abgenommen. Als nächster Pflichtschritt folgt
+der Linux-Nachweis aus 22.4, danach die gemeinsame Neuabnahme 22.5. Der manuelle
+GUI-Test bleibt offen. Die folgenden älteren Nachträge und Diagnoseaufträge
+sind historische Zwischenstände; sie sind keine aktuellen Folgeaufträge.
+
 **Abschluss vom 10. November 2026:** AP 22.1 ist abgeschlossen. Die beiden
 INPUT-Resetfehler sind lokal korrigiert; 23 dynamische Fälle, drei Fehlerkopien
 und alle 63 bestehenden Kernfixtures über das Eingabetop bestehen. Der neue

@@ -1,0 +1,4 @@
+; Run with --input 41, or without input to observe the INPUT flag.
+INPUT()
+PRINT()
+HALT()

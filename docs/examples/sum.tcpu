@@ -1,0 +1,7 @@
+; Quickstart data flow: valid memory plus valid accumulator.
+LOAD_CONST(3)
+STORE_ADDRESS(10)
+LOAD_CONST(2)
+ADD_ADDRESS(10)
+PRINT()
+HALT()

@@ -1,5 +1,11 @@
 # TinyCPU 1.1.0 release notes
 
+> Historical release record. Commands, file names, compatibility claims, and
+> acceptance results below refer to that release stage. For the current
+> checkout use the [test guide](tiny_cpu_test_guide.md) and
+> [current evidence](tiny_cpu_instruction_status.md). Fresh-checkout release
+> qualification of the current candidate remains open in AP 22.5.
+
 TinyCPU 1.1.0 is the first minor release after the qualified 1.0 baseline. It
 keeps the existing 16-bit-data/12-bit-address CPU and version-1 machine format
 compatible and packages the additive work completed after 1.0. The release tag

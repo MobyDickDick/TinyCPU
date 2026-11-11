@@ -1,5 +1,11 @@
 # TinyCPU 1.0.0 release notes
 
+> Historical release record. Commands, file names, compatibility claims, and
+> acceptance results below refer to that release stage. For the current
+> checkout use the [test guide](tiny_cpu_test_guide.md) and
+> [current evidence](tiny_cpu_instruction_status.md). Fresh-checkout release
+> qualification of the current candidate remains open in AP 22.5.
+
 TinyCPU 1.0.0 is the first qualified release of the 16-bit-data/12-bit-address
 Logisim CPU, its versioned 22-bit machine format, assembler, reference simulator,
 and offline verification tools. The release tag is `tinycpu-v1.0.0`.

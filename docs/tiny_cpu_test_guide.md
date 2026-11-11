@@ -1,161 +1,128 @@
-# Testing TinyCPU.circ yourself
+# Testing TinyCPU yourself
 
-This guide provides the short, recommended procedure for a complete test of
-the committed circuit. Run all commands from the root of the TinyLanguage
-checkout.
+Run commands from the **TinyCPU repository root**. The
+[quickstart](tiny_cpu_quickstart.md) runs the Python reference model; this page
+covers offline checks and the actual Logisim circuit.
 
 ## Prerequisites
 
-- **Java 21 or newer** (`java -version`)
-- **Python 3** (`python3 --version`)
-- an internet connection for the first run **or** the file
-  `logisim-evolution-4.1.0-all.jar`
+Use Python 3.12 or newer (CI uses 3.12). The offline suite uses only the Python
+standard library. Electrical tests additionally need Java 21 or newer and the
+pinned Logisim-evolution **4.1.0** JAR. On Linux, provide an X display or Xvfb
+for the native vector runners; CI installs Xvfb. Shell gates require Bash.
 
-You do not need to install Logisim separately. Logisim support is part of the
-project: circuits, fixtures, launcher, pinned version, and CI provisioning are
-checked in. Only the unchanged upstream binary is **not duplicated as a Git
-blob**; its conventional local location is documented.
-The test script first uses `vendor/logisim-evolution-4.1.0-all.jar` when you
-place it there, then checks `~/.cache/tinycpu/`, and only downloads the exact
-supported version as a last resort. GitHub Actions caches this download between
-runs, so it is not fetched anew for every commit.
+The launcher uses `LOGISIM_JAR` or `--jar` when supplied, otherwise the
+[vendor location](../vendor/README.md), then the local TinyCPU cache, then the
+pinned upstream download. An available JAR avoids network access.
 
-## Complete automated test
+## Offline gate
 
-Before using Java, run the repository's fast offline gate:
+Under Bash:
 
 ```bash
 scripts/test-offline.sh
 ```
 
-It parses every checked-in JSON and Logisim project, rejects malformed circuit
-hierarchies, duplicate pin names, recursive subcircuits, missing subcircuits,
-zero-length wires, and diagonal wires, and cross-checks the opcode/profile and
-electrical-matrix inventories. This is a structural and contract check only;
-it does **not** replace the electrical Logisim run below.
+Under native PowerShell, run the same three checks individually and verify
+that each exits 0 (`$LASTEXITCODE` after each command):
 
-## Automated checks for commits and pull requests
-
-The same offline test suite is used locally and by GitHub, so failures can be
-found before code is pushed:
-
-```bash
-python3 -m pip install pre-commit
-pre-commit install
+```powershell
+python src/tiny_cpu_verify.py
+python scripts/check-logisim-circuit.py
+python -m unittest discover -s tests -v
 ```
 
-After this one-time setup, `.pre-commit-config.yaml` runs
-`scripts/test-offline.sh` before every commit. A failing check aborts the
-commit. Run `pre-commit run --all-files` to check the complete working tree at
-any time. The hook can only protect checkouts in which it has been installed;
-the test script may also be run directly without installing `pre-commit`.
+These check JSON/ISA/profile contracts, circuit structure and named wiring,
+layout constraints, VM/tool behavior, executable documentation examples, and
+local links on the current documentation pages. They reject malformed or
+missing connections but do not replace electrical simulation. The suite's
+current-page inventory is in
+[`test_tiny_cpu_documentation.py`](../tests/test_tiny_cpu_documentation.py);
+linked historical records retain their dated commands.
 
-GitHub Actions runs the offline command and the electrical profile acceptance
-for every push, pull request, and merge queue entry. To prevent failed pull
-requests from being merged, configure the repository's protected branch or
-ruleset to require **Offline verification and unit tests** and **Electrical
-acceptance (all profiles)**. The workflow supplies both checks, while the
-branch protection setting in GitHub enforces them.
+## Complete electrical gate
 
-1. Open a terminal and change to the checkout:
-
-   ```bash
-   cd /pfad/zu/TinyLanguage
-   ```
-
-2. Check Java:
-
-   ```bash
-   java -version
-   ```
-
-   The output must report Java 21 or newer.
-
-3. Start the test:
-
-   ```bash
-   scripts/test-logisim.sh
-   ```
-
-The script loads `TinyCPU.circ` in the real simulator.
-For each profile it runs the complete 17-edge countdown and all isolated programs from
-the corresponding electrical matrix: one positive case for every opcode and
-the six sticky-error fixtures. Conditional jumps additionally have separate
-taken and non-taken programs. The offline gate rejects a matrix that omits an
-opcode or repeats a case ID. Results are kept below
-`artifacts/tinycpu-profile-acceptance/<profile>/`; a failure in one profile
-does not prevent the other profile from being attempted, but the combined
-command still exits nonzero.
-
-Logisim's table logger is change-driven: if two clock edges leave every
-exported signal unchanged, it emits no duplicate row. Consequently, the raw
-table can contain fewer than 17 data rows even though the complete countdown
-ran. Logisim's raw table contains values but no column-name header. Acceptance
-therefore relies on the autonomous clock together with `table,halt`: successful
-termination means that the temporary runner's specially named halt output was
-asserted. Before each run, the reference VM determines whether the fixture ends
-through `HALTED` or `HALTED_WITH_ERROR`; the launcher renames that expected
-event in the temporary copy. Both terminal instructions therefore stop the runner,
-whereas a CPU which never halts reaches the launcher timeout. The table row
-count is deliberately not treated as a clock-edge counter.
-
-This complete command is a required CI test. A missing simulator, an incomplete
-matrix, or any electrical failure causes the run to fail; there is no silent
-fallback to a project-loading-only or Python test. The CI artifact preserves
-all tables produced before success or failure.
-
-The matrix launcher prints and immediately flushes the profile, fixture number,
-fixture count, and fixture ID before starting each isolated Logisim process.
-This heartbeat is intentional: every fixture needs a fresh JVM for its injected
-ROM, so a complete two-profile run can otherwise look stalled in a buffered CI
-log even though electrical simulation is still advancing. The last printed ID
-also identifies the fixture to inspect if its per-process timeout is reached.
-The acceptance script runs fixtures serially because Logisim JVMs can share
-simulator state outside their isolated project directories on hosted runners.
-Environments known to isolate that state may opt into concurrency with, for
-example, `LOGISIM_JOBS=2`; CI deliberately prioritizes reproducibility. A
-fixture failure includes its profile and ID in the final error message.
-In the default serial mode the launcher stops immediately at that fixture; it
-does not print or execute the remaining matrix entries after a failure.
-
-The `LOAD_ADDRESS_REGISTER_PLUS_OFFSET` acceptance case also guards a physical
-top-level junction: the address path's register-plus-offset sum must branch to
-the effective-address selector. A visually routed but electrically floating
-selector input prevents Logisim from settling and appears as a launcher
-timeout rather than as an ordinary value mismatch.
-Its decode signal must also occupy the third `ACC_MEMORY_SELECT` input. The
-immediate `LOAD_CONST` control must not drive that selector: register-offset
-loads consume memory data, while constants retain the operand path.
-
-### If you already have the Logisim JAR
-
-Pass its path explicitly instead of downloading it:
+Use Bash (including Git Bash on Windows):
 
 ```bash
-LOGISIM_JAR=/pfad/zu/logisim-evolution-4.1.0-all.jar scripts/test-logisim.sh
+scripts/test-logisim.sh
 ```
 
-## Inspecting the circuit as well
+An explicit local runtime can be selected without changing system settings:
 
-For a visual inspection, start Logisim-evolution 4.1.0 and open
-`hardware/logisim/TinyCPU.circ`. Select the `TinyCPUMain` sheet on the left. You
-can inspect signals with the Poke tool; the automated test does not require
-changes to the file.
+```bash
+JAVA='/path/to/java' LOGISIM_JAR='/path/to/logisim-evolution-4.1.0-all.jar' scripts/test-logisim.sh
+```
 
-If the large project does not load, first open
-`hardware/logisim/smoke/PinPair-1bit.circ`, `PinPair-12bit.circ`, and
-`PinPair-16bit.circ` in that order. If they work, use the standalone projects
-under `hardware/logisim/diagnostics/` to narrow the problem down to the affected
-circuit sheet.
+Replace both placeholders with real paths. The gate runs the one supported
+base profile, `tinycpu-16-12`; the 8/8 experiment is retired. The complete
+matrix is mandatory, with no `TINYCPU_FULL_ACCEPTANCE` switch. It includes:
 
-## Common problems
+- two deterministic minimal-core runs, the 17-instruction countdown, and all
+  63 baseline ISA/error fixtures with full observed-state comparison;
+- 23 dynamic INPUT cases, three INPUT error copies, and the 63 baseline
+  fixtures through the input top with inactive input;
+- targeted decode, STORE, PRINT, immediate/address, arithmetic, and mutation
+  regressions;
+- all seven optional peripheral-system cases and operator clock/core checks.
 
-| Message or symptom | Solution |
-|---|---|
-| `Java 21 or newer is required` | Install Java 21+ or use `JAVA=/pfad/zu/java scripts/test-logisim.sh`. |
-| JAR download fails | Download the JAR manually and run `scripts/test-logisim-local.sh /pfad/zur/JAR`. |
-| Multiple JAR files found | Pass the desired full path to `scripts/test-logisim-local.sh`. |
-| Test fails | Check the first error message and `artifacts/tinycpu-ap12-acceptance/acceptance.json`; an aborted run does not count as passing. |
+The [core comparator](tiny_cpu_core_trace.md) compares pre/post observations
+at each driven rising edge: PC, registers and validity, flags, output events,
+write requests, and RAM. The separate INPUT ledger checks consumption. The
+older autonomous `table,halt` run is still supplementary; its change-driven
+row count is not an instruction count, and reaching halt alone is insufficient.
+
+Fixtures run serially by default and report their ID before execution. A
+failed fixture stops its serial matrix at the first difference, which names
+the edge, phase, signal, expected and observed value. The shell gate attempts
+its remaining independent check groups, then exits nonzero if any failed.
+`LOGISIM_JOBS` can opt into parallel baseline fixtures; the default is 1.
+
+Raw traces and reports remain below
+`artifacts/tinycpu-profile-acceptance/` (override with `LOGISIM_OUTPUT`). In
+particular, inspect `tinycpu-16-12/isa-matrix/`, `input/`,
+`tinycpu-peripherals-16-12-v1/system-matrix/`, and `operator-core/`, together
+with the first error message. A partial artifact directory is not a pass.
+
+## Focused native PowerShell diagnostic
+
+For the baseline core and matrix only:
+
+```powershell
+python src/tiny_cpu_logisim.py --trace-output artifacts/core/core.tsv --matrix-output artifacts/core/isa
+```
+
+Add `--java 'C:/path/to/java.exe'` and `--jar 'C:/path/to/logisim-evolution-4.1.0-all.jar'`
+if needed. This diagnostic does not replace INPUT, system, operator, or the
+other regressions in the full shell gate. The 10 November
+[local acceptance record](tiny_cpu_input_reset_repair.md) documents how those
+same Python subcommands were run where sandbox restrictions prevented Bash.
+
+## CI and manual inspection
+
+[GitHub Actions](../.github/workflows/tests.yml) runs the offline gate with
+Python 3.12 and the electrical gate with Java 21 on Linux, preserving electrical
+artifacts even on failure. The existing check names are **Offline verification
+and unit tests** and **Electrical acceptance (all profiles)**; the latter is
+a retained CI name, not evidence that multiple base profiles are supported.
+A configured workflow is not proof of a completed Linux run for this candidate.
+
+The optional pre-commit hook runs the offline gate after installing
+`pre-commit` and running `pre-commit install`; use `pre-commit run --all-files`
+for a manual hook run. Direct execution needs no hook installation.
+
+Open [TinyCPU.circ](../hardware/logisim/TinyCPU.circ) to inspect the core or
+[TinyCPU_Operator.circ](../hardware/logisim/TinyCPU_Operator.circ) for the
+implemented RESET/STEP/RUN panel. If loading fails, start with the
+[one-bit smoke project](../hardware/logisim/smoke/PinPair-1bit.circ) and the
+[standalone diagnostics](../hardware/logisim/diagnostics/).
+The [manual GUI procedure](../hardware/logisim/README.md#manueller-gui-kurztest)
+requires visible interaction and a recorded result. It remains open. Neither
+an automated operator test nor an Xvfb process completes it.
+
+The [current status](tiny_cpu_instruction_status.md) links the latest local
+acceptance. Fresh-checkout release qualification (AP 22.5) and Linux evidence
+(AP 22.4) remain separate open tasks.
 
 # Topological circuit tests
 

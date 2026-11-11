@@ -1,14 +1,31 @@
 # Funktionsstand der TinyCPU-Befehle
 
-**Aktueller Stand: 4. November 2026 — 63 bestehende Kernfixtures und sieben
-Systemfixtures bestehen; zusätzlich 38 Adressgültigkeitsfälle.**
+**Aktueller Stand: 10. November 2026 — AP 22.1 und 22.2 lokal abgenommen.**
 
-Die fehlende Gültigkeitsprüfung des Adressregisters ist korrigiert; indirekte
-Zugriffe werden bei ungültigem Register gesperrt. Die
-[Nachweise und Abdeckungsgrenzen](tiny_cpu_address_validity.md) umfassen auch
-den öffentlichen Peripherie-Schreibimpuls. Vier projektweite Rasterbefunde
-und der bestehende Decoder-Mutationstest bleiben in der Offline-Suite offen;
-eine neue vollständige Releasefreigabe wird daraus nicht abgeleitet.
+Die [Abnahme vom 10. November](tiny_cpu_input_reset_repair.md) belegt zwei
+Minimalkernläufe, Countdown und alle 63 bestehenden Kernfixtures mit dem
+vollständigen beobachteten Pre-/Post-Zustandsvergleich gegen die VM. Zusätzlich
+bestehen 23 dynamische INPUT-Fälle, drei INPUT-Fehlerkopien sowie alle 63
+Baselinefixtures über das Eingabetop bei inaktiver Eingabe. Der Vergleich
+umfasst PC, Register und Gültigkeit, alle Fehlerflags, Ausgabeereignisse sowie
+RAM; der Quellenverbrauch wird getrennt protokolliert.
+
+Außerdem bestehen 83 mathematisch festgelegte arithmetische Kernfälle,
+38 Adressgültigkeitsfälle, sieben Systemfixtures und die automatischen
+Operator-Takt-/Kernprüfungen samt zugehörigen Negativkontrollen. Die
+[arithmetische v1-Grenze](tiny_cpu_circuit_repair_20261106.md) erhält
+−32768 ÷ −1 als −32768 VALID ohne OVF. Die 294 damaligen Windows-Unit-Tests
+bestehen nach Korrektur der Layout-Testreferenzen.
+
+Das ist ein lokaler Nachweis für die ausgeführten Fälle, keine allgemeine
+Äquivalenz aller Programme und keine neue Releasefreigabe. Der Linux-Nachweis
+(AP 22.4), die gemeinsame Neuabnahme aus frischem Checkout (AP 22.5) und die
+interaktive GUI-Kurzabnahme bleiben offen. Das Operator-Panel ist implementiert;
+dessen automatische Abnahme ersetzt keine manuelle Bedienprüfung.
+
+Die folgenden Abschnitte sind **historische Aufzeichnungen**. Ihre Zahlen,
+Befehle, Testmethoden und damaligen offenen Punkte gelten für den jeweils
+genannten Kandidaten; aktuelle Befehle stehen im [Testleitfaden](tiny_cpu_test_guide.md).
 
 **Historischer Stand: 31. Oktober 2026 — alle 61 damaligen Kernfixtures bestehen.**
 
@@ -28,8 +45,8 @@ historischer Abschlussvermerk vom 20. September 2026 gekennzeichnet.
 
 Details und Nachweise stehen im
 [AP-22.1-Diagnosebericht](tiny_cpu_circuit_debug_report.md#ap-221-registerpfade-und-vollständige-61-fall-abnahme-am-31-oktober-2026).
-Der [Beobachtungsvertrag](tiny_cpu_core_trace.md) beschreibt die neue Prüfung
-und ihre noch offene Grenze für gültige Eingaben. Der manuelle GUI-Test bleibt
+Der [Beobachtungsvertrag](tiny_cpu_core_trace.md) beschreibt die neue Prüfung;
+die damalige Eingabegrenze wurde am 10. November geschlossen. Der manuelle GUI-Test bleibt
 ebenfalls offen.
 
 ## Historischer Abschlussstand vom 20. September 2026

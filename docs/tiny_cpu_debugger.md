@@ -54,7 +54,8 @@ Weitere wichtige Optionen:
 Ein normaler Halt und ein Breakpoint liefern Exit-Code `0`. `halt_error` und
 `step_limit` liefern Exit-Code `1`; fehlerhafte Argumente, nicht assemblierbare
 Quellen und ungültige Breakpoints werden von `argparse` mit Exit-Code `2`
-gemeldet. Damit kann der Debugger auch in Skripten eingesetzt werden.
+gemeldet. Gesetzte Sticky-Flags allein ändern den Exit-Code nicht: `HALT()`
+bleibt auch dann `halt` mit Exit-Code `0`. Damit kann der Debugger auch in Skripten eingesetzt werden.
 
 ## Mehrere Stopps mit der Python-Schnittstelle
 
@@ -85,8 +86,7 @@ print(state["stop_reason"], state["output"])
 `remove_breakpoint` löscht einen Breakpoint wieder. `read_memory(100)` liest
 eine einzelne Zelle; `read_memory(100, 110)` liest den geschlossenen Bereich
 100 bis 110. Beide Formen liefern für jede Zelle `address`, `value` und
-`valid`. Bereichsgrenzen außerhalb des gewählten Profils (`0..4095` oder
-`0..255`) werden abgelehnt.
+`valid`. Bereichsgrenzen außerhalb des unterstützten Profils (`0..4095`) werden abgelehnt.
 
 Die Python-Schnittstelle `Debugger` bietet zusätzlich `add_breakpoint`,
 `remove_breakpoint`, `step`, `continue_` und `read_memory(start, end)`. Ein

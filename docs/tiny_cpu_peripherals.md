@@ -6,52 +6,26 @@ nicht selbst dessen Spezifikation.
 
 ## Status und bewusste Grenze
 
-`TinyCPU_Peripherals.circ` enthält derzeit drei eigenständig prüfbare
-Bausteine: `OutputPort`, `OutputMemoryPath` und `InterruptController`. Die neue
-`CPUIntegrationBoundary` friert zusätzlich die dafür benötigte CPU-seitige
-Daten-, Befehls- und PC-Schnittstelle mit Richtung und Breite ein.
-`TinyCPUSystemMain` beschreibt nur die öffentliche Systemgrenze. Takt, Reset
-und externe Interruptanforderung erreichen inzwischen die jeweils betroffenen
-Bausteine. Hinter der neuen Grenze sind der atomare Leseweg aus RAM-Wert und
-RAM-Gültigkeit, der 12-Bit-Adressweg und die drei CPU-seitigen Signale für
-Schreibwert, Schreibgültigkeit und Schreibfreigabe von vorläufigen
-CPU-Kernanschlüssen bis zur Speichergrenze direkt verdrahtet. Auch die
-Instruktionsgrenze und die drei Befehlsimpulse für Aktivierung, Deaktivierung
-und Rückkehr reichen direkt zu den Interruptausgängen. Der Folge-PC wird von
-einem vorläufigen Kernanschluss direkt zur Interruptsteuerung geführt. Damit
-ist der PC-Steuerpfad innerhalb der Grenze ebenfalls vorbereitet; die
-Top-Level-Grenze ist nun mit allen 15 Daten-, Adress-, Schreib-, Befehls- und
-Interruptpfaden direkt an `OutputMemoryPath` und `InterruptController`
-angeschlossen. Für alle direkten 1:1-Übergaben zwischen `TinyCPUMain`,
-`CPUIntegrationBoundary` und `InterruptController` gilt dabei dasselbe
-Pin-Schema: Name und Busbreite bleiben an beiden Seiten identisch; nur die
-Richtung kehrt sich an der Verbrauchergrenze um. Das betrifft insbesondere
-`INTERRUPT_TARGET_PC` sowie die drei `*_INTERRUPTS_REQUEST`-Signale.
-Der 12-Bit-Ausgang `CPUIntegrationBoundary.ADDRESS` endet ausschließlich am
-12-Bit-Eingang `OutputMemoryPath.ADDRESS`. Er darf insbesondere nicht mit dem
-16-Bit-Eingang `OutputMemoryPath.RAM_READ_VALUE` verbunden werden. Die
-Vertragsprüfung vergleicht deshalb für jede direkte Übergabe ausdrücklich
-Erzeugerpin, Verbraucherpin, Richtung und Breite, statt nur zu prüfen, ob eine
-Leitung optisch an einem Unterbaustein endet.
-Die Prüfung dieser Wege folgt den benannten Pins und den
-tatsächlichen Anschlüssen der generierten Symbole und bleibt dadurch auch nach
-einer manuellen Neuanordnung der Grenze wirksam.
-Innerhalb der Grenze speisen außerdem der adressierte Speicherwert des
-vollständigen Kerns und dessen Gültigkeitsbit direkt die beiden
-Leseausgänge des Adapters. Die ausgewählte Rückleseseite erreicht nun die neue
-additive Kernschnittstelle aus Wert, Gültigkeit und Aktivierung. Ihre interne
-Auswahl ist nun für Wert und Gültigkeit jeweils über einen eigenen Multiplexer
-verdrahtet. `USE_EXTERNAL_MEMORY` schaltet beide Pfade gemeinsam auf die
-Systemrückleseseite; ohne diese additive Aktivierung bleibt der bisherige
-RAM-Pfad des eigenständigen 1.0-Profils unverändert ausgewählt.
-Deshalb
-ist der klassische Interruptcontroller vorläufig eine **Referenzlösung für
-AP 18**, keine unumkehrbare Festlegung der TinyCPU-Architektur.
+Die optionale Systemvariante `tinycpu-peripherals-16-12-v1` ist auf dem
+16/12-Kern implementiert. [TinyCPU_Peripherals.circ](../hardware/logisim/TinyCPU_Peripherals.circ)
+verbindet den Kern über `CPUIntegrationBoundary` mit `OutputMemoryPath`,
+`OutputPort` und `InterruptController`. RAM-Rücklesewert und Gültigkeit,
+Schreibwert/-gültigkeit/-freigabe, Adresse, Instruktionsgrenze, Interruptbefehle
+und Folge-PC sind an die benannten Kernpins angeschlossen. Interruptannahme,
+Ziel-PC und ungültige Rückkehr wirken auf den Kern zurück.
 
-Insbesondere sind Polling, ein ausdrücklicher `WAIT`-Befehl und ein lediglich
-sichtbares Pending-Bit weiterhin denkbare Alternativen. Erst die spätere
-Systemintegration entscheidet, ob der automatische Sprung wirklich Bestandteil
-der TinyCPU werden soll.
+Im eigenständigen Kern bleibt der interne RAM-Pfad aktiv; der externe Modus
+wählt Wert und Gültigkeit gemeinsam. Für direkte Übergaben gelten gleiche
+Signalnamen und Breiten bei entgegengesetzter Pinrichtung. Die 12-Bit-Adresse
+endet am Adresseingang, nicht am 16-Bit-Rücklesewert.
+
+Alle sieben versionierten Systemfälle bestehen in der
+[lokalen Abnahme vom 10. November](tiny_cpu_input_reset_repair.md). Sie prüfen
+Ausgabeport, Interruptannahme/-rückkehr, Maskierung und Reset gemäß dem
+[Systemvertrag](../hardware/logisim/tinycpu-system-trace-v1.json). Diese
+optionale Referenzlösung ist kein Bestandteil des Basis-Maschinenformats;
+die neue Releaseabnahme und der manuelle GUI-Test bleiben offen.
+Historische Integrationsschritte stehen im [AP-18-Plan](tiny_cpu_peripherals_plan.md).
 
 ## Ausgabeport: eine besondere Speicheradresse
 
@@ -92,11 +66,15 @@ Anforderung wird ausschließlich zwischen zwei Instruktionen angenommen:
 
 ```text
 INTERRUPT_ACCEPT =
-    INTERRUPT_PENDING
+    (INTERRUPT_PENDING OR RISING_EDGE_DETECT)
     AND INTERRUPT_ENABLED
     AND INSTRUCTION_BOUNDARY
     AND NOT IN_INTERRUPT_HANDLER
 ```
+
+Eine aktuelle steigende Anforderung kann damit bereits an derselben
+Instruktionsgrenze angenommen werden. Bei gesperrter Maske bleibt die
+Anforderung im Pending-Zustand erhalten. Reset hat Vorrang.
 
 Bei der Annahme führt die Maschine semantisch folgende Pseudo-Instruktion aus:
 
@@ -128,6 +106,7 @@ Bei einer gültigen Rückkehr gilt:
 
 ```text
 TARGET_PC            := RET_ADDR
+RET_ADDR             := 0
 RET_ADDR_VALID := 0
 IN_INTERRUPT_HANDLER := 0
 INTERRUPT_ENABLED    := 1
@@ -172,8 +151,8 @@ gilt:
 2. Interruptannahme;
 3. normale Instruktionsverarbeitung.
 
-Diese Regeln sind die Grundlage für Softwaremodell, Verträge und spätere
-elektrische Systemtests. Die Systemschaltung bindet inzwischen die
+Diese Regeln bilden die Grundlage für Softwaremodell, Verträge und die
+implementierten elektrischen Systemtests. Die Systemschaltung bindet inzwischen die
 unveränderte `TinyCPUMain`-CPU als externe Projektbibliothek in ihre
 Integrationsgrenze ein. Der Kern exportiert inzwischen Schreibwert,
 Schreibgültigkeit und Schreibfreigabe direkt von den drei Netzen, die auch
@@ -195,5 +174,5 @@ Mehrfachtreiberprüfung, geometrischen Kontakt-Audit sowie einen headless
 Logisim-Tabellenlauf. Damit werden falscher Port, fehlendes Leitungsstück,
 Kurzschluss und ein in Logisim undefinierter Wert getrennt sichtbar. Ein
 absoluter mathematischer Beweis für alle zeitlichen Abläufe ist das noch nicht;
-der vollständige End-to-End-Nachweis bleibt von der elektrischen Systemmatrix
-abhängig.
+der End-to-End-Nachweis gilt für die ausgeführten Fälle der elektrischen
+Systemmatrix.

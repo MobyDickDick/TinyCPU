@@ -9,21 +9,17 @@ break before changing the accepted machine.
 
 ## Recommendation
 
-The review on 21 October 2026 identified gaps in core trace verification,
-division overflow handling, documentation, and Windows tests. Address the open
-[AP 22 quality work packages](tiny_cpu_quality_work_packages.md) before choosing
-another feature experiment. Earlier acceptance records do not establish the
-full state parity currently missing from the core gate. The operator panel
-from AP 21 is already implemented; its manual GUI smoke test remains open.
-The feature recommendations below record possible directions rather than the
-current required next task.
+The required next tasks are tracked in the
+[AP 22 quality work packages](tiny_cpu_quality_work_packages.md). AP 22.1
+(core/INPUT comparison) and 22.2 (arithmetic boundary contract) were locally
+accepted on 10 and 6 November 2026 respectively. AP 22.3 maintains executable
+documentation. The Linux evidence from 22.4 and the fresh-checkout release
+acceptance from 22.5 remain open. See [current evidence](tiny_cpu_instruction_status.md).
 
-First complete only the deferred manual GUI smoke test and preserve the current
-release as a baseline. If work resumes, implement an **operator/trace panel** as
-the next small project. It directly answers the need to watch TinyCPU work,
-changes no ISA semantics, and has a clear definition of done: load the supplied
-countdown program, reset it, single-step it, run/pause it, and visibly show PC,
-instruction, accumulator plus validity, output, halt state, and error flags.
+The operator panel from AP 21 and the eight-box CPU overview from AP 23 are
+already implemented. Use the [operator circuit](../hardware/logisim/TinyCPU_Operator.circ)
+to watch execution; its interactive manual GUI acceptance remains open.
+The suggestions below are future experiments, not missing current features.
 
 After that, choose **one** research branch in a copy or feature branch. Do not
 redraw the CPU, unify memory, add multithreading, and make it asynchronous in a
@@ -35,8 +31,8 @@ single evolution step.
 |---|---|---|---|
 | Beginner documentation | Very high | Low | Keep the ten-minute guide executable and add one annotated trace. |
 | English documentation | High | Medium | Use English for new canonical pages; translate one topic at a time without mixing language inside a page. |
-| Watch execution | Very high | Low–medium | Build the operator/trace panel first; retain the existing debugger as the non-GUI reference. |
-| Redraw `TinyCPUMain` using only functional blocks | High for readability | Medium–high; easy to break accepted wiring | Create a new presentation top level that instantiates tested blocks. Keep the accepted top level unchanged until equivalence tests pass. |
+| Watch execution | Very high | Low–medium | Use the existing operator panel and debugger; finish the manual GUI acceptance. |
+| Redraw `TinyCPUMain` using only functional blocks | High for readability | Medium–high; easy to break accepted wiring | Already implemented in AP 23; preserve the eight-box overview and verified interfaces. |
 | Unified program/data memory | High as an architecture experiment | High; changes machine format, loader, write protection, and tests | Define a separate von Neumann profile, boot protocol, address map, and protected/code-writable policy. Do not silently change the 16/12 profile. |
 | Concurrent programs | Interesting, but not small | Very high; scheduling, memory isolation, I/O ownership, interrupt and error semantics | Prototype banked PC/ACC/flags in the VM first. Specify context switching and shared memory before drawing hardware. |
 | Live input/output | High and demonstrable | Medium | Start with one input register/queue and one output display; specify handshake, validity, and behavior when no input is available. |
@@ -49,11 +45,10 @@ single evolution step.
 
 ### Functional-block redraw
 
-A presentation-oriented `TinyCPUMainBlocks` is safer than editing the verified
-`TinyCPUMain` in place. Its public pins should match the existing top level,
-and an automated trace comparison should prove the same behavior. Hierarchy
-can hide detail without deleting it: users can descend from CPU to datapath,
-ALU, adder, and eventually gate-level demonstrations.
+AP 23 already places eight functional boxes in `TinyCPUMain`. Preserve this
+implemented boundary and the protected decoder drawing. New presentation
+experiments must follow the [project rules](../hardware/logisim/AGENTS.md)
+and compare behavior electrically before claiming equivalence.
 
 ### Unified memory and booting
 

@@ -1,5 +1,11 @@
 # TinyCPU 1.0 release plan
 
+> Historical release record. Commands, file names, compatibility claims, and
+> acceptance results below refer to that release stage. For the current
+> checkout use the [test guide](tiny_cpu_test_guide.md) and
+> [current evidence](tiny_cpu_instruction_status.md). Fresh-checkout release
+> qualification of the current candidate remains open in AP 22.5.
+
 The electrical acceptance of the circuit is complete, but that alone does not
 constitute a TinyCPU 1.0 product release. AP 1 through AP 12 prove the hardware
 and its simulator behaviour. The following bounded packages turn that accepted

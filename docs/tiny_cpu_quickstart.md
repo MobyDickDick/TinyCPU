@@ -72,36 +72,68 @@ the two halt outputs.
 
 ## Run it without the circuit GUI
 
-The Python VM is the executable reference model and is the quickest way to
-learn the instruction set:
+Use Python 3.12 or newer from the repository root. These single-line commands
+work in Bash and PowerShell with `python` on PATH; use `python3` instead on
+systems that require that name. No packages, Java, or `PYTHONPATH` are needed
+for these VM runs. The existing debugger is the command-line entry point;
+`tiny_cpu_vm.py` itself is a library.
+
+<!-- example: countdown exit: 0 -->
 
 ```bash
-PYTHONPATH=src python src/tiny_cpu_vm.py hardware/logisim/ap5_countdown.tcpu
+python src/tiny_cpu_debugger.py hardware/logisim/ap5_countdown.tcpu
 ```
 
-To inspect a program instruction by instruction, use the symbolic debugger:
+```text
+stop=halt pc=9 steps=17
+ACC=0 valid=true AR=0 valid=false ZERO=true NEGATIVE=false
+errors=- output=[3, 2, 1]
+memory_changes=[{'address': 100, 'value': 0, 'valid': True}, {'address': 101, 'value': -1, 'valid': True}]
+```
+
+This prints the final machine state; the program's three PRINT events appear
+in `output=[3, 2, 1]`. The process exits with code **0**. The countdown source
+is slightly longer than the sum example above: it stores a decrement and a
+counter, then loops three times.
+
+The six-instruction sum above is checked in as
+[`examples/sum.tcpu`](examples/sum.tcpu). Run it with:
+
+<!-- example: sum exit: 0 -->
 
 ```bash
-PYTHONPATH=src python src/tiny_cpu_debugger.py \
-  hardware/logisim/ap5_countdown.tcpu
+python src/tiny_cpu_debugger.py docs/examples/sum.tcpu
 ```
 
-The debugger supports stepping, continuing, breakpoints, memory inspection,
-input injection, and JSON traces; its command reference is in
-[`tiny_cpu_debugger.md`](tiny_cpu_debugger.md).
+```text
+stop=halt pc=6 steps=6
+ACC=5 valid=true AR=0 valid=false ZERO=false NEGATIVE=false
+errors=- output=[5]
+memory_changes=[{'address': 10, 'value': 3, 'valid': True}]
+```
+
+Exit code: **0**. For breakpoints, single steps, input values, and JSON state
+output, see the [debugger reference](tiny_cpu_debugger.md). Each CLI invocation
+starts a new run; the Python debugger API supports a continuing session.
 
 ## Watch the actual Logisim circuit
 
-On a desktop, open `hardware/logisim/TinyCPU.circ` with Logisim-evolution
-4.1.0, select `TinyCPUMain`, reset the simulation, and toggle the external
-`CLK` pin from 0 to 1 and back to 0 for each step. Do not use Logisim’s manual
-tick command: this circuit intentionally uses an external clock pin.
+The implemented [operator panel](../hardware/logisim/TinyCPU_Operator.circ)
+provides RESET, STEP, and RUN around the real CPU. Its
+[description](../hardware/logisim/TinyCPU_Operator.md) and
+[implementation/acceptance record](tiny_cpu_operator_panel_plan.md) explain the
+clock controls. Open it with Logisim-evolution **4.1.0**, using Java 21 or
+newer. For direct inspection, open
+[`TinyCPU.circ`](../hardware/logisim/TinyCPU.circ) and select `TinyCPUMain`.
+That sheet uses an external CLK pin; Logisim's manual tick command does not
+toggle it. The [manual GUI procedure](../hardware/logisim/README.md#manueller-gui-kurztest)
+explains the raw-core path. The interactive GUI acceptance remains open;
+automated operator and core tests do not establish a successful manual run.
 
-The exact Linux, Windows, and container/VNC instructions and the expected
-countdown trace are in the [manual GUI test](../hardware/logisim/README.md#manueller-gui-kurztest).
-If the interface is too low-level, the proposed operator panel explains a
-safer future UI with reset, single-step, run, and readable state displays; see
-[`tiny_cpu_operator_panel_plan.md`](tiny_cpu_operator_panel_plan.md).
+The current local electrical acceptance covers 63 baseline core fixtures,
+23 dynamic INPUT cases, arithmetic boundaries, seven system cases, and the
+operator. These are bounded tests rather than a proof for every possible
+program. See [status and evidence](tiny_cpu_instruction_status.md).
 
 ## Where to read next
 

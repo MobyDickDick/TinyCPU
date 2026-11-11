@@ -1,134 +1,60 @@
-# TinyCPU: microcomputer, assembly language, and simulator
+# TinyCPU: architecture, assembly language, and reference execution
 
-TinyCPU is a deliberately small, complete teaching machine for TinyLanguage. By
-default, it is a **16-bit accumulator machine** with a 12-bit address bus and
-4,096 memory cells. Data and address widths can be configured independently.
-The machine has an address register, a program counter, input/output,
-conditional jumps, and strict error semantics. The simulator is in
-`src/tiny_cpu_vm.py`, the assembler is in `src/tiny_cpu_assembler.py`, and the
-ISA is in `src/tiny_cpu_isa.py`.
+TinyCPU is a teaching accumulator machine. The supported execution profile is
+**tinycpu-16-12**: signed 16-bit data, 12-bit addresses, and 4,096 data cells.
+Program ROM and data RAM are separate. The former experimental 8/8 profile is
+retired; the current tools expose only 16/12. The optional peripheral system
+uses that same base profile.
 
-## Circuit-simulation recommendation
+## Implemented tools and machine format
 
-**[Logisim-evolution](https://github.com/logisim-evolution/logisim-evolution)**
-is recommended for recreating TinyCPU. It is cross-platform, makes educational
-circuits easy to understand, and provides the registers, RAM/ROM, ALU,
-splitters, and clock components that TinyCPU needs. Most importantly, it allows
-the processor to be divided hierarchically into datapath, control unit, and
-input/output. The included Python VM remains the reference: a Logisim test is
-correct when registers, memory, output, and error flags match
-`src/tiny_cpu_vm.py` after every clock tick.
+- [`tiny_cpu_vm.py`](../src/tiny_cpu_vm.py): reference CPU state and execution;
+  a Python library without a standalone command-line runner.
+- [`tiny_cpu_assembler.py`](../src/tiny_cpu_assembler.py): symbolic
+  `Instruction`/`Program`, `assemble()`, `load_program()`, and `encode_program()`.
+- [`tiny_cpu_debugger.py`](../src/tiny_cpu_debugger.py): the program-running CLI,
+  breakpoints, steps, and text/JSON state output. See its
+  [options and exit codes](tiny_cpu_debugger.md).
+- [`tiny_cpu_profiles.py`](../src/tiny_cpu_profiles.py): the supported profile.
+- [`tiny_cpu_verify.py`](../src/tiny_cpu_verify.py): offline contract checks.
 
-**[Digital](https://github.com/hneemann/Digital)** is a suitable alternative,
-particularly when automated circuit tests and a compact Java application are
-more important. Logisim-evolution is preferred for collaboration and easily
-accessible documentation. Browser-based tools are useful for demonstrations,
-but make it more difficult to model precisely the validity bits and sticky
-error flags described below.
+The versioned [opcode table](../hardware/logisim/tinycpu-machine-v1.json)
+defines a 22-bit word: six opcode bits plus a 16-bit operand. The assembler
+encodes a `Program` into machine words; `load_program()` reads `.tcpu` sources
+or Logisim `.rom` files. The checked-in [countdown source](../hardware/logisim/ap5_countdown.tcpu)
+and [ROM](../hardware/logisim/ap5_countdown.rom) are reproducible fixtures.
+There is no separate ISA, machine-encoder, or general-purpose CLI module.
 
-The machine format is now versioned: an instruction word consists of 22 bits,
-with a 6-bit opcode and a 16-bit operand. `assemble()` continues to return a
-`Program` made up of symbolic `Instruction` objects; `src/tiny_cpu_machine.py`
-then converts them into machine words, a ROM image readable by
-Logisim-evolution, and a human-readable listing file. The opcode table is in
-`hardware/logisim/tinycpu-machine-v1.json`. The AP-5 program, its ROM image, and
-its listing serve as reproducible reference artifacts for the encoder and the
-embedded Logisim ROM.
+## Hardware and clock contract
 
-### Hardware contract for an implementation
+[`TinyCPU.circ`](../hardware/logisim/TinyCPU.circ) runs in Logisim-evolution
+**4.1.0** with Java 21 or newer. `TinyCPUMain` is an overview of eight functional
+boxes. Details belong inside those boxes; the hand-drawn decoder remains
+protected by [the Logisim rules](../hardware/logisim/AGENTS.md).
 
-The smallest compatible circuit consists of the following states and signals:
-
-| Part | Required state / behavior |
+| State | Contract |
 |---|---|
-| Program control | unsigned, `address_bits`-wide PC; increment to the next instruction before execution |
-| Datapath | `data_bits`-wide two’s-complement accumulator plus zero and negative status |
-| Addressing | `address_bits`-wide address register with its own validity bit |
-| Data memory | one `data_bits`-wide value **and one validity bit** per cell |
-| Error register | sticky bits `OVF`, `DIV0`, `ADDR`, `INV`, `ILL`, `INPUT`; their OR is `ERR` |
-| Input/output | input queue to the accumulator; `PRINT` writes a valid value to the output channel |
-| Halt | separate states for a normal halt and a halt with an error |
+| PC | 12-bit instruction index into program ROM |
+| Accumulator | 16-bit signed value plus validity; valid zero/negative status |
+| Address register | 12-bit address plus validity; invalid indirect accesses are rejected |
+| Data RAM | 16-bit value and validity per cell |
+| Errors | Sticky OVF, DIV0, ADDR, INV, ILL, INPUT; ERR is their OR |
+| I/O | INPUT loads the accumulator; PRINT emits valid values |
+| Halt | Separate normal and error halt states |
 
-The validity bit is not an optional debugging signal: the specified error
-propagation cannot be implemented without a validity bit for the accumulator,
-the address register, and every memory cell. `CLEAR_ERROR()` clears only the
-error register, never validity bits. Zero is set exactly when the value stored
-in the accumulator is zero; conditional zero/not-zero jumps are taken only when
-the accumulator is valid. Negative is set only for a valid negative
-accumulator.
+Before each rising edge, fetch/decode selects the instruction, sources, write
+requests, and next PC. The edge commits register, RAM, flag, and PC changes.
+Taken jumps use instruction indices and validate their targets; an untaken
+jump does not validate its target. `CLEAR_ERROR()` clears flags without
+repairing invalid data. The [core trace contract](tiny_cpu_core_trace.md)
+defines the exact pre/post observations and memory comparison.
 
-The following sequence is observable in a clock-synchronous implementation:
-
-1. Read the instruction at `PC`; an invalid instruction address sets `ADDR`
-   and halts with an error.
-2. Increment `PC` to the next instruction.
-3. Read operands and perform the operation and validity check.
-4. Commit the result, flags, memory, or jump target together at the clock edge.
-
-Jump targets are **instruction indices**, not byte addresses. A taken jump
-outside the loaded program sets `ADDR`; a jump that is not taken does not
-validate its target. Integer division truncates toward zero. `AND`, `OR`, and
-`NOT` operate bitwise at the selected two’s-complement width. Arithmetic results
-outside the signed data range set `OVF` and write `0 INVALID` to the
-accumulator.
-
-### Testing TinyCPU.circ
-
-A short step-by-step guide for the stable electrical test, testing with an
-existing Logisim JAR, and visual troubleshooting is available in
-[`docs/tiny_cpu_test_guide.md`](tiny_cpu_test_guide.md). Run the required AP-5
-test from the repository root with `scripts/test-logisim.sh`. The full matrix
-remains available as a diagnostic run with
-`TINYCPU_FULL_ACCEPTANCE=1 scripts/test-logisim.sh`.
-
-### Accepted Logisim-evolution implementation
-
-The project that runs in Logisim-evolution 4.1.x is located at
-[`hardware/logisim/TinyCPU.circ`](../hardware/logisim/TinyCPU.circ). It defines
-the 16/12-bit profile, subcircuits, and mandatory validity/error states. The
-architecture and electrical AP-12 acceptance are documented in
-[`hardware/logisim/README.md`](../hardware/logisim/README.md). The following
-list describes the implementation and acceptance sequence already performed,
-not missing wiring: the inspector reports `TinyCPUMain: connected`, and the
-electrical AP-11 matrix covers all 50 opcodes in the versioned machine format,
-including their success and error cases. Thus, every top-level pin and the
-entire documented instruction set are implemented; visible wire crossings
-without a junction point are deliberately not electrical connections in
-Logisim.
-
-The project can first be checked structurally without Logisim by running
-`PYTHONPATH=src python src/tiny_cpu_circuit.py
-hardware/logisim/TinyCPU.circ`. The checker reads the `.circ` XML, reports
-missing connections, and exits with status 1 for contract violations. It
-deliberately does not simulate the complete Logisim component library;
-Logisim-evolution remains responsible for electrical simulation, while
-`tiny_cpu_vm.py` supplies the expected CPU semantics. A successful structural
-check therefore does not replace the full electrical test linked above.
-
-If CPU or memory usage is unusually high, the five standalone projects under
-[`hardware/logisim/diagnostics/`](../hardware/logisim/diagnostics/) can be
-loaded individually. This allows fetch/decode, datapath, address path, memory,
-and error flags to be examined without loading all other circuit sheets at the
-same time. Generation, size comparison, and a recommended test sequence are
-documented in the hardware
-[README](../hardware/logisim/README.md#ressourcenverbrauch-eingrenzen).
-
-1. The target profile was set to **16 data bits, 12 address bits, and 4,096
-   memory cells**.
-2. The datapath (accumulator, ALU, status), address path (address register,
-   offset adder), memory, and control unit were built as separate subcircuits.
-3. The validity RAM is parallel to the data RAM; both use the same address and
-   write-enable signal.
-4. The error flags are set-dominant registers; `CLEAR_ERROR` is the only shared
-   clear line.
-5. `LOAD_CONST`, `STORE_ADDRESS`, `ADD_ADDRESS`, `JUMP_NOT_ZERO`, `PRINT`, and
-   `HALT` were accepted first using the loop example.
-6. The remaining addressing modes and targeted error cases were then added and
-   accepted in the full electrical matrix.
-
-For reproducible comparisons, every circuit test should include the `.tcpu`
-source file, the target profile used, the input sequence, and the expected
-output and error flags in addition to the Logisim project.
+The [test guide](tiny_cpu_test_guide.md) gives the current required commands.
+The electrical gate includes complete observed-state comparisons against the
+VM for its fixtures, dynamic INPUT, system, arithmetic, and operator checks.
+A successful load, structural check, or normal halt alone is insufficient.
+[Current evidence and remaining limits](tiny_cpu_instruction_status.md) distinguish
+local acceptance from the pending fresh-checkout release and manual GUI tests.
 
 ## Guiding principle: errors are not modular arithmetic
 
@@ -145,7 +71,7 @@ the low data-width bits; division by zero and invalid operands still fail.
 ADD, SUB and MUL outside the signed range produce `0 INVALID` and OVF.
 See the [6 November arithmetic acceptance](tiny_cpu_circuit_repair_20261106.md).
 
-## Scale-invariant widths
+## Width-independent design requirement
 
 The long-term architecture requirement is **width-independent, not limited to
 a list of preferred sizes**.  There are two independent parameters:
@@ -157,9 +83,9 @@ a list of preferred sizes**.  There are two independent parameters:
   and RAM.  A 12-bit PC addresses 4,096 instruction locations; it is an
   address bus, not a reduction of the CPU's data bus.
 
-Every positive integral width at or above these minima is a valid design
-target.  In particular, no special case may be required for 12, 16, 24, 32,
-36, 48 or 64 bits.  Register widths, constants, splitters, sign extension,
+Every positive integral width at or above these minima is a design
+target, not an implemented execution profile. In particular, no special case
+may be required for 12, 16, 24, 32, 36, 48 or 64 bits.  Register widths, constants, splitters, sign extension,
 overflow/range checks, masks and memory-address ports must all be derived from
 `DATA_WIDTH` or `PC_WIDTH`; truncation between the two domains must be explicit
 and range-checked.  The program counter wraps or reports an address error
@@ -242,69 +168,89 @@ OP_ADDRESS_REGISTER_PLUS_OFFSET(offset)
 | Control flow | `HALT()` |
 
 Jump instructions expect a label or a numeric instruction address. `INPUT()`
-reads the next number passed with `--input`. Missing or invalid input sets
-`INPUT` and invalidates the accumulator.
+reads the next number queued with the debugger option `--input`. Missing or
+out-of-range input sets `INPUT` and invalidates the accumulator. Invalid
+PRINT operands set `INV` and emit no output.
 
-## Example and invocation
+## Run the reference model
 
-Executable example programs are located under
-[`examples/tiny_cpu/`](../examples/tiny_cpu/). There is a dedicated program for
-each operation listed below; for operations with multiple addressing modes,
-the program exercises all variants. Each `.tcpu` file has a same-named
-`.stdout` file containing the complete expected output. Optional `.args` files
-provide CLI arguments, and `.exit` files provide the expected nonzero exit
-status. The `tests/detailtests/test_tiny_cpu_examples.py` test automatically
-finds all these programs, runs them through the public CLI, and compares
-standard output, standard error, and exit status. A new output example
-therefore needs only its source file and output snapshot. An additional
-coverage test ensures that no operation or addressing mode is missing. Run the
-example suite specifically with:
+Use Python 3.12 or newer from the repository root, without installing packages
+or setting `PYTHONPATH`. The [quickstart](tiny_cpu_quickstart.md) gives the
+countdown and sum commands with their complete output. More examples follow.
+
+[`examples/input.tcpu`](examples/input.tcpu) contains INPUT, PRINT, and HALT.
+With a supplied value, the process exits **0**:
+
+<!-- example: input exit: 0 -->
 
 ```bash
-python -m pytest tests/detailtests/test_tiny_cpu_examples.py
+python src/tiny_cpu_debugger.py docs/examples/input.tcpu --input 41
 ```
 
 ```text
-counter := 20
-LOAD_CONST(3)
-STORE_ADDRESS(counter)
-
-loop:
-LOAD_ADDRESS(counter)
-PRINT()
-SUB_CONST(1)
-STORE_ADDRESS(counter)
-JUMP_NOT_ZERO(loop)
-HALT()
+stop=halt pc=3 steps=3
+ACC=41 valid=true AR=0 valid=false ZERO=false NEGATIVE=false
+errors=- output=[41]
+memory_changes=[]
 ```
+
+Without input, INPUT invalidates the accumulator and sets INPUT. PRINT then
+sets INV and emits nothing. HALT still stops normally and exits **0**; sticky
+flags alone do not change the debugger exit code:
+
+<!-- example: missing-input exit: 0 -->
 
 ```bash
-python src/tiny_cpu_cli.py program.tcpu
-python src/tiny_cpu_cli.py --disassemble program.tcpu
-python src/tiny_cpu_cli.py --input 41 input_program.tcpu
-python src/tiny_cpu_cli.py --data-bits 8 --address-bits 9 --memory-size 512 program.tcpu
+python src/tiny_cpu_debugger.py docs/examples/input.tcpu
 ```
-
-`--data-bits` and `--address-bits` also select the target profile for a CLI
-invocation. `--memory-size` must not exceed the address space determined by the
-address bus; the defaults are 16, 12, and 4096.
-
-The process exits with status 1 if `HALT_ERROR()` is executed or if an error
-flag is still set at `HALT()`. A step limit protects against unintended infinite
-loops.
-
-## Cross-compiler direction
-
-The stable boundary for a future backend is the canonical
-`Instruction`/`Program` model. The intended direction is:
 
 ```text
-TinyLanguage-Subset -> Native IR -> TinyCPU Program
-TinyCPU Program -> Kontrollflussanalyse -> kanonisches TinyLanguage-Subset
+stop=halt pc=3 steps=3
+ACC=0 valid=false AR=0 valid=false ZERO=false NEGATIVE=false
+errors=INV,INPUT output=[]
+memory_changes=[]
 ```
 
-The reverse direction is a decompiler and cannot generally reconstruct the
-original names or control structures. It is therefore deliberately limited to
-a canonical subset (numbers, variables, arithmetic, `if`, `while`, and simple
-I/O); independently of that limitation, the simulator and assembler already
-function as a complete small microcomputer.
+An explicit HALT_ERROR stops with exit code **1**:
+
+<!-- example: error-halt exit: 1 -->
+
+```bash
+python src/tiny_cpu_debugger.py docs/examples/halt-error.tcpu
+```
+
+```text
+stop=halt_error pc=1 steps=1
+ACC=0 valid=false AR=0 valid=false ZERO=false NEGATIVE=false
+errors=- output=[]
+memory_changes=[]
+```
+
+A breakpoint stops before the labelled instruction, with exit code **0**:
+
+<!-- example: breakpoint exit: 0 -->
+
+```bash
+python src/tiny_cpu_debugger.py hardware/logisim/ap5_countdown.tcpu --breakpoint loop
+```
+
+```text
+stop=breakpoint pc=4 steps=4
+ACC=3 valid=true AR=0 valid=false ZERO=false NEGATIVE=false
+errors=- output=[]
+memory_changes=[{'address': 100, 'value': 3, 'valid': True}, {'address': 101, 'value': -1, 'valid': True}]
+```
+
+Use `--json` for the [debug JSON contract](tiny_cpu_debugger.md#json-vertrag).
+`--step-limit N` bounds execution; reaching the limit exits 1. Invalid
+arguments or unassemblable sources exit 2. These examples and the quickstart
+commands are executed directly from the documentation by
+[`test_tiny_cpu_documentation.py`](../tests/test_tiny_cpu_documentation.py).
+The current runner does not offer disassembly or width-selection flags.
+
+## Future compiler direction
+
+A possible TinyLanguage backend could target the assembler's canonical
+`Instruction`/`Program` model. A reverse compiler would need a bounded canonical
+subset because original names and control structures cannot generally be
+reconstructed. Neither compiler is implemented in this repository.

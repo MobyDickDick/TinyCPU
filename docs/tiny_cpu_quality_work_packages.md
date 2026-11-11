@@ -1,9 +1,27 @@
 # AP 22: Qualitätsbefunde und belastbare Abnahme
 
-**Stand:** 10. November 2026. **Status:** AP 22.1 und 22.2 sind lokal elektrisch
-abgenommen. Die INPUT-Resetfehler und sieben Layout-Testfehler sind behoben;
-die Offline-Suite besteht. Dokumentationspflege, der Linux-Nachweis aus 22.4
-und die Release-Neuabnahme aus 22.5 bleiben eigene Aufgaben.
+**Stand:** 11. November 2026. **Status:** AP 22.1 und 22.2 sind lokal elektrisch
+abgenommen; AP 22.3 ist abgeschlossen. Der Linux-Nachweis aus 22.4 und die
+Release-Neuabnahme aus 22.5 bleiben eigene offene Aufgaben.
+
+## Abschluss am 11. November 2026: ausführbare Dokumentation
+
+AP 22.3 trennt aktuelle Einstiegs-/Referenzseiten von historischen Protokollen.
+Quickstart und Architektur verwenden den vorhandenen Debugger; sechs direkt
+aus den Seiten ausgeführte Beispiele sichern vollständige Ausgabe und Exitcode
+ab. Der Pflichtlauf prüft zusätzlich lokale Datei- und Überschriftenlinks auf
+15 aktuellen Seiten. Alte Hardware-Aufbauschritte stehen im eigenen
+historischen Protokoll; Profile, Operator-Status, INPUT-Abnahme und Grenzen des
+VM-/Logisim-Vergleichs sind auf den belegten Stand gebracht.
+
+Ein frisch aus dem Basiscommit plus dokumentiertem Änderungsinventar
+extrahierter Quellstand besteht ohne PYTHONPATH den Offline-Verifikator,
+die Strukturprüfung und alle 296 Windows-Unit-Tests. Alle sechs veröffentlichten
+Programmläufe bestehen. [Kandidat, Befehle, Exitcodes und Nachweise](tiny_cpu_documentation_acceptance.md).
+Die Schaltungen und die VM wurden nicht geändert. Als nächstes folgt der
+verbleibende Linux-Nachweis aus 22.4; AP 22.5 und die manuelle GUI-Abnahme
+bleiben offen. Die nachfolgenden datierten Fortschritte sind historische
+Zwischenstände mit ihrem damaligen Abnahmeumfang.
 
 ## Abschluss am 10. November 2026: INPUT und Layout-Testreferenzen
 
@@ -348,25 +366,27 @@ Der v1-Divisionssonderfall ist ausdrücklich als gültig und fehlerfrei
 festgelegt und in allen vier Operandenarten elektrisch abgesichert. Die bestehende ISA-/Peripheriematrix bleibt
 unter dem ausdrücklich festgelegten Vertrag grün.
 
-### 22.3 Dokumentation ausführbar und widerspruchsfrei machen — mittlere Priorität
+### 22.3 Dokumentation ausführbar und widerspruchsfrei machen — abgeschlossen am 11. November 2026
 
-- [ ] Aktuelle Einstiegs- und Referenzseiten von historischen Diagnose- und
+- [x] Aktuelle Einstiegs- und Referenzseiten von historischen Diagnose- und
   Planungsständen unterscheiden; aktuelle Seiten auf vorhandene Werkzeuge,
   Dateien und tatsächlich implementierte Funktionen ausrichten.
-- [ ] Quickstart und Architekturaufrufe in einem frischen Checkout ausführen.
+- [x] Quickstart und Architekturaufrufe in einem frischen Checkout ausführen.
   Für den ersten Programmlauf ein vorhandenes Werkzeug verwenden und Ausgabe
   sowie Exitcode nennen. Fehlende alte CLI-Module nicht nur zur Erfüllung alter
   Verweise nachbauen.
-- [ ] Veraltete Aussagen zu Profilen und zum bereits implementierten
+- [x] Veraltete Aussagen zu Profilen und zum bereits implementierten
   Operator-Panel sowie unzutreffende Behauptungen vollständiger VM-Parität
   korrigieren. Nachweisumfang und offene GUI-Abnahme ausdrücklich benennen.
-- [ ] Die zentralen Programmlauf-Beispiele als Regression gegen erwartete
+- [x] Die zentralen Programmlauf-Beispiele als Regression gegen erwartete
   Ausgabe und Exitcode absichern; lokale Dateilinks der aktuellen Dokumentation
   prüfen. Historische Befehle als solche kennzeichnen.
 
 **Abnahme:** Ein neuer Benutzer kann den dokumentierten ersten Lauf ohne
 Korrekturen reproduzieren. Aktuelle Verweise führen zu vorhandenen Dateien;
 Funktions- und Abnahmestatus entsprechen den tatsächlich ausgeführten Gates.
+
+Nachweis: [AP-22.3-Abschlussbericht](tiny_cpu_documentation_acceptance.md).
 
 ### 22.4 Windows-Testfehler beheben — mittlere Priorität
 

@@ -9,7 +9,7 @@ bestehen 23 dynamische Fälle, drei Fehlerkopien und alle 63 bestehenden
 Kernfixtures über das Eingabetop. [Stimulusvertrag und ursprünglicher Befund](tiny_cpu_input_dynamic.md).
 Die folgenden älteren Statusaussagen beschreiben ihren jeweiligen damaligen Stand.
 
-**Stand: 4. November 2026.** Alle 63 bestehenden Kernfixtures sowie 38
+**Historischer Stand: 4. November 2026.** Alle 63 bestehenden Kernfixtures sowie 38
 zusätzliche Adressgültigkeitsfälle bestehen. Der TSV-Vertrag enthält jetzt
 auch `EXTERNAL_WRITE_ENABLE`: Die öffentliche Schreibanforderung wird vor
 jeder Flanke gemeinsam mit der internen RAM-Freigabe gegen das erwartete
@@ -52,7 +52,7 @@ PYTHONPATH=src python src/tiny_cpu_logisim.py \
 `--java` und `--jar` wählen explizite lokale Laufzeiten. Unter PowerShell
 wird `PYTHONPATH` vorher mit `$env:PYTHONPATH='src'` gesetzt. Der normale
 serielle Lauf stoppt bei der ersten fehlerhaften Fixture. `run_matrix()`
-vergleicht jede der unveränderten 61 Fixtures; ein grüner Halt ersetzt
+vergleicht jede der aktuell 63 Baselinefixtures; ein grüner Halt ersetzt
 keinen Zustandsvergleich. `run_core_acceptance()` prüft den Minimalkern
 zweimal auf Parität und Determinismus sowie die ursprüngliche Countdown-Fixture.
 
@@ -106,19 +106,22 @@ Speichereingänge sind null, `USE_EXTERNAL_MEMORY=0` wählt internen RAM.
 `RAM_WRITE_ENABLE=0` ist in diesem Modus unselektiert. Neue unbekannte
 Eingangspins lassen den Export scheitern.
 
-**Offene Eingabegrenze:** `TinyCPUMain` besitzt derzeit keine öffentlichen
-`INPUT_VALUE`-/`INPUT_VALID`-Pins. Die Eingabefälle verwenden deshalb ausdrücklich
-Wert `0`, Gültigkeit `0` beziehungsweise eine leere VM-Eingabequeue. Diese
-Festlegung steht je Lauf in `inputs.json`. Sie ist kein Nachweis einer
-funktionierenden gültigen Eingabe. Deren elektrische Schnittstelle und Abnahme
-bleiben innerhalb AP 22.1 offen; die bestehende ISA wird dafür nicht erweitert.
+**Baseline und zusätzliche Eingabegrenze:** `TinyCPUMain` besitzt weiterhin
+keine öffentlichen `INPUT_VALUE`-/`INPUT_VALID`-Pins. Die Baselinefälle verwenden
+Wert 0 und Gültigkeit 0 beziehungsweise eine leere VM-Eingabequeue; `inputs.json`
+hält das fest. Gültige externe Eingaben prüft das zusätzliche `TinyCPUInputMain`
+mit flankenbezogenen Stimuli und getrenntem Quellenprotokoll. Diese
+[Abnahme](tiny_cpu_input_reset_repair.md) ist mit 23 dynamischen Fällen und drei
+Fehlerkopien abgeschlossen. Das verpflichtende Gate führt außerdem alle 63
+Baselinefixtures über diese Eingabegrenze mit inaktiver Eingabe aus. Die ISA
+wurde dafür nicht erweitert.
 
 Der Comparator lehnt fehlende, zusätzliche oder vertauschte Beobachtungen,
 fehlende/zusätzliche Spalten, falsche Bitbreiten und jeden undefinierten oder
 elektrischen Fehlerwert ab, auch auf momentan inaktiven beobachteten Bussen.
 Ein Logisim-Prozessfehler oder Timeout kann nicht bestehen. Zeilenanzahlen
 einer änderungsgetriebenen `-tty table`-Ausgabe werden nie als Flankenzahl
-interpretiert; der alte Tabellenlauncher bleibt ausschließlich Diagnosehilfe.
+interpretiert; der autonome Tabellenlauncher bleibt ein zusätzlicher Halt-/Tabellennachweis.
 
 ## Nachweise und Negativkontrolle
 
