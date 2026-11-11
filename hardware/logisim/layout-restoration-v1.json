@@ -1,10 +1,10 @@
 {
-  "description": "Exact native/visually reviewed drawings through 2026-11-10: user-edited sheets, built-in Logisim-evolution symbols and local wire-corridor corrections. Only the modulo grid is exempt; electrical nets, interfaces, tunnels, OR input approach and long parallel spacing remain checked. INPUT reset guard repair and native re-review on 2026-11-10; nine exact references refreshed.",
+  "description": "Exact native/visually reviewed drawings through 2026-11-10: user-edited sheets, built-in Logisim-evolution symbols and local wire-corridor corrections. Only the modulo grid is exempt; electrical nets, interfaces, tunnels, OR input approach and long parallel spacing remain checked. INPUT reset guard repair and native re-review on 2026-11-10; nine exact references refreshed. Ten exact references refreshed after native review of the user-authored 2026-11-11 drawing (4fc1c53); native net comparison and 640 differential samples passed. Circuit sources unchanged.",
   "circuits": [
     {
       "file": "TinyCPU.circ",
       "circuit": "AccumulatorInputUnit",
-      "geometry_sha256": "4d1e708161dfaad2ef763d8697fac16dacd5bbb002560387e48c82b7f15b6d55"
+      "geometry_sha256": "63c8c2cda79e08d1c00d878f59fdd571b8b2d922e17a26cb31293cec02f0270f"
     },
     {
       "file": "TinyCPU.circ",
@@ -34,12 +34,12 @@
     {
       "file": "TinyCPU.circ",
       "circuit": "AddressRegisterLoad",
-      "geometry_sha256": "db54f1b633395871cef5be958e23d1c7219251a32df07df29c8e57630aea9af2"
+      "geometry_sha256": "25f7378ba6aef85852c13d7764a34cbb7df68d73beed9a002387019f68adf1f8"
     },
     {
       "file": "TinyCPU.circ",
       "circuit": "AddressUnit",
-      "geometry_sha256": "57bd8deccba312bb7e9756cdb13b12c6ac4aee2feebd3acf056fcfed2bb7a5c8"
+      "geometry_sha256": "c660598e0e5b0ac871a5c6464459fd73f089c64d75f845267fbb660744675eca"
     },
     {
       "file": "TinyCPU.circ",
@@ -49,7 +49,7 @@
     {
       "file": "TinyCPU.circ",
       "circuit": "BranchUnit",
-      "geometry_sha256": "8c85462ce5a274c513bcf5ba69c94c9bb27e9dbb841097702d86db86a0d72ef3"
+      "geometry_sha256": "f5da20388aa38fc7b27642bad0ec32b8dea382cfd6bccb290ff0d20815191ba8"
     },
     {
       "file": "TinyCPU.circ",
@@ -69,7 +69,7 @@
     {
       "file": "TinyCPU.circ",
       "circuit": "CPUBranchUnitLink",
-      "geometry_sha256": "69b1d3bdeeae80008e182ea3938f6e769ffdb44a1ac5475770e4501cb5e2c579"
+      "geometry_sha256": "32b2014e934e47248524a6b9e684246cfc8d75d84e0602291a53043c22abaa7d"
     },
     {
       "file": "TinyCPU.circ",
@@ -84,7 +84,7 @@
     {
       "file": "TinyCPU.circ",
       "circuit": "CPUCoreDiagnosticsLink",
-      "geometry_sha256": "618708f147ad2578d0fba706c378d8ec2cbe665c0928cd164c2b778d443f5b16"
+      "geometry_sha256": "d74c1fd76b96ba0768306b4176739e0cdd82c602a6bc79af823ec73ce747937d"
     },
     {
       "file": "TinyCPU.circ",
@@ -139,7 +139,7 @@
     {
       "file": "TinyCPU.circ",
       "circuit": "CPUStatusStage",
-      "geometry_sha256": "01c8a1c30cf498b09450df48c9dc58ed86ccbbf677adb9ceed83a034fe5b9fd3"
+      "geometry_sha256": "386b35c6c70130fa07204530b4ebca30aabebcab4953b4d6c71099b02a92a7fc"
     },
     {
       "file": "TinyCPU.circ",
@@ -179,12 +179,12 @@
     {
       "file": "TinyCPU.circ",
       "circuit": "FaultInputUnit",
-      "geometry_sha256": "b74846f22fd3c04a5e3e86c557f29e4164f10df595f887e6f858e0de84b0fda7"
+      "geometry_sha256": "f6aeb6a0db2c9d874cb22492b42f2a6157b9a52e9d31291d23476c3d2d1b3cc4"
     },
     {
       "file": "TinyCPU.circ",
       "circuit": "FaultUnit",
-      "geometry_sha256": "cef39ae643745ca57b2c892a2681b8815776f114a4b90fb9f63ac53940c1d0c9"
+      "geometry_sha256": "db58181c3a5290c11dc3f0080888b5c449f7213aec9376f3a42a56d864d59ca9"
     },
     {
       "file": "TinyCPU.circ",
@@ -224,7 +224,7 @@
     {
       "file": "TinyCPU.circ",
       "circuit": "MulArithmeticCircuit",
-      "geometry_sha256": "05a453ff68ae926d7f36eecd78cdae1498d1aef88a5f59b15d26dd0ac379c1d1"
+      "geometry_sha256": "286a5e7e1a4ad1b3b864dd35ebb275f3be988fa527857162256a918386e4951b"
     },
     {
       "file": "TinyCPU.circ",

@@ -4,6 +4,18 @@
 abgenommen; AP 22.3 ist abgeschlossen. Der Linux-Nachweis aus 22.4 und die
 Release-Neuabnahme aus 22.5 bleiben eigene offene Aufgaben.
 
+## Fortschritt am 11. November 2026: Plattformabnahme AP 22.4
+
+Die jüngste Benutzerzeichnung aus `4fc1c53` ist nativ geprüft; ausschließlich
+zehn exakte Layoutreferenzen sind nachgeführt. Alle Schaltungsdateien bleiben
+erhalten. Verifikator, Strukturprüfung und alle 296 Windows-Unit-Tests bestehen
+im isolierten Quellsnapshot unter Python 3.14.5. Die zusätzliche Negativkontrolle
+belegt, dass der bestehende Download-Fehlertest eine Meldung ohne Vendor-Pfad
+weiterhin ablehnt. Der Linux-Prüfkandidat `cdba8e6` liegt auf einem separaten
+CI-Branch; dessen Lauf wartet derzeit auf einen Runner. AP 22.4 bleibt bis zum
+vollständigen Linux-Ergebnis offen.
+[Kandidat, Ausgangsfehler und Nachweise](tiny_cpu_platform_acceptance.md).
+
 ## Abschluss am 11. November 2026: ausführbare Dokumentation
 
 AP 22.3 trennt aktuelle Einstiegs-/Referenzseiten von historischen Protokollen.
@@ -389,6 +401,8 @@ Funktions- und Abnahmestatus entsprechen den tatsächlich ausgeführten Gates.
 Nachweis: [AP-22.3-Abschlussbericht](tiny_cpu_documentation_acceptance.md).
 
 ### 22.4 Windows-Testfehler beheben — mittlere Priorität
+
+Aktueller Nachweisstand: [Plattformabnahme vom 11. November](tiny_cpu_platform_acceptance.md).
 
 - [x] Im genannten Test Literalpfad und regulären Ausdruck korrekt trennen,
   etwa durch `re.escape()` oder einen direkten Teilstringvergleich.

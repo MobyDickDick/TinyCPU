@@ -1,5 +1,13 @@
 # Arbeitsplan: TinyCPU-Hardware
 
+**Fortschritt AP 22.4 vom 11. November 2026:** Die Offline-Suite besteht
+mit 296 Tests unter Windows/Python 3.14.5. Nach nativer Prüfung sind zehn
+exakte Referenzen der jüngsten Benutzerzeichnung nachgeführt; die
+Schaltungsdateien bleiben erhalten. Die Pfad-Negativkontrolle besteht.
+Der separate Linux-Prüflauf wartet auf einen GitHub-Runner; 22.4 bleibt
+bis zu dessen vollständigem Ergebnis offen.
+[Kandidat und Nachweise](tiny_cpu_platform_acceptance.md).
+
 **Aktueller Stand vom 11. November 2026:** AP 22.3 ist abgeschlossen:
 aktuelle Dokumentation und historische Protokolle sind getrennt; sechs
 veröffentlichte Programmläufe und lokale Links auf 15 aktuellen Seiten werden

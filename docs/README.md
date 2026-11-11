@@ -46,6 +46,7 @@ AP 22.5, and interactive GUI acceptance remain open.
 - [Quality work packages (AP 22)](tiny_cpu_quality_work_packages.md): required next work and acceptance criteria.
 - [Roadmap](tiny_cpu_roadmap.md): package sequence and dated progress.
 - [Documentation acceptance (AP 22.3)](tiny_cpu_documentation_acceptance.md): scope, fresh source snapshot, commands, and evidence for these pages.
+- [Platform acceptance (AP 22.4)](tiny_cpu_platform_acceptance.md): reviewed layout references, passing Windows suite, path negative control, and pending Linux CI evidence.
 
 ## Binding circuit rules
 
