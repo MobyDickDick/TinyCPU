@@ -1,8 +1,20 @@
 # AP 22: Qualitätsbefunde und belastbare Abnahme
 
-**Stand:** 11. November 2026. **Status:** AP 22.1 und 22.2 sind lokal elektrisch
-abgenommen; AP 22.3 ist abgeschlossen. Der Linux-Nachweis aus 22.4 und die
+**Stand:** 12. November 2026. **Status:** AP 22.1 und 22.2 sind lokal elektrisch
+abgenommen; AP 22.3 ist abgeschlossen. Der Linux-CI-Nachweis aus 22.4 und die
 Release-Neuabnahme aus 22.5 bleiben eigene offene Aufgaben.
+
+## Fortschritt am 12. November 2026: Windows und Linux lokal bestanden
+
+Der unveränderte Commit `0b9cf8d` besteht im selben, getrennt entpackten
+Git-Archiv Verifikator, Strukturprüfung und alle 296 Unit-Tests sowohl unter
+Windows/Python 3.14.5 als auch unter Ubuntu 26.04.1/WSL2/Python 3.14.4.
+Es gibt keine Fehler oder übersprungenen Tests. Die Pfad-Negativkontrolle
+lehnt auf beiden Plattformen die Fehlermeldung ohne Vendor-Pfad ab.
+Der bestehende GitHub-Workflow mit Python 3.12 wartet weiterhin ohne Jobs
+auf einen Runner; deshalb bleibt 22.4 offen. Die folgende gemeinsame
+Release-Neuabnahme 22.5 wird damit noch nicht freigegeben.
+[Commit, Befehle, Laufzeiten und Nachweise](tiny_cpu_platform_acceptance.md).
 
 ## Fortschritt am 11. November 2026: Plattformabnahme AP 22.4
 
@@ -402,14 +414,18 @@ Nachweis: [AP-22.3-Abschlussbericht](tiny_cpu_documentation_acceptance.md).
 
 ### 22.4 Windows-Testfehler beheben — mittlere Priorität
 
-Aktueller Nachweisstand: [Plattformabnahme vom 11. November](tiny_cpu_platform_acceptance.md).
+Aktueller Nachweisstand: [Plattformabnahme vom 12. November](tiny_cpu_platform_acceptance.md).
 
 - [x] Im genannten Test Literalpfad und regulären Ausdruck korrekt trennen,
   etwa durch `re.escape()` oder einen direkten Teilstringvergleich.
 - [x] Den Download-Fehlerpfad weiterhin gezielt prüfen; die Assertion weder
   entfernen noch den Test unter Windows überspringen.
-- [ ] Die vollständige Offline-Suite unter Windows und im bestehenden
-  Linux-CI-Umfeld mit dokumentierter Python-Version ausführen.
+- [x] Die vollständige Offline-Suite lokal unter Windows und zusätzlich
+  unter WSL-Linux auf demselben Commit mit dokumentierter Python-Version
+  ausführen; die Pfad-Negativkontrolle auf beiden Plattformen bestätigen.
+- [ ] Die vollständige Offline-Suite im bestehenden Linux-CI-Umfeld mit
+  dokumentierter Python-Version ausführen. Der lokale WSL-Nachweis ersetzt
+  diesen weiterhin geforderten CI-Lauf nicht.
 
 **Abnahme:** Der bisher fehlerhafte Test besteht auf beiden Plattformen und
 erkennt weiterhin eine Fehlermeldung ohne den erwarteten Vendor-Pfad. Die

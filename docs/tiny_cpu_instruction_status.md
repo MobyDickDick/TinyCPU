@@ -18,7 +18,9 @@ Operator-Takt-/Kernprüfungen samt zugehörigen Negativkontrollen. Die
 bestehen nach Korrektur der Layout-Testreferenzen.
 
 Das ist ein lokaler Nachweis für die ausgeführten Fälle, keine allgemeine
-Äquivalenz aller Programme und keine neue Releasefreigabe. Der Linux-Nachweis
+Äquivalenz aller Programme und keine neue Releasefreigabe. Die lokale
+[Plattformprüfung vom 12. November](tiny_cpu_platform_acceptance.md) besteht
+mit allen 296 Offline-Tests unter Windows und WSL-Linux. Der Linux-CI-Nachweis
 (AP 22.4), die gemeinsame Neuabnahme aus frischem Checkout (AP 22.5) und die
 interaktive GUI-Kurzabnahme bleiben offen. Das Operator-Panel ist implementiert;
 dessen automatische Abnahme ersetzt keine manuelle Bedienprüfung.

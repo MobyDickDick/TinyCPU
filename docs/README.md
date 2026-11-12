@@ -40,13 +40,15 @@ The [10 November local acceptance](tiny_cpu_input_reset_repair.md) covers
 boundaries, seven system cases, operator tests, and negative controls.
 The [6 November report](tiny_cpu_circuit_repair_20261106.md) records the
 arithmetic contract, including the preserved v1 division exception.
-The Linux evidence from AP 22.4, common fresh-checkout release acceptance from
+The [12 November platform check](tiny_cpu_platform_acceptance.md) passes all
+296 offline tests and the path negative control on the same committed source
+under Windows and WSL Linux. The Linux CI evidence from AP 22.4, common fresh-checkout release acceptance from
 AP 22.5, and interactive GUI acceptance remain open.
 
 - [Quality work packages (AP 22)](tiny_cpu_quality_work_packages.md): required next work and acceptance criteria.
 - [Roadmap](tiny_cpu_roadmap.md): package sequence and dated progress.
 - [Documentation acceptance (AP 22.3)](tiny_cpu_documentation_acceptance.md): scope, fresh source snapshot, commands, and evidence for these pages.
-- [Platform acceptance (AP 22.4)](tiny_cpu_platform_acceptance.md): reviewed layout references, passing Windows suite, path negative control, and pending Linux CI evidence.
+- [Platform acceptance (AP 22.4)](tiny_cpu_platform_acceptance.md): reviewed layout references, passing Windows and WSL Linux suites, path negative controls, and pending Linux CI evidence.
 
 ## Binding circuit rules
 

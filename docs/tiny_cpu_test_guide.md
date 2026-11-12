@@ -121,7 +121,7 @@ requires visible interaction and a recorded result. It remains open. Neither
 an automated operator test nor an Xvfb process completes it.
 
 The [current status](tiny_cpu_instruction_status.md) links the latest local
-acceptance. Fresh-checkout release qualification (AP 22.5) and Linux evidence
+acceptance. Fresh-checkout release qualification (AP 22.5) and Linux CI evidence
 (AP 22.4) remain separate open tasks.
 
 # Topological circuit tests
